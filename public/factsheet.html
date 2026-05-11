@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFI Respond — Product Factsheet</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #0f766e;
+      --teal-mid: #14b8a6;
+      --teal-light: #ccfbf1;
+      --teal-pale: #f0fdfa;
+      --slate-900: #0f172a;
+      --slate-700: #334155;
+      --slate-500: #64748b;
+      --slate-300: #cbd5e1;
+      --slate-100: #f1f5f9;
+      --white: #ffffff;
+    }
+
+    html, body {
+      width: 210mm;
+      height: 297mm;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--slate-900);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      width: 210mm;
+      height: 297mm;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--teal);
+      padding: 22px 32px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .logo-mark svg { width: 20px; height: 20px; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.4px;
+    }
+
+    .brand-tagline {
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      margin-top: 1px;
+    }
+
+    .header-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 4px 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── Hero strip ── */
+    .hero {
+      background: var(--teal-pale);
+      border-bottom: 2px solid var(--teal-light);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+
+    .hero-text {
+      flex: 1;
+    }
+
+    .hero-headline {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--slate-900);
+      line-height: 1.25;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-sub {
+      font-size: 11.5px;
+      color: var(--slate-500);
+      margin-top: 5px;
+      line-height: 1.55;
+      max-width: 420px;
+    }
+
+    .hero-stat-group {
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .hero-stat {
+      text-align: center;
+      background: var(--white);
+      border: 1px solid var(--teal-light);
+      border-radius: 10px;
+      padding: 8px 14px;
+    }
+
+    .hero-stat-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--teal);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+
+    /* ── Body ── */
+    .body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .col {
+      padding: 20px 28px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .col-right {
+      border-left: 1px solid var(--slate-100);
+      background: var(--slate-100);
+    }
+
+    /* ── Section ── */
+    .section-title {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--teal);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--teal-light);
+    }
+
+    /* ── Feature list ── */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+    }
+
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--teal-light);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.5px;
+    }
+
+    .feature-icon svg { width: 13px; height: 13px; color: var(--teal); }
+
+    .feature-text strong {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--slate-900);
+      line-height: 1.3;
+    }
+
+    .feature-text span {
+      font-size: 10.5px;
+      color: var(--slate-500);
+      line-height: 1.45;
+    }
+
+    /* ── Workflow steps ── */
+    .workflow {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .workflow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      position: relative;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-body strong {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--slate-900);
+      display: block;
+    }
+
+    .step-body span {
+      font-size: 10.5px;
+      color: var(--slate-500);
+    }
+
+    /* ── Pill tags ── */
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      border: 1px solid;
+    }
+
+    .tag-teal { background: var(--teal-pale); color: var(--teal); border-color: var(--teal-light); }
+    .tag-slate { background: var(--white); color: var(--slate-700); border-color: var(--slate-300); }
+
+    /* ── Quote box ── */
+    .quote-box {
+      background: var(--teal);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--white);
+    }
+
+    .quote-text {
+      font-size: 11.5px;
+      font-weight: 500;
+      line-height: 1.55;
+      font-style: italic;
+      opacity: 0.95;
+    }
+
+    .quote-attr {
+      font-size: 10px;
+      font-weight: 600;
+      opacity: 0.65;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Use-case box ── */
+    .use-cases {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .use-case {
+      background: var(--white);
+      border: 1px solid var(--slate-300);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .use-case strong {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--slate-900);
+      margin-bottom: 2px;
+    }
+
+    .use-case span {
+      font-size: 10px;
+      color: var(--slate-500);
+      line-height: 1.4;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: var(--slate-900);
+      padding: 10px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .footer-left {
+      font-size: 9.5px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .footer-right {
+      font-size: 9.5px;
+      color: rgba(255,255,255,0.5);
+      text-align: right;
+    }
+
+    .footer strong {
+      color: rgba(255,255,255,0.85);
+      font-weight: 600;
+    }
+
+    @media print {
+      html, body { width: 210mm; height: 297mm; }
+      .page { page-break-after: avoid; }
+      @page { size: A4; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 12h6M9 16h6M9 8h2"/>
+          <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+          <circle cx="17" cy="8" r="2" fill="white" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">RFI Respond</div>
+        <div class="brand-tagline">AI-powered RFI response platform</div>
+      </div>
+    </div>
+    <div class="header-badge">Product Factsheet</div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-text">
+      <div class="hero-headline">Win more deals by responding to RFIs<br>faster, smarter, and as a team.</div>
+      <div class="hero-sub">RFI Respond automates first-draft answers using your organisation's knowledge base, routes questions to the right subject-matter experts, and tracks every response through to approval — cutting RFI turnaround time dramatically.</div>
+    </div>
+    <div class="hero-stat-group">
+      <div class="hero-stat">
+        <div class="hero-stat-num">80%</div>
+        <div class="hero-stat-label">Faster<br>first draft</div>
+      </div>
+      <div class="hero-stat-group" style="gap:0;flex-direction:column;gap:6px">
+        <div class="hero-stat">
+          <div class="hero-stat-num">100%</div>
+          <div class="hero-stat-label">Audit<br>trail</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">1 hub</div>
+          <div class="hero-stat-label">All RFIs<br>& teams</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <!-- Left column -->
+    <div class="col">
+
+      <!-- How it works -->
+      <div>
+        <div class="section-title">How it works</div>
+        <div class="workflow">
+          <div class="workflow-step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Upload your RFI</strong>
+              <span>Import any CSV or Excel file — questions are extracted automatically.</span>
+            </div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>AI generates answers</strong>
+              <span>Each question is matched against your knowledge base; a scored draft answer is produced instantly.</span>
+            </div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>Route to experts</strong>
+              <span>Assign individual questions to the right subject-matter expert with one click.</span>
+            </div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>Review &amp; approve</strong>
+              <span>Experts refine answers; managers approve. Full status tracking from pending to approved.</span>
+            </div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Export &amp; submit</strong>
+              <span>Download your completed RFI as Excel, CSV, or Word in seconds.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ideal customers -->
+      <div>
+        <div class="section-title">Ideal customers</div>
+        <div class="use-cases">
+          <div class="use-case">
+            <strong>Enterprise Software</strong>
+            <span>Security &amp; compliance RFIs from prospects and enterprise procurement teams</span>
+          </div>
+          <div class="use-case">
+            <strong>Managed Services</strong>
+            <span>Repeat RFIs across verticals — leverage a shared, ever-growing knowledge base</span>
+          </div>
+          <div class="use-case">
+            <strong>Professional Services</strong>
+            <span>Complex multi-discipline RFIs routed to the right expert in each practice area</span>
+          </div>
+          <div class="use-case">
+            <strong>Government &amp; Public Sector</strong>
+            <span>Formal tender responses with full auditability and version control</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quote -->
+      <div class="quote-box">
+        <div class="quote-text">"RFI Respond cut our security questionnaire turnaround from two weeks to two days. Our knowledge base gets smarter with every submission."</div>
+        <div class="quote-attr">— Head of Sales Engineering, Enterprise Software Co.</div>
+      </div>
+
+    </div>
+
+    <!-- Right column -->
+    <div class="col col-right">
+
+      <!-- Key features -->
+      <div>
+        <div class="section-title">Key features</div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </div>
+            <div class="feature-text">
+              <strong>Knowledge Base Retrieval</strong>
+              <span>TF-IDF semantic search surfaces the best-matched prior answers with a confidence score for every question.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="feature-text">
+              <strong>Collaborative Assignment</strong>
+              <span>Assign questions to individual team members by name, department, or expertise tag. Track notes and status in real time.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="feature-text">
+              <strong>Approval Workflow</strong>
+              <span>Structured review stages — pending, in review, answered, approved — with full comment history.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="feature-text">
+              <strong>Opportunity Pipeline</strong>
+              <span>Link every RFI session to a named opportunity. Track deal status from new through won or lost.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div class="feature-text">
+              <strong>Multi-format Export</strong>
+              <span>Export completed responses as Excel (.xlsx), CSV, or Word (.doc) — ready to submit immediately.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="feature-text">
+              <strong>Enterprise Security</strong>
+              <span>Row-level security, role-based access control, and a full audit trail on every response and edit.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrations / specs -->
+      <div>
+        <div class="section-title">Supported formats &amp; integrations</div>
+        <div class="tag-group">
+          <span class="tag tag-teal">CSV Upload</span>
+          <span class="tag tag-teal">Excel (.xlsx / .xls)</span>
+          <span class="tag tag-teal">Word Export</span>
+          <span class="tag tag-slate">Bulk KB Import</span>
+          <span class="tag tag-slate">Role-based Access</span>
+          <span class="tag tag-slate">Supabase / PostgreSQL</span>
+          <span class="tag tag-slate">Web Browser</span>
+          <span class="tag tag-slate">SSO-ready</span>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="background:white;border:1.5px solid #ccfbf1;border-radius:12px;padding:13px 16px;margin-top:auto">
+        <div style="font-size:11px;font-weight:700;color:#0f766e;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px">Get started today</div>
+        <div style="font-size:11px;color:#334155;line-height:1.55;margin-bottom:8px">Request a demo and see how RFI Respond can cut your response time and increase win rates.</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="font-size:11px;font-weight:600;color:#0f172a">&#9993;&nbsp; sales@rfirespond.com</div>
+          <div style="width:1px;height:14px;background:#cbd5e1"></div>
+          <div style="font-size:11px;font-weight:600;color:#0f172a">&#127760;&nbsp; rfirespond.com</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left"><strong>RFI Respond</strong> &nbsp;·&nbsp; AI-powered RFI response platform</div>
+    <div class="footer-right">Confidential &amp; proprietary &nbsp;·&nbsp; For sales use only &nbsp;·&nbsp; 2026</div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+question,tags,source
+How does your organization protect data at rest?,encryption,RFP Template 2024
+What encryption standards are used for data in transit?,encryption TLS,RFP Template 2024
+Describe your multi-factor authentication implementation.,authentication access-control,RFP Template 2024
+How are user access rights reviewed and revoked?,access-control IAM,RFP Template 2024
+What is your process for managing privileged accounts?,PAM access-control,RFP Template 2024
+How does your organization handle security incidents?,incident-response,RFP Template 2024
+What is your mean time to detect a security breach?,incident-response MTTD,RFP Template 2024
+Describe your patch management and vulnerability remediation process.,vulnerability-management,RFP Template 2024
+How often do you conduct penetration testing?,pentest vulnerability,RFP Template 2024
+What compliance certifications does your organization hold?,compliance certifications,RFP Template 2024
+How do you ensure GDPR compliance for EU data subjects?,GDPR privacy,RFP Template 2024
+Describe your data retention and secure deletion policies.,data-retention privacy,RFP Template 2024
+What is your backup strategy and recovery time objective?,backup BCDR,RFP Template 2024
+How do you assess third-party vendor security?,vendor-risk supply-chain,RFP Template 2024
+What security awareness training is provided to employees?,security-training,RFP Template 2024
+How is remote access to your infrastructure secured?,remote-access VPN,RFP Template 2024
+Describe your network segmentation architecture.,network-security segmentation,RFP Template 2024
+What logging and monitoring capabilities do you have?,SIEM logging,RFP Template 2024
+How do you manage cryptographic key lifecycles?,encryption key-management,RFP Template 2024
+What is your software development security lifecycle process?,DevSecOps SDLC,RFP Template 2024
+How do you handle data subject access requests?,GDPR privacy,RFP Template 2024
+Describe your business continuity planning.,BCDR BCP,RFP Template 2024
+How are security policies reviewed and updated?,governance policy,RFP Template 2024
+What endpoint protection solutions are deployed?,endpoint-security EDR,RFP Template 2024
+How do you control physical access to data centers?,physical-security,RFP Template 2024
+What is your approach to zero-trust architecture?,zero-trust network,RFP Template 2024
+How do you manage API security?,API-security application,RFP Template 2024
+Describe your data loss prevention controls.,DLP data-protection,RFP Template 2024
+How are cloud environments secured?,cloud-security,RFP Template 2024
+What is your vulnerability disclosure policy?,vulnerability-management,RFP Template 2024
+How do you protect against ransomware?,ransomware endpoint,RFP Template 2024
+What identity governance processes are in place?,IAM governance,RFP Template 2024
+How is security integrated into your CI/CD pipeline?,DevSecOps SDLC,RFP Template 2024
+Describe your disaster recovery testing frequency.,BCDR DR-testing,RFP Template 2024
+How do you manage mobile device security?,MDM mobile,RFP Template 2024
+What is your approach to threat intelligence?,threat-intelligence SOC,RFP Template 2024
+How are security exceptions and risk acceptances handled?,risk-management governance,RFP Template 2024
+Describe your email security controls.,email-security phishing,RFP Template 2024
+How do you secure your supply chain software components?,supply-chain SBOM,RFP Template 2024
+What is your process for security due diligence on acquisitions?,M&A governance,RFP Template 2024
