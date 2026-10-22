@@ -35,6 +35,11 @@ jobs:
         env:
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_ANON_KEY: ci-placeholder
+      - name: No provider details in the browser bundle (S1-2, project rule 3)
+        run: |
+          if grep -rlE 'voyageai|VOYAGE_API_KEY|:11434|service_role' dist; then
+            echo "::error::The browser bundle mentions an embedding provider or the service role"; exit 1
+          fi
 
   database:
     name: Database tests (Postgres + Supabase shim)

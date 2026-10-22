@@ -6,13 +6,13 @@ Product brief: [`docs/PRODUCT.md`](docs/PRODUCT.md). Backlog: [`docs/BACKLOG.md`
 
 ## Status
 
-Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprint 0 (clean-up) is complete.** What the code does today, stated plainly:
+Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 (clean-up) and 1 (retrieval and confidence) are complete.** What the code does today, stated plainly:
 
-- **Retrieval is keyword-based** (TF-IDF with cosine similarity). There are no embeddings yet; Sprint 1 adds them.
-- **Drafts are assembled, not generated.** Each draft is made of sentences from the best-matching knowledge-base answers, with their references. No language model is used yet; Sprint 2 adds grounded drafting.
-- **Confidence** is the best keyword match scaled to 0 to 100%. It is a heuristic, not yet calibrated (Sprint 1).
+- **Retrieval is by meaning.** Questions and knowledge-base entries are turned into vectors by an embedding model (voyage-4 hosted, or a local model through Ollama) in a Supabase Edge Function, so the provider key never reaches the browser. Japanese questions find English entries. If embedding is unavailable, matching falls back to keywords and says so.
+- **Confidence is calibrated**: the measured chance that the top entry is the right one, for the model in use, from an evaluation set of 364 synthetic questions (`docs/evals/`). Its known limit: a question on a topic the knowledge base covers, but whose specific answer it lacks, can still score 60 to 80%, and occasionally more. Sprint 2 adds a check of whether the entry actually answers the question.
+- **Drafts are assembled, not generated.** Each draft is made of sentences from the best-matching knowledge-base answers, with their references. No language model writes text yet; Sprint 2 adds grounded drafting.
 
-Features in the code (end-to-end browser testing is still to come; see decision 0004): responses (opportunities) with an owner; uploading questions from `.xlsx` or `.csv`; drafts with references; review lowest-confidence first, with accept, edit, skip and bulk-accept; assigning questions to colleagues by expertise, with an inbox; export to Excel, CSV and Word; a shared knowledge base with import and add-back; invite-only accounts with admin, owner and member rights enforced in the database.
+Features in the code, tested end to end in a browser against local Supabase: responses (opportunities) with an owner; uploading questions from `.xlsx` or `.csv`; drafts with references; review lowest-confidence first, with accept, edit, skip and bulk-accept above a confidence threshold (disabled when confidence is not calibrated); assigning questions to colleagues by expertise, with an inbox; export to Excel, CSV and Word; a shared knowledge base with import and add-back; invite-only accounts with admin, owner and member rights enforced in the database.
 
 ## Project rules
 

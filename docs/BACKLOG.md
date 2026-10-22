@@ -62,19 +62,64 @@ Goal: find the right knowledge-base entry by meaning, in English and from Japane
 
 | ID | Story | Why now | Size | Status |
 |---|---|---|---|---|
-| S1-1 | Evaluation set: two English paraphrases of each of the 100 synthetic questions, one Japanese version (machine-translated, back-translation checked, labelled unreviewed), and questions the knowledge base cannot answer | Everything else in the sprint is judged against it | M | Ready, Sprint 1 |
-| S1-2 | Embedding provider behind one interface, in a Supabase Edge Function: Voyage (hosted) and Ollama (local); key held server-side | Decision 0005 | M | Ready, Sprint 1 |
-| S1-3 | Vectors in the knowledge base: pgvector column with model name and dimension, embedded on import and add-back, re-embed command | Retrieval needs them; storing the model prevents mixing vectors | M | Ready, Sprint 1 |
-| S1-4 | Model bake-off: keyword baseline against voyage-4, qwen3-embedding and bge-m3, English and Japanese-to-English, recall@5 and MRR; choose the model (Rory runs the local half on his PC) | Choose by measurement, not leaderboard | M | Ready, Sprint 1 |
-| S1-5 | Hybrid retrieval in the app: vector and keyword results combined (reciprocal rank fusion) in a database function | The product's core improvement | M | Ready, Sprint 1 |
-| S1-6 | Calibrated confidence: score mapped to the measured chance the top entry is right, with a reliability chart; "no good match" below a floor (folds in F-12) | Makes bulk approval safe (project rule 4) | M | Ready, Sprint 1 |
-| F-9 | Report failed saves for single accept, edit and skip, and question inserts | Small reliability fix in code this sprint touches | S | Ready, Sprint 1 |
+| S1-1 | Evaluation set: two English paraphrases of each of the 100 synthetic questions, one Japanese version (machine-translated, back-translation checked, labelled unreviewed), and questions the knowledge base cannot answer | Everything else in the sprint is judged against it | M | Done, Sprint 1 (364 items after near misses were added at the review) |
+| S1-2 | Embedding provider behind one interface, in a Supabase Edge Function: Voyage (hosted) and Ollama (local); key held server-side | Decision 0005 | M | Done, Sprint 1 |
+| S1-3 | Vectors in the knowledge base: pgvector column with model name and dimension, embedded on import and add-back, re-embed command | Retrieval needs them; storing the model prevents mixing vectors | M | Done, Sprint 1 (gaps filled after import and on sign-in, not a separate command) |
+| S1-4 | Model bake-off: keyword baseline against voyage-4, qwen3-embedding and bge-m3, English and Japanese-to-English, recall@5 and MRR; choose the model (Rory runs the local half on his PC) | Choose by measurement, not leaderboard | M | Done, Sprint 1 (decision 0006) |
+| S1-5 | Hybrid retrieval in the app: vector and keyword results combined (reciprocal rank fusion) in a database function | The product's core improvement | M | Done, Sprint 1 (ranks by meaning, keywords as fallback: fusion measured worse) |
+| S1-6 | Calibrated confidence: score mapped to the measured chance the top entry is right, with a reliability chart; "no good match" below a floor (folds in F-12) | Makes bulk approval safe (project rule 4) | M | Done, Sprint 1, with a residual accepted by Rory: the abstention bar is not met for near misses; the fix is Sprint 2's answerability check |
+| F-9 | Report failed saves for single accept, edit and skip, and question inserts | Small reliability fix in code this sprint touches | S | Done, Sprint 1 |
 
 Order: S1-1 and S1-2 first (independent), then S1-3, S1-4, S1-5, S1-6; F-9 any time. No spike in this sprint; S1-4 is a measurement whose design is already known, and the stories after it do not change shape whichever model wins.
 
+### Sprint 1 review (22 October 2026)
+
+**Checks, with evidence.** 103 unit tests and 87 database tests pass; type check and lint clean; the built bundle contains no provider details (now a CI step). Model comparison and calibration run on Rory's PC (`docs/evals/retrieval-2026-10-22.md`, `docs/evals/calibration-2026-10-22.md`, set 2026-10-22.2). In the app on Rory's PC with voyage-4: 108 entries embedded; 40 sample questions plus 6 near misses run; Japanese questions find the right English entry (encryption at rest, incident handling); keyword-only matching works when no vector is given; a Japanese near miss (cyber insurance, 20%) shows "No confident match".
+
+| Bar (agreed at refinement) | Result with voyage-4 | Held? |
+|---|---|---|
+| English recall@5 at least 90% | 99.5% | Yes |
+| Japanese recall@5 at least 80% | 100% (machine-translated, unreviewed) | Yes |
+| Calibration error at most 0.10 | 0.036 | Yes |
+| 80% of unanswerable questions below the floor | 62.5% overall; 35.3% of near misses | **No** (residual accepted) |
+| F-12: fewer than 33 of 40 sample questions at 80% or more without evidence | 33 of 40; the 7 below include mean time to detect and DSARs, which the knowledge base does not answer | Partly: the two known gaps now sit below the bulk line |
+
+**Found at the review and fixed.** BUG-4: source chips and the entry window multiplied similarity by 333 (Sprint 0's keyword ceiling), showing matches of 120%; now shown as similarity, labelled not a probability. The first unanswerable set held only off-topic questions, which made abstention look better than it is; 34 near misses were added (set 2026-10-22.2) and the calibration report now shows near misses and wrong top entries at or above the 80% bulk line (voyage-4: 1 of 34, 7 of 166).
+
+**Decisions at the review.** Keep the 0.3 floor and record the abstention bar as not met; an answerability check goes into Sprint 2 (decision 0006, point 5). Hosted default voyage-4. Local default to be confirmed by Rory: qwen3-embedding:0.6b has the better recall and calibration, bge-m3 lets fewer near misses reach the bulk line (2 of 34 against 6).
+
+**All seven items Done, Sprint 1.** S1-6 carries the residual above. Nothing returned.
+
+### Where every Sprint 1 review item now lives
+
+| Item | Now |
+|---|---|
+| Near misses pass the floor | Sprint 2, answerability check (proposed S2-1) |
+| BUG-4 Source similarity shown as 120% | Done in Sprint 1 (review) |
+| F-13 Right Japanese matches score about 77%, so never reach the bulk line | Proposed for Sprint 2 with the answerability check, which changes confidence anyway |
+| F-14 Reviewed, reworded Japanese evaluation items | Backlog, from Sprint 1 review; needs a native reader |
+| F-15 Near-miss set is small (34) and written by Claude | Backlog, from Sprint 1 review; grows with Sprint 2's red-team and labelled sets |
+| Local default model | Decision for Rory (decision 0006, point 3) |
+
+## Sprint 2 (proposed at the Sprint 1 review, for Rory to confirm): grounded drafting and safety gates
+
+Goal: a draft that says only what the knowledge base supports, and questions that must not be bulk-approved (near misses, pricing, legal) kept away from bulk approval, measured on evaluation sets.
+
+| ID | Story | Why in this sprint | Size | Status |
+|---|---|---|---|---|
+| S2-1 | Answerability check: for each question, does the top entry actually answer it? Compare a reranker (Voyage rerank) with a small Claude model as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met: 1 to 6 near misses per model reach the bulk line, and only 35% fall below the floor | M | Proposed |
+| S2-2 | Grounded drafting in an Edge Function (Claude, key server-side): drafts only from retrieved entries, cites them, says "insufficient evidence" rather than guessing | The product's promise; decision 0005 | L | Proposed |
+| S2-3 | Pricing and legal or contractual questions detected and excluded from bulk approval, whatever their score | Project rule 4; needs to exist before drafts look persuasive | M | Proposed |
+| S2-4 | Drafting evaluation: faithfulness and citation accuracy on a hand-labelled set; prompt and model versions recorded with every draft | Measure drafting the way Sprint 1 measured retrieval | M | Proposed |
+| S2-5 | Red-team set: prompt injection hidden in uploaded questions, with tests that drafts and gates ignore it | Project rule 6; drafting is the first step that reads questions with an LLM | S | Proposed |
+| F-5 | Split `RFIWorkspace.tsx` | The drafting rewrite changes it anyway | S | Proposed |
+| F-13 | Check calibration per language once S2-1 changes confidence | Same code and evaluation run as S2-1 | S | Proposed |
+
+Order: S2-5's set and S2-4's labels first (they judge the rest); S2-1 and S2-3 in parallel; S2-2; F-5 alongside S2-2. No spike: S2-1 compares two known options by measurement, and the stories after it take a score whichever wins. Hand-off: Rory provides the Anthropic key (agreed at the Sprint 0 review). Larger than Sprint 1 (one large story); S2-5 or F-13 can return to the backlog if it runs long.
+
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 0 review)
 
-**Sprint 2: grounded drafting and safety gates.** LLM drafts server-side from retrieved sources only, citing KB entries; says "insufficient evidence" rather than guessing; an answerability check (does the matched entry actually answer the question?) that sends near misses to a person, measured on the near-miss questions from Sprint 1, which no embedding model could separate by similarity alone; pricing and legal or contractual questions detected and excluded from bulk approval; prompt and model versioned; faithfulness and calibration evaluated against hand-labelled answers; red-team set for prompt injection hidden in uploaded questions.
+(Sprint 2 is proposed in full above.)
 
 **Sprint 3: workflow and the learning loop.** Overview of responses in flight (owner, due date, progress, overdue and at-risk flags); per-response owner role; bulk approval recorded; readiness gate before export; archive with outcome (won or lost), admin-only hard delete for errors, logged; learning at export with provenance and supersession of near-duplicates (F-11), pricing never learned; session questions editable only by owner, assignees and admins (F-7); origin_ref set by the system (F-6); expert recommendation from answer history as well as stated expertise; audit trail of every approval with model and prompt version.
 
@@ -88,7 +133,7 @@ Order: S1-1 and S1-2 first (independent), then S1-3, S1-4, S1-5, S1-6; F-9 any t
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups logged during Sprint 0 (ranked at the review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 onwards from Sprint 1; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -103,6 +148,9 @@ Order: S1-1 and S1-2 first (independent), then S1-3, S1-4, S1-5, S1-6; F-9 any t
 | F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Found in the end-to-end run; a failed save is silent |
 | F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Found in the end-to-end run |
 | F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Found in the end-to-end run; Sprint 3, with supersession |
+| F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
+| F-14 | Japanese evaluation items are machine translations of the original questions, unreviewed | From the Sprint 1 review; reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
+| F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
