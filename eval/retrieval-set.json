@@ -1,0 +1,2975 @@
+{
+  "version": "2026-10-22.1",
+  "items": [
+    {
+      "id": "e001-en1",
+      "text": "What protections keep our information unreadable when it is stored on your disks and databases?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization encrypt data at rest?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e001-en2",
+      "text": "When customer data sits in storage, how is it kept confidential if the hardware were stolen?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization encrypt data at rest?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e001-ja",
+      "text": "保存されているデータはどのように暗号化されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization encrypt data at rest?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e002-en1",
+      "text": "How is information protected while it moves across networks between systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization encrypt data in transit?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e002-en2",
+      "text": "Which protocols secure traffic between our users and your service?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization encrypt data in transit?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e002-ja",
+      "text": "通信中のデータはどのように暗号化されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization encrypt data in transit?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e003-en1",
+      "text": "How do you decide who is allowed into which systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your access control framework.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e003-en2",
+      "text": "Explain the model you use to grant and limit permissions to your platforms.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your access control framework.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e003-ja",
+      "text": "アクセス制御の枠組みについて説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your access control framework.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e004-en1",
+      "text": "Do users need more than a password to log in, and where is that enforced?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What multi-factor authentication (MFA) controls are in place?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e004-en2",
+      "text": "Which second-factor methods do staff use when signing in?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What multi-factor authentication (MFA) controls are in place?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e004-ja",
+      "text": "どのような多要素認証が導入されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What multi-factor authentication (MFA) controls are in place?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e005-en1",
+      "text": "How long do you keep customer records, and how are they removed afterwards?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your data retention and disposal policy?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e005-en2",
+      "text": "What happens to our data when it is no longer needed?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your data retention and disposal policy?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e005-ja",
+      "text": "データの保持期間と廃棄方針を教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your data retention and disposal policy?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e006-en1",
+      "text": "Walk us through what happens when a breach or attack is detected.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle security incidents?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e006-en2",
+      "text": "What is your process for responding to a cyber event?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle security incidents?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e006-ja",
+      "text": "セキュリティインシデントにはどのように対応していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization handle security incidents?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e007-en1",
+      "text": "How do you find and fix weaknesses in your systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your vulnerability management program.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e007-en2",
+      "text": "Explain how security flaws are discovered, prioritised and remediated.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your vulnerability management program.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e007-ja",
+      "text": "脆弱性管理のプログラムについて説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your vulnerability management program.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e008-en1",
+      "text": "What happens to the service if a data centre goes offline?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What business continuity and disaster recovery plans does your organization maintain?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e008-en2",
+      "text": "How would you keep operating after a major outage or disaster?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What business continuity and disaster recovery plans does your organization maintain?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e008-ja",
+      "text": "事業継続計画と災害復旧計画について教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What business continuity and disaster recovery plans does your organization maintain?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e009-en1",
+      "text": "How do you check that your suppliers handle data securely?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you manage third-party and vendor security risk?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e009-en2",
+      "text": "What due diligence do you perform on subcontractors with access to our information?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you manage third-party and vendor security risk?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e009-ja",
+      "text": "サードパーティやベンダーのセキュリティリスクをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you manage third-party and vendor security risk?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e010-en1",
+      "text": "How is your network designed to keep attackers out and limit their movement?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your network security architecture.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e010-en2",
+      "text": "Describe the firewalls and segmentation that protect your infrastructure.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your network security architecture.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e010-ja",
+      "text": "ネットワークセキュリティのアーキテクチャについて説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your network security architecture.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e011-en1",
+      "text": "What anti-malware and EDR tooling runs on staff laptops?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What endpoint protection controls are deployed?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e011-en2",
+      "text": "How are workstations and servers defended against malicious software?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What endpoint protection controls are deployed?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e011-ja",
+      "text": "どのようなエンドポイント保護対策を導入していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What endpoint protection controls are deployed?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e012-en1",
+      "text": "How do you protect workloads running with AWS, Azure or GCP?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure cloud environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e012-en2",
+      "text": "What safeguards apply to your infrastructure in public cloud providers?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure cloud environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e012-ja",
+      "text": "クラウド環境をどのように保護していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you secure cloud environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e013-en1",
+      "text": "How do you make sure the code you ship is free of security flaws?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your application security practices.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e013-en2",
+      "text": "What do your engineers do to build software that resists attack?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your application security practices.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e013-ja",
+      "text": "アプリケーションセキュリティの取り組みについて説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your application security practices.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e014-en1",
+      "text": "How are your offices and server rooms protected from unauthorised entry?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What physical security controls protect your facilities?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e014-en2",
+      "text": "What badge, camera and visitor controls exist at your sites?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What physical security controls protect your facilities?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e014-ja",
+      "text": "施設を守る物理的なセキュリティ対策は何ですか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What physical security controls protect your facilities?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e015-en1",
+      "text": "How do you meet European data protection law for our users' personal data?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization comply with GDPR?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e015-en2",
+      "text": "Explain how you satisfy the EU's privacy regulation obligations.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization comply with GDPR?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e015-ja",
+      "text": "GDPRへの準拠をどのように確保していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization comply with GDPR?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e016-en1",
+      "text": "How do you safeguard protected health information under US healthcare rules?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization comply with HIPAA requirements?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e016-en2",
+      "text": "Can you sign a business associate agreement and meet its obligations?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization comply with HIPAA requirements?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e016-ja",
+      "text": "HIPAAの要件にどのように準拠していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization comply with HIPAA requirements?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e017-en1",
+      "text": "Do you have an independent service organisation controls report we can review?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What SOC 2 certifications does your organization hold?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e017-en2",
+      "text": "Which Type I or Type II attestation reports are available?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What SOC 2 certifications does your organization hold?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e017-ja",
+      "text": "どのようなSOC 2認証を取得していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What SOC 2 certifications does your organization hold?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e018-en1",
+      "text": "Is your information security management system certified to the international standard?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization align with ISO 27001?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e018-en2",
+      "text": "How closely does your ISMS follow the ISO security framework?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization align with ISO 27001?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e018-ja",
+      "text": "ISO 27001にどのように準拠していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization align with ISO 27001?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e019-en1",
+      "text": "How often do outside experts try to break into your systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How frequently do you conduct penetration testing?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e019-en2",
+      "text": "When was your last ethical hacking exercise, and how regularly are they run?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How frequently do you conduct penetration testing?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e019-ja",
+      "text": "ペネトレーションテストの実施頻度を教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How frequently do you conduct penetration testing?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e020-en1",
+      "text": "How are employees taught to recognise and avoid cyber threats?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your security awareness training program.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e020-en2",
+      "text": "What education do staff receive on phishing and safe behaviour?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your security awareness training program.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e020-ja",
+      "text": "セキュリティ意識向上のための研修について説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your security awareness training program.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e021-en1",
+      "text": "How do you record and watch activity across your systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What logging and monitoring capabilities do you have?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e021-en2",
+      "text": "What audit trails and alerting do you have to spot suspicious behaviour?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What logging and monitoring capabilities do you have?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e021-ja",
+      "text": "どのようなログ取得と監視の機能がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What logging and monitoring capabilities do you have?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e022-en1",
+      "text": "How are changes that could affect security reviewed and approved?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is change management handled for security-impacting changes?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e022-en2",
+      "text": "What controls stop unvetted modifications reaching production?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is change management handled for security-impacting changes?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e022-ja",
+      "text": "セキュリティに影響する変更はどのように管理されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How is change management handled for security-impacting changes?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e023-en1",
+      "text": "How do you copy and restore data if it is lost or corrupted?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What backup and recovery procedures are in place?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e023-en2",
+      "text": "How quickly can you get our data back after accidental deletion?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What backup and recovery procedures are in place?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e023-ja",
+      "text": "どのようなバックアップと復旧の手順がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What backup and recovery procedures are in place?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e024-en1",
+      "text": "How are accounts created, changed and removed when people join or move roles?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage user identities and access provisioning?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e024-en2",
+      "text": "Describe the joiner, mover and leaver process for user accounts.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage user identities and access provisioning?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e024-ja",
+      "text": "ユーザーIDとアクセス権の付与をどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage user identities and access provisioning?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e025-en1",
+      "text": "Do you assume no user or device is trusted by default, and how is that enforced?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your zero trust implementation.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e025-en2",
+      "text": "How have you moved away from perimeter-based trust?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your zero trust implementation.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e025-ja",
+      "text": "ゼロトラストの実装について説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your zero trust implementation.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e026-en1",
+      "text": "How do you protect the interfaces that partners call to integrate with you?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure APIs exposed to external consumers?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e026-en2",
+      "text": "What authentication and rate limiting apply to your public endpoints?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure APIs exposed to external consumers?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e026-ja",
+      "text": "外部に公開しているAPIをどのように保護していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you secure APIs exposed to external consumers?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e027-en1",
+      "text": "What rules govern company phones and tablets?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What mobile device management policies are in place?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e027-en2",
+      "text": "How are smartphones used for work enrolled and controlled?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What mobile device management policies are in place?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e027-ja",
+      "text": "モバイルデバイス管理のポリシーを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What mobile device management policies are in place?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e028-en1",
+      "text": "At which stages of building software do security checks happen?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is security integrated into your software development lifecycle (SDLC)?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e028-en2",
+      "text": "How is secure coding built into your engineering process from design to release?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is security integrated into your software development lifecycle (SDLC)?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e028-ja",
+      "text": "ソフトウェア開発ライフサイクルにセキュリティをどのように組み込んでいますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How is security integrated into your software development lifecycle (SDLC)?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e029-en1",
+      "text": "How do you identify, assess and treat threats to your information?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage information security risk?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e029-en2",
+      "text": "Describe your risk register and how risks are prioritised.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage information security risk?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e029-ja",
+      "text": "情報セキュリティリスクをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage information security risk?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e030-en1",
+      "text": "Who is accountable for security, and how is oversight organised?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security governance structure is in place?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e030-en2",
+      "text": "Describe the committees and roles that steer your security programme.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security governance structure is in place?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e030-ja",
+      "text": "どのようなセキュリティガバナンス体制がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What security governance structure is in place?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e031-en1",
+      "text": "How are administrator and other high-powered accounts controlled?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you manage privileged access accounts?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e031-en2",
+      "text": "What safeguards apply to accounts with superuser rights?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you manage privileged access accounts?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e031-ja",
+      "text": "特権アカウントをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you manage privileged access accounts?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e032-en1",
+      "text": "How do you label information by sensitivity?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your data classification scheme.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e032-en2",
+      "text": "What categories do you use to decide how carefully data must be handled?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your data classification scheme.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e032-ja",
+      "text": "データ分類の仕組みについて説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your data classification scheme.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e033-en1",
+      "text": "How would you spot an employee misusing their access?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization detect and prevent insider threats?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e033-en2",
+      "text": "What stops a trusted staff member from stealing or leaking data?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization detect and prevent insider threats?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e033-ja",
+      "text": "内部脅威をどのように検知し防止していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization detect and prevent insider threats?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e034-en1",
+      "text": "What stops sensitive information leaving your organisation by email or upload?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place to prevent data loss?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e034-en2",
+      "text": "Describe your DLP tooling and policies.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place to prevent data loss?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e034-ja",
+      "text": "データ漏えいを防ぐためにどのような対策がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What controls are in place to prevent data loss?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e035-en1",
+      "text": "How is your corporate mail protected from spoofing and malicious attachments?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure your email platform?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e035-en2",
+      "text": "Do you use SPF, DKIM and DMARC, and what filters inspect messages?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure your email platform?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e035-ja",
+      "text": "メールプラットフォームをどのように保護していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you secure your email platform?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e036-en1",
+      "text": "How can staff connect from outside the office, and how is that secured?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls govern remote access to your environment?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e036-en2",
+      "text": "What VPN or similar controls apply to off-site connections?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls govern remote access to your environment?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e036-ja",
+      "text": "環境へのリモートアクセスにはどのような管理策がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What controls govern remote access to your environment?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e037-en1",
+      "text": "How quickly do you apply fixes from vendors to your systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you manage security patches and updates?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e037-en2",
+      "text": "Describe how operating system and software updates are rolled out.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you manage security patches and updates?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e037-ja",
+      "text": "セキュリティパッチと更新をどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you manage security patches and updates?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e038-en1",
+      "text": "How do you test your websites and web apps for weaknesses?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your security testing for web applications.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e038-en2",
+      "text": "What dynamic and static scanning do you run on browser-facing applications?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your security testing for web applications.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e038-ja",
+      "text": "ウェブアプリケーションのセキュリティテストについて説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your security testing for web applications.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e039-en1",
+      "text": "What happens when a team cannot meet a security rule?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle security exceptions and policy waivers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e039-en2",
+      "text": "How are deviations from policy approved, tracked and reviewed?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle security exceptions and policy waivers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e039-ja",
+      "text": "セキュリティ例外やポリシー適用除外をどのように扱っていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization handle security exceptions and policy waivers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e040-en1",
+      "text": "How do you make sure systems are set up securely and stay that way?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for security configuration management?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e040-en2",
+      "text": "Describe your hardening baselines and drift detection.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for security configuration management?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e040-ja",
+      "text": "セキュリティ構成管理のプロセスを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your process for security configuration management?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e041-en1",
+      "text": "How do you protect Kubernetes clusters and container images?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you handle security for cloud-native workloads and containers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e041-en2",
+      "text": "What safeguards apply to containerised applications from build to runtime?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you handle security for cloud-native workloads and containers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e041-ja",
+      "text": "クラウドネイティブなワークロードやコンテナのセキュリティをどのように確保していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you handle security for cloud-native workloads and containers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e042-en1",
+      "text": "How are new system designs checked for security before they are built?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security architecture reviews.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e042-en2",
+      "text": "Who reviews architecture for security risks, and when?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security architecture reviews.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e042-ja",
+      "text": "セキュリティアーキテクチャのレビューへの取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to security architecture reviews.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e043-en1",
+      "text": "How do you keep people working from home secure?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to managing security for remote workers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e043-en2",
+      "text": "What protections apply to staff who are not in the office?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to managing security for remote workers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e043-ja",
+      "text": "リモートワーカーのセキュリティをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your approach to managing security for remote workers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e044-en1",
+      "text": "How are encryption keys created, rotated and retired?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage cryptographic key lifecycles?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e044-en2",
+      "text": "Who can access your keys, and are they stored in hardware modules?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage cryptographic key lifecycles?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e044-ja",
+      "text": "暗号鍵のライフサイクルをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage cryptographic key lifecycles?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e045-en1",
+      "text": "How do you protect the data stores behind your service?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for database security?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e045-en2",
+      "text": "What access, encryption and auditing apply to your SQL and NoSQL systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for database security?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e045-ja",
+      "text": "データベースのセキュリティにはどのような管理策がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What controls are in place for database security?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e046-en1",
+      "text": "How do you prevent domain name resolution from being hijacked or abused?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is DNS security managed within your environment?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e046-en2",
+      "text": "Do you use DNSSEC or protective DNS filtering?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is DNS security managed within your environment?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e046-ja",
+      "text": "DNSのセキュリティはどのように管理されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How is DNS security managed within your environment?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e047-en1",
+      "text": "How do you measure and report how secure you are?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security metrics and reporting.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e047-en2",
+      "text": "What security KPIs reach your leadership, and how often?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security metrics and reporting.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e047-ja",
+      "text": "セキュリティの指標と報告への取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to security metrics and reporting.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e048-en1",
+      "text": "How do you make sure the components and libraries you depend on are not compromised?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage software supply chain security?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e048-en2",
+      "text": "What do you do to protect against attacks on your suppliers' code?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage software supply chain security?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e048-ja",
+      "text": "ソフトウェアサプライチェーンのセキュリティをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage software supply chain security?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e049-en1",
+      "text": "How is personal data protection considered when new features are designed?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What privacy-by-design principles are applied in product development?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e049-en2",
+      "text": "Do you minimise the personal data your products collect by default?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What privacy-by-design principles are applied in product development?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e049-ja",
+      "text": "製品開発ではどのようなプライバシー・バイ・デザインの原則を適用していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What privacy-by-design principles are applied in product development?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e050-en1",
+      "text": "How would your service withstand a flood of malicious traffic?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization protect against DDoS attacks?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e050-en2",
+      "text": "What mitigation do you have against volumetric network attacks?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization protect against DDoS attacks?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e050-ja",
+      "text": "DDoS攻撃からどのように保護していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization protect against DDoS attacks?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e051-en1",
+      "text": "How is your office Wi-Fi protected?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security controls are applied to wireless networks?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e051-en2",
+      "text": "What authentication and encryption apply to wireless access points?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security controls are applied to wireless networks?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e051-ja",
+      "text": "無線ネットワークにはどのようなセキュリティ対策を適用していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What security controls are applied to wireless networks?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e052-en1",
+      "text": "How do you dispose of old hard drives and paper records so data cannot be recovered?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you ensure secure destruction of physical media?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e052-en2",
+      "text": "What certified methods are used to wipe or shred retired storage?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you ensure secure destruction of physical media?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e052-ja",
+      "text": "物理媒体を安全に破棄する方法を教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you ensure secure destruction of physical media?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e053-en1",
+      "text": "How do you handle security when your company buys or sells a business?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security during mergers, acquisitions, or divestitures.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e053-en2",
+      "text": "What checks are done on the systems of a company you acquire?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security during mergers, acquisitions, or divestitures.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e053-ja",
+      "text": "合併・買収・事業売却の際のセキュリティへの取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to security during mergers, acquisitions, or divestitures.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e054-en1",
+      "text": "What rules apply to the length and complexity of passwords?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage password policies?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e054-en2",
+      "text": "How often must credentials be changed, and how are weak ones prevented?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage password policies?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e054-ja",
+      "text": "パスワードポリシーをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage password policies?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e055-en1",
+      "text": "How do you keep an eye on what administrators do?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security monitoring is performed on privileged users?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e055-en2",
+      "text": "Are sessions of high-privilege users recorded and reviewed?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security monitoring is performed on privileged users?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e055-ja",
+      "text": "特権ユーザーに対してどのようなセキュリティ監視を行っていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What security monitoring is performed on privileged users?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e056-en1",
+      "text": "How do you learn about new attackers and their methods?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization approach threat intelligence?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e056-en2",
+      "text": "What intelligence feeds inform your defences?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization approach threat intelligence?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e056-ja",
+      "text": "脅威インテリジェンスにどのように取り組んでいますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization approach threat intelligence?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e057-en1",
+      "text": "How do you secure the cloud software subscriptions your staff use?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your security controls for SaaS applications.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e057-en2",
+      "text": "What controls apply to third-party web applications you subscribe to?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your security controls for SaaS applications.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e057-ja",
+      "text": "SaaSアプリケーションのセキュリティ管理策について説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your security controls for SaaS applications.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e058-en1",
+      "text": "How are your build and deployment toolchains protected?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage security for DevOps environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e058-en2",
+      "text": "What security applies to your CI/CD and infrastructure-as-code?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage security for DevOps environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e058-ja",
+      "text": "DevOps環境のセキュリティをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage security for DevOps environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e059-en1",
+      "text": "When an alert fires, how is it assessed and investigated?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What processes are in place for security event triage and investigation?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e059-en2",
+      "text": "Describe how your analysts work through a potential security event.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What processes are in place for security event triage and investigation?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e059-ja",
+      "text": "セキュリティイベントのトリアージと調査にはどのようなプロセスがありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What processes are in place for security event triage and investigation?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e060-en1",
+      "text": "How quickly is a leaver's access removed?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage access for terminated employees?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e060-en2",
+      "text": "What happens to accounts and devices when someone leaves the company?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage access for terminated employees?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e060-ja",
+      "text": "退職した従業員のアクセスをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage access for terminated employees?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e061-en1",
+      "text": "How do engineers know what security a new feature must meet?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How are security requirements defined and communicated to development teams?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e061-en2",
+      "text": "Where are security needs written down for product teams?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How are security requirements defined and communicated to development teams?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e061-ja",
+      "text": "セキュリティ要件はどのように定義され、開発チームに伝えられていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How are security requirements defined and communicated to development teams?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e062-en1",
+      "text": "What happens to issues that auditors raise?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for managing security-related findings from audits?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e062-en2",
+      "text": "How are audit recommendations tracked to closure?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for managing security-related findings from audits?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e062-ja",
+      "text": "監査で見つかったセキュリティ上の指摘をどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your process for managing security-related findings from audits?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e063-en1",
+      "text": "How do you defend against the most common web attack types, such as injection and cross-site scripting?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization address OWASP Top 10 vulnerabilities in web applications?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e063-en2",
+      "text": "Which controls address the industry's top web application risks?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization address OWASP Top 10 vulnerabilities in web applications?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e063-ja",
+      "text": "ウェブアプリケーションのOWASP Top 10の脆弱性にどのように対処していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization address OWASP Top 10 vulnerabilities in web applications?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e064-en1",
+      "text": "How do you protect connected sensors and industrial control equipment?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security for IoT and OT devices.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e064-en2",
+      "text": "What security applies to operational technology in your facilities?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security for IoT and OT devices.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e064-ja",
+      "text": "IoTやOT機器のセキュリティへの取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to security for IoT and OT devices.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e065-en1",
+      "text": "How do teams across the company hear about security matters?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is security information shared across your organization?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e065-en2",
+      "text": "How are threat updates and lessons learned communicated internally?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is security information shared across your organization?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e065-ja",
+      "text": "セキュリティ情報は組織内でどのように共有されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How is security information shared across your organization?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e066-en1",
+      "text": "How do you send files to and from customers securely?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for secure file transfer?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e066-en2",
+      "text": "What protects documents exchanged over SFTP or file-sharing portals?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for secure file transfer?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e066-ja",
+      "text": "安全なファイル転送のためにどのような管理策がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What controls are in place for secure file transfer?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e067-en1",
+      "text": "How do you assess the security of your own in-house systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization perform security assessments of internal systems?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e067-en2",
+      "text": "Describe the internal reviews and scans you run on corporate infrastructure.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization perform security assessments of internal systems?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e067-ja",
+      "text": "社内システムのセキュリティ評価をどのように行っていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization perform security assessments of internal systems?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e068-en1",
+      "text": "How do you manage credentials used by software rather than people?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to securing machine identities and service accounts?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e068-en2",
+      "text": "What controls apply to API keys, certificates and non-human accounts?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to securing machine identities and service accounts?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e068-ja",
+      "text": "マシンIDやサービスアカウントの保護にどのように取り組んでいますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your approach to securing machine identities and service accounts?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e069-en1",
+      "text": "How do you vet free and community-maintained libraries before using them?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage risks related to open-source software?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e069-en2",
+      "text": "What licence and vulnerability checks apply to third-party open code?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage risks related to open-source software?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e069-ja",
+      "text": "オープンソースソフトウェアに関するリスクをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage risks related to open-source software?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e070-en1",
+      "text": "In which countries is our data kept, and can we choose?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your data sovereignty and residency controls.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e070-en2",
+      "text": "How do you guarantee our information stays in a specific region?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your data sovereignty and residency controls.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e070-ja",
+      "text": "データ主権とデータの所在に関する管理策について説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your data sovereignty and residency controls.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e071-en1",
+      "text": "What legal safeguards apply when personal data is sent to other countries?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage cross-border data transfers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e071-en2",
+      "text": "Do you use standard contractual clauses for international data flows?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage cross-border data transfers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e071-ja",
+      "text": "国境を越えたデータ移転をどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage cross-border data transfers?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e072-en1",
+      "text": "Can staff use their own phones and laptops for work, and under what conditions?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your policy on the use of personal devices for work purposes?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e072-en2",
+      "text": "What is your bring-your-own-device policy?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your policy on the use of personal devices for work purposes?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e072-ja",
+      "text": "業務での私物端末の利用に関する方針を教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your policy on the use of personal devices for work purposes?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e073-en1",
+      "text": "How do you stop and respond to fraudulent emails that try to trick staff?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization detect and respond to phishing attacks?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e073-en2",
+      "text": "What happens when an employee reports a suspicious message?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization detect and respond to phishing attacks?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e073-ja",
+      "text": "フィッシング攻撃をどのように検知し対応していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization detect and respond to phishing attacks?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e074-en1",
+      "text": "How is security handled when a partner runs part of your IT for you?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for managing security in outsourced or co-managed IT environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e074-en2",
+      "text": "What responsibilities do managed service providers have for security?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for managing security in outsourced or co-managed IT environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e074-ja",
+      "text": "外部委託や共同管理のIT環境におけるセキュリティ管理のプロセスを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your process for managing security in outsourced or co-managed IT environments?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e075-en1",
+      "text": "Can our staff log in using our own identity provider?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to identity federation and SSO.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e075-en2",
+      "text": "Do you support single sign-on through SAML or OpenID Connect?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to identity federation and SSO.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e075-ja",
+      "text": "IDフェデレーションとシングルサインオンへの取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to identity federation and SSO.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e076-en1",
+      "text": "How does your programme map to the US government's cybersecurity framework?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you ensure compliance with the NIST Cybersecurity Framework?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e076-en2",
+      "text": "Have you assessed yourselves against the Identify, Protect, Detect, Respond and Recover functions?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you ensure compliance with the NIST Cybersecurity Framework?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e076-ja",
+      "text": "NISTサイバーセキュリティフレームワークへの準拠をどのように確保していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you ensure compliance with the NIST Cybersecurity Framework?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e077-en1",
+      "text": "How do you protect the systems that hold your backup copies?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security controls apply to your data backup infrastructure?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e077-en2",
+      "text": "Are backups isolated or immutable so attackers cannot destroy them?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security controls apply to your data backup infrastructure?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e077-ja",
+      "text": "データのバックアップ基盤にはどのようなセキュリティ管理策が適用されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What security controls apply to your data backup infrastructure?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e078-en1",
+      "text": "How do you keep an inventory of your hardware and software?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage and track security assets?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e078-en2",
+      "text": "How do you know every device and system you own is accounted for?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage and track security assets?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e078-ja",
+      "text": "セキュリティ資産をどのように管理・追跡していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage and track security assets?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e079-en1",
+      "text": "How do you protect trade secrets and proprietary designs?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for protecting intellectual property?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e079-en2",
+      "text": "What stops your confidential know-how from being copied or leaked?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for protecting intellectual property?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e079-ja",
+      "text": "知的財産を保護するためにどのような管理策がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What controls are in place for protecting intellectual property?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e080-en1",
+      "text": "How do you spot and block attacks travelling over your network?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your network intrusion detection and prevention capabilities.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e080-en2",
+      "text": "Describe your IDS and IPS capabilities.",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your network intrusion detection and prevention capabilities.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e080-ja",
+      "text": "ネットワーク侵入の検知・防止機能について説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your network intrusion detection and prevention capabilities.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e081-en1",
+      "text": "Is real customer data ever used in testing, and if so how is it protected?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is sensitive data handled in non-production environments?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e081-en2",
+      "text": "How do you mask or anonymise data in development and staging?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is sensitive data handled in non-production environments?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e081-ja",
+      "text": "本番以外の環境で機密データはどのように扱われていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How is sensitive data handled in non-production environments?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e082-en1",
+      "text": "How do you protect older systems that can no longer be patched?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to security for legacy systems?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e082-en2",
+      "text": "What compensating controls apply to outdated platforms?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to security for legacy systems?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e082-ja",
+      "text": "レガシーシステムのセキュリティへの取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your approach to security for legacy systems?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e083-en1",
+      "text": "What do you do if you think someone has viewed our data without permission?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle suspected unauthorized access to customer data?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e083-en2",
+      "text": "How quickly would you tell us about a possible compromise of our records?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle suspected unauthorized access to customer data?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e083-ja",
+      "text": "顧客データへの不正アクセスが疑われる場合、どのように対応しますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization handle suspected unauthorized access to customer data?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e084-en1",
+      "text": "How can outside researchers report security flaws to you?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your policy on vulnerability disclosure and bug bounty programs?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e084-en2",
+      "text": "Do you reward people who find and responsibly report vulnerabilities?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your policy on vulnerability disclosure and bug bounty programs?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e084-ja",
+      "text": "脆弱性の開示やバグバウンティプログラムに関する方針を教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your policy on vulnerability disclosure and bug bounty programs?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e085-en1",
+      "text": "How is data protected when it is used to train or run machine learning models?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure data processed by artificial intelligence or machine learning systems?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e085-en2",
+      "text": "What controls apply to customer information fed into your AI features?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How do you secure data processed by artificial intelligence or machine learning systems?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e085-ja",
+      "text": "人工知能や機械学習システムで処理されるデータをどのように保護していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How do you secure data processed by artificial intelligence or machine learning systems?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e086-en1",
+      "text": "How do you secure communication between many small services?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security for microservices architectures.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e086-en2",
+      "text": "What authentication applies between internal services in a distributed system?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to security for microservices architectures.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e086-ja",
+      "text": "マイクロサービスアーキテクチャのセキュリティへの取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to security for microservices architectures.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e087-en1",
+      "text": "How do you protect functions that run on demand in the cloud, such as Lambda?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for securing serverless functions?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e087-en2",
+      "text": "What permissions and monitoring apply to your event-driven cloud functions?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What controls are in place for securing serverless functions?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e087-ja",
+      "text": "サーバーレス関数を保護するためにどのような管理策がありますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What controls are in place for securing serverless functions?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e088-en1",
+      "text": "How do you work out how a system could be attacked before it is built?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization conduct and document threat modeling?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e088-en2",
+      "text": "Which method do you use to analyse attack paths during design, and where is it recorded?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization conduct and document threat modeling?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e088-ja",
+      "text": "脅威モデリングをどのように実施し、文書化していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization conduct and document threat modeling?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e089-en1",
+      "text": "How do you secure a mix of on-premises and public cloud infrastructure?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to managing security in hybrid cloud environments?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e089-en2",
+      "text": "How are security policies kept consistent across your own data centres and the cloud?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to managing security in hybrid cloud environments?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e089-ja",
+      "text": "ハイブリッドクラウド環境のセキュリティをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your approach to managing security in hybrid cloud environments?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e090-en1",
+      "text": "How do you keep your most important systems up and running?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization ensure the availability and resilience of critical systems?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e090-en2",
+      "text": "What redundancy and failover protect your core service?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization ensure the availability and resilience of critical systems?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e090-ja",
+      "text": "重要システムの可用性と回復力をどのように確保していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization ensure the availability and resilience of critical systems?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e091-en1",
+      "text": "How do you keep track of the laws and regulations you must follow?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to regulatory compliance monitoring.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e091-en2",
+      "text": "How do you know you are still meeting your legal obligations day to day?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe your approach to regulatory compliance monitoring.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e091-ja",
+      "text": "規制遵守の監視への取り組みを教えてください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe your approach to regulatory compliance monitoring.",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e092-en1",
+      "text": "How do you control what people can do in your cloud provider's permission system?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to managing user privileges in cloud identity and access management?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e092-en2",
+      "text": "How are cloud IAM roles reviewed and kept to the minimum needed?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your approach to managing user privileges in cloud identity and access management?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e092-ja",
+      "text": "クラウドのIDおよびアクセス管理でユーザー権限をどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your approach to managing user privileges in cloud identity and access management?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e093-en1",
+      "text": "What happens to data and systems when a product is retired?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is security considered during product end-of-life and decommissioning?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e093-en2",
+      "text": "How do you securely shut down a service you no longer offer?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How is security considered during product end-of-life and decommissioning?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e093-ja",
+      "text": "製品のサポート終了や廃止の際、セキュリティはどのように考慮されていますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How is security considered during product end-of-life and decommissioning?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e094-en1",
+      "text": "How do you collect and correlate security logs centrally?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization implement and manage security information and event management (SIEM)?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e094-en2",
+      "text": "Which platform aggregates your alerts, and who watches it?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization implement and manage security information and event management (SIEM)?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e094-ja",
+      "text": "SIEMをどのように導入し、運用していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization implement and manage security information and event management (SIEM)?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e095-en1",
+      "text": "How do you protect RDP and SSH access to servers?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your organization's approach to security for remote desktop and administrative protocols?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e095-en2",
+      "text": "What controls apply to administrative connections into your environment?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your organization's approach to security for remote desktop and administrative protocols?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e095-ja",
+      "text": "リモートデスクトップや管理用プロトコルのセキュリティにどのように取り組んでいますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your organization's approach to security for remote desktop and administrative protocols?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e096-en1",
+      "text": "What would stop an attacker from encrypting your systems and demanding payment?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe the controls used to protect against ransomware attacks.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e096-en2",
+      "text": "How are you prepared to recover from an extortion malware attack?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "Describe the controls used to protect against ransomware attacks.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e096-ja",
+      "text": "ランサムウェア攻撃から保護するための管理策について説明してください。",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "Describe the controls used to protect against ransomware attacks.",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e097-en1",
+      "text": "How do you protect the servers and services exposed to the internet?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage the security of its public-facing infrastructure?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e097-en2",
+      "text": "What controls apply to your externally reachable systems?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization manage the security of its public-facing infrastructure?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e097-ja",
+      "text": "公開しているインフラのセキュリティをどのように管理していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization manage the security of its public-facing infrastructure?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e098-en1",
+      "text": "How and when would you notify us if an incident affected us?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for communicating security incidents to affected parties?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e098-en2",
+      "text": "Who tells customers about a breach, and through which channels?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What is your process for communicating security incidents to affected parties?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e098-ja",
+      "text": "影響を受ける関係者にセキュリティインシデントをどのように伝えますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What is your process for communicating security incidents to affected parties?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e099-en1",
+      "text": "How can we trust that the software you release has not been tampered with?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security assurances do you provide for your software build and release pipeline?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e099-en2",
+      "text": "What integrity checks protect your build and deployment process?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "What security assurances do you provide for your software build and release pipeline?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e099-ja",
+      "text": "ソフトウェアのビルドとリリースのパイプラインについて、どのようなセキュリティ保証を提供していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "What security assurances do you provide for your software build and release pipeline?",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "e100-en1",
+      "text": "How do you stay secure during big releases or data centre moves?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle security during significant operational events such as major releases or infrastructure migrations?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e100-en2",
+      "text": "What extra controls apply during large migrations or high-risk changes?",
+      "language": "en",
+      "kind": "paraphrase",
+      "gold": "How does your organization handle security during significant operational events such as major releases or infrastructure migrations?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "e100-ja",
+      "text": "大規模リリースやインフラ移行などの重要な業務イベントの際、セキュリティをどのように確保していますか？",
+      "language": "ja",
+      "kind": "translation",
+      "gold": "How does your organization handle security during significant operational events such as major releases or infrastructure migrations?",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u001",
+      "text": "What is your annual subscription price for 500 users?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u002",
+      "text": "Which payment terms do you offer on invoices?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u003",
+      "text": "How many employees does your company have in total?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u004",
+      "text": "Who are your three largest customers?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u005",
+      "text": "What was your revenue last financial year?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u006",
+      "text": "Can your product integrate with our HR system's payroll module?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u007",
+      "text": "What is your product roadmap for the next two years?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u008",
+      "text": "Do you offer on-site training for end users, and what does it cost?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u009",
+      "text": "What is your carbon reduction target?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u010",
+      "text": "How many languages does your user interface support?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u011",
+      "text": "What is your standard service level for customer support response times?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u012",
+      "text": "Do you provide a dedicated account manager?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u013",
+      "text": "What is your policy on modern slavery in your supply chain?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u014",
+      "text": "How long does a typical implementation project take?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u015",
+      "text": "What liability cap do you accept in your standard contract?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u016",
+      "text": "Which version of your mobile app supports offline mode?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u017",
+      "text": "Can we customise the colours and logo in your dashboard?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u018",
+      "text": "What diversity and inclusion commitments does your company make?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u019",
+      "text": "Do you offer discounts for charities or education customers?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u020",
+      "text": "Which countries do you have sales offices in?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u021",
+      "text": "What insurance cover does your company hold, and to what value?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u022",
+      "text": "How do you price additional storage beyond the included allowance?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u023",
+      "text": "Who is your chief executive, and how long have they been in post?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u024",
+      "text": "What is your process for handling customer feature requests?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u025",
+      "text": "Can your reporting module export to our business intelligence tool?",
+      "language": "en",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u026",
+      "text": "年間ライセンス費用はいくらですか？",
+      "language": "ja",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u027",
+      "text": "御社の従業員数は何人ですか？",
+      "language": "ja",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u028",
+      "text": "導入プロジェクトには通常どのくらいの期間がかかりますか？",
+      "language": "ja",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "u029",
+      "text": "カスタマーサポートの対応時間を教えてください。",
+      "language": "ja",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "u030",
+      "text": "製品の今後のロードマップを教えてください。",
+      "language": "ja",
+      "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    }
+  ]
+}
