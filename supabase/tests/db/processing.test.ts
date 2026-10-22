@@ -167,3 +167,80 @@ describe('4. a person can still accept a gated question individually', () => {
     expect(r.rowCount).toBe(1);
   });
 });
+
+describe('security review findings (Sprint 2)', () => {
+  /** A question as the browser left it before Sprint 2: confidence written by a user, never processed. */
+  async function legacyQuestion(s: string): Promise<string> {
+    return (await one<{ id: string }>(
+      `INSERT INTO rfi_questions (session_id, position, question, confidence) VALUES ($1, 0, 'Old', 0.99) RETURNING id`, [s])).id;
+  }
+
+  it('finding 1: bulk approval never includes questions the server has not processed', async () => {
+    const fresh = (await one<{ id: string }>(
+      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
+       SELECT 'l.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    const old = await legacyQuestion(fresh);
+    const ok = await question(fresh);
+    await as(owner, async (q) => {
+      const r = await q<{ bulk_accept: { accepted: number; heldUncalibrated: number } }>(`SELECT bulk_accept($1, 0)`, [fresh]);
+      expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 1, heldUncalibrated: 1 });
+    });
+    await refused(as(owner, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [old, ok])));
+  });
+
+  it('finding 3: a member cannot rewrite several answers, or undo several approvals, at once', async () => {
+    const a = await question(session);
+    const b = await question(session);
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b]);
+    await refused(as(member, (q) => q(`UPDATE rfi_questions SET final_answer = 'We charge nothing' WHERE id IN ($1, $2)`, [a, b])));
+    await refused(as(member, (q) => q(`UPDATE rfi_questions SET status = 'pending' WHERE id IN ($1, $2)`, [a, b])));
+  });
+
+  it('finding 3: changing an accepted answer reopens it for a fresh decision', async () => {
+    const id = await question(session, { gate: 'pricing' });
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Priced by a person.' WHERE id = $1`, [id]);
+    await as(member, async (q) => {
+      await q(`UPDATE rfi_questions SET final_answer = 'We charge nothing' WHERE id = $1`, [id]);
+      const r = await q<{ status: string }>(`SELECT status FROM rfi_questions WHERE id = $1`, [id]);
+      expect(r.rows[0].status).toBe('pending');
+      // A person can then accept the revised answer individually.
+      expect((await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id])).rowCount).toBe(1);
+    });
+  });
+
+  it('finding 3: accepted_count is computed by the database, and members cannot write it', async () => {
+    const fresh = (await one<{ id: string }>(
+      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
+       SELECT 'c.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    await question(fresh);
+    await question(fresh);
+    await refused(as(member, (q) => q(`UPDATE rfi_sessions SET accepted_count = 999 WHERE id = $1`, [fresh])));
+    await as(owner, async (q) => {
+      await q(`SELECT bulk_accept($1, 0)`, [fresh]);
+      const r = await q<{ accepted_count: number }>(`SELECT accepted_count FROM rfi_sessions WHERE id = $1`, [fresh]);
+      expect(r.rows[0].accepted_count).toBe(2);
+    });
+  });
+
+  it('finding 6: members cannot delete questions or sessions', async () => {
+    const id = await question(session);
+    await refused(as(member, (q) => q(`DELETE FROM rfi_questions WHERE id = $1`, [id])));
+    await refused(as(owner, (q) => q(`DELETE FROM rfi_sessions WHERE id = $1`, [session])));
+  });
+
+  it('finding 6: a forged role claim does not switch the bulk check off', async () => {
+    const a = await question(session);
+    const b = await question(session, { gate: 'legal' });
+    const pool = (await import('./harness')).getPool();
+    const c = await pool.connect();
+    try {
+      await c.query('BEGIN');
+      await c.query('SET LOCAL ROLE authenticated');
+      await c.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: owner.id, role: 'x' })]);
+      await refused(c.query(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b]));
+    } finally {
+      await c.query('ROLLBACK').catch(() => undefined);
+      c.release();
+    }
+  });
+});

@@ -33,12 +33,15 @@ export async function saveQuestionPatch(
   id: string,
   patch: { status?: string; finalAnswer?: string },
 ): Promise<void> {
-  const db: Record<string, unknown> = {};
-  if (patch.status !== undefined) db.status = patch.status;
-  if (patch.finalAnswer !== undefined) db.final_answer = patch.finalAnswer;
-  if (Object.keys(db).length === 0) return;
-  const { error } = await client.from('rfi_questions').update(db).eq('id', id);
-  if (error) throw new Error(`Your change was not saved: ${error.message}`);
+  // The answer first, then the decision: changing an accepted answer reopens the question in the
+  // database (security review, Sprint 2), so accepting the revised text is a separate, later step.
+  const steps: Record<string, unknown>[] = [];
+  if (patch.finalAnswer !== undefined) steps.push({ final_answer: patch.finalAnswer });
+  if (patch.status !== undefined) steps.push({ status: patch.status });
+  for (const db of steps) {
+    const { error } = await client.from('rfi_questions').update(db).eq('id', id);
+    if (error) throw new Error(`Your change was not saved: ${error.message}`);
+  }
 }
 
 /**

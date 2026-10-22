@@ -18,15 +18,20 @@ import { HttpError, json, requireUser, serve } from '../_shared/http.ts';
 import { processQuestions, validateProcessRequest } from '../_shared/process-core.ts';
 import type { MatchRow } from '../_shared/sources.ts';
 
+/**
+ * The configured answerability checker. 'none' deliberately falls back to similarity calibration;
+ * a checker that is configured but has no key fails every check, so confidence is null rather
+ * than quietly falling back (security review).
+ */
 function checkerFromEnv(env: Record<string, string | undefined>): AnswerabilityChecker | null {
   const choice = env.ANSWERABILITY_CHECKER ?? 'claude-haiku-5-5';
   if (choice === 'none') return null;
-  if (choice.startsWith('rerank-')) {
-    if (!env.VOYAGE_API_KEY) return null;
-    return voyageRerankChecker({ apiKey: env.VOYAGE_API_KEY, model: choice });
+  const key = choice.startsWith('rerank-') ? env.VOYAGE_API_KEY : env.ANTHROPIC_API_KEY;
+  if (!key) {
+    return { name: 'unavailable', model: choice, check: () => Promise.reject(new Error(`${choice} has no API key configured`)) };
   }
-  if (!env.ANTHROPIC_API_KEY) return null;
-  return claudeJudge({ client: claudeClient({ apiKey: env.ANTHROPIC_API_KEY }), model: choice });
+  if (choice.startsWith('rerank-')) return voyageRerankChecker({ apiKey: key, model: choice });
+  return claudeJudge({ client: claudeClient({ apiKey: key }), model: choice });
 }
 
 serve(async (req) => {
@@ -35,13 +40,18 @@ serve(async (req) => {
   const env = Deno.env.toObject();
 
   // Read as the caller: row-level security decides what they may process.
-  const { data: questions, error } = await asCaller
+  const { data: found, error } = await asCaller
     .from('rfi_questions')
-    .select('id, question')
+    .select('id, question, status, processed_at')
     .eq('session_id', sessionId)
     .in('id', questionIds);
   if (error) throw new HttpError('Could not read the questions', 500);
-  if (!questions || questions.length !== questionIds.length) throw new HttpError('Some questions are not in this session', 400);
+  if (!found || found.length !== questionIds.length) throw new HttpError('Some questions are not in this session', 400);
+  // Each question is processed once: reprocessing could reroll a classifier's gate or replace an
+  // accepted draft (security review). Already processed or decided questions are skipped.
+  const questions = found.filter((q) => q.processed_at === null && q.status === 'pending');
+  const skipped = found.filter((q) => !questions.includes(q)).map((q) => ({ id: q.id, saved: true, skipped: true }));
+  if (questions.length === 0) return json(req, 200, { processed: skipped });
 
   const provider = (() => {
     try {
@@ -70,11 +80,22 @@ serve(async (req) => {
   });
 
   const admin = createClient(env.SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
-  const saved = [];
+  const saved: Record<string, unknown>[] = [];
   for (const r of results) {
     const { id, ...columns } = r;
-    const { error: saveError } = await admin.from('rfi_questions').update(columns).eq('id', id).eq('session_id', sessionId);
+    // processed_at IS NULL again here, so two overlapping calls cannot both write a question.
+    const { data: written, error: saveError } = await admin
+      .from('rfi_questions')
+      .update(columns)
+      .eq('id', id)
+      .eq('session_id', sessionId)
+      .is('processed_at', null)
+      .select('id');
+    if (!saveError && (written ?? []).length === 0) {
+      saved.push({ id, saved: true, skipped: true });
+      continue;
+    }
     saved.push({ id, saved: !saveError, gate: r.gate, draftKind: r.draft_kind, confidence: r.confidence, note: r.processing_note });
   }
-  return json(req, 200, { processed: saved });
+  return json(req, 200, { processed: [...saved, ...skipped] });
 });

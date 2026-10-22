@@ -16,6 +16,7 @@
  * Plain TypeScript, no imports beyond ./claude, so it runs in Deno, Node and Vitest.
  */
 import type { ClaudeClient } from './claude.ts';
+import { safeNote } from './safe-text.ts';
 
 export type GateCategory = 'pricing' | 'legal';
 
@@ -36,9 +37,22 @@ export interface GateResult {
   classifierAvailable: boolean;
 }
 
-/** Case-insensitive, and full-width characters folded to normal width (NFKC). */
-function normalise(text: string): string {
-  return text.normalize('NFKC').toLowerCase();
+/** Cyrillic and Greek letters that look like Latin ones, folded so "рrice" still matches "price". */
+const CONFUSABLES: Record<string, string> = {
+  а: 'a', в: 'b', е: 'e', ё: 'e', к: 'k', м: 'm', н: 'h', о: 'o', р: 'p', с: 'c', т: 't', у: 'y', х: 'x',
+  і: 'i', ј: 'j', ѕ: 's', ԁ: 'd', ɡ: 'g', ο: 'o', α: 'a', ε: 'e', ι: 'i', κ: 'k', ν: 'v', ρ: 'p', τ: 't', υ: 'u', χ: 'x',
+};
+
+/**
+ * Case-insensitive; full-width and half-width characters folded (NFKC); invisible format
+ * characters such as zero-width spaces removed; look-alike letters folded (security review).
+ */
+export function normaliseForRules(text: string): string {
+  return text
+    .normalize('NFKC')
+    .replace(/\p{Cf}/gu, '')
+    .toLowerCase()
+    .replace(/[\u0370-\u03ff\u0400-\u04ff\u0500-\u052f\u0261\u0501]/g, (c) => CONFUSABLES[c] ?? c);
 }
 
 /** Pricing terms. Kept specific to asking us for money terms; the classifier catches the rest. */
@@ -89,7 +103,7 @@ const LEGAL_RULES: [string, RegExp][] = [
 
 /** The deterministic check. Pricing wins over legal, because pricing also means "no draft". */
 export function ruleGate(question: string): { category: GateCategory | null; matched: string[] } {
-  const text = normalise(question);
+  const text = normaliseForRules(question);
   const pricing = PRICING_RULES.filter(([, re]) => re.test(text)).map(([name]) => name);
   const legal = LEGAL_RULES.filter(([, re]) => re.test(text)).map(([name]) => name);
   if (pricing.length) return { category: 'pricing', matched: [...pricing, ...legal] };
@@ -131,7 +145,7 @@ export async function classifierGate(
     schema: GATE_SCHEMA,
     maxTokens: 200,
   });
-  const reason = typeof data?.reason === 'string' ? data.reason.slice(0, 300) : '';
+  const reason = typeof data?.reason === 'string' ? safeNote(data.reason) : '';
   if (data?.category === 'pricing') return { category: 'pricing', reason };
   if (data?.category === 'none') return { category: null, reason };
   if (data?.category === 'legal') return { category: 'legal', reason };

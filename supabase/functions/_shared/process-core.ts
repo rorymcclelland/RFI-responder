@@ -77,7 +77,8 @@ export function validateProcessRequest(body: unknown): { sessionId: string; ques
   return { sessionId: b.sessionId, questionIds: [...new Set(b.questionIds as string[])] };
 }
 
-export const languageOf = (text: string): 'en' | 'ja' => (/[぀-ヿ一-鿿]/.test(text) ? 'ja' : 'en');
+/** Japanese if it contains kana or kanji, after folding half-width katakana (NFKC, security review). */
+export const languageOf = (text: string): 'en' | 'ja' => (/[぀-ヿ一-鿿]/.test(text.normalize('NFKC')) ? 'ja' : 'en');
 
 /** Run `fn` over `items`, at most `limit` at a time, keeping order. */
 async function pool<T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {

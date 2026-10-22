@@ -47,3 +47,16 @@ A separate reviewer, given the code but not the reasoning, probed the database a
 7. Members held TRUNCATE (which ignores row-level security) and similar privileges; revoked.
 
 Still accepted until Sprint 3: questions within a session are team-editable, and `kb_entries.origin_ref` is free text.
+
+## Independent review, Sprint 2 (23 October 2026)
+
+A second reviewer, given the code but not the reasoning, probed the Sprint 2 changes as a member who does not own the response and as an anonymous visitor. It confirmed the column rights, that a member cannot approve in bulk by any route it tried (multi-row updates, writable CTEs, `INSERT ... ON CONFLICT`, `bulk_accept`), that an owner cannot include a gated question, that questions from another session cannot be processed, and that no key or provider error reaches a response. It found six gaps, fixed in `20261023110000_review_fixes.sql` and the function code, each with a test (`supabase/tests/db/processing.test.ts`, `supabase/functions/_shared/*.test.ts`):
+
+1. Questions scored in the browser before Sprint 2 could be bulk-approved on user-written confidence; bulk approval now also requires `processed_at`, which only the server sets.
+2. Any member could reprocess a question until a classifier gate cleared; each question is now processed once (pending and never processed), and the save itself re-checks this.
+3. Accepted answers could be rewritten or approvals undone in bulk; any statement changing more than one question's status or answer now needs the owner or an admin, changing an accepted answer reopens it, and `accepted_count` is computed by the database.
+4. The draft checks missed numbers in words or other scripts, digits excused by "annually" anywhere in the text, ref-shaped numbers and links without a scheme; all now rejected, and model-written notes are withheld if they contain links.
+5. Zero-width and look-alike characters defeated the rules, and half-width katakana avoided the translation gate; text is now normalised first.
+6. Members held DELETE on questions and sessions (no policy allowed it, but it was one policy away), now revoked; the bulk check decides by the database role in use, so a forged claim cannot switch it off.
+
+Residuals accepted for now: a member can still accept questions one statement at a time (each is an individual decision); any member can add knowledge-base entries, so the draft checks trust the cited entries' own figures and links (Sprint 4's governance pack adds review of member-added entries); there is no per-user rate limit on processing (Sprint 4's cost caps).

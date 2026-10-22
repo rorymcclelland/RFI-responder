@@ -189,3 +189,4 @@ All nine stories are Ready, Sprint 2.
 | S2-2a | Calibration code and tables moved into the shared server code; tables are generated as `calibration-tables.ts`; the browser's retrieval client removed | Confidence is now computed only server-side |
 | S2-2b | The figure check allows numbers implied by frequency words ("annually" as 年1回, "24/7" as 24時間365日) and ignores entry refs | Otherwise faithful Japanese drafts were rejected |
 | S2-2b | Pricing answers are left out of "Add to KB" at export | Product rule: pricing is never learned automatically |
+| S2-2a, S2-2b, S2-3 | Six fixes from the independent security review (decision 0003): processed-only bulk approval, process once, bulk answer changes restricted and accepted answers reopened on change, stricter figure and link checks, text normalised before the rules, member deletes revoked | Found by a reviewer that probed the database and code without our reasoning |

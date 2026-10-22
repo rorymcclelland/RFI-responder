@@ -210,7 +210,8 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
 
   const finishSession = async () => {
     if (sessionId) {
-      await supabase.from('rfi_sessions').update({ status: 'completed', accepted_count: accepted.length }).eq('id', sessionId);
+      // accepted_count is kept by the database itself.
+      await supabase.from('rfi_sessions').update({ status: 'completed' }).eq('id', sessionId);
     }
     setListCollapsed(true);
     setStep('export');

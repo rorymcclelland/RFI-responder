@@ -175,3 +175,19 @@ describe('answerability (S2-1 test 1)', () => {
     expect(client.json).not.toHaveBeenCalled();
   });
 });
+
+describe('security review finding 5: rules survive invisible and look-alike characters', () => {
+  it.each([
+    ['a zero-width space', 'What is the pri​ce?'],
+    ['a Cyrillic "р"', 'What is the рrice?'],
+    ['a Cyrillic "е" and "о"', 'Do you еffеr discounts?'],
+    ['half-width katakana with a pricing kanji', 'ﾗｲｾﾝｽ料金は?'],
+  ])('%s still gates pricing', (_n, q) => {
+    expect(ruleGate(q).category).toBe('pricing');
+  });
+
+  it('a classifier reason with a link is withheld', async () => {
+    const r = await classifierGate(fakeClient({ category: 'legal', reason: 'see https://x.example.invalid' }), 'm', 'q');
+    expect(r.reason).toMatch(/withheld/);
+  });
+});
