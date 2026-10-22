@@ -53,7 +53,7 @@ export default function AuthPage({ onAuthenticated }: Props) {
 
         <div>
           <h1 className="text-5xl font-black text-white leading-[1.1] tracking-tight mb-6">
-            Answer RFIs<br />ten times faster.
+            Answer RFIs from<br />what your team knows.
           </h1>
           <p className="text-ink-400 text-lg leading-relaxed max-w-sm">
             Knowledge-base matching, collaborative expert review, and one-click export.
@@ -62,9 +62,10 @@ export default function AuthPage({ onAuthenticated }: Props) {
 
         <div className="grid grid-cols-3 gap-4">
           {[
-            { stat: '80%', label: 'Faster first draft' },
-            { stat: '100%', label: 'Audit trail' },
-            { stat: '3×', label: 'Export formats' },
+            // Statements of what the tool does, not performance claims (project rule 1).
+            { stat: 'Sourced', label: 'Drafts cite their entries' },
+            { stat: 'Routed', label: 'To the right expert' },
+            { stat: '3', label: 'Export formats' },
           ].map(({ stat, label }) => (
             <div key={stat} className="bg-white/5 rounded-2xl p-4 border border-white/10">
               <p className="text-2xl font-black text-white">{stat}</p>
