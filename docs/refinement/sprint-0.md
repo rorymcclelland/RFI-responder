@@ -230,7 +230,7 @@ Archiving replaces deletion as the normal route in Sprint 3; until then the dele
 
 **The question.** Sprints 1 and 2 need an embedding model and a drafting model. Where they run decides the architecture: a local model (Ollama on Rory's PC) can only be reached if the app's server side runs on the same machine, which rules out a hosted demo using it; a hosted API works anywhere but sends RFI text to a provider.
 
-**Output.** A one-page decision note (`docs/decisions/0005`) comparing: local Ollama embeddings and model; hosted embeddings (for example Voyage or OpenAI) with Claude for drafting; and a mixed option with a provider switch behind one interface. For each: privacy, cost for the 100-entry KB and a typical 40-question RFI, demo-ability, and setup effort. Includes a quick check that pgvector is available locally and on hosted Supabase.
+**Output.** A one-page decision note (`docs/decisions/0005`) comparing: local Ollama embeddings and model; hosted embeddings (for example Voyage or OpenAI) with Claude for drafting; and a mixed option with a provider switch behind one interface. For each: privacy, cost for the 100-entry KB and a typical 40-question RFI, demo-ability, setup effort, and **multilingual capability** (whether a question in one language finds an answer stored in another, and whether drafts can be written in the RFI's language; added 22 October for candidate story C-1). Includes a quick check that pgvector is available locally and on hosted Supabase.
 
 **Why now.** Sprint 1 cannot be refined without it, and a spike may not share a sprint with the stories that depend on it.
 

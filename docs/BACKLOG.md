@@ -42,6 +42,12 @@ Refinement: `docs/refinement/sprint-0.md`
 
 **Sprint 5: documentation and publish.** Architecture diagram, evaluation reports, governance pack, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match.
 
+## Candidate stories (not yet placed in a sprint)
+
+| ID | Story | Acceptance criteria (summary) | Notes |
+|---|---|---|---|
+| C-1 | Multilingual knowledge base (added 22 Oct) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages to settle at refinement |
+
 ## Parked
 
 - Rory to pause or delete the original Bolt-hosted Supabase project (agreed 22 Oct).

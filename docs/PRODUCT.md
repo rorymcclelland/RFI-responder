@@ -46,6 +46,10 @@ Several responses are normally in flight at once. An overview shows every respon
 
 The heart of the product. Every entry records who added it, from where (manual, import, or a named response), when, which entry it superseded, and when it was last reviewed. Because it learns automatically, it is also the main governance risk: it can learn mistakes, stale facts and contradictions, and it is the obvious target for deliberately bad answers. Provenance, versioning, review dates and the never-learn rule for pricing are the controls.
 
+## Later: multilingual
+
+Knowledge may be captured, and RFIs received and answered, in different languages. The aim is that knowledge captured in any supported language is usable in all of them, with drafts written in the RFI's own language and machine-translated answers reviewed by a person before they are learned. Backlog candidate C-1.
+
 ## Scope and non-goals
 
 - **One organisation per deployment.** No multi-tenancy.
@@ -62,4 +66,5 @@ The heart of the product. Every entry records who added it, from where (manual, 
 | 22 Oct 2026 | Pricing and legal or contractual questions never auto-approved; pricing never auto-learned |
 | 22 Oct 2026 | Learning happens at export; manual additions immediate and tagged |
 | 22 Oct 2026 | Spreadsheet and Word ingestion first; PDF and pasted text later |
+| 22 Oct 2026 | Multilingual knowledge base added as a backlog candidate; the AI-route spike must assess multilingual capability |
 | 22 Oct 2026 | Overview of in-flight responses with due dates; archive, never delete (admin hard delete for errors only); outcome recorded |
