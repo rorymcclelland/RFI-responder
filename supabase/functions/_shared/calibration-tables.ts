@@ -8,7 +8,7 @@ import type { CalibrationTable } from './calibration.ts';
 export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
   "voyage-4": {
     "model": "voyage-4",
-    "evaluationSet": "2026-10-22.2 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (calibrate split)",
     "points": [
       {
         "score": 0.1838,
@@ -20,59 +20,59 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
       },
       {
         "score": 0.3431,
-        "probability": 0.2
+        "probability": 0.125
       },
       {
-        "score": 0.3653,
-        "probability": 0.2
+        "score": 0.3797,
+        "probability": 0.125
       },
       {
         "score": 0.3805,
         "probability": 0.5
       },
       {
-        "score": 0.3986,
+        "score": 0.382,
         "probability": 0.5
       },
       {
+        "score": 0.3883,
+        "probability": 0.6
+      },
+      {
+        "score": 0.4062,
+        "probability": 0.6
+      },
+      {
         "score": 0.4099,
-        "probability": 0.7273
+        "probability": 0.6667
       },
       {
         "score": 0.4319,
-        "probability": 0.7273
+        "probability": 0.6667
       },
       {
         "score": 0.4367,
-        "probability": 0.7407
+        "probability": 0.75
       },
       {
-        "score": 0.484,
-        "probability": 0.7407
+        "score": 0.4489,
+        "probability": 0.75
       },
       {
-        "score": 0.4849,
-        "probability": 0.7692
-      },
-      {
-        "score": 0.5341,
-        "probability": 0.7692
-      },
-      {
-        "score": 0.5347,
-        "probability": 0.7778
+        "score": 0.4499,
+        "probability": 0.8
       },
       {
         "score": 0.551,
-        "probability": 0.7778
+        "probability": 0.8
       },
       {
         "score": 0.5523,
-        "probability": 0.9455
+        "probability": 0.9286
       },
       {
         "score": 0.6259,
-        "probability": 0.9455
+        "probability": 0.9286
       },
       {
         "score": 0.6282,
@@ -86,47 +86,55 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
   },
   "bge-m3": {
     "model": "bge-m3",
-    "evaluationSet": "2026-10-22.2 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (calibrate split)",
     "points": [
       {
         "score": 0.344,
         "probability": 0
       },
       {
-        "score": 0.4917,
+        "score": 0.4781,
         "probability": 0
       },
       {
         "score": 0.4938,
-        "probability": 0.1111
+        "probability": 0.1
       },
       {
-        "score": 0.5267,
-        "probability": 0.1111
+        "score": 0.5276,
+        "probability": 0.1
       },
       {
         "score": 0.5288,
         "probability": 0.2
       },
       {
-        "score": 0.568,
+        "score": 0.5679,
         "probability": 0.2
       },
       {
         "score": 0.5691,
-        "probability": 0.7121
+        "probability": 0.6897
+      },
+      {
+        "score": 0.633,
+        "probability": 0.6897
+      },
+      {
+        "score": 0.6346,
+        "probability": 0.7
       },
       {
         "score": 0.6399,
-        "probability": 0.7121
+        "probability": 0.7
       },
       {
         "score": 0.6406,
-        "probability": 0.92
+        "probability": 0.8846
       },
       {
         "score": 0.6695,
-        "probability": 0.92
+        "probability": 0.8846
       },
       {
         "score": 0.6722,
@@ -140,7 +148,7 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
   },
   "qwen3-embedding:0.6b": {
     "model": "qwen3-embedding:0.6b",
-    "evaluationSet": "2026-10-22.2 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (calibrate split)",
     "points": [
       {
         "score": 0.2718,
@@ -152,11 +160,11 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
       },
       {
         "score": 0.424,
-        "probability": 0.3333
+        "probability": 0.2857
       },
       {
-        "score": 0.4746,
-        "probability": 0.3333
+        "score": 0.4752,
+        "probability": 0.2857
       },
       {
         "score": 0.4793,
@@ -184,18 +192,182 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
       },
       {
         "score": 0.565,
-        "probability": 0.8571
+        "probability": 0.8
       },
       {
-        "score": 0.599,
-        "probability": 0.8571
+        "score": 0.5697,
+        "probability": 0.8
+      },
+      {
+        "score": 0.5712,
+        "probability": 0.8696
+      },
+      {
+        "score": 0.6004,
+        "probability": 0.8696
       },
       {
         "score": 0.6005,
+        "probability": 0.9737
+      },
+      {
+        "score": 0.6533,
+        "probability": 0.9737
+      },
+      {
+        "score": 0.6539,
         "probability": 1
       },
       {
         "score": 0.7206,
+        "probability": 1
+      }
+    ]
+  },
+  "voyage-4 + claude-haiku-5-5": {
+    "model": "voyage-4 + claude-haiku-5-5",
+    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "points": [
+      {
+        "score": 0.1838,
+        "probability": 0
+      },
+      {
+        "score": 0.3395,
+        "probability": 0
+      },
+      {
+        "score": 0.3431,
+        "probability": 0.0909
+      },
+      {
+        "score": 0.4062,
+        "probability": 0.0909
+      },
+      {
+        "score": 0.4099,
+        "probability": 0.5556
+      },
+      {
+        "score": 0.4594,
+        "probability": 0.5556
+      },
+      {
+        "score": 0.4599,
+        "probability": 0.6296
+      },
+      {
+        "score": 0.551,
+        "probability": 0.6296
+      },
+      {
+        "score": 0.5575,
+        "probability": 0.75
+      },
+      {
+        "score": 1.4195,
+        "probability": 0.75
+      },
+      {
+        "score": 1.4714,
+        "probability": 0.9231
+      },
+      {
+        "score": 2.4319,
+        "probability": 0.9231
+      },
+      {
+        "score": 2.4367,
+        "probability": 1
+      },
+      {
+        "score": 2.7102,
+        "probability": 1
+      }
+    ]
+  },
+  "qwen3-embedding:0.6b + claude-haiku-5-5": {
+    "model": "qwen3-embedding:0.6b + claude-haiku-5-5",
+    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "points": [
+      {
+        "score": 0.2718,
+        "probability": 0
+      },
+      {
+        "score": 0.416,
+        "probability": 0
+      },
+      {
+        "score": 0.424,
+        "probability": 0.1667
+      },
+      {
+        "score": 0.4583,
+        "probability": 0.1667
+      },
+      {
+        "score": 0.4603,
+        "probability": 0.25
+      },
+      {
+        "score": 0.4992,
+        "probability": 0.25
+      },
+      {
+        "score": 0.5043,
+        "probability": 0.2857
+      },
+      {
+        "score": 0.5234,
+        "probability": 0.2857
+      },
+      {
+        "score": 0.5358,
+        "probability": 0.4375
+      },
+      {
+        "score": 0.5697,
+        "probability": 0.4375
+      },
+      {
+        "score": 0.5712,
+        "probability": 0.7143
+      },
+      {
+        "score": 0.6004,
+        "probability": 0.7143
+      },
+      {
+        "score": 0.6049,
+        "probability": 0.8
+      },
+      {
+        "score": 1.551,
+        "probability": 0.8
+      },
+      {
+        "score": 1.5568,
+        "probability": 0.8462
+      },
+      {
+        "score": 2.5563,
+        "probability": 0.8462
+      },
+      {
+        "score": 2.559,
+        "probability": 0.9333
+      },
+      {
+        "score": 2.5927,
+        "probability": 0.9333
+      },
+      {
+        "score": 2.5955,
+        "probability": 1
+      },
+      {
+        "score": 2.7206,
         "probability": 1
       }
     ]
