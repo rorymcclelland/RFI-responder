@@ -60,6 +60,10 @@ Refinement: `docs/refinement/sprint-0.md`
 | F-6 | Validate `kb_entries.origin_ref` server-side | Free text until Sprint 3's learning at export sets it |
 | F-7 | Make questions within a session editable only by the owner, assignees and admins | Team-editable until Sprint 3's readiness workflow |
 | F-8 | Turn on leaked-password protection in the hosted project | The Bolt migration claiming to do this was a no-op (decision 0003) |
+| F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Found in the end-to-end run; a failed save is silent |
+| F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Found in the end-to-end run |
+| F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Found in the end-to-end run; Sprint 1's near-duplicate detection and Sprint 3's supersession address it |
+| F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Found in the end-to-end run; Sprint 1 calibration |
 
 ## Parked
 
