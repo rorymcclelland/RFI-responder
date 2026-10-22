@@ -65,7 +65,7 @@ export default function AuthPage({ onAuthenticated }: Props) {
             Answer RFIs<br />ten times faster.
           </h1>
           <p className="text-ink-400 text-lg leading-relaxed max-w-sm">
-            AI-powered knowledge base matching, collaborative expert review, and one-click export.
+            Knowledge-base matching, collaborative expert review, and one-click export.
           </p>
         </div>
 

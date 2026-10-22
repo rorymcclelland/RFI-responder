@@ -13,13 +13,6 @@ export interface RetrievedSource {
   score: number;
 }
 
-export interface DraftResult {
-  answer: string;
-  confidence: number;
-  citations: string[];
-  sources: RetrievedSource[];
-}
-
 // ─── Opportunities ────────────────────────────────────────────────────────────
 
 export type OpportunityStatus = 'new' | 'in_progress' | 'won' | 'lost';

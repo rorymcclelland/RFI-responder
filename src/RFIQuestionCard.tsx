@@ -341,11 +341,10 @@ export default function RFIQuestionCard({
         <div className="border-t border-ink-100 px-5 pb-5 pt-4 space-y-5">
 
           {/* Confidence breakdown */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Combined',  value: question.confidence,                    tip: 'Weighted blend: 70% retrieval quality + 30% synthesis confidence.' },
-              { label: 'Retrieval', value: Math.min(1, question.retrievalScore / 0.30), tip: 'How well the top KB entry matches this question.' },
-              { label: 'Top Match', value: question.retrievalScore * 3.33,         tip: 'Raw similarity of the single best-matching KB entry.' },
+              { label: 'Confidence', value: question.confidence, tip: 'How closely this question matches the knowledge base: the best keyword match, scaled from 0 to 100%. A heuristic for now, not yet calibrated.' },
+              { label: 'Raw match',  value: question.retrievalScore, tip: 'Unscaled keyword similarity (TF-IDF cosine) of the single best-matching knowledge-base entry.' },
             ].map((m) => {
               const mp = Math.min(100, Math.round(m.value * 100));
               const mc = mp >= 80 ? 'text-emerald-700' : mp >= 40 ? 'text-amber-700' : 'text-coral-600';
@@ -370,7 +369,7 @@ export default function RFIQuestionCard({
             <div>
               <p className="section-label mb-2.5 flex items-center gap-1.5">
                 <BookOpen size={11} /> KB Sources
-                <InfoTip text="KB entries used to generate this answer. Click to read the full entry." />
+                <InfoTip text="Knowledge-base entries this draft was assembled from. Click to read the full entry." />
               </p>
               <div className="flex flex-wrap gap-2">
                 {question.sources.slice(0, 3).map((s) => (
@@ -411,7 +410,7 @@ export default function RFIQuestionCard({
             <div className="flex items-center justify-between mb-3">
               <p className="section-label flex items-center gap-1.5">
                 {editing ? 'Edit Response' : 'Proposed Response'}
-                {!editing && <InfoTip text="AI-generated answer from KB matches. Accept as-is, edit, or skip." />}
+                {!editing && <InfoTip text="Draft assembled from the best-matching knowledge-base answers, with references. Accept as-is, edit, or skip." />}
               </p>
               {!editing && question.status !== 'skipped' && (
                 <button
@@ -442,7 +441,7 @@ export default function RFIQuestionCard({
               </div>
             ) : (
               <div className="text-sm text-ink-700 leading-relaxed bg-ink-50 rounded-2xl p-4 border border-ink-100 whitespace-pre-wrap font-normal">
-                {question.finalAnswer || <span className="italic text-ink-400">No answer generated.</span>}
+                {question.finalAnswer || <span className="italic text-ink-400">No draft available.</span>}
               </div>
             )}
           </div>

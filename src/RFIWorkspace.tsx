@@ -18,8 +18,7 @@ import {
   Search, X, MessageSquare, ChevronUp, User, ArrowRight,
 } from 'lucide-react';
 import { KnowledgeEntry, RFIQuestion, RFISession, RFIStatus, UserProfile, QuestionAssignment } from './types';
-import { retrieveTopK } from './retrieval';
-import { synthesizeDraft } from './synthesis';
+import { scoreQuestion, detectQuestionColumn } from './lib/drafting';
 import { supabase } from './lib/supabase';
 import { exportCSV, exportExcel, exportWord } from './exportUtils';
 import RFIQuestionCard from './RFIQuestionCard';
@@ -117,32 +116,6 @@ function SessionRow({ session: s, onLoad }: { session: RFISession; onLoad: (s: R
       </button>
     </div>
   );
-}
-
-// ─── Confidence calculation ───────────────────────────────────────────────────
-
-const SCORE_CEILING = 0.30;
-
-function computeConfidence(question: string, kb: KnowledgeEntry[]) {
-  const sources  = retrieveTopK(question, kb, 3);
-  const topScore = sources[0]?.score ?? 0;
-  const retrievalConf = Math.min(1, topScore / SCORE_CEILING);
-  const draft    = synthesizeDraft(question, sources);
-  const combined = Math.round((0.70 * retrievalConf + 0.30 * draft.confidence) * 1000) / 1000;
-  return { sources, generatedAnswer: draft.answer, confidence: combined, retrievalScore: topScore };
-}
-
-// ─── Column detection ─────────────────────────────────────────────────────────
-
-const Q_ALIASES = ['question', 'q', 'query', 'prompt', 'rfp question', 'sq question', 'topic', 'item', 'requirement'];
-
-function detectQuestionCol(headers: string[]) {
-  const low = headers.map((h) => h.toLowerCase().trim());
-  for (const a of Q_ALIASES) {
-    const i = low.findIndex((h) => h === a || h.startsWith(a));
-    if (i !== -1) return headers[i];
-  }
-  return headers[0] ?? '';
 }
 
 // ─── Select ───────────────────────────────────────────────────────────────────
@@ -344,7 +317,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
       rawRows.current = rows;
       setFileName(file.name);
       setHeaders(hdrs);
-      setQuestionCol(detectQuestionCol(hdrs));
+      setQuestionCol(detectQuestionColumn(hdrs));
       setStep('mapping');
     };
     reader.readAsArrayBuffer(file);
@@ -381,7 +354,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
       if (!qText) continue;
       setProcessMsg(`Processing ${i + 1} / ${rows.length}…`);
       setProgress(Math.round(((i + 1) / rows.length) * 100));
-      const { sources, generatedAnswer, confidence, retrievalScore } = computeConfidence(qText, kb);
+      const { sources, generatedAnswer, confidence, retrievalScore } = scoreQuestion(qText, kb);
       built.push({
         id: crypto.randomUUID(), sessionId: sid ?? '', position: i, question: qText,
         generatedAnswer, finalAnswer: generatedAnswer, confidence, retrievalScore, sources, status: 'pending',
@@ -490,7 +463,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
       <div>
         <h2 className="text-3xl font-black text-ink-900 tracking-tight">New RFI Session</h2>
         <p className="text-ink-500 mt-2 text-sm font-medium max-w-lg">
-          Upload questions for <strong className="text-ink-700">{opportunityName}</strong>. Each question will be matched against the knowledge base with an AI-generated answer for you to review.
+          Upload questions for <strong className="text-ink-700">{opportunityName}</strong>. Each question is matched against the knowledge base and a draft is assembled from the closest answers for you to review.
         </p>
       </div>
 
