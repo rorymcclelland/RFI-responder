@@ -1,7 +1,7 @@
 // Sprint 0, story S0-1: drafts and scores must be deterministic and honest.
 // Test numbers refer to docs/refinement/sprint-0.md.
 import { describe, expect, it } from 'vitest';
-import { draftAnswer, scoreQuestion, NO_MATCH_TEXT } from './drafting';
+import { draftAnswer, scoreQuestion, detectQuestionColumn, NO_MATCH_TEXT } from './drafting';
 import type { KnowledgeEntry } from '../types';
 
 const kb: KnowledgeEntry[] = [
@@ -74,5 +74,21 @@ describe('draftAnswer (S0-1)', () => {
   it('ignores sources with a zero score', () => {
     const draft = draftAnswer([{ entry: kb[1], score: 0 }]);
     expect(draft).toBe(NO_MATCH_TEXT);
+  });
+});
+
+describe('detectQuestionColumn (S0-3, test 4)', () => {
+  it('finds the question column when it is not first', () => {
+    expect(detectQuestionColumn(['Ref', 'Section', 'Question'])).toBe('Question');
+  });
+
+  it('matches common variants, ignoring case and spacing', () => {
+    expect(detectQuestionColumn(['ID', ' RFP Question '])).toBe(' RFP Question ');
+    expect(detectQuestionColumn(['Area', 'requirement text'])).toBe('requirement text');
+  });
+
+  it('falls back to the first column, or empty when there are none', () => {
+    expect(detectQuestionColumn(['Col A', 'Col B'])).toBe('Col A');
+    expect(detectQuestionColumn([])).toBe('');
   });
 });

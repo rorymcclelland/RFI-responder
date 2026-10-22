@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Type check, lint, unit tests, audit, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # npm 10 hits a resolver bug with this dependency tree (see decision 0002).
+      - run: npm install -g npm@11
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint -- --max-warnings 0
+      - run: npm run coverage
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_ANON_KEY: ci-placeholder
+
+  database:
+    name: Database tests (Postgres + Supabase shim)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_TEST_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install -g npm@11
+      - run: npm ci
+      - run: npm run test:db
+
+  supabase:
+    name: Migrations and auth settings on the real Supabase stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - name: Start Supabase (database, auth and API only)
+        run: supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor,realtime,storage-api,postgres-meta
+      - name: Apply every migration and the dev seed from scratch
+        run: supabase db reset
+      - name: Sign-up is refused (invite-only, decision 0003)
+        run: |
+          eval "$(supabase status -o env)"
+          code=$(curl -s -o /tmp/signup.json -w '%{http_code}' -X POST "$API_URL/auth/v1/signup" \
+            -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
+            -d '{"email":"intruder@example.com","password":"Intruder2026pw"}')
+          cat /tmp/signup.json; echo
+          if [ "$code" -lt 400 ]; then echo "Sign-up was allowed (HTTP $code)"; exit 1; fi
+      - name: Seeded admin can sign in
+        run: |
+          eval "$(supabase status -o env)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API_URL/auth/v1/token?grant_type=password" \
+            -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
+            -d '{"email":"sarah.chen@example.com","password":"LocalDev2026pw"}')
+          test "$code" = "200" || { echo "Sign-in failed (HTTP $code)"; exit 1; }
