@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Mail, Lock, User, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { supabase } from './lib/supabase';
 
-type AuthMode = 'login' | 'register' | 'reset';
+// Invite-only (decision 0003): there is no sign-up. Admins invite users.
+type AuthMode = 'login' | 'reset';
 
 interface Props {
   onAuthenticated: () => void;
@@ -12,7 +13,6 @@ export default function AuthPage({ onAuthenticated }: Props) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,15 +27,6 @@ export default function AuthPage({ onAuthenticated }: Props) {
 
     if (mode === 'login') {
       const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-      if (err) { setError(err.message); setLoading(false); return; }
-      onAuthenticated();
-    } else if (mode === 'register') {
-      if (!displayName.trim()) { setError('Display name is required.'); setLoading(false); return; }
-      const { error: err } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { display_name: displayName.trim() } },
-      });
       if (err) { setError(err.message); setLoading(false); return; }
       onAuthenticated();
     } else {
@@ -96,32 +87,18 @@ export default function AuthPage({ onAuthenticated }: Props) {
 
           <div className="mb-8">
             <h2 className="text-3xl font-black text-ink-900 tracking-tight">
-              {mode === 'login' ? 'Welcome back' : mode === 'register' ? 'Create account' : 'Reset password'}
+              {mode === 'login' ? 'Welcome back' : 'Reset password'}
             </h2>
             <p className="text-ink-500 mt-2 text-sm">
               {mode === 'login' ? 'Sign in to continue to your workspace.' :
-               mode === 'register' ? 'Join your team on RFI Respond.' :
                'We\'ll send you a link to reset your password.'}
             </p>
           </div>
 
-          {/* Mode toggle (login / register) */}
-          {mode !== 'reset' && (
-            <div className="flex p-1 bg-ink-100 rounded-2xl mb-8 gap-1">
-              {(['login', 'register'] as AuthMode[]).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => { setMode(m); reset(); }}
-                  className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${
-                    mode === m
-                      ? 'bg-white text-ink-900 shadow-card'
-                      : 'text-ink-500 hover:text-ink-700'
-                  }`}
-                >
-                  {m === 'login' ? 'Sign In' : 'Register'}
-                </button>
-              ))}
-            </div>
+          {mode === 'login' && (
+            <p className="text-xs text-ink-500 font-medium mb-8">
+              Access is by invitation. If you do not have an account, ask an admin to invite you.
+            </p>
           )}
 
           {mode === 'reset' && (
@@ -151,21 +128,6 @@ export default function AuthPage({ onAuthenticated }: Props) {
               </div>
             ) : (
               <>
-                {mode === 'register' && (
-                  <div>
-                    <label className="block text-xs font-bold text-ink-600 mb-1.5 uppercase tracking-wide">Display Name</label>
-                    <div className="relative">
-                      <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" />
-                      <input
-                        type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Your full name"
-                        className="input pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-                )}
-
                 <div>
                   <label className="block text-xs font-bold text-ink-600 mb-1.5 uppercase tracking-wide">Email</label>
                   <div className="relative">
@@ -195,7 +157,7 @@ export default function AuthPage({ onAuthenticated }: Props) {
                       <input
                         type={showPw ? 'text' : 'password'} value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder={mode === 'register' ? 'Min 6 characters' : '••••••••'}
+                        placeholder="••••••••"
                         className="input pl-10 pr-11"
                         required minLength={6}
                       />
@@ -219,7 +181,6 @@ export default function AuthPage({ onAuthenticated }: Props) {
                 >
                   {loading ? 'Please wait…' :
                    mode === 'login' ? 'Sign In' :
-                   mode === 'register' ? 'Create Account' :
                    'Send Reset Link'}
                   {!loading && <ArrowRight size={18} />}
                 </button>

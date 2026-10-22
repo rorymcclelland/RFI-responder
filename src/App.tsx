@@ -403,6 +403,7 @@ export default function App() {
               opportunityName={activeOpportunity.name}
               currentUser={currentUser}
               allUsers={allUsers}
+              canAssign={currentUser.isAdmin || activeOpportunity.ownerId === currentUser.id}
             />
           </>
         ) : view === 'inbox' ? (
@@ -411,6 +412,8 @@ export default function App() {
           <UserManagement currentUserId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : (
           <OpportunitiesDashboard
+            currentUserId={currentUser.id}
+            isAdmin={currentUser.isAdmin}
             onSelectOpportunity={(opp) => { setActiveOpportunity(opp); setView('opportunities'); }}
             onImportKB={() => setShowBulkUpload(true)}
           />

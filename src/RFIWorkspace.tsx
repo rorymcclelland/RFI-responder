@@ -150,6 +150,8 @@ interface Props {
   opportunityName: string;
   currentUser: UserProfile;
   allUsers: UserProfile[];
+  /** Owner or admin: may assign this response's questions (decision 0003). */
+  canAssign: boolean;
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -164,7 +166,7 @@ const CONF_GROUPS: { key: ConfidenceGroup; label: string; min: number; max: numb
   { key: 'low',    label: 'Low <40%',      min: 0,    max: 0.40, dot: 'bg-coral-500' },
 ];
 
-export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunityName, currentUser, allUsers }: Props) {
+export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunityName, currentUser, allUsers, canAssign }: Props) {
   const [step, setStep]                   = useState<WorkflowStep>('idle');
   const [dragOver, setDragOver]           = useState(false);
   const [fileName, setFileName]           = useState('');
@@ -782,8 +784,8 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
                     onUndoSkip={() => handleUndoSkip(q.id)}
                     users={allUsers}
                     assignments={assignments[q.id] ?? []}
-                    onAssign={handleAssign}
-                    onUnassign={handleUnassign}
+                    onAssign={canAssign ? handleAssign : undefined}
+                    onUnassign={canAssign ? handleUnassign : undefined}
                   />
                 </div>
               ))}

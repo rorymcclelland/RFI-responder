@@ -21,6 +21,8 @@ export interface Opportunity {
   id: string;
   name: string;
   status: OpportunityStatus;
+  /** The response owner: may edit it and assign its questions (see docs/decisions/0003). */
+  ownerId: string | null;
   createdAt: string;
   updatedAt: string;
   sessionCount?: number;

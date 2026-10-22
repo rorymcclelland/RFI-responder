@@ -133,9 +133,15 @@ function EditUserDrawer({ user, currentUserId, isAdmin, onClose, onSaved }: {
     setSaving(true); setError('');
     const { error: err } = await supabase.from('user_profiles').update({
       display_name: displayName.trim(), job_title: jobTitle.trim(),
-      department: department.trim(), expertise_tags: tags, is_admin: isAdminVal,
+      department: department.trim(), expertise_tags: tags, updated_at: new Date().toISOString(),
     }).eq('id', user.id);
     if (err) { setError(err.message); setSaving(false); return; }
+    // Admin rights can only change through set_user_admin, which checks the caller
+    // is an admin and records the change in the audit log (decision 0003).
+    if (isAdmin && isAdminVal !== user.isAdmin) {
+      const { error: rpcErr } = await supabase.rpc('set_user_admin', { target: user.id, make_admin: isAdminVal });
+      if (rpcErr) { setError(rpcErr.message); setSaving(false); return; }
+    }
     onSaved({ ...user, displayName: displayName.trim(), jobTitle: jobTitle.trim(), department: department.trim(), expertiseTags: tags, isAdmin: isAdminVal });
     setSaving(false);
     onClose();

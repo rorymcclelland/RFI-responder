@@ -105,14 +105,14 @@ function CreateModal({ onClose, onCreate }: { onClose: () => void; onCreate: (op
   const handleCreate = async () => {
     if (!name.trim()) { setError('Name is required.'); return; }
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    // created_by and owner_id default to the signed-in user in the database.
     const { data, error: dbErr } = await supabase
       .from('opportunities')
-      .insert({ name: name.trim(), status, created_by: user?.id ?? null })
+      .insert({ name: name.trim(), status })
       .select()
       .maybeSingle();
     if (dbErr || !data) { setError('Failed to create opportunity.'); setSaving(false); return; }
-    onCreate({ id: data.id, name: data.name, status: data.status, createdAt: data.created_at, updatedAt: data.updated_at });
+    onCreate({ id: data.id, name: data.name, status: data.status, ownerId: data.owner_id, createdAt: data.created_at, updatedAt: data.updated_at });
   };
 
   return (
@@ -184,9 +184,9 @@ function CreateModal({ onClose, onCreate }: { onClose: () => void; onCreate: (op
 // ─── Opportunity card ──────────────────────────────────────────────────────────
 
 function OpportunityCard({
-  opp, sessionCount, onOpen, onRename, onStatusChange, onDelete,
+  opp, sessionCount, canEdit, canDelete, onOpen, onRename, onStatusChange, onDelete,
 }: {
-  opp: Opportunity; sessionCount: number;
+  opp: Opportunity; sessionCount: number; canEdit: boolean; canDelete: boolean;
   onOpen: () => void; onRename: (name: string) => void;
   onStatusChange: (s: OpportunityStatus) => void; onDelete: () => void;
 }) {
@@ -228,13 +228,13 @@ function OpportunityCard({
             ) : (
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-ink-900 truncate leading-tight">{opp.name}</h3>
-                <button
+                {canEdit && <button
                   onClick={(e) => { e.stopPropagation(); setEditing(true); }}
                   className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-ink-400 hover:text-ink-700 transition-all flex-shrink-0"
                   title="Rename"
                 >
                   <Pencil size={12} />
-                </button>
+                </button>}
               </div>
             )}
           </div>
@@ -242,12 +242,14 @@ function OpportunityCard({
           {/* Status badge */}
           <div className="relative flex-shrink-0" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setStatusOpen((o) => !o)}
-              className={`status-pill ${cfg.pill} gap-1.5`}
+              onClick={() => canEdit && setStatusOpen((o) => !o)}
+              disabled={!canEdit}
+              title={canEdit ? 'Change status' : 'Only the owner or an admin can change the status'}
+              className={`status-pill ${cfg.pill} gap-1.5 disabled:cursor-default`}
             >
               {cfg.icon}
               {cfg.label}
-              <ChevronDown size={10} className={`transition-transform ${statusOpen ? 'rotate-180' : ''}`} />
+              {canEdit && <ChevronDown size={10} className={`transition-transform ${statusOpen ? 'rotate-180' : ''}`} />}
             </button>
             {statusOpen && (
               <div className="absolute right-0 top-9 bg-white border border-ink-200 rounded-2xl shadow-modal z-20 w-44 py-1.5 overflow-hidden">
@@ -283,8 +285,8 @@ function OpportunityCard({
             {new Date(opp.createdAt).toLocaleDateString()}
           </span>
 
-          {/* Delete */}
-          <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+          {/* Delete: admins only, for responses created in error */}
+          {canDelete && <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
             {confirmDelete ? (
               <div className="flex items-center gap-2">
                 <span className="text-coral-600 font-semibold text-xs">Delete?</span>
@@ -299,7 +301,7 @@ function OpportunityCard({
                 <Trash2 size={13} />
               </button>
             )}
-          </div>
+          </div>}
         </div>
 
         <div className="mt-3 pt-3 border-t border-ink-50">
@@ -322,11 +324,13 @@ function OpportunityCard({
 // ─── Main dashboard ────────────────────────────────────────────────────────────
 
 interface Props {
+  currentUserId: string;
+  isAdmin: boolean;
   onSelectOpportunity: (opp: Opportunity) => void;
   onImportKB: () => void;
 }
 
-export default function OpportunitiesDashboard({ onSelectOpportunity, onImportKB }: Props) {
+export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelectOpportunity, onImportKB }: Props) {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [sessionCounts, setSessionCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -341,7 +345,7 @@ export default function OpportunitiesDashboard({ onSelectOpportunity, onImportKB
     const { data } = await supabase.from('opportunities').select('*').order('updated_at', { ascending: false });
     if (data) {
       setOpportunities(data.map((r) => ({
-        id: r.id, name: r.name, status: r.status,
+        id: r.id, name: r.name, status: r.status, ownerId: r.owner_id ?? null,
         createdAt: r.created_at, updatedAt: r.updated_at,
       })));
       const ids = data.map((r) => r.id);
@@ -509,6 +513,8 @@ export default function OpportunitiesDashboard({ onSelectOpportunity, onImportKB
                 key={opp.id}
                 opp={opp}
                 sessionCount={sessionCounts[opp.id] ?? 0}
+                canEdit={isAdmin || opp.ownerId === currentUserId}
+                canDelete={isAdmin}
                 onOpen={() => onSelectOpportunity(opp)}
                 onRename={(name) => handleRename(opp.id, name)}
                 onStatusChange={(s) => handleStatusChange(opp.id, s)}
