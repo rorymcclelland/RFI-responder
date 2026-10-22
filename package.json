@@ -17,7 +17,9 @@
     "db:reset": "supabase db reset",
     "types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "eval:retrieval": "tsx eval/run-retrieval.ts",
-    "eval:calibrate": "tsx eval/run-calibration.ts"
+    "eval:calibrate": "tsx eval/run-calibration.ts",
+    "eval:answerability": "tsx eval/run-answerability.ts",
+    "eval:gates": "tsx eval/run-gates.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

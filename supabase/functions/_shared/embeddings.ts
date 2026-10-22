@@ -47,11 +47,16 @@ export interface RetryPolicy {
 /** The app waits briefly; the evaluation scripts pass a patient policy. */
 const DEFAULT_RETRY: RetryPolicy = { attempts: 3, baseDelayMs: 1000 };
 
-async function withRateLimitRetry(call: () => Promise<Response>, policy: RetryPolicy): Promise<Response> {
+/** Retry while the response status is one of `statuses` (429 by default; Anthropic also uses 529 for "overloaded"). */
+export async function withRateLimitRetry(
+  call: () => Promise<Response>,
+  policy: RetryPolicy,
+  statuses: number[] = [429],
+): Promise<Response> {
   const sleep = policy.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   for (let attempt = 1; ; attempt++) {
     const res = await call();
-    if (res.status !== 429 || attempt >= policy.attempts) return res;
+    if (!statuses.includes(res.status) || attempt >= policy.attempts) return res;
     const retryAfter = Number(res.headers.get('Retry-After'));
     await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : policy.baseDelayMs * 2 ** (attempt - 1));
   }
