@@ -175,3 +175,17 @@ The calibration report adds calibration error and bulk-line counts per language.
 | Q5 | Default (a) stands unless Rory changes it: assembled draft, no calibrated confidence, threshold bulk accept off |
 
 All nine stories are Ready, Sprint 2.
+
+## Changes during the build (22 and 23 October 2026)
+
+| Story | Change | Why |
+|---|---|---|
+| S2-0 | 30 held-out gate questions added after the rules were written; the rules are not tuned on them | The rules were written while looking at the first 140; the held-out split gives an honest figure (rules alone: 8 of 20) |
+| S2-0 | The near miss on data subject access requests removed from the Sprint 1 set (2026-10-22.3) | KB-0015 answers it (30-day SLA); found while labelling the drafting set |
+| S2-3 | If the classifier cannot be asked and the rules find nothing, the question is gated as "unchecked" | Rules alone missed 12 of 20 held-out questions, so they cannot be the only check |
+| S2-2a | Gate values: pricing, legal, unchecked, translation (Q1's Japanese drafts) | One column decides "never bulk-approved", whatever the reason |
+| S2-2a | Bulk rules enforced by a statement trigger as well as `bulk_accept`: any update accepting several questions must come from the owner or an admin and contain no gated or uncalibrated question | Column rights still let members set status, so a direct multi-row update would otherwise bypass `bulk_accept` |
+| S2-2a | "All" bulk button became "All eligible" (threshold 0, same holds) | Gated and uncalibrated questions are never in bulk approval |
+| S2-2a | Calibration code and tables moved into the shared server code; tables are generated as `calibration-tables.ts`; the browser's retrieval client removed | Confidence is now computed only server-side |
+| S2-2b | The figure check allows numbers implied by frequency words ("annually" as 年1回, "24/7" as 24時間365日) and ignores entry refs | Otherwise faithful Japanese drafts were rejected |
+| S2-2b | Pricing answers are left out of "Add to KB" at export | Product rule: pricing is never learned automatically |

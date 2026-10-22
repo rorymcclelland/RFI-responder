@@ -1,6 +1,6 @@
 # 0003 Access control and the role matrix
 
-Date: 22 October 2026. Status: agreed with Rory (invite-only; any member may add to the knowledge base; response owner per response; hard delete for admins only).
+Date: 22 October 2026, extended 23 October (Sprint 2: bulk approval and server-side scoring). Status: agreed with Rory (invite-only; any member may add to the knowledge base; response owner per response; hard delete for admins only).
 
 **Context.** The review found that any signed-in user could make themselves an admin, anyone could sign up, responses without a recorded creator were editable by everyone, and seed users shared one password in a migration.
 
@@ -14,6 +14,9 @@ Date: 22 October 2026. Status: agreed with Rory (invite-only; any member may add
 | Permanently delete a response (created in error only) | yes | no | no |
 | Assign questions on a response; add or remove contributors | yes | yes | no |
 | Update an assignment | yes | yes | assignee only |
+| Accept, edit or skip one question (including a gated one) | yes | yes | yes |
+| Approve several questions at once (`bulk_accept`, or any update accepting more than one); never includes gated or uncalibrated questions | yes | yes | no |
+| Write confidence, gates, drafts or processing details | no: the `process-questions` function, as the service role | no | no |
 | Add to the knowledge base (import, add back, manual) | yes | yes | yes |
 | Edit or delete a knowledge-base entry | yes | no | no |
 | Edit own name, title, department, expertise | yes | yes | yes |
@@ -22,7 +25,7 @@ Date: 22 October 2026. Status: agreed with Rory (invite-only; any member may add
 | Invite users | yes, from the Supabase dashboard or CLI for now | no | no |
 | Anonymous visitors | no access to any table | | |
 
-Sessions and questions remain team-shared (any member adds and updates); Sprint 3's readiness workflow tightens this. Privileged changes are written to `audit_log`, which only admins can read and only `SECURITY DEFINER` functions can write.
+Sessions and questions remain team-shared: any member adds questions and records review decisions; Sprint 3's readiness workflow tightens this. From Sprint 2 (`20261023100000_server_side_processing.sql`, tested in `supabase/tests/db/processing.test.ts`), members may insert only a question's text and update only its status and final answer, and the database refuses any update that accepts more than one question unless it comes from the response owner or an admin and contains no gated or uncalibrated question. A member could still accept questions one statement at a time; each of those is an individual decision, which is what rule 4 asks for. Privileged changes are written to `audit_log`, which only admins can read and only `SECURITY DEFINER` functions can write.
 
 **How it is enforced and tested.** Row-level security plus column-level grants (so `is_admin`, `created_by` and similar cannot be changed through the API), in `supabase/migrations/20261022120000_access_control.sql` and `..._knowledge_base.sql`. Every row of the table has a test in `supabase/tests/db/`. Sign-up is off in `supabase/config.toml`, and CI checks against the real Supabase stack that sign-up is refused.
 
