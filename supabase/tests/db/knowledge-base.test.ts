@@ -141,14 +141,13 @@ describe('6. access (role matrix, decision 0003)', () => {
   });
 
   it('a member cannot edit or delete entries; an admin can delete', async () => {
-    expect((await as(member, (q) => q(`UPDATE kb_entries SET answer = 'changed' WHERE id = $1`, [entryId]).catch(() => ({ rowCount: 0 })))).rowCount).toBe(0);
+    expect((await as(member, (q) => q(`UPDATE kb_entries SET answer = 'changed' WHERE id = $1`, [entryId]))).rowCount).toBe(0);
     expect((await as(member, (q) => q('DELETE FROM kb_entries WHERE id = $1', [entryId]))).rowCount).toBe(0);
     expect((await as(admin, (q) => q('DELETE FROM kb_entries WHERE id = $1', [entryId]))).rowCount).toBe(1);
   });
 
   it('anonymous visitors see nothing and cannot import', async () => {
-    const r = await as(null, (q) => q('SELECT * FROM kb_entries').catch(() => ({ rowCount: 0 })));
-    expect(r.rowCount).toBe(0);
+    expect(await refused(as(null, (q) => q('SELECT * FROM kb_entries')))).toMatch(/permission denied/);
     await refused(as(null, importAs(null, [{ question: 'x?', answer: 'y', tags: [], source: '' }])));
   });
 });

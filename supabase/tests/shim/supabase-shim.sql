@@ -12,7 +12,10 @@
 -- It does NOT emulate GoTrue (sign-up, invites, passwords) or PostgREST. Those are
 -- covered by the CI job that applies the same migrations to the real Supabase stack.
 
-create extension if not exists pgcrypto;
+-- Extensions live in their own schema, as on Supabase (search_path includes it).
+create schema if not exists extensions;
+create extension if not exists pgcrypto schema extensions;
+grant usage on schema extensions to anon, authenticated, service_role;
 
 do $$
 begin

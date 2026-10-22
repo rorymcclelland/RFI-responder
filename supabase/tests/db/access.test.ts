@@ -187,10 +187,10 @@ describe('question assignments', () => {
 
 describe('anonymous visitors', () => {
   it.each(['opportunities', 'rfi_sessions', 'rfi_questions', 'user_profiles', 'question_assignments', 'opportunity_contributors', 'audit_log'])(
-    '9. see no rows in %s',
+    '9. cannot read %s at all',
     async (table) => {
-      const r = await as(null, (q) => q(`SELECT * FROM ${table}`).catch(() => ({ rowCount: 0 })));
-      expect(r.rowCount).toBe(0);
+      const reason = await refused(as(null, (q) => q(`SELECT * FROM ${table}`)));
+      expect(reason).toMatch(/permission denied/);
     },
   );
 

@@ -30,3 +30,17 @@ Sessions and questions remain team-shared (any member adds and updates); Sprint 
 - The seed-users migration was emptied (kept for sequence) and its users moved to the dev-only `supabase/seed.sql`, since only the retired Bolt project ever ran it.
 - The Bolt migration titled "enable HIBP password protection" is a no-op: leaked-password protection is a hosted Auth setting, not SQL. Turn it on in the hosted project (Sprint 5 checklist).
 - An in-app invite screen needs a server-side function with the service key; logged in the backlog.
+
+## Independent review (22 October 2026)
+
+A separate reviewer, given the code but not the reasoning, probed the database as members and anonymous visitors. It confirmed that admin rights cannot be self-granted, anonymous visitors reach nothing, and the `SECURITY DEFINER` functions are safe, and found seven gaps, all now fixed in `20261022140000_access_control_hardening.sql` and tested in `supabase/tests/db/hardening.test.ts`:
+
+1. An owner could move an assignment onto another response; assignments are now tied to their response's session by a trigger, and only the work columns (status, answer, notes, completion) can change.
+2. An assignee could rewrite an assignment's history (assigner, question text, dates); fixed by the same column grants.
+3. Two admins removing each other simultaneously could leave none; `set_user_admin` now locks admin rows first.
+4. Functions created later would have been executable by anonymous visitors; the global default grant to PUBLIC is revoked.
+5. Any member could move a session onto another response; only status and counts can change now.
+6. Imports were unbounded; capped at 2,000 entries, matching the upload limit.
+7. Members held TRUNCATE (which ignores row-level security) and similar privileges; revoked.
+
+Still accepted until Sprint 3: questions within a session are team-editable, and `kb_entries.origin_ref` is free text.

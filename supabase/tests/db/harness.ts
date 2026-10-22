@@ -34,6 +34,8 @@ export async function buildDatabase(options: { seed?: boolean } = {}): Promise<v
   await admin.connect();
   await admin.query(`DROP DATABASE IF EXISTS ${TEST_DB} WITH (FORCE)`);
   await admin.query(`CREATE DATABASE ${TEST_DB}`);
+  // As on Supabase, extension functions (crypt, gen_salt) resolve through the extensions schema.
+  await admin.query(`ALTER DATABASE ${TEST_DB} SET search_path = "$user", public, extensions`);
   await admin.end();
 
   const db = new pg.Client({ connectionString: testUrl() });
