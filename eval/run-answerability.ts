@@ -3,6 +3,7 @@
  * `npm run eval:retrieval` (it reuses that run's cached vectors):
  *
  *   npm run eval:answerability
+ *   npm run eval:answerability -- --only=claude-haiku-5-5      (one candidate)
  *
  * For every item in the retrieval set, takes the entries the app would draft from (by voyage-4
  * and by qwen3-embedding:0.6b vectors), asks each answerability candidate whether they answer the
@@ -47,6 +48,13 @@ function checkers(): { list: AnswerabilityChecker[]; skipped: string[] } {
   if (env.ANTHROPIC_API_KEY) {
     list.push(claudeJudge({ client: claudeClient({ apiKey: env.ANTHROPIC_API_KEY, retry: patient }), model: JUDGE_MODEL }));
   } else skipped.push('Claude judge: ANTHROPIC_API_KEY not set in supabase/functions/.env');
+  // Optional: --only=claude-haiku-5-5,rerank-2.5 runs a subset (Voyage accounts without a payment
+  // method get a few requests a minute, so the rerankers can take hours).
+  const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7).split(',');
+  if (only) {
+    for (const c of list.filter((c) => !only.includes(c.model))) skipped.push(`${c.model}: not selected (--only)`);
+    return { list: list.filter((c) => only.includes(c.model)), skipped };
+  }
   return { list, skipped };
 }
 
