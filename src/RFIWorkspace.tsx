@@ -18,9 +18,10 @@ import {
   Search, X, MessageSquare, ChevronUp, User, ArrowRight,
 } from 'lucide-react';
 import { KnowledgeEntry, RFIQuestion, RFISession, RFIStatus, UserProfile, QuestionAssignment } from './types';
-import { draftAnswer, detectQuestionColumn } from './lib/drafting';
+import { draftAnswer, detectQuestionColumn, NO_CONFIDENT_MATCH_TEXT } from './lib/drafting';
 import { embedQuestions, matchQuestion, selectDraftSources } from './lib/retrievalClient';
-import { calibratedConfidence } from './lib/calibration';
+import { calibratedConfidence, NO_MATCH_FLOOR } from './lib/calibration';
+import { CALIBRATION_TABLES } from './lib/calibrationTables';
 import { bulkAcceptInDb, saveQuestionPatch, insertQuestions } from './lib/sessions';
 import { supabase } from './lib/supabase';
 import { exportCSV, exportExcel, exportWord } from './exportUtils';
@@ -381,13 +382,15 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
         chunk.forEach((x, j) => {
           const rows = matched[j];
           const sources = selectDraftSources(rows);
-          const generatedAnswer = draftAnswer(sources);
           const similarities = rows.map((r) => r.similarity).filter((v): v is number => v !== null);
           const topSimilarity = similarities.length ? Math.max(...similarities) : null;
+          const confidence = calibratedConfidence(topSimilarity, embedded.ok ? embedded.model : null, CALIBRATION_TABLES);
+          // Below the floor there is no confident match: a person writes the answer (S1-6).
+          const generatedAnswer = confidence !== null && confidence < NO_MATCH_FLOOR ? NO_CONFIDENT_MATCH_TEXT : draftAnswer(sources);
           built.push({
             id: crypto.randomUUID(), sessionId: sid ?? '', position: x.position, question: x.text,
             generatedAnswer, finalAnswer: generatedAnswer,
-            confidence: calibratedConfidence(topSimilarity, embedded.ok ? embedded.model : null),
+            confidence,
             retrievalScore: topSimilarity ?? rows[0]?.fused_score ?? 0,
             sources, status: 'pending',
           });

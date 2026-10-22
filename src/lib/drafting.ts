@@ -14,6 +14,10 @@
 import { retrieveTopK } from '../retrieval';
 import type { KnowledgeEntry, RetrievedSource } from '../types';
 
+/** Shown when the best match is below the calibrated confidence floor (S1-6). The sources stay visible. */
+export const NO_CONFIDENT_MATCH_TEXT =
+  'No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.';
+
 /** Shown instead of a draft when no knowledge-base entry shares any terms with the question. */
 export const NO_MATCH_TEXT = 'No matching knowledge-base entry was found for this question. It needs an answer written by a person.';
 

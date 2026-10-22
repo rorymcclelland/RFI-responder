@@ -16,15 +16,17 @@ export interface CalibrationTable {
   points: { score: number; probability: number }[];
 }
 
-const loaded = import.meta.glob<CalibrationTable>('./calibration/*.json', { eager: true, import: 'default' });
-export const CALIBRATION_TABLES: Record<string, CalibrationTable> = Object.fromEntries(
-  Object.values(loaded).map((t) => [t.model, t]),
-);
+/**
+ * Below this calibrated confidence the draft says there is no confident match and the
+ * question goes to a person (S1-6). The evaluation report states how many
+ * unanswerable questions fall below it.
+ */
+export const NO_MATCH_FLOOR = 0.3;
 
 export function calibratedConfidence(
   similarity: number | null,
   model: string | null,
-  tables: Record<string, CalibrationTable> = CALIBRATION_TABLES,
+  tables: Record<string, CalibrationTable>,
 ): number | null {
   if (similarity === null || model === null) return null;
   const table = tables[model];
