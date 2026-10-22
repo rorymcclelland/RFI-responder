@@ -15,7 +15,8 @@
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "types": "supabase gen types typescript --local > src/lib/database.types.ts"
+    "types": "supabase gen types typescript --local > src/lib/database.types.ts",
+    "eval:retrieval": "tsx eval/run-retrieval.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -43,6 +44,7 @@
     "postcss": "^8.4.35",
     "supabase": "^2.121.0",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^7.3.7",

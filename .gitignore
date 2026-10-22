@@ -22,3 +22,6 @@ dist-ssr
 *.sw?
 .env
 coverage
+
+# Evaluation vector cache (rebuildable)
+eval/.cache/
