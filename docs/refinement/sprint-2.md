@@ -163,3 +163,15 @@ The calibration report adds calibration error and bulk-line counts per language.
 | Q3 | Who labels the drafting evaluation? | (a) Claude writes the labels; Rory marks 10 drafts to check the judge. (b) Rory labels all 70 | (a): about 15 minutes of Rory's time |
 | Q4 | The bars | (a) As proposed in S2-1, S2-3, S2-4 and S2-5. (b) Set after the first results | (a), revisited at the review if the data says otherwise |
 | Q5 | Claude unreachable while processing | (a) Assembled draft, no calibrated confidence, threshold bulk accept off. (b) Fall back to Sprint 1's similarity calibration | (a): Sprint 1 showed similarity alone lets near misses through |
+
+## Answers (22 October 2026)
+
+| # | Answer |
+|---|---|
+| Q1 | Japanese drafts, labelled "translated from English entries", never bulk-approved until the Japanese evaluation items are reviewed (F-14) |
+| Q2 | Broad definition as listed; when in doubt, gated |
+| Q3 | Claude writes the labels; Rory marks 10 drafts to check the judge |
+| Q4 | Bars as proposed, revisited at the review if the data says otherwise |
+| Q5 | Default (a) stands unless Rory changes it: assembled draft, no calibrated confidence, threshold bulk accept off |
+
+All nine stories are Ready, Sprint 2.
