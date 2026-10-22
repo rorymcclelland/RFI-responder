@@ -167,6 +167,10 @@ export default function App() {
     await loadAllUsers();
     await refreshKB();
     setAuthLoading(false);
+    // Fill any gaps in the meaning-based index (existing entries, or after a model change). Quiet unless it fails.
+    void indexNewEntries().then((r) => {
+      if (!r.ok) showToast(`Meaning-based search is unavailable (${r.reason}); matching will use keywords only.`, 'error');
+    });
   }
 
   async function loadAllUsers() {

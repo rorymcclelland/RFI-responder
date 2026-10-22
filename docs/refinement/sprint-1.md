@@ -66,7 +66,7 @@ Find the right knowledge-base entry **by meaning**, including from a Japanese qu
 **What changes.**
 - Migration: `create extension vector`; `kb_entries.embedding vector(1024)`, `embedding_model text`, `embedded_at timestamptz`; HNSW index for cosine distance. Members cannot write these columns (column grants); only the service role can.
 - `supabase/functions/embed-entries`: embeds current entries whose `embedding_model` differs from the configured model (or is empty), in batches; callable by signed-in users (it only fills gaps); returns counts.
-- The app calls it after an import or add-back. `npm run kb:reembed` calls it until nothing is left (after a model change).
+- The app calls it after an import or add-back, and quietly on sign-in to fill any gaps (existing entries, or every entry after a model change). (Changed during the build from a separate `kb:reembed` command: simpler, and nothing to remember.)
 
 **Test cases.**
 1. Database: a member cannot set `embedding` or `embedding_model` directly; the service role can.
