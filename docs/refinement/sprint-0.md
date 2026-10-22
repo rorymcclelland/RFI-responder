@@ -281,3 +281,19 @@ Rory briefed the original intent (now `docs/PRODUCT.md`). Effect on Sprint 0, wh
 | Backlog | Rule 4 reworded so the owner's recorded bulk approval counts as human approval; rule 7 added (learning only with provenance). Later sprints re-ranked into five: retrieval and calibration; grounded drafting and safety gates; workflow and learning loop; ingestion and governance pack; publish |
 
 Sizes unchanged: S0-4 and S0-5 stay M. All nine stories remain **Ready, Sprint 0**.
+
+## Changes during the build (22 October 2026)
+
+| Story | Change | Why |
+|---|---|---|
+| S0-3 | ExcelJS and PapaParse instead of SheetJS 0.20 | SheetJS's registry is blocked from the build workspace; Rory chose ExcelJS. `.xls` is now refused with advice (test case 2 inverted). In `.xlsx` export, formula-like text is stored as a text cell rather than prefixed with an apostrophe, because text cells are never evaluated and the apostrophe would show to the reader |
+| S0-1 | Kept the word "Confidence" (defined in a tooltip as the best keyword match, not yet calibrated) instead of renaming it "Match score" | The product brief uses "confidence" for exactly this idea; renaming now and back in Sprint 1 would be churn |
+| S0-1 | Also removed "ten times faster", "80% faster first draft" and "100% audit trail" from the sign-in page | Found by looking at the page in a browser |
+| S0-2 | Vite 7, Vitest 4, npm 11 | Critical and moderate advisories in the old test tooling; npm 10 resolver bug. Remaining dev-only findings in Tailwind 3 accepted (decision 0002) |
+| S0-2 | Generated database types deferred | Need the local Supabase stack, which cannot run in the build workspace |
+| S0-4 | Imports through one database function, all-or-nothing | Test case 5 ("no silent partial success") is met by atomicity: a failure saves nothing |
+| S0-5 | Added the audit log and `set_user_admin` | Test case 5 required promotions to be logged |
+| S0-5 | Admins can now edit other users' details | The old policy silently blocked the admin screen |
+| S0-6 | Database tests run on Postgres with a Supabase shim; CI adds a real-stack job | The Supabase containers cannot be downloaded in the build workspace (decision 0004) |
+| S0-6 | Real-stack CI found that `[auth.email] enable_signup = false` disables email login entirely | Fixed: invite-only is the global `[auth] enable_signup = false` only |
+| S0-9 | Spike is a desk study plus a measured bake-off at the start of Sprint 1 | Model weights cannot be downloaded in the build workspace |
