@@ -1,6 +1,6 @@
 # 0006 Retrieval defaults: rank by meaning, voyage-4 hosted, qwen3-embedding locally
 
-Date: 22 October 2026. Status: proposed for the Sprint 1 review, from measurements on Rory's PC. Revised the same day after near-miss questions were added to the evaluation set.
+Date: 22 October 2026. Status: agreed at the Sprint 1 review (22 October 2026), from measurements on Rory's PC. Revised the same day after near-miss questions were added to the evaluation set.
 
 **Evidence.** `docs/evals/retrieval-2026-10-22.md` and `docs/evals/calibration-2026-10-22.md`, on evaluation set 2026-10-22.2: 364 synthetic items, all unreviewed. Japanese items are machine translations of the original questions, so Japanese results show that crossing languages works, not that Japanese rewording does. The set has two kinds of unanswerable question: 30 off-topic and 34 near misses (security questions the knowledge base does not answer, such as mean time to detect or FedRAMP).
 
@@ -20,7 +20,7 @@ The gate that matters most for safety holds better: with voyage-4 only one near 
 **Decisions.**
 1. **Rank by meaning** whenever a query vector exists; keywords only as the fallback. Equal-weight fusion lowered English recall@5 by about 20 points for every model.
 2. **Hosted default: voyage-4.** Best English recall and the best-calibrated confidence.
-3. **Local default: qwen3-embedding:0.6b, to be confirmed at the Sprint 1 review.** Best local recall and calibration, but 6 of 34 near misses reach the bulk-approval line against bge-m3's 2.
+3. **Local default: qwen3-embedding:0.6b** (confirmed by Rory at the Sprint 1 review). Best local recall and calibration. It lets 6 of 34 near misses reach the bulk-approval line against bge-m3's 2; Sprint 2's answerability check is the control for that, whichever model is used.
 4. Calibration tables for all three models ship with the app (`src/lib/calibration/`), so switching provider keeps calibrated confidence.
 5. **Keep the no-match floor at 0.3 and record the abstention bar as not met** (agreed with Rory, 22 October). Raising it would send many answerable questions to a person and still miss a third of near misses. The fix belongs in Sprint 2: a check of whether the matched entry actually answers the question, measured on the same near misses.
 

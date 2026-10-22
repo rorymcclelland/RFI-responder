@@ -86,7 +86,7 @@ Order: S1-1 and S1-2 first (independent), then S1-3, S1-4, S1-5, S1-6; F-9 any t
 
 **Found at the review and fixed.** BUG-4: source chips and the entry window multiplied similarity by 333 (Sprint 0's keyword ceiling), showing matches of 120%; now shown as similarity, labelled not a probability. The first unanswerable set held only off-topic questions, which made abstention look better than it is; 34 near misses were added (set 2026-10-22.2) and the calibration report now shows near misses and wrong top entries at or above the 80% bulk line (voyage-4: 1 of 34, 7 of 166).
 
-**Decisions at the review.** Keep the 0.3 floor and record the abstention bar as not met; an answerability check goes into Sprint 2 (decision 0006, point 5). Hosted default voyage-4. Local default to be confirmed by Rory: qwen3-embedding:0.6b has the better recall and calibration, bge-m3 lets fewer near misses reach the bulk line (2 of 34 against 6).
+**Decisions at the review.** Keep the 0.3 floor and record the abstention bar as not met; an answerability check goes into Sprint 2 (decision 0006, point 5). Hosted default voyage-4. Local default qwen3-embedding:0.6b, confirmed by Rory: better recall and calibration than bge-m3, which lets fewer near misses reach the bulk line (2 of 34 against 6); the answerability check covers that. Decision 0006 agreed.
 
 **All seven items Done, Sprint 1.** S1-6 carries the residual above. Nothing returned.
 
@@ -99,21 +99,21 @@ Order: S1-1 and S1-2 first (independent), then S1-3, S1-4, S1-5, S1-6; F-9 any t
 | F-13 Right Japanese matches score about 77%, so never reach the bulk line | Proposed for Sprint 2 with the answerability check, which changes confidence anyway |
 | F-14 Reviewed, reworded Japanese evaluation items | Backlog, from Sprint 1 review; needs a native reader |
 | F-15 Near-miss set is small (34) and written by Claude | Backlog, from Sprint 1 review; grows with Sprint 2's red-team and labelled sets |
-| Local default model | Decision for Rory (decision 0006, point 3) |
+| Local default model | qwen3-embedding:0.6b, confirmed at the review (decision 0006) |
 
-## Sprint 2 (proposed at the Sprint 1 review, for Rory to confirm): grounded drafting and safety gates
+## Sprint 2: grounded drafting and safety gates (confirmed 22 October 2026)
 
 Goal: a draft that says only what the knowledge base supports, and questions that must not be bulk-approved (near misses, pricing, legal) kept away from bulk approval, measured on evaluation sets.
 
 | ID | Story | Why in this sprint | Size | Status |
 |---|---|---|---|---|
-| S2-1 | Answerability check: for each question, does the top entry actually answer it? Compare a reranker (Voyage rerank) with a small Claude model as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met: 1 to 6 near misses per model reach the bulk line, and only 35% fall below the floor | M | Proposed |
-| S2-2 | Grounded drafting in an Edge Function (Claude, key server-side): drafts only from retrieved entries, cites them, says "insufficient evidence" rather than guessing | The product's promise; decision 0005 | L | Proposed |
-| S2-3 | Pricing and legal or contractual questions detected and excluded from bulk approval, whatever their score | Project rule 4; needs to exist before drafts look persuasive | M | Proposed |
-| S2-4 | Drafting evaluation: faithfulness and citation accuracy on a hand-labelled set; prompt and model versions recorded with every draft | Measure drafting the way Sprint 1 measured retrieval | M | Proposed |
-| S2-5 | Red-team set: prompt injection hidden in uploaded questions, with tests that drafts and gates ignore it | Project rule 6; drafting is the first step that reads questions with an LLM | S | Proposed |
-| F-5 | Split `RFIWorkspace.tsx` | The drafting rewrite changes it anyway | S | Proposed |
-| F-13 | Check calibration per language once S2-1 changes confidence | Same code and evaluation run as S2-1 | S | Proposed |
+| S2-1 | Answerability check: for each question, does the top entry actually answer it? Compare a reranker (Voyage rerank) with a small Claude model as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met: 1 to 6 near misses per model reach the bulk line, and only 35% fall below the floor | M | Confirmed, Sprint 2 |
+| S2-2 | Grounded drafting in an Edge Function (Claude, key server-side): drafts only from retrieved entries, cites them, says "insufficient evidence" rather than guessing | The product's promise; decision 0005 | L | Confirmed, Sprint 2 |
+| S2-3 | Pricing and legal or contractual questions detected and excluded from bulk approval, whatever their score | Project rule 4; needs to exist before drafts look persuasive | M | Confirmed, Sprint 2 |
+| S2-4 | Drafting evaluation: faithfulness and citation accuracy on a hand-labelled set; prompt and model versions recorded with every draft | Measure drafting the way Sprint 1 measured retrieval | M | Confirmed, Sprint 2 |
+| S2-5 | Red-team set: prompt injection hidden in uploaded questions, with tests that drafts and gates ignore it | Project rule 6; drafting is the first step that reads questions with an LLM | S | Confirmed, Sprint 2 |
+| F-5 | Split `RFIWorkspace.tsx` | The drafting rewrite changes it anyway | S | Confirmed, Sprint 2 |
+| F-13 | Check calibration per language once S2-1 changes confidence | Same code and evaluation run as S2-1 | S | Confirmed, Sprint 2 |
 
 Order: S2-5's set and S2-4's labels first (they judge the rest); S2-1 and S2-3 in parallel; S2-2; F-5 alongside S2-2. No spike: S2-1 compares two known options by measurement, and the stories after it take a score whichever wins. Hand-off: Rory provides the Anthropic key (agreed at the Sprint 0 review). Larger than Sprint 1 (one large story); S2-5 or F-13 can return to the backlog if it runs long.
 
