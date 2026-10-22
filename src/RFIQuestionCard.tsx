@@ -41,8 +41,8 @@ function KBArticleModal({ entry, score, onClose }: { entry: KnowledgeEntry; scor
                     <ExternalLink size={10} />{entry.source}
                   </span>
                 )}
-                <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                  {Math.round(score * 333)}% match
+                <span title="Similarity to the question; not a probability" className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                  {Math.round(score * 100)}% similarity
                 </span>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function RFIQuestionCard({
                   >
                     <span className="font-black">{s.entry.id}</span>
                     <span className="text-ink-400 group-hover:text-white/60 truncate max-w-[160px] transition-colors">{s.entry.question}</span>
-                    <span className="font-bold opacity-60">({Math.round(s.score * 333)}%)</span>
+                    <span className="font-bold opacity-60" title="Similarity to the question; not a probability">({Math.round(s.score * 100)}%)</span>
                     <ExternalLink size={10} className="opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" />
                   </button>
                 ))}
