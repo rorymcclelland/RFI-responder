@@ -38,3 +38,31 @@ describe('bulkAcceptInDb', () => {
     await expect(bulkAcceptInDb(client, 'session-1', 0.8)).rejects.toThrow(/not saved: permission denied/);
   });
 });
+
+describe('saveQuestionPatch and insertQuestions (F-9)', () => {
+  it('1. saves status and final answer, and reports a refusal', async () => {
+    const { saveQuestionPatch } = await import('./sessions');
+    const okClient = fakeClient({ error: null });
+    await saveQuestionPatch(okClient.client, 'q1', { status: 'accepted', finalAnswer: 'Yes.' });
+    expect(okClient.calls).toEqual([['from', 'rfi_questions'], ['update', { status: 'accepted', final_answer: 'Yes.' }], ['eq', 'id', 'q1']]);
+    const bad = fakeClient({ error: { message: 'permission denied' } });
+    await expect(saveQuestionPatch(bad.client, 'q1', { status: 'skipped' })).rejects.toThrow(/not saved: permission denied/);
+  });
+
+  it('does nothing when there is nothing to save', async () => {
+    const { saveQuestionPatch } = await import('./sessions');
+    const c = fakeClient({ error: null });
+    await saveQuestionPatch(c.client, 'q1', {});
+    expect(c.calls).toEqual([]);
+  });
+
+  it('2. inserts in batches and reports a failed batch', async () => {
+    const { insertQuestions } = await import('./sessions');
+    const calls: number[] = [];
+    let n = 0;
+    const client = { from: () => ({ insert: async (rows: unknown[]) => { calls.push(rows.length); return { error: n++ === 1 ? { message: 'too big' } : null }; } }) } as never;
+    await expect(insertQuestions(client, Array.from({ length: 60 }, (_, i) => ({ id: String(i) })), 25))
+      .rejects.toThrow(/25 of 60 questions were saved.*too big/);
+    expect(calls).toEqual([25, 25]);
+  });
+});

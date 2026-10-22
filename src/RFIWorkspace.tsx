@@ -21,7 +21,7 @@ import { KnowledgeEntry, RFIQuestion, RFISession, RFIStatus, UserProfile, Questi
 import { draftAnswer, detectQuestionColumn } from './lib/drafting';
 import { embedQuestions, matchQuestion, selectDraftSources } from './lib/retrievalClient';
 import { calibratedConfidence } from './lib/calibration';
-import { bulkAcceptInDb } from './lib/sessions';
+import { bulkAcceptInDb, saveQuestionPatch, insertQuestions } from './lib/sessions';
 import { supabase } from './lib/supabase';
 import { exportCSV, exportExcel, exportWord } from './exportUtils';
 import RFIQuestionCard from './RFIQuestionCard';
@@ -414,9 +414,10 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
         status: q.status,
         sources_json: q.sources.map((s) => ({ id: s.entry.id, score: s.score })),
       }));
-      const BATCH = 25;
-      for (let i = 0; i < dbRows.length; i += BATCH) {
-        await supabase.from('rfi_questions').insert(dbRows.slice(i, i + BATCH));
+      try {
+        await insertQuestions(supabase, dbRows);
+      } catch (err) {
+        setUploadError(`${(err as Error).message}. The drafts are shown, but reopening this session will not show all of them.`);
       }
     }
     setTimeout(() => setStep('review'), 400);
@@ -424,12 +425,18 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
 
   // ── Review actions ────────────────────────────────────────────────────────
 
+  // Show the change at once; if saving fails, put the question back and say why (F-9).
   const updateQuestion = useCallback((id: string, patch: Partial<RFIQuestion>) => {
-    setQuestions((prev) => prev.map((q) => q.id === id ? { ...q, ...patch } : q));
-    const db: Record<string, unknown> = {};
-    if (patch.status      !== undefined) db['status']       = patch.status;
-    if (patch.finalAnswer !== undefined) db['final_answer'] = patch.finalAnswer;
-    if (Object.keys(db).length) supabase.from('rfi_questions').update(db).eq('id', id);
+    let previous: RFIQuestion | undefined;
+    setQuestions((prev) => prev.map((q) => {
+      if (q.id !== id) return q;
+      previous = q;
+      return { ...q, ...patch };
+    }));
+    saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).catch((err: Error) => {
+      if (previous) setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
+      setUploadError(err.message);
+    });
   }, []);
 
   const handleAccept    = useCallback((id: string, ans: string) => updateQuestion(id, { status: 'accepted', finalAnswer: ans }), [updateQuestion]);
