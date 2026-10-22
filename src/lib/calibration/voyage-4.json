@@ -1,6 +1,6 @@
 {
   "model": "voyage-4",
-  "evaluationSet": "2026-10-22.1 (calibrate split)",
+  "evaluationSet": "2026-10-22.2 (calibrate split)",
   "points": [
     {
       "score": 0.1838,
@@ -12,27 +12,51 @@
     },
     {
       "score": 0.3431,
-      "probability": 0.3333
+      "probability": 0.2
     },
     {
-      "score": 0.354,
-      "probability": 0.3333
+      "score": 0.3653,
+      "probability": 0.2
     },
     {
       "score": 0.3805,
-      "probability": 0.8261
+      "probability": 0.5
     },
     {
-      "score": 0.4594,
-      "probability": 0.8261
+      "score": 0.3986,
+      "probability": 0.5
     },
     {
-      "score": 0.4599,
-      "probability": 0.8511
+      "score": 0.4099,
+      "probability": 0.7273
+    },
+    {
+      "score": 0.4319,
+      "probability": 0.7273
+    },
+    {
+      "score": 0.4367,
+      "probability": 0.7407
+    },
+    {
+      "score": 0.484,
+      "probability": 0.7407
+    },
+    {
+      "score": 0.4849,
+      "probability": 0.7692
+    },
+    {
+      "score": 0.5341,
+      "probability": 0.7692
+    },
+    {
+      "score": 0.5347,
+      "probability": 0.7778
     },
     {
       "score": 0.551,
-      "probability": 0.8511
+      "probability": 0.7778
     },
     {
       "score": 0.5523,

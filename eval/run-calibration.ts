@@ -17,6 +17,8 @@ import { expectedCalibrationError, isotonicFit, reliabilityBins, toBreakpoints }
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BARS = { ece: 0.1, abstention: 0.8 };
+/** The bulk-approval line in the app (project rule 4): the confidence that matters most for safety. */
+const BULK_LINE = 0.8;
 
 interface ItemResult { id: string; kind: string; split: string; method: string; topScore: number; topIsGold: boolean }
 
@@ -41,8 +43,8 @@ const lines: string[] = [
   '',
   `Bars agreed for Sprint 1: expected calibration error at most ${BARS.ece}; at least ${pct(BARS.abstention)} of unanswerable questions below the no-match floor (${NO_MATCH_FLOOR}).`,
   '',
-  '| Model | Calibration error (test) | Unanswerable below floor (test) | of which near misses | Answerable below floor (test) | Meets bars |',
-  '|---|---|---|---|---|---|',
+  '| Model | Calibration error (test) | Unanswerable below floor (test) | of which near misses | Answerable below floor (test) | Meets bars | Near misses at or above 80% (all) | Wrong top entry at or above 80% (all) |',
+  '|---|---|---|---|---|---|---|---|',
 ];
 const details: string[] = [];
 
@@ -69,7 +71,13 @@ for (const model of models) {
   const nearBelow = near.filter((p) => p.p < NO_MATCH_FLOOR).length / (near.length || 1);
   const ansBelow = ans.filter((p) => p.p < NO_MATCH_FLOOR).length / (ans.length || 1);
   const meets = ece <= BARS.ece && unansBelow >= BARS.abstention;
-  lines.push(`| ${model} | ${ece.toFixed(3)} | ${pct(unansBelow)} | ${near.length ? pct(nearBelow) : 'n/a'} | ${pct(ansBelow)} | ${meets ? 'yes' : 'no'} |`);
+  // Both splits: the bulk line is a safety check, not a fit, and every near miss counts.
+  const conf = (r: ItemResult) => calibratedConfidence(r.topScore, model, tables) ?? 0;
+  const nearAll = rows.filter((r) => r.kind === 'near-miss');
+  const nearOver = nearAll.filter((r) => conf(r) >= BULK_LINE).length;
+  const over = rows.filter((r) => conf(r) >= BULK_LINE);
+  const wrongOver = over.filter((r) => !r.topIsGold).length;
+  lines.push(`| ${model} | ${ece.toFixed(3)} | ${pct(unansBelow)} | ${near.length ? pct(nearBelow) : 'n/a'} | ${pct(ansBelow)} | ${meets ? 'yes' : 'no'} | ${nearOver} of ${nearAll.length} | ${wrongOver} of ${over.length} |`);
 
   writeFileSync(join(ROOT, `src/lib/calibration/${model.replace(/[^a-z0-9.-]/gi, '_')}.json`), JSON.stringify(table, null, 2) + '\n');
   details.push(
@@ -80,7 +88,7 @@ for (const model of models) {
   );
 }
 
-lines.push('', '"Answerable below floor" is the cost of the floor: answerable questions sent to a person although the knowledge base had the answer.', ...details, '');
+lines.push('', '"Answerable below floor" is the cost of the floor: answerable questions sent to a person although the knowledge base had the answer.', '', `The last two columns are the safety check for bulk approval: questions an owner could approve in bulk at ${pct(BULK_LINE)} although the top entry does not answer them. Pricing and legal questions are never bulk-approved whatever their score (project rule 4).`, ...details, '');
 writeFileSync(join(ROOT, `docs/evals/calibration-${date}.md`), lines.join('\n'));
 console.log(lines.join('\n'));
 console.log(`\nWritten: docs/evals/calibration-${date}.md and src/lib/calibration/*.json`);

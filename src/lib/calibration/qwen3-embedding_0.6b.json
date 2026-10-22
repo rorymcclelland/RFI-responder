@@ -1,6 +1,6 @@
 {
   "model": "qwen3-embedding:0.6b",
-  "evaluationSet": "2026-10-22.1 (calibrate split)",
+  "evaluationSet": "2026-10-22.2 (calibrate split)",
   "points": [
     {
       "score": 0.2718,
@@ -12,11 +12,11 @@
     },
     {
       "score": 0.424,
-      "probability": 0.4444
+      "probability": 0.3333
     },
     {
       "score": 0.4746,
-      "probability": 0.4444
+      "probability": 0.3333
     },
     {
       "score": 0.4793,
@@ -28,22 +28,30 @@
     },
     {
       "score": 0.5128,
-      "probability": 0.6176
+      "probability": 0.5556
+    },
+    {
+      "score": 0.5234,
+      "probability": 0.5556
+    },
+    {
+      "score": 0.5281,
+      "probability": 0.5926
     },
     {
       "score": 0.5649,
-      "probability": 0.6176
+      "probability": 0.5926
     },
     {
       "score": 0.565,
-      "probability": 0.9091
+      "probability": 0.8571
     },
     {
-      "score": 0.5943,
-      "probability": 0.9091
+      "score": 0.599,
+      "probability": 0.8571
     },
     {
-      "score": 0.5955,
+      "score": 0.6005,
       "probability": 1
     },
     {
