@@ -1,6 +1,6 @@
 # 0005 Where the AI runs (spike S0-9)
 
-Date: 22 October 2026. Status: **proposed**, for Rory's agreement at the Sprint 0 close. Time box: half a day.
+Date: 22 October 2026. Status: **agreed** at the Sprint 0 review (22 October 2026): option C, provider switch; Rory provides Voyage and Anthropic keys; Japanese test questions machine-translated and labelled unreviewed. Time box: half a day.
 
 ## Question
 
