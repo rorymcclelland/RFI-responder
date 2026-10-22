@@ -16,13 +16,14 @@ describe('retrieval evaluation set (S1-1)', () => {
     expect(count((i) => i.kind === 'paraphrase' && i.language === 'en')).toBe(200);
     expect(count((i) => i.kind === 'translation' && i.language === 'ja')).toBe(100);
     expect(count((i) => i.kind === 'unanswerable')).toBeGreaterThanOrEqual(30);
+    expect(count((i) => i.kind === 'near-miss')).toBeGreaterThanOrEqual(30);
   });
 
   it('1. every gold answer is a question in the knowledge base, and each entry is covered three times', () => {
-    const answerable = set.items.filter((i) => i.kind !== 'unanswerable');
+    const answerable = set.items.filter((i) => i.kind !== 'unanswerable' && i.kind !== 'near-miss');
     for (const i of answerable) expect(kb).toContain(i.gold);
     for (const q of kb) expect(answerable.filter((i) => i.gold === q)).toHaveLength(3);
-    for (const i of set.items.filter((x) => x.kind === 'unanswerable')) expect(i.gold).toBe('');
+    for (const i of set.items.filter((x) => x.kind === 'unanswerable' || x.kind === 'near-miss')) expect(i.gold).toBe('');
   });
 
   it('2. no paraphrase repeats its gold question word for word', () => {

@@ -5,7 +5,7 @@
  *
  * For each embedding model in the newest docs/evals/retrieval-*.json, fits an
  * isotonic curve from the top match's cosine similarity to whether the top entry was
- * right, on the `calibrate` split (unanswerable questions count as wrong), then checks
+ * right, on the `calibrate` split (unanswerable and near-miss questions count as wrong), then checks
  * it on the `test` split against the agreed bars. Writes src/lib/calibration/<model>.json
  * (used by the app) and docs/evals/calibration-<date>.md.
  */
@@ -41,8 +41,8 @@ const lines: string[] = [
   '',
   `Bars agreed for Sprint 1: expected calibration error at most ${BARS.ece}; at least ${pct(BARS.abstention)} of unanswerable questions below the no-match floor (${NO_MATCH_FLOOR}).`,
   '',
-  '| Model | Calibration error (test) | Unanswerable below floor (test) | Answerable below floor (test) | Meets bars |',
-  '|---|---|---|---|---|',
+  '| Model | Calibration error (test) | Unanswerable below floor (test) | of which near misses | Answerable below floor (test) | Meets bars |',
+  '|---|---|---|---|---|---|',
 ];
 const details: string[] = [];
 
@@ -61,12 +61,15 @@ for (const model of models) {
     p: calibratedConfidence(r.topScore, model, tables) ?? 0, correct: r.topIsGold, kind: r.kind,
   }));
   const ece = expectedCalibrationError(predictions);
-  const unans = predictions.filter((p) => p.kind === 'unanswerable');
-  const ans = predictions.filter((p) => p.kind !== 'unanswerable');
+  const isUnans = (k: string) => k === 'unanswerable' || k === 'near-miss';
+  const unans = predictions.filter((p) => isUnans(p.kind));
+  const ans = predictions.filter((p) => !isUnans(p.kind));
+  const near = predictions.filter((p) => p.kind === 'near-miss');
   const unansBelow = unans.filter((p) => p.p < NO_MATCH_FLOOR).length / (unans.length || 1);
+  const nearBelow = near.filter((p) => p.p < NO_MATCH_FLOOR).length / (near.length || 1);
   const ansBelow = ans.filter((p) => p.p < NO_MATCH_FLOOR).length / (ans.length || 1);
   const meets = ece <= BARS.ece && unansBelow >= BARS.abstention;
-  lines.push(`| ${model} | ${ece.toFixed(3)} | ${pct(unansBelow)} | ${pct(ansBelow)} | ${meets ? 'yes' : 'no'} |`);
+  lines.push(`| ${model} | ${ece.toFixed(3)} | ${pct(unansBelow)} | ${near.length ? pct(nearBelow) : 'n/a'} | ${pct(ansBelow)} | ${meets ? 'yes' : 'no'} |`);
 
   writeFileSync(join(ROOT, `src/lib/calibration/${model.replace(/[^a-z0-9.-]/gi, '_')}.json`), JSON.stringify(table, null, 2) + '\n');
   details.push(

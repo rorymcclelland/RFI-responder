@@ -28,5 +28,15 @@ JSON.parse(readFileSync(here('./source/unanswerable.json'), 'utf8')).forEach((te
   });
 });
 
-writeFileSync(here('./retrieval-set.json'), JSON.stringify({ version: '2026-10-22.1', items }, null, 2) + '\n');
+// Near misses: on-topic security questions the knowledge base does not answer (added 22 Oct
+// after the first app run showed off-topic questions alone made calibration look too good).
+JSON.parse(readFileSync(here('./source/near-miss.json'), 'utf8')).forEach((text, i) => {
+  const language = /[\u3040-\u30ff\u4e00-\u9fff]/.test(text) ? 'ja' : 'en';
+  items.push({
+    id: `n${String(i + 1).padStart(3, '0')}`, text, language, kind: 'near-miss', gold: '',
+    review: 'unreviewed', split: i % 2 === 0 ? 'calibrate' : 'test',
+  });
+});
+
+writeFileSync(here('./retrieval-set.json'), JSON.stringify({ version: '2026-10-22.2', items }, null, 2) + '\n');
 console.log(`Wrote ${items.length} items`);

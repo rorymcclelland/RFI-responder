@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-22.1",
+  "version": "2026-10-22.2",
   "items": [
     {
       "id": "e001-en1",
@@ -2967,6 +2967,312 @@
       "text": "製品の今後のロードマップを教えてください。",
       "language": "ja",
       "kind": "unanswerable",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n001",
+      "text": "What is your mean time to detect a security breach?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n002",
+      "text": "How do you handle data subject access requests, and within what deadline?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n003",
+      "text": "Do you hold a FedRAMP authorisation?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n004",
+      "text": "Can customers manage their own encryption keys (bring your own key)?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n005",
+      "text": "What cyber insurance cover do you hold?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n006",
+      "text": "Which SIEM product do you use?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n007",
+      "text": "Are your data centres in Frankfurt or Dublin?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n008",
+      "text": "Are you certified under Cyber Essentials Plus?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n009",
+      "text": "Do you hold a TISAX label?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n010",
+      "text": "Are you HITRUST certified?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n011",
+      "text": "Are you assessed under Australia's IRAP programme?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n012",
+      "text": "Do you hold a German C5 attestation?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n013",
+      "text": "Are you registered under Japan's ISMAP scheme?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n014",
+      "text": "What background checks do you run on new employees?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n015",
+      "text": "Are staff with production access vetted to government clearance level?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n016",
+      "text": "Do you use biometric authentication for data centre entry?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n017",
+      "text": "What is your contractual uptime commitment?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n018",
+      "text": "Do you publish a list of your sub-processors?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n019",
+      "text": "Will you allow our auditors to visit your premises?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n020",
+      "text": "Is your source code held in escrow for customers?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n021",
+      "text": "Do you use FIPS 140-validated cryptographic modules?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n022",
+      "text": "How are you preparing for post-quantum cryptography?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n023",
+      "text": "What controls protect against deepfake voice fraud targeting your finance team?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n024",
+      "text": "How long are customer support chat transcripts kept?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n025",
+      "text": "Do you run purple team exercises?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n026",
+      "text": "How many full-time security staff do you employ?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n027",
+      "text": "What was the result of your most recent phishing simulation?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n028",
+      "text": "Do you notify customers before changing your sub-processors?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n029",
+      "text": "Can we receive a copy of your latest penetration test report?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n030",
+      "text": "What happens to our data if your company is acquired?",
+      "language": "en",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n031",
+      "text": "顧客が独自の暗号鍵を管理することはできますか？",
+      "language": "ja",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n032",
+      "text": "サイバー保険には加入していますか？",
+      "language": "ja",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "test"
+    },
+    {
+      "id": "n033",
+      "text": "従業員の採用時にどのような身元調査を行っていますか？",
+      "language": "ja",
+      "kind": "near-miss",
+      "gold": "",
+      "review": "unreviewed",
+      "split": "calibrate"
+    },
+    {
+      "id": "n034",
+      "text": "可用性に関する契約上の保証値はどのくらいですか？",
+      "language": "ja",
+      "kind": "near-miss",
       "gold": "",
       "review": "unreviewed",
       "split": "test"
