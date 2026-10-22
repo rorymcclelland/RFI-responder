@@ -107,15 +107,17 @@ Goal: a draft that says only what the knowledge base supports, and questions tha
 
 | ID | Story | Why in this sprint | Size | Status |
 |---|---|---|---|---|
-| S2-1 | Answerability check: for each question, does the top entry actually answer it? Compare a reranker (Voyage rerank) with a small Claude model as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met: 1 to 6 near misses per model reach the bulk line, and only 35% fall below the floor | M | Confirmed, Sprint 2 |
-| S2-2 | Grounded drafting in an Edge Function (Claude, key server-side): drafts only from retrieved entries, cites them, says "insufficient evidence" rather than guessing | The product's promise; decision 0005 | L | Confirmed, Sprint 2 |
-| S2-3 | Pricing and legal or contractual questions detected and excluded from bulk approval, whatever their score | Project rule 4; needs to exist before drafts look persuasive | M | Confirmed, Sprint 2 |
-| S2-4 | Drafting evaluation: faithfulness and citation accuracy on a hand-labelled set; prompt and model versions recorded with every draft | Measure drafting the way Sprint 1 measured retrieval | M | Confirmed, Sprint 2 |
-| S2-5 | Red-team set: prompt injection hidden in uploaded questions, with tests that drafts and gates ignore it | Project rule 6; drafting is the first step that reads questions with an LLM | S | Confirmed, Sprint 2 |
-| F-5 | Split `RFIWorkspace.tsx` | The drafting rewrite changes it anyway | S | Confirmed, Sprint 2 |
-| F-13 | Check calibration per language once S2-1 changes confidence | Same code and evaluation run as S2-1 | S | Confirmed, Sprint 2 |
+| S2-0 | Evaluation sets: gate set (pricing, legal, lookalikes), drafting labels, red-team set (injected questions and entries) | They judge the rest of the sprint; written first | S | Refined, awaiting Rory |
+| S2-1 | Answerability check: compare Voyage rerank-2.5, rerank-3 and Claude Haiku 5.5 as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met | M | Refined, awaiting Rory |
+| S2-2a | Server-side processing and enforcement: an Edge Function scores, gates and drafts; members can no longer write confidence or gates; bulk accept becomes a database function that refuses gated questions | Refinement found the controls run in the browser, where a signed-in user could switch them off (rules 4 and 5) | M | Refined, awaiting Rory |
+| S2-2b | Grounded drafting: Claude drafts from matched entries only, cites them, says "insufficient evidence"; citations and figures checked in code; no draft for pricing | The product's promise; decision 0005 | M | Refined, awaiting Rory |
+| S2-3 | Pricing and legal gates: rules and a classifier, gated if either fires; rules still work when Claude is down | Project rule 4 | M | Refined, awaiting Rory |
+| S2-4 | Drafting evaluation: citation accuracy, faithfulness, coverage, abstention; model and prompt version saved with every draft | Measure drafting as Sprint 1 measured retrieval | M | Refined, awaiting Rory |
+| S2-5 | Red team: injected questions and knowledge-base entries change nothing | Rule 6; first sprint where an LLM reads untrusted text | S | Refined, awaiting Rory |
+| F-5 | Split `RFIWorkspace.tsx` | S2-2a removes its scoring anyway | S | Refined, awaiting Rory |
+| F-13 | Calibration per language | Same run as S2-1 | S | Refined, awaiting Rory |
 
-Order: S2-5's set and S2-4's labels first (they judge the rest); S2-1 and S2-3 in parallel; S2-2; F-5 alongside S2-2. No spike: S2-1 compares two known options by measurement, and the stories after it take a score whichever wins. Hand-off: Rory provides the Anthropic key (agreed at the Sprint 0 review). Larger than Sprint 1 (one large story); S2-5 or F-13 can return to the backlog if it runs long.
+Refinement: `docs/refinement/sprint-2.md`. Order: S2-0 first; S2-1 and S2-3 in parallel; S2-2a; S2-2b with F-5; then S2-4, S2-5 and F-13. No spike: S2-1 compares three known options by measurement, and the stories after it take a score whichever wins. The Anthropic key is in place. A little larger than Sprint 1; if it runs long, F-13 and then S2-5 return to the backlog (S2-5 must land before any hosted demo).
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 0 review)
 
