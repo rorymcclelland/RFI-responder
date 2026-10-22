@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_PASSWORD: postgres
         ports: ['5432:5432']
@@ -68,8 +68,13 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.121.0
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check the Edge Functions (Deno)
+        run: deno check supabase/functions/embed/index.ts supabase/functions/embed-entries/index.ts
       - name: Start Supabase (database, auth and API only)
-        run: supabase start -x studio,imgproxy,inbucket,edge-runtime,logflare,vector,supavisor,realtime,storage-api,postgres-meta
+        run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor,realtime,storage-api,postgres-meta
       - name: Apply every migration and the dev seed from scratch
         run: supabase db reset
       - name: Sign-up is refused (invite-only, decision 0003)
@@ -87,3 +92,27 @@ jobs:
             -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
             -d '{"email":"sarah.chen@example.com","password":"LocalDev2026pw"}')
           test "$code" = "200" || { echo "::error title=Seeded sign-in failed (HTTP $code)::$(head -c 500 /tmp/signin.json)"; exit 1; }
+      - name: Edge Functions refuse unsigned calls, enforce limits, and fail safely
+        run: |
+          eval "$(supabase status -o env)"
+          # A provider that cannot be reached, and a fake key that must never be echoed.
+          printf 'EMBEDDING_PROVIDER=ollama\nEMBEDDING_MODEL=bge-m3\nOLLAMA_URL=http://127.0.0.1:9\nVOYAGE_API_KEY=sk-should-never-appear\n' > /tmp/fn.env
+          supabase functions serve --env-file /tmp/fn.env > /tmp/functions.log 2>&1 &
+          sleep 15
+          F="$API_URL/functions/v1"
+          fail() { echo "::error title=$1::$2"; exit 1; }
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$F/embed" -H 'Content-Type: application/json' -d '{"texts":["a"],"kind":"query"}')
+          [ "$code" = "401" ] || fail "No JWT should get 401" "got $code"
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/embed" -H "Authorization: Bearer $ANON_KEY" -H 'Content-Type: application/json' -d '{"texts":["a"],"kind":"query"}')
+          [ "$code" = "401" ] || fail "Anon key alone should get 401" "got $code $(cat /tmp/r.json)"
+          TOKEN=$(curl -s -X POST "$API_URL/auth/v1/token?grant_type=password" -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
+            -d '{"email":"sarah.chen@example.com","password":"LocalDev2026pw"}' | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
+          big=$(python3 -c 'import json; print(json.dumps({"texts":["a"]*129,"kind":"query"}))')
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/embed" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d "$big")
+          [ "$code" = "400" ] || fail "129 texts should get 400" "got $code $(cat /tmp/r.json)"
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/embed" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"texts":["Do you use MFA?"],"kind":"query"}')
+          [ "$code" = "503" ] || fail "Unreachable provider should get 503" "got $code $(cat /tmp/r.json)"
+          code=$(curl -s -o /tmp/r2.json -w '%{http_code}' -X POST "$F/embed-entries" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}')
+          [ "$code" = "503" ] || fail "embed-entries with unreachable provider should get 503" "got $code $(cat /tmp/r2.json)"
+          if grep -q 'sk-should-never-appear' /tmp/r.json /tmp/r2.json; then fail "Key leaked" "a response contained the provider key"; fi
+          echo "embed: $(cat /tmp/r.json)"; echo "embed-entries: $(cat /tmp/r2.json)"
