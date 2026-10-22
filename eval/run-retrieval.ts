@@ -78,6 +78,19 @@ const documentText = (e: KnowledgeEntry) => `${e.question}\n${e.answer}`;
 
 // ─── Embedding with a disk cache ────────────────────────────────────────────
 
+/** A dropped connection ("terminated") mid-run should not lose the candidate: retry the batch. */
+async function embedWithRetry(p: EmbeddingProvider, batch: string[], kind: EmbedKind, attempts = 4) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await p.embed(batch, kind);
+    } catch (err) {
+      if (attempt >= attempts) throw err;
+      console.log(`\n  ${p.model}: ${(err as Error).message}; retrying in ${5 * attempt}s`);
+      await new Promise((r) => setTimeout(r, 5000 * attempt));
+    }
+  }
+}
+
 async function embedCached(p: EmbeddingProvider, texts: string[], kind: EmbedKind): Promise<number[][]> {
   const dir = join(ROOT, 'eval/.cache', p.name, p.model.replace(/[^a-z0-9.-]/gi, '_'));
   mkdirSync(dir, { recursive: true });
@@ -87,7 +100,7 @@ async function embedCached(p: EmbeddingProvider, texts: string[], kind: EmbedKin
   const missing = [...new Set(texts.filter((t) => !cache[key(t)]))];
   for (let i = 0; i < missing.length; i += BATCH) {
     const batch = missing.slice(i, i + BATCH);
-    const { vectors } = await p.embed(batch, kind);
+    const { vectors } = await embedWithRetry(p, batch, kind);
     batch.forEach((t, j) => (cache[key(t)] = vectors[j]));
     writeFileSync(file, JSON.stringify(cache));
     process.stdout.write(`  ${p.model} ${kind}: ${Math.min(i + BATCH, missing.length)}/${missing.length}\r`);
