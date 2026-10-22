@@ -145,7 +145,7 @@ function ColSelect({ label, value, options, onChange, required }: {
 
 interface Props {
   kb: KnowledgeEntry[];
-  onAddToKB: (entries: Omit<KnowledgeEntry, 'id'>[]) => void;
+  onAddToKB: (entries: Omit<KnowledgeEntry, 'id'>[], origin: 'response', originRef: string) => Promise<boolean>;
   opportunityId: string;
   opportunityName: string;
   currentUser: UserProfile;
@@ -424,14 +424,14 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
     loadPastSessions();
   };
 
-  const handleAddToKB = () => {
+  const handleAddToKB = async () => {
     const entries = accepted.map((q) => ({
       question: q.question, answer: q.finalAnswer,
       tags: q.sources.flatMap((s) => s.entry.tags).slice(0, 4),
       source: `RFI: ${fileName}`,
     }));
-    onAddToKB(entries);
-    setKbAdded(true);
+    // Sprint 3 replaces this button with learning at export, with full provenance.
+    if (await onAddToKB(entries, 'response', fileName)) setKbAdded(true);
   };
 
   const startNew = () => {

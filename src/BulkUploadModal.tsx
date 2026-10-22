@@ -77,7 +77,7 @@ function Select({ label, value, options, onChange, required }: {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface Props {
-  onImport: (entries: Omit<KnowledgeEntry, 'id'>[]) => void;
+  onImport: (entries: Omit<KnowledgeEntry, 'id'>[], fileName: string) => void;
   onClose: () => void;
 }
 
@@ -155,7 +155,7 @@ export default function BulkUploadModal({ onImport, onClose }: Props) {
       question: r.question, answer: r.answer,
       tags: r.tags, source: r.source || undefined,
     }));
-    onImport(toAdd);
+    onImport(toAdd, fileName);
   };
 
   const validRows    = rows.filter((r) => !r.error);

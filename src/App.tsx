@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Database, X, BookOpen, Tag, CheckCircle2,
   Plus, ChevronLeft, Briefcase,
-  Inbox, Users, LogOut, Menu, Search, Sparkles,
+  Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle,
 } from 'lucide-react';
-import { initialKnowledgeBase } from './knowledgeBase';
+import { loadKnowledgeBase, importEntries, describeImport, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
 import RFIWorkspace from './RFIWorkspace';
@@ -122,14 +122,13 @@ export default function App() {
   const [currentUser, setCurrentUser]             = useState<UserProfile | null>(null);
   const [allUsers, setAllUsers]                   = useState<UserProfile[]>([]);
   const [authLoading, setAuthLoading]             = useState(true);
-  const [kb, setKb]                               = useState<KnowledgeEntry[]>(initialKnowledgeBase);
+  const [kb, setKb]                               = useState<KnowledgeEntry[]>([]);
   const [showKBModal, setShowKBModal]             = useState(false);
   const [showBulkUpload, setShowBulkUpload]       = useState(false);
-  const [toast, setToast]                         = useState<{ msg: string } | null>(null);
+  const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
   const [view, setView]                           = useState<AppView>('opportunities');
   const [navOpen, setNavOpen]                     = useState(false);
-  const idCounter                                 = useRef(initialKnowledgeBase.length + 1);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -166,6 +165,7 @@ export default function App() {
       });
     }
     await loadAllUsers();
+    await refreshKB();
     setAuthLoading(false);
   }
 
@@ -181,17 +181,30 @@ export default function App() {
     }
   }
 
-  const addToKB = (entries: Omit<KnowledgeEntry, 'id'>[]) => {
-    const newEntries: KnowledgeEntry[] = entries.map((e) => {
-      const id = `KB-${String(idCounter.current).padStart(3, '0')}`;
-      idCounter.current += 1;
-      return { ...e, id };
-    });
-    setKb((prev) => [...prev, ...newEntries]);
-    const msg = `${newEntries.length} entr${newEntries.length !== 1 ? 'ies' : 'y'} added to Knowledge Base`;
-    setToast({ msg });
-    setTimeout(() => setToast(null), 5000);
-    return newEntries;
+  const showToast = (msg: string, tone: 'ok' | 'error' = 'ok') => {
+    setToast({ msg, tone });
+    setTimeout(() => setToast(null), tone === 'error' ? 10000 : 5000);
+  };
+
+  const refreshKB = async () => {
+    try {
+      setKb(await loadKnowledgeBase());
+    } catch (err) {
+      showToast((err as Error).message, 'error');
+    }
+  };
+
+  /** Add entries through the database; returns whether anything was saved. */
+  const addToKB = async (entries: NewEntry[], origin: KbOrigin, originRef: string): Promise<boolean> => {
+    try {
+      const result = await importEntries(entries, origin, originRef);
+      showToast(describeImport(result));
+      await refreshKB();
+      return true;
+    } catch (err) {
+      showToast((err as Error).message, 'error');
+      return false;
+    }
   };
 
   const handleSignOut = async () => {
@@ -242,15 +255,17 @@ export default function App() {
       )}
       {showBulkUpload && (
         <BulkUploadModal
-          onImport={(e) => { addToKB(e); setShowBulkUpload(false); }}
+          onImport={async (e, fileName) => { if (await addToKB(e, 'import', fileName)) setShowBulkUpload(false); }}
           onClose={() => setShowBulkUpload(false)}
         />
       )}
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-ink-900 text-white text-sm px-5 py-3.5 rounded-2xl shadow-modal animate-slide-up">
-          <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+        <div role="status" className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-ink-900 text-white text-sm px-5 py-3.5 rounded-2xl shadow-modal animate-slide-up">
+          {toast.tone === 'error'
+            ? <AlertTriangle size={16} className="text-coral-400 flex-shrink-0" />
+            : <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />}
           <span className="font-medium">{toast.msg}</span>
           <button onClick={() => setToast(null)} className="ml-2 text-ink-400 hover:text-white transition-colors">
             <X size={14} />
