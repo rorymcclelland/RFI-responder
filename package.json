@@ -19,7 +19,9 @@
     "eval:retrieval": "tsx eval/run-retrieval.ts",
     "eval:calibrate": "tsx eval/run-calibration.ts",
     "eval:answerability": "tsx eval/run-answerability.ts",
-    "eval:gates": "tsx eval/run-gates.ts"
+    "eval:gates": "tsx eval/run-gates.ts",
+    "eval:drafting": "tsx eval/run-drafting.ts",
+    "eval:redteam": "tsx eval/run-redteam.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
