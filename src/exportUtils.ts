@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import { buildCsv, buildXlsx, escapeHtml } from './lib/spreadsheet';
 import { RFIQuestion } from './types';
 
 function triggerDownload(content: BlobPart, filename: string, type: string) {
@@ -23,44 +23,30 @@ function stripKbReferences(answer: string) {
 
 export function exportCSV(questions: RFIQuestion[], sourceFileName = 'export') {
   const accepted = questions.filter((q) => q.status === 'accepted');
-  const escape   = (s: string) => `"${s.replace(/"/g, '""')}"`;
-  const rows = [
-    ['#', 'Question', 'Answer'].map(escape).join(','),
-    ...accepted.map((q, i) =>
-      [
-        i + 1,
-        escape(q.question),
-        escape(stripKbReferences(q.finalAnswer)),
-      ].join(',')
-    ),
-  ];
-  triggerDownload(rows.join('\r\n'), `${stem(sourceFileName)}.csv`, 'text/csv;charset=utf-8;');
+  const csv = buildCsv(
+    ['#', 'Question', 'Answer'],
+    accepted.map((q, i) => [String(i + 1), q.question, stripKbReferences(q.finalAnswer)]),
+  );
+  triggerDownload('\ufeff' + csv, `${stem(sourceFileName)}.csv`, 'text/csv;charset=utf-8;');
 }
 
 // ─── Excel ────────────────────────────────────────────────────────────────────
 
-export function exportExcel(questions: RFIQuestion[], sourceFileName = 'export') {
+export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'export') {
   const accepted = questions.filter((q) => q.status === 'accepted');
-
-  const wsData = accepted.map((q, i) => ({
-    '#': i + 1,
-    Question: q.question,
-    Answer: stripKbReferences(q.finalAnswer),
-    'Was Edited': q.finalAnswer !== q.generatedAnswer ? 'Yes' : 'No',
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(wsData);
-
-  ws['!cols'] = [
-    { wch: 5 },   // #
-    { wch: 60 },  // Question
-    { wch: 80 },  // Answer
-    { wch: 12 },  // Was Edited
-  ];
-
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'RFI Responses');
-  XLSX.writeFile(wb, `${stem(sourceFileName)}.xlsx`);
+  const bytes = await buildXlsx(
+    'RFI Responses',
+    ['#', 'Question', 'Answer', 'Was Edited'],
+    accepted.map((q, i) => [
+      String(i + 1),
+      q.question,
+      stripKbReferences(q.finalAnswer),
+      q.finalAnswer !== q.generatedAnswer ? 'Yes' : 'No',
+    ]),
+    [5, 60, 80, 12],
+  );
+  triggerDownload(bytes, `${stem(sourceFileName)}.xlsx`,
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
 
 // ─── Word (HTML-based .doc — opens in Word/LibreOffice) ───────────────────────
@@ -76,10 +62,10 @@ export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') 
         <td style="width:5%;padding:8px 6px;border:1px solid #e2e8f0;vertical-align:top;
                    font-size:12px;color:#64748b;font-weight:bold;">${i + 1}</td>
         <td style="width:40%;padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;
-                   font-size:13px;color:#1e293b;">${q.question.replace(/</g, '&lt;')}</td>
+                   font-size:13px;color:#1e293b;">${escapeHtml(q.question)}</td>
         <td style="padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;
                    font-size:13px;color:#334155;line-height:1.5;">
-          ${stripKbReferences(q.finalAnswer).replace(/</g, '&lt;').replace(/\n/g, '<br>')}
+          ${escapeHtml(stripKbReferences(q.finalAnswer)).replace(/\n/g, '<br>')}
         </td>
       </tr>`
     )
@@ -104,7 +90,7 @@ export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') 
     </head>
     <body>
       <h1>RFI Response Document</h1>
-      <p class="meta">Generated: ${date} &nbsp;·&nbsp; Source: ${sourceFileName}
+      <p class="meta">Generated: ${date} &nbsp;·&nbsp; Source: ${escapeHtml(sourceFileName)}
          &nbsp;·&nbsp; ${accepted.length} accepted response${accepted.length !== 1 ? 's' : ''}
       </p>
       <table>

@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from 'react';
-import * as XLSX from 'xlsx';
+import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
 import {
   Upload, FileSpreadsheet, ChevronDown, Sparkles, Loader2,
   CheckCircle2, SkipForward, BarChart3, Download, Plus,
@@ -181,10 +181,11 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
   const [pastSessions, setPastSessions]   = useState<RFISession[]>([]);
   const [orphanSessions, setOrphanSessions] = useState<RFISession[]>([]);
   const [kbAdded, setKbAdded]             = useState(false);
+  const [uploadError, setUploadError]     = useState('');
   const [listCollapsed, setListCollapsed] = useState(false);
   const [assignments, setAssignments]     = useState<Record<string, QuestionAssignment[]>>({});
   const fileInput                         = useRef<HTMLInputElement>(null);
-  const rawRows                           = useRef<Record<string, unknown>[]>([]);
+  const rawRows                           = useRef<Row[]>([]);
 
   useEffect(() => { loadPastSessions(true); }, [opportunityId]);
   useEffect(() => { if (sessionId) loadAssignments(sessionId); }, [sessionId]);
@@ -305,22 +306,18 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
 
   // ── File parsing ─────────────────────────────────────────────────────────
 
-  const processFile = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target!.result as ArrayBuffer);
-      const wb   = XLSX.read(data, { type: 'array' });
-      const ws   = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '' });
-      if (!rows.length) return;
-      const hdrs = Object.keys(rows[0]);
+  const processFile = useCallback(async (file: File) => {
+    setUploadError('');
+    try {
+      const { headers: hdrs, rows } = await parseSpreadsheet(file);
       rawRows.current = rows;
       setFileName(file.name);
       setHeaders(hdrs);
       setQuestionCol(detectQuestionColumn(hdrs));
       setStep('mapping');
-    };
-    reader.readAsArrayBuffer(file);
+    } catch (err) {
+      setUploadError(err instanceof SpreadsheetError ? err.message : 'The file could not be read.');
+    }
   }, []);
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -485,12 +482,18 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
         </p>
         <p className="text-sm text-ink-400 font-medium">or click to browse</p>
         <div className="flex justify-center gap-2 mt-5">
-          {['.csv', '.xlsx', '.xls'].map((e) => (
+          {['.csv', '.xlsx'].map((e) => (
             <span key={e} className="text-xs bg-white border border-ink-200 text-ink-500 px-3 py-1.5 rounded-full font-bold shadow-card">{e}</span>
           ))}
         </div>
-        <input ref={fileInput} type="file" accept=".csv,.xlsx,.xls" onChange={handleFileChange} className="hidden" />
+        <input ref={fileInput} type="file" accept=".csv,.xlsx" onChange={handleFileChange} className="hidden" />
       </div>
+
+      {uploadError && (
+        <div role="alert" className="flex items-center gap-2 text-sm text-coral-600 bg-coral-50 border border-coral-200 rounded-xl px-4 py-3 font-medium">
+          <AlertTriangle size={14} className="flex-shrink-0" /> {uploadError}
+        </div>
+      )}
 
       {/* Steps */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

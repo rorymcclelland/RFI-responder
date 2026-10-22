@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useCallback, DragEvent, ChangeEvent } from 'react';
-import * as XLSX from 'xlsx';
+import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
 import {
   X, Upload, FileSpreadsheet, AlertTriangle, CheckCircle2,
   ChevronDown, Trash2, Eye, EyeOff,
@@ -90,41 +90,27 @@ export default function BulkUploadModal({ onImport, onClose }: Props) {
   const [rows, setRows]         = useState<ParsedRow[]>([]);
   const [error, setError]       = useState('');
   const fileInput               = useRef<HTMLInputElement>(null);
-  const rawRef                  = useRef<Record<string, unknown>[]>([]);
+  const rawRef                  = useRef<Row[]>([]);
 
   // ── File parsing ────────────────────────────────────────────────────────
 
-  const processFile = useCallback((file: File) => {
+  const processFile = useCallback(async (file: File) => {
     setError('');
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    if (!['csv', 'xlsx', 'xls'].includes(ext ?? '')) {
-      setError('Please upload a .csv, .xlsx, or .xls file.');
-      return;
+    try {
+      const { headers: hdrs, rows } = await parseSpreadsheet(file);
+      rawRef.current = rows;
+      setFileName(file.name);
+      setHeaders(hdrs);
+      setColMap({
+        question: detectCol(hdrs, 'question'),
+        answer:   detectCol(hdrs, 'answer'),
+        tags:     detectCol(hdrs, 'tags'),
+        source:   detectCol(hdrs, 'source'),
+      });
+      setStage('map');
+    } catch (err) {
+      setError(err instanceof SpreadsheetError ? err.message : 'The file could not be read.');
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target!.result as ArrayBuffer);
-        const wb   = XLSX.read(data, { type: 'array' });
-        const ws   = wb.Sheets[wb.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: '' });
-        if (!json.length) { setError('File is empty.'); return; }
-        const hdrs = Object.keys(json[0]);
-        rawRef.current = json;
-        setFileName(file.name);
-        setHeaders(hdrs);
-        setColMap({
-          question: detectCol(hdrs, 'question'),
-          answer:   detectCol(hdrs, 'answer'),
-          tags:     detectCol(hdrs, 'tags'),
-          source:   detectCol(hdrs, 'source'),
-        });
-        setStage('map');
-      } catch {
-        setError('Could not parse file.');
-      }
-    };
-    reader.readAsArrayBuffer(file);
   }, []);
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -232,7 +218,7 @@ export default function BulkUploadModal({ onImport, onClose }: Props) {
                 <Upload size={26} className={`mx-auto mb-3 ${dragOver ? 'text-teal-500' : 'text-slate-400'}`} />
                 <p className="text-sm font-semibold text-slate-700">Drag & drop or click to upload</p>
                 <p className="text-xs text-slate-500 mt-1">CSV or Excel with question + answer columns</p>
-                <input ref={fileInput} type="file" accept=".csv,.xlsx,.xls" onChange={handleChange} className="hidden" />
+                <input ref={fileInput} type="file" accept=".csv,.xlsx" onChange={handleChange} className="hidden" />
               </div>
               {error && (
                 <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
