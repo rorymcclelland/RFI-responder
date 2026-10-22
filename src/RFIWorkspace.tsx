@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { KnowledgeEntry, RFIQuestion, RFISession, RFIStatus, UserProfile, QuestionAssignment } from './types';
 import { scoreQuestion, detectQuestionColumn } from './lib/drafting';
+import { bulkAcceptInDb } from './lib/sessions';
 import { supabase } from './lib/supabase';
 import { exportCSV, exportExcel, exportWord } from './exportUtils';
 import RFIQuestionCard from './RFIQuestionCard';
@@ -400,14 +401,20 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
   const handleSkip      = useCallback((id: string) => updateQuestion(id, { status: 'skipped' }), [updateQuestion]);
   const handleUndoSkip  = useCallback((id: string) => updateQuestion(id, { status: 'pending' }), [updateQuestion]);
 
-  const bulkAccept = (minConf: number) => {
-    setQuestions((prev) => prev.map((q) =>
-      q.status === 'pending' && q.confidence >= minConf ? { ...q, status: 'accepted' } : q
-    ));
+  // Saved to the database first, then shown; previously the screen changed but nothing was saved.
+  const runBulkAccept = async (minConf: number | null) => {
+    if (!sessionId) return;
+    try {
+      await bulkAcceptInDb(supabase, sessionId, minConf);
+      setQuestions((prev) => prev.map((q) =>
+        q.status === 'pending' && (minConf === null || q.confidence >= minConf) ? { ...q, status: 'accepted' } : q
+      ));
+    } catch (err) {
+      setUploadError((err as Error).message);
+    }
   };
-  const bulkAcceptAll = () => {
-    setQuestions((prev) => prev.map((q) => q.status === 'pending' ? { ...q, status: 'accepted' } : q));
-  };
+  const bulkAccept = (minConf: number) => runBulkAccept(minConf);
+  const bulkAcceptAll = () => runBulkAccept(null);
 
   // ── Export ────────────────────────────────────────────────────────────────
 
@@ -689,6 +696,12 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
             )}
           </div>
         </div>
+
+        {uploadError && (
+          <div role="alert" className="flex items-center gap-2 text-sm text-coral-600 bg-coral-50 border border-coral-200 rounded-xl px-4 py-3 font-medium">
+            <AlertTriangle size={14} className="flex-shrink-0" /> {uploadError}
+          </div>
+        )}
 
         {/* Filter + search */}
         <div className="space-y-2">
