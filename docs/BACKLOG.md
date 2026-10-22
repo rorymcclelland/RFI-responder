@@ -20,15 +20,15 @@ Refinement: `docs/refinement/sprint-0.md`
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| S0-1 | Remove misleading content | Factsheet deleted; random confidence removed; UI and docs describe what the code does | S | Ready, Sprint 0 |
-| S0-2 | Clean build | Zero type errors, zero lint errors, no high-severity audit findings | S | Ready, Sprint 0 |
-| S0-3 | Safe spreadsheet handling | Vulnerable library replaced; upload limits; export escapes formula injection | M | Ready, Sprint 0 |
-| S0-4 | Persist the knowledge base | Entries stored in the database with source; survive reload; imports and add-back write to it | M | Ready, Sprint 0 |
-| S0-5 | Fix access control | Users cannot make themselves admin; written role matrix; policies match it; no shared-password users in migrations; sign-up policy settled | M | Ready, Sprint 0 |
-| S0-6 | Reproducible local environment | One documented command sequence brings up database, seed data and app from a clean clone | M | Ready, Sprint 0 |
-| S0-7 | Tests and CI | Unit tests for pure logic; database access tests; GitHub Actions runs typecheck, lint, tests, audit on every push | M | Ready, Sprint 0 |
-| S0-8 | Documentation baseline | README rewritten; decisions log started; agent context file | S | Ready, Sprint 0 |
-| S0-9 | Spike: where the AI runs | Time-boxed note settling embedding and drafting model route and its hosting consequences | S | Ready, Sprint 0 |
+| S0-1 | Remove misleading content | Factsheet deleted; random confidence removed; UI and docs describe what the code does | S | Built, awaiting sprint review |
+| S0-2 | Clean build | Zero type errors, zero lint errors, no high-severity audit findings | S | Built, awaiting sprint review |
+| S0-3 | Safe spreadsheet handling | Vulnerable library replaced; upload limits; export escapes formula injection | M | Built, awaiting sprint review |
+| S0-4 | Persist the knowledge base | Entries stored in the database with source; survive reload; imports and add-back write to it | M | Built, awaiting sprint review |
+| S0-5 | Fix access control | Users cannot make themselves admin; written role matrix; policies match it; no shared-password users in migrations; sign-up policy settled | M | Built, awaiting sprint review |
+| S0-6 | Reproducible local environment | One documented command sequence brings up database, seed data and app from a clean clone | M | Built, awaiting sprint review |
+| S0-7 | Tests and CI | Unit tests for pure logic; database access tests; GitHub Actions runs typecheck, lint, tests, audit on every push | M | Built, awaiting sprint review |
+| S0-8 | Documentation baseline | README rewritten; decisions log started; agent context file | S | Built, awaiting sprint review |
+| S0-9 | Spike: where the AI runs | Time-boxed note settling embedding and drafting model route and its hosting consequences | S | Built, awaiting sprint review |
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked 22 Oct after the product brief)
 
@@ -47,6 +47,19 @@ Refinement: `docs/refinement/sprint-0.md`
 | ID | Story | Acceptance criteria (summary) | Notes |
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
+
+## Follow-ups logged during Sprint 0 (to rank at the sprint close)
+
+| ID | Item | Why |
+|---|---|---|
+| F-1 | End-to-end browser test of the main path (sign in, upload, review, assign, export) | Not possible in the build workspace; needs Docker locally or a hosted project (decision 0004) |
+| F-2 | Generate database types (`npm run types`) and use them in the app | Needs the local Supabase stack |
+| F-3 | In-app "invite user" screen, via a server-side function with the service key | Invites go through the Supabase dashboard for now |
+| F-4 | Move to Tailwind 4 | Clears the remaining dev-only audit findings (decision 0002) |
+| F-5 | Split `RFIWorkspace.tsx` (870 lines) | Planned with Sprint 2's drafting rewrite |
+| F-6 | Validate `kb_entries.origin_ref` server-side | Free text until Sprint 3's learning at export sets it |
+| F-7 | Make questions within a session editable only by the owner, assignees and admins | Team-editable until Sprint 3's readiness workflow |
+| F-8 | Turn on leaked-password protection in the hosted project | The Bolt migration claiming to do this was a no-op (decision 0003) |
 
 ## Parked
 
