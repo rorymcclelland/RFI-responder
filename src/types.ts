@@ -39,7 +39,9 @@ export interface RFIQuestion {
   question: string;
   generatedAnswer: string;
   finalAnswer: string;
-  confidence: number;
+  /** Calibrated chance the top entry is right (S1-6); null when not calibrated. */
+  confidence: number | null;
+  /** Top cosine similarity, or the keyword fusion score when matching was keyword-only. */
   retrievalScore: number;
   sources: RetrievedSource[];
   status: RFIStatus;

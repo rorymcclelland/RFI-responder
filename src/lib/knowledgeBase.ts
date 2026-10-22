@@ -52,3 +52,14 @@ export function describeImport(r: ImportResult): string {
   if (r.invalid > 0) parts.push(`${plural(r.invalid, 'row', 'rows')} without a question or answer skipped`);
   return parts.join('; ') + '.';
 }
+
+/**
+ * Ask the server to embed entries that have no vector from the configured model yet
+ * (S1-3). Never throws: an import still counts if indexing fails, and the entries
+ * are picked up by the next call.
+ */
+export async function indexNewEntries(): Promise<{ ok: true; embedded: number } | { ok: false; reason: string }> {
+  const { data, error } = await supabase.functions.invoke('embed-entries', { body: {} });
+  if (error || !data) return { ok: false, reason: error?.message ?? 'no response' };
+  return { ok: true, embedded: (data as { embedded: number }).embedded };
+}

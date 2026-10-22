@@ -18,7 +18,9 @@ import {
   Search, X, MessageSquare, ChevronUp, User, ArrowRight,
 } from 'lucide-react';
 import { KnowledgeEntry, RFIQuestion, RFISession, RFIStatus, UserProfile, QuestionAssignment } from './types';
-import { scoreQuestion, detectQuestionColumn } from './lib/drafting';
+import { draftAnswer, detectQuestionColumn } from './lib/drafting';
+import { embedQuestions, matchQuestion, selectDraftSources } from './lib/retrievalClient';
+import { calibratedConfidence } from './lib/calibration';
 import { bulkAcceptInDb } from './lib/sessions';
 import { supabase } from './lib/supabase';
 import { exportCSV, exportExcel, exportWord } from './exportUtils';
@@ -145,7 +147,6 @@ function ColSelect({ label, value, options, onChange, required }: {
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface Props {
-  kb: KnowledgeEntry[];
   onAddToKB: (entries: Omit<KnowledgeEntry, 'id'>[], origin: 'response', originRef: string) => Promise<boolean>;
   opportunityId: string;
   opportunityName: string;
@@ -159,15 +160,21 @@ interface Props {
 
 type WorkflowStep    = 'idle' | 'mapping' | 'processing' | 'review' | 'export';
 type FilterTab       = 'all' | 'pending' | 'accepted' | 'skipped';
-type ConfidenceGroup = 'all' | 'high' | 'medium' | 'low';
+type ConfidenceGroup = 'all' | 'high' | 'medium' | 'low' | 'uncalibrated';
 
 const CONF_GROUPS: { key: ConfidenceGroup; label: string; min: number; max: number; dot: string }[] = [
   { key: 'high',   label: 'High ≥80%',    min: 0.80, max: 1.01, dot: 'bg-emerald-500' },
   { key: 'medium', label: 'Medium 40–80%', min: 0.40, max: 0.80, dot: 'bg-amber-400' },
   { key: 'low',    label: 'Low <40%',      min: 0,    max: 0.40, dot: 'bg-coral-500' },
+  { key: 'uncalibrated', label: 'Not calibrated', min: NaN, max: NaN, dot: 'bg-ink-300' },
 ];
 
-export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunityName, currentUser, allUsers, canAssign }: Props) {
+function inGroup(confidence: number | null, g: { key: ConfidenceGroup; min: number; max: number }): boolean {
+  if (g.key === 'uncalibrated') return confidence === null;
+  return confidence !== null && confidence >= g.min && confidence < g.max;
+}
+
+export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName, currentUser, allUsers, canAssign }: Props) {
   const [step, setStep]                   = useState<WorkflowStep>('idle');
   const [dragOver, setDragOver]           = useState(false);
   const [fileName, setFileName]           = useState('');
@@ -185,6 +192,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
   const [orphanSessions, setOrphanSessions] = useState<RFISession[]>([]);
   const [kbAdded, setKbAdded]             = useState(false);
   const [uploadError, setUploadError]     = useState('');
+  const [retrievalNote, setRetrievalNote] = useState('');
   const [listCollapsed, setListCollapsed] = useState(false);
   const [assignments, setAssignments]     = useState<Record<string, QuestionAssignment[]>>({});
   const fileInput                         = useRef<HTMLInputElement>(null);
@@ -300,7 +308,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
     const loaded: RFIQuestion[] = rows.map((r) => ({
       id: r.id, sessionId: r.session_id, position: r.position, question: r.question,
       generatedAnswer: r.generated_answer ?? '', finalAnswer: r.final_answer ?? '',
-      confidence: Number(r.confidence ?? 0), retrievalScore: Number(r.retrieval_score ?? 0),
+      confidence: r.confidence === null || r.confidence === undefined ? null : Number(r.confidence), retrievalScore: Number(r.retrieval_score ?? 0),
       sources: [], status: r.status as RFIStatus,
     }));
     setFileName(session.fileName);
@@ -353,20 +361,47 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
     const sid = session?.id as string | undefined;
     if (sid) setSessionId(sid);
 
+    const asked = rows
+      .map((r, position) => ({ text: String(r[questionCol] ?? '').trim(), position }))
+      .filter((x) => x.text);
+
+    // 1. Embed every question in one go (server-side; the provider key never reaches the browser).
+    setProcessMsg('Understanding the questions…');
+    const embedded = await embedQuestions(supabase, asked.map((x) => x.text));
+    setRetrievalNote(embedded.ok ? '' : `Keyword match only: ${embedded.reason}. Confidence is not calibrated.`);
+
+    // 2. Match each question in the database, a few at a time.
     const built: RFIQuestion[] = [];
-    for (let i = 0; i < rows.length; i++) {
-      const qText = String(rows[i][questionCol] ?? '').trim();
-      if (!qText) continue;
-      setProcessMsg(`Processing ${i + 1} / ${rows.length}…`);
-      setProgress(Math.round(((i + 1) / rows.length) * 100));
-      const { sources, generatedAnswer, confidence, retrievalScore } = scoreQuestion(qText, kb);
-      built.push({
-        id: crypto.randomUUID(), sessionId: sid ?? '', position: i, question: qText,
-        generatedAnswer, finalAnswer: generatedAnswer, confidence, retrievalScore, sources, status: 'pending',
-      });
-      await new Promise((r) => setTimeout(r, 0));
+    const CONCURRENCY = 5;
+    try {
+      for (let i = 0; i < asked.length; i += CONCURRENCY) {
+        const chunk = asked.slice(i, i + CONCURRENCY);
+        const matched = await Promise.all(chunk.map((x, j) =>
+          matchQuestion(supabase, x.text, embedded.ok ? embedded.vectors[i + j] : null, embedded.ok ? embedded.model : null)));
+        chunk.forEach((x, j) => {
+          const rows = matched[j];
+          const sources = selectDraftSources(rows);
+          const generatedAnswer = draftAnswer(sources);
+          const similarities = rows.map((r) => r.similarity).filter((v): v is number => v !== null);
+          const topSimilarity = similarities.length ? Math.max(...similarities) : null;
+          built.push({
+            id: crypto.randomUUID(), sessionId: sid ?? '', position: x.position, question: x.text,
+            generatedAnswer, finalAnswer: generatedAnswer,
+            confidence: calibratedConfidence(topSimilarity, embedded.ok ? embedded.model : null),
+            retrievalScore: topSimilarity ?? rows[0]?.fused_score ?? 0,
+            sources, status: 'pending',
+          });
+        });
+        setProcessMsg(`Matched ${Math.min(i + CONCURRENCY, asked.length)} / ${asked.length}…`);
+        setProgress(Math.round((Math.min(i + CONCURRENCY, asked.length) / asked.length) * 100));
+      }
+    } catch (err) {
+      setUploadError((err as Error).message);
+      setStep('mapping');
+      return;
     }
-    built.sort((a, b) => a.confidence - b.confidence);
+    // Least confident first; questions without a calibrated confidence come before all others.
+    built.sort((a, b) => (a.confidence ?? -1) - (b.confidence ?? -1));
     setQuestions(built);
     setProgress(100);
 
@@ -374,7 +409,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
       const dbRows = built.map((q) => ({
         id: q.id, session_id: sid, position: q.position, question: q.question,
         generated_answer: q.generatedAnswer, final_answer: q.finalAnswer,
-        confidence: Math.round(q.confidence * 1e6) / 1e6,
+        confidence: q.confidence === null ? null : Math.round(q.confidence * 1e3) / 1e3,
         retrieval_score: Math.round(q.retrievalScore * 1e6) / 1e6,
         status: q.status,
         sources_json: q.sources.map((s) => ({ id: s.entry.id, score: s.score })),
@@ -385,7 +420,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
       }
     }
     setTimeout(() => setStep('review'), 400);
-  }, [questionCol, fileName, kb, opportunityId]);
+  }, [questionCol, fileName, opportunityId]);
 
   // ── Review actions ────────────────────────────────────────────────────────
 
@@ -407,7 +442,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
     try {
       await bulkAcceptInDb(supabase, sessionId, minConf);
       setQuestions((prev) => prev.map((q) =>
-        q.status === 'pending' && (minConf === null || q.confidence >= minConf) ? { ...q, status: 'accepted' } : q
+        q.status === 'pending' && (minConf === null || (q.confidence !== null && q.confidence >= minConf)) ? { ...q, status: 'accepted' } : q
       ));
     } catch (err) {
       setUploadError((err as Error).message);
@@ -419,6 +454,8 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
   // ── Export ────────────────────────────────────────────────────────────────
 
   const accepted = questions.filter((q) => q.status === 'accepted');
+  /** Threshold bulk accept needs calibrated confidence (rule 4); "All" stays available as an explicit choice. */
+  const anyCalibrated = questions.some((q) => q.confidence !== null);
   const pending  = questions.filter((q) => q.status === 'pending');
   const skipped  = questions.filter((q) => q.status === 'skipped');
 
@@ -455,7 +492,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
     if (filter !== 'all' && q.status !== filter) return false;
     if (confGroup !== 'all') {
       const grp = CONF_GROUPS.find((g) => g.key === confGroup)!;
-      if (q.confidence < grp.min || q.confidence >= grp.max) return false;
+      if (!inGroup(q.confidence, grp)) return false;
     }
     if (search) {
       const s = search.toLowerCase();
@@ -679,10 +716,14 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
         {/* Bulk actions + complete button */}
         <div className="flex flex-wrap items-center gap-2 p-4 bg-white rounded-2xl border border-ink-100 shadow-card">
           <span className="section-label mr-1">Bulk accept:</span>
-          <button onClick={() => bulkAccept(0.80)} className="text-xs font-bold px-3.5 py-2 bg-ink-900 text-white rounded-xl hover:bg-ink-700 transition-colors">
+          <button onClick={() => bulkAccept(0.80)} disabled={!anyCalibrated}
+            title={anyCalibrated ? 'Accept pending drafts with calibrated confidence of 80% or more' : 'Not available: confidence is not calibrated for these results'}
+            className="text-xs font-bold px-3.5 py-2 bg-ink-900 text-white rounded-xl hover:bg-ink-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             High ≥80%
           </button>
-          <button onClick={() => bulkAccept(0.60)} className="text-xs font-bold px-3.5 py-2 bg-ink-100 text-ink-700 rounded-xl hover:bg-ink-200 transition-colors">
+          <button onClick={() => bulkAccept(0.60)} disabled={!anyCalibrated}
+            title={anyCalibrated ? 'Accept pending drafts with calibrated confidence of 60% or more' : 'Not available: confidence is not calibrated for these results'}
+            className="text-xs font-bold px-3.5 py-2 bg-ink-100 text-ink-700 rounded-xl hover:bg-ink-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             Medium ≥60%
           </button>
           <button onClick={bulkAcceptAll} className="text-xs font-bold px-3.5 py-2 border border-ink-200 text-ink-600 rounded-xl hover:bg-ink-50 transition-colors">
@@ -700,6 +741,11 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
         {uploadError && (
           <div role="alert" className="flex items-center gap-2 text-sm text-coral-600 bg-coral-50 border border-coral-200 rounded-xl px-4 py-3 font-medium">
             <AlertTriangle size={14} className="flex-shrink-0" /> {uploadError}
+          </div>
+        )}
+        {retrievalNote && (
+          <div role="status" className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-medium">
+            <AlertTriangle size={14} className="flex-shrink-0" /> {retrievalNote}
           </div>
         )}
 
@@ -745,7 +791,8 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
               All <span className="opacity-60">({totalCount})</span>
             </button>
             {CONF_GROUPS.map((g) => {
-              const cnt = questions.filter((q) => q.confidence >= g.min && q.confidence < g.max).length;
+              const cnt = questions.filter((q) => inGroup(q.confidence, g)).length;
+              if (g.key === 'uncalibrated' && cnt === 0) return null;
               return (
                 <button key={g.key} onClick={() => setConfGroup(confGroup === g.key ? 'all' : g.key)}
                   className={`text-xs px-3 py-1.5 rounded-xl border font-bold transition-all flex items-center gap-1.5 ${
@@ -760,11 +807,11 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
         </div>
 
         {/* Low confidence alert */}
-        {questions.filter((q) => q.confidence < 0.4 && q.status === 'pending').length > 0 && (
+        {questions.filter((q) => q.confidence !== null && q.confidence < 0.4 && q.status === 'pending').length > 0 && (
           <div className="flex items-start gap-3 p-4 bg-coral-50 border border-coral-200 rounded-2xl">
             <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-coral-500" />
             <p className="text-sm text-coral-700 font-medium">
-              <strong>{questions.filter((q) => q.confidence < 0.4 && q.status === 'pending').length}</strong> questions have very low confidence (&lt;40%) — edit these carefully before accepting.
+              <strong>{questions.filter((q) => q.confidence !== null && q.confidence < 0.4 && q.status === 'pending').length}</strong> questions have very low confidence (&lt;40%) — edit these carefully before accepting.
             </p>
           </div>
         )}

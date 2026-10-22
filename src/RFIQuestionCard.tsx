@@ -81,7 +81,8 @@ function KBArticleModal({ entry, score, onClose }: { entry: KnowledgeEntry; scor
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function confidenceLabel(c: number): { label: string; dot: string; bar: string; text: string } {
+function confidenceLabel(c: number | null): { label: string; dot: string; bar: string; text: string } {
+  if (c === null) return { label: 'Not calibrated', dot: 'bg-ink-300', bar: 'bg-ink-300', text: 'text-ink-500' };
   const pct = c * 100;
   if (pct >= 80) return { label: 'High',   dot: 'bg-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-700' };
   if (pct >= 40) return { label: 'Medium', dot: 'bg-amber-400',   bar: 'bg-amber-400',   text: 'text-amber-700' };
@@ -266,7 +267,7 @@ export default function RFIQuestionCard({
   const [editText, setEditText]   = useState(question.finalAnswer);
   const [kbArticle, setKbArticle] = useState<{ entry: KnowledgeEntry; score: number } | null>(null);
   const conf = confidenceLabel(question.confidence);
-  const pct  = Math.round(question.confidence * 100);
+  const pct  = question.confidence === null ? null : Math.round(question.confidence * 100);
 
   useEffect(() => { setEditText(question.finalAnswer); }, [question.finalAnswer]);
 
@@ -328,9 +329,9 @@ export default function RFIQuestionCard({
         {/* Confidence bar */}
         <div className="hidden sm:flex items-center gap-2 w-28 flex-shrink-0 mt-1">
           <div className="flex-1 h-1.5 bg-ink-100 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${conf.bar}`} style={{ width: `${pct}%` }} />
+            <div className={`h-full rounded-full ${conf.bar}`} style={{ width: `${pct ?? 0}%` }} />
           </div>
-          <span className={`text-xs font-black w-9 text-right ${conf.text}`}>{pct}%</span>
+          <span className={`text-xs font-black w-9 text-right ${conf.text}`} title={pct === null ? 'Not calibrated' : undefined}>{pct === null ? 'n/c' : `${pct}%`}</span>
         </div>
 
         <ChevronDown size={16} className={`flex-shrink-0 text-ink-300 transition-transform mt-0.5 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -343,9 +344,22 @@ export default function RFIQuestionCard({
           {/* Confidence breakdown */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Confidence', value: question.confidence, tip: 'How closely this question matches the knowledge base: the best keyword match, scaled from 0 to 100%. A heuristic for now, not yet calibrated.' },
-              { label: 'Raw match',  value: question.retrievalScore, tip: 'Unscaled keyword similarity (TF-IDF cosine) of the single best-matching knowledge-base entry.' },
+              { label: 'Confidence', value: question.confidence, tip: question.confidence === null
+                  ? 'Not calibrated: matching was keyword-only, or there is no calibration table for the embedding model in use.'
+                  : 'The measured chance that the top knowledge-base entry is the right one, calibrated on the evaluation set for this embedding model (docs/evals).' },
+              { label: 'Similarity', value: question.retrievalScore, tip: 'Cosine similarity between the question and the best-matching entry (or the keyword score when matching was keyword-only). Not a probability.' },
             ].map((m) => {
+              if (m.value === null) {
+                return (
+                  <div key={m.label} className="bg-ink-50 rounded-xl p-3 border border-ink-100">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <span className="text-2xs font-black uppercase tracking-wider text-ink-500">{m.label}</span>
+                      <InfoTip text={m.tip} />
+                    </div>
+                    <span className="text-sm font-black text-ink-500">Not calibrated</span>
+                  </div>
+                );
+              }
               const mp = Math.min(100, Math.round(m.value * 100));
               const mc = mp >= 80 ? 'text-emerald-700' : mp >= 40 ? 'text-amber-700' : 'text-coral-600';
               const bar = mp >= 80 ? 'bg-emerald-500' : mp >= 40 ? 'bg-amber-400' : 'bg-coral-500';
@@ -476,7 +490,7 @@ export default function RFIQuestionCard({
             </div>
           )}
 
-          {question.confidence < 0.4 && question.status === 'pending' && (
+          {question.confidence !== null && question.confidence < 0.4 && question.status === 'pending' && (
             <div className="flex items-start gap-2.5 p-3.5 bg-coral-50 border border-coral-200 rounded-xl">
               <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-coral-500" />
               <p className="text-xs text-coral-700 font-medium leading-relaxed">

@@ -4,7 +4,7 @@ import {
   Plus, ChevronLeft, Briefcase,
   Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle,
 } from 'lucide-react';
-import { loadKnowledgeBase, importEntries, describeImport, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
+import { loadKnowledgeBase, importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
 import RFIWorkspace from './RFIWorkspace';
@@ -198,8 +198,14 @@ export default function App() {
   const addToKB = async (entries: NewEntry[], origin: KbOrigin, originRef: string): Promise<boolean> => {
     try {
       const result = await importEntries(entries, origin, originRef);
-      showToast(describeImport(result));
       await refreshKB();
+      // Make the new entries findable by meaning (S1-3). The import counts even if this fails.
+      const indexed = result.inserted > 0 ? await indexNewEntries() : { ok: true as const, embedded: 0 };
+      if (indexed.ok) {
+        showToast(describeImport(result));
+      } else {
+        showToast(`${describeImport(result)} Not yet indexed for meaning-based search (${indexed.reason}); they will be indexed on the next import.`, 'error');
+      }
       return true;
     } catch (err) {
       showToast((err as Error).message, 'error');
@@ -412,7 +418,6 @@ export default function App() {
               <span className="font-semibold text-ink-800 truncate">{activeOpportunity.name}</span>
             </div>
             <RFIWorkspace
-              kb={kb}
               onAddToKB={addToKB}
               opportunityId={activeOpportunity.id}
               opportunityName={activeOpportunity.name}
