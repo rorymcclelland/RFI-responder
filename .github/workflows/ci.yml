@@ -72,7 +72,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type-check the Edge Functions (Deno)
-        run: deno check supabase/functions/embed/index.ts supabase/functions/embed-entries/index.ts
+        run: deno check --config supabase/functions/deno.json supabase/functions/embed/index.ts supabase/functions/embed-entries/index.ts
       - name: Start Supabase (database, auth and API only)
         run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor,realtime,storage-api,postgres-meta
       - name: Apply every migration and the dev seed from scratch
