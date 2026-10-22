@@ -38,5 +38,5 @@ JSON.parse(readFileSync(here('./source/near-miss.json'), 'utf8')).forEach((text,
   });
 });
 
-writeFileSync(here('./retrieval-set.json'), JSON.stringify({ version: '2026-10-22.2', items }, null, 2) + '\n');
+writeFileSync(here('./retrieval-set.json'), JSON.stringify({ version: '2026-10-22.3', items }, null, 2) + '\n');
 console.log(`Wrote ${items.length} items`);

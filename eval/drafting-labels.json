@@ -1,0 +1,793 @@
+{
+ "version": "2026-10-22.1",
+ "note": "Synthetic. Labels written by Claude, unreviewed; Rory checks 10 drafts to measure the automated judge (Sprint 2, Q3).",
+ "items": [
+  {
+   "id": "d001",
+   "question": "How does your organization protect data at rest?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization encrypt data at rest?"
+   ],
+   "mustInclude": [
+    "AES-256",
+    "HSM"
+   ]
+  },
+  {
+   "id": "d002",
+   "question": "What encryption standards are used for data in transit?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization encrypt data in transit?"
+   ],
+   "mustInclude": [
+    "TLS 1.2",
+    "mTLS"
+   ]
+  },
+  {
+   "id": "d003",
+   "question": "Describe your multi-factor authentication implementation.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What multi-factor authentication (MFA) controls are in place?"
+   ],
+   "mustInclude": [
+    "FIDO2",
+    "mandatory"
+   ]
+  },
+  {
+   "id": "d004",
+   "question": "How are user access rights reviewed and revoked?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization manage user identities and access provisioning?"
+   ],
+   "mustInclude": [
+    "4 hours",
+    "recertification"
+   ]
+  },
+  {
+   "id": "d005",
+   "question": "What is your process for managing privileged accounts?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How do you manage privileged access accounts?"
+   ],
+   "mustInclude": [
+    "just-in-time",
+    "session recording"
+   ]
+  },
+  {
+   "id": "d006",
+   "question": "How does your organization handle security incidents?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization handle security incidents?"
+   ],
+   "mustInclude": [
+    "NIST SP 800-61",
+    "24/7"
+   ]
+  },
+  {
+   "id": "d007",
+   "question": "What is your mean time to detect a security breach?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d008",
+   "question": "Describe your patch management and vulnerability remediation process.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How do you manage security patches and updates?",
+    "Describe your vulnerability management program."
+   ],
+   "mustInclude": [
+    "24",
+    "CVSS"
+   ]
+  },
+  {
+   "id": "d009",
+   "question": "How often do you conduct penetration testing?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How frequently do you conduct penetration testing?"
+   ],
+   "mustInclude": [
+    "annually",
+    "third-party"
+   ]
+  },
+  {
+   "id": "d010",
+   "question": "What compliance certifications does your organization hold?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What SOC 2 certifications does your organization hold?",
+    "How does your organization align with ISO 27001?"
+   ],
+   "mustInclude": [
+    "SOC 2 Type II",
+    "27001"
+   ]
+  },
+  {
+   "id": "d011",
+   "question": "How do you ensure GDPR compliance for EU data subjects?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization comply with GDPR?"
+   ],
+   "mustInclude": [
+    "Data Protection Officer",
+    "DPIA"
+   ]
+  },
+  {
+   "id": "d012",
+   "question": "Describe your data retention and secure deletion policies.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What is your data retention and disposal policy?"
+   ],
+   "mustInclude": [
+    "7 years",
+    "NIST SP 800-88"
+   ]
+  },
+  {
+   "id": "d013",
+   "question": "What is your backup strategy and recovery time objective?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What backup and recovery procedures are in place?",
+    "What business continuity and disaster recovery plans does your organization maintain?"
+   ],
+   "mustInclude": [
+    "daily",
+    "quarterly"
+   ]
+  },
+  {
+   "id": "d014",
+   "question": "How do you assess third-party vendor security?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How do you manage third-party and vendor security risk?"
+   ],
+   "mustInclude": [
+    "tiered",
+    "right-to-audit"
+   ]
+  },
+  {
+   "id": "d015",
+   "question": "What security awareness training is provided to employees?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "Describe your security awareness training program."
+   ],
+   "mustInclude": [
+    "annually",
+    "phishing simulation"
+   ]
+  },
+  {
+   "id": "d016",
+   "question": "How is remote access to your infrastructure secured?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What controls govern remote access to your environment?"
+   ],
+   "mustInclude": [
+    "ZTNA",
+    "MFA"
+   ]
+  },
+  {
+   "id": "d017",
+   "question": "Describe your network segmentation architecture.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "Describe your network security architecture."
+   ],
+   "mustInclude": [
+    "micro-segmentation"
+   ]
+  },
+  {
+   "id": "d018",
+   "question": "What logging and monitoring capabilities do you have?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What logging and monitoring capabilities do you have?"
+   ],
+   "mustInclude": [
+    "SIEM",
+    "12 months"
+   ]
+  },
+  {
+   "id": "d019",
+   "question": "How do you manage cryptographic key lifecycles?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization manage cryptographic key lifecycles?"
+   ],
+   "mustInclude": [
+    "KMS",
+    "NIST SP 800-57"
+   ]
+  },
+  {
+   "id": "d020",
+   "question": "What is your software development security lifecycle process?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How is security integrated into your software development lifecycle (SDLC)?"
+   ],
+   "mustInclude": [
+    "SAST",
+    "threat modeling"
+   ]
+  },
+  {
+   "id": "d021",
+   "question": "How do you handle data subject access requests?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization comply with GDPR?"
+   ],
+   "mustInclude": [
+    "30-day"
+   ]
+  },
+  {
+   "id": "d022",
+   "question": "Describe your business continuity planning.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What business continuity and disaster recovery plans does your organization maintain?"
+   ],
+   "mustInclude": [
+    "tested annually"
+   ]
+  },
+  {
+   "id": "d023",
+   "question": "How are security policies reviewed and updated?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What security governance structure is in place?"
+   ],
+   "mustInclude": [
+    "monthly"
+   ]
+  },
+  {
+   "id": "d024",
+   "question": "What endpoint protection solutions are deployed?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What endpoint protection controls are deployed?"
+   ],
+   "mustInclude": [
+    "EDR",
+    "MDM"
+   ]
+  },
+  {
+   "id": "d025",
+   "question": "How do you control physical access to data centers?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What physical security controls protect your facilities?"
+   ],
+   "mustInclude": [
+    "badge",
+    "CCTV"
+   ]
+  },
+  {
+   "id": "d026",
+   "question": "What is your approach to zero-trust architecture?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "Describe your zero trust implementation."
+   ],
+   "mustInclude": [
+    "NIST SP 800-207"
+   ]
+  },
+  {
+   "id": "d027",
+   "question": "How do you manage API security?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How do you secure APIs exposed to external consumers?"
+   ],
+   "mustInclude": [
+    "OAuth 2.0",
+    "Rate limiting"
+   ]
+  },
+  {
+   "id": "d028",
+   "question": "Describe your data loss prevention controls.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What controls are in place to prevent data loss?"
+   ],
+   "mustInclude": [
+    "DLP"
+   ]
+  },
+  {
+   "id": "d029",
+   "question": "How are cloud environments secured?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How do you secure cloud environments?"
+   ],
+   "mustInclude": [
+    "CSPM",
+    "CIS benchmarks"
+   ]
+  },
+  {
+   "id": "d030",
+   "question": "What is your vulnerability disclosure policy?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What is your policy on vulnerability disclosure and bug bounty programs?"
+   ],
+   "mustInclude": [
+    "bug bounty",
+    "safe harbor"
+   ]
+  },
+  {
+   "id": "d031",
+   "question": "How do you protect against ransomware?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "Describe the controls used to protect against ransomware attacks."
+   ],
+   "mustInclude": [
+    "EDR",
+    "allowlisting"
+   ]
+  },
+  {
+   "id": "d032",
+   "question": "What identity governance processes are in place?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization manage user identities and access provisioning?"
+   ],
+   "mustInclude": [
+    "IGA"
+   ]
+  },
+  {
+   "id": "d033",
+   "question": "How is security integrated into your CI/CD pipeline?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How is security integrated into your software development lifecycle (SDLC)?",
+    "What security assurances do you provide for your software build and release pipeline?"
+   ],
+   "mustInclude": [
+    "SAST/DAST"
+   ]
+  },
+  {
+   "id": "d034",
+   "question": "Describe your disaster recovery testing frequency.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What business continuity and disaster recovery plans does your organization maintain?"
+   ],
+   "mustInclude": [
+    "tested annually"
+   ]
+  },
+  {
+   "id": "d035",
+   "question": "How do you manage mobile device security?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "What mobile device management policies are in place?"
+   ],
+   "mustInclude": [
+    "MDM",
+    "remote wipe"
+   ]
+  },
+  {
+   "id": "d036",
+   "question": "What is your approach to threat intelligence?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization approach threat intelligence?"
+   ],
+   "mustInclude": [
+    "ISAC"
+   ]
+  },
+  {
+   "id": "d037",
+   "question": "How are security exceptions and risk acceptances handled?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization handle security exceptions and policy waivers?"
+   ],
+   "mustInclude": [
+    "expiry dates",
+    "CISO"
+   ]
+  },
+  {
+   "id": "d038",
+   "question": "Describe your email security controls.",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How do you secure your email platform?"
+   ],
+   "mustInclude": [
+    "DMARC"
+   ]
+  },
+  {
+   "id": "d039",
+   "question": "How do you secure your supply chain software components?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "How does your organization manage software supply chain security?"
+   ],
+   "mustInclude": [
+    "SBOM",
+    "SCA"
+   ]
+  },
+  {
+   "id": "d040",
+   "question": "What is your process for security due diligence on acquisitions?",
+   "language": "en",
+   "kind": "sample",
+   "gold": [
+    "Describe your approach to security during mergers, acquisitions, or divestitures."
+   ],
+   "mustInclude": [
+    "Letter of Intent"
+   ]
+  },
+  {
+   "id": "d041",
+   "question": "What is your mean time to detect a security breach?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d042",
+   "question": "Do you hold a FedRAMP authorisation?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d043",
+   "question": "Can customers manage their own encryption keys (bring your own key)?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d044",
+   "question": "What cyber insurance cover do you hold?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d045",
+   "question": "Which SIEM product do you use?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d046",
+   "question": "Are your data centres in Frankfurt or Dublin?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d047",
+   "question": "Are you certified under Cyber Essentials Plus?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d048",
+   "question": "Do you hold a TISAX label?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d049",
+   "question": "Are you HITRUST certified?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d050",
+   "question": "Are you assessed under Australia's IRAP programme?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d051",
+   "question": "Do you hold a German C5 attestation?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d052",
+   "question": "Are you registered under Japan's ISMAP scheme?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d053",
+   "question": "What background checks do you run on new employees?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d054",
+   "question": "Are staff with production access vetted to government clearance level?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d055",
+   "question": "Do you use biometric authentication for data centre entry?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d056",
+   "question": "What is your contractual uptime commitment?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d057",
+   "question": "Do you publish a list of your sub-processors?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d058",
+   "question": "Will you allow our auditors to visit your premises?",
+   "language": "en",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d059",
+   "question": "顧客が独自の暗号鍵を管理することはできますか？",
+   "language": "ja",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d060",
+   "question": "サイバー保険には加入していますか？",
+   "language": "ja",
+   "kind": "near-miss",
+   "gold": [],
+   "mustInclude": []
+  },
+  {
+   "id": "d061",
+   "question": "保存されているデータはどのように暗号化されていますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "How does your organization encrypt data at rest?"
+   ],
+   "mustInclude": [
+    "AES-256"
+   ]
+  },
+  {
+   "id": "d062",
+   "question": "通信中のデータはどのように暗号化されていますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "How does your organization encrypt data in transit?"
+   ],
+   "mustInclude": [
+    "TLS 1.2"
+   ]
+  },
+  {
+   "id": "d063",
+   "question": "どのような多要素認証が導入されていますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "What multi-factor authentication (MFA) controls are in place?"
+   ],
+   "mustInclude": [
+    "FIDO2"
+   ]
+  },
+  {
+   "id": "d064",
+   "question": "セキュリティインシデントにはどのように対応していますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "How does your organization handle security incidents?"
+   ],
+   "mustInclude": [
+    "NIST SP 800-61"
+   ]
+  },
+  {
+   "id": "d065",
+   "question": "どのようなSOC 2認証を取得していますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "What SOC 2 certifications does your organization hold?"
+   ],
+   "mustInclude": [
+    "SOC 2"
+   ]
+  },
+  {
+   "id": "d066",
+   "question": "特権アカウントをどのように管理していますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "How do you manage privileged access accounts?"
+   ],
+   "mustInclude": [
+    "PAM"
+   ]
+  },
+  {
+   "id": "d067",
+   "question": "どのようなログ取得と監視の機能がありますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "What logging and monitoring capabilities do you have?"
+   ],
+   "mustInclude": [
+    "SIEM"
+   ]
+  },
+  {
+   "id": "d068",
+   "question": "ゼロトラストの実装について説明してください。",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "Describe your zero trust implementation."
+   ],
+   "mustInclude": [
+    "NIST SP 800-207"
+   ]
+  },
+  {
+   "id": "d069",
+   "question": "メールプラットフォームをどのように保護していますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "How do you secure your email platform?"
+   ],
+   "mustInclude": [
+    "DMARC"
+   ]
+  },
+  {
+   "id": "d070",
+   "question": "ソフトウェアサプライチェーンのセキュリティをどのように管理していますか？",
+   "language": "ja",
+   "kind": "translation",
+   "gold": [
+    "How does your organization manage software supply chain security?"
+   ],
+   "mustInclude": [
+    "SBOM"
+   ]
+  }
+ ]
+}

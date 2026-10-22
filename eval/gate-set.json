@@ -1,0 +1,986 @@
+{
+ "version": "2026-10-22.1",
+ "note": "Synthetic, written by Claude, unreviewed. Legal or contractual follows the broad definition agreed for Sprint 2 (Q2): contract terms, liability, indemnity, warranties, governing law, IP ownership, termination, insurance cover, data processing agreement terms, audit rights, service credits and penalties; when in doubt, gated.",
+ "items": [
+  {
+   "id": "p001",
+   "text": "What is the annual licence cost for 500 users?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a price"
+  },
+  {
+   "id": "p002",
+   "text": "Please provide your pricing for the enterprise tier.",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a price"
+  },
+  {
+   "id": "p003",
+   "text": "What discounts do you offer for a three-year commitment?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about discounts"
+  },
+  {
+   "id": "p004",
+   "text": "Is implementation charged separately, and at what rate?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about charges"
+  },
+  {
+   "id": "p005",
+   "text": "What are your day rates for professional services?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for rates"
+  },
+  {
+   "id": "p006",
+   "text": "Do you charge per seat or per usage?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about the charging model"
+  },
+  {
+   "id": "p007",
+   "text": "What would a three-year commitment look like for 500 seats?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "disguised: a commercial quote without the word price"
+  },
+  {
+   "id": "p008",
+   "text": "How much would it cost to add another region?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a cost"
+  },
+  {
+   "id": "p009",
+   "text": "Please complete the attached rate card.",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for rates"
+  },
+  {
+   "id": "p010",
+   "text": "What is the total cost of ownership over five years?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a cost"
+  },
+  {
+   "id": "p011",
+   "text": "Are there overage fees if we exceed our usage allowance?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about fees"
+  },
+  {
+   "id": "p012",
+   "text": "What does premium support cost?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a cost"
+  },
+  {
+   "id": "p013",
+   "text": "Do you offer non-profit or public sector pricing?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about pricing"
+  },
+  {
+   "id": "p014",
+   "text": "What price increases should we expect at renewal?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about price changes"
+  },
+  {
+   "id": "p015",
+   "text": "Are training sessions included in the subscription fee?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks what a fee covers"
+  },
+  {
+   "id": "p016",
+   "text": "What is the cost of the dedicated hosting option?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a cost"
+  },
+  {
+   "id": "p017",
+   "text": "Provide a fee breakdown for onboarding, licences and support.",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for fees"
+  },
+  {
+   "id": "p018",
+   "text": "Is there a minimum contract value?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a commercial minimum"
+  },
+  {
+   "id": "p019",
+   "text": "What payment terms do you offer?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about payment terms"
+  },
+  {
+   "id": "p020",
+   "text": "Can you match a competitor's quote?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a commercial concession"
+  },
+  {
+   "id": "p021",
+   "text": "How is storage above the included quota billed?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about billing"
+  },
+  {
+   "id": "p022",
+   "text": "What is the price per API call beyond the free tier?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a price"
+  },
+  {
+   "id": "p023",
+   "text": "Do you charge extra for single sign-on?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about charges"
+  },
+  {
+   "id": "p024",
+   "text": "What would you charge to run a penetration test of our tenant on request?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a charge, in a security context"
+  },
+  {
+   "id": "p025",
+   "text": "Are there exit or data export fees?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about fees"
+  },
+  {
+   "id": "p026",
+   "text": "What currency do you invoice in, and do your prices include VAT?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about prices and invoicing"
+  },
+  {
+   "id": "p027",
+   "text": "What would it set us back to add 200 more users mid-term?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "disguised: asks for a cost colloquially"
+  },
+  {
+   "id": "p028",
+   "text": "Give us your best and final offer.",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a commercial offer"
+  },
+  {
+   "id": "p029",
+   "text": "How much budget should we set aside for year one?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "disguised: asks for the spend"
+  },
+  {
+   "id": "p030",
+   "text": "Is the security add-on priced separately?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about pricing"
+  },
+  {
+   "id": "p031",
+   "text": "What is the hourly rate for incident response support beyond the included hours?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a rate, in a security context"
+  },
+  {
+   "id": "p032",
+   "text": "Do you offer volume tiers?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks about volume pricing"
+  },
+  {
+   "id": "p033",
+   "text": "What will the renewal cost be after the first term?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a cost"
+  },
+  {
+   "id": "p034",
+   "text": "How much is the on-premises deployment option?",
+   "language": "en",
+   "category": "pricing",
+   "reason": "asks for a price"
+  },
+  {
+   "id": "p035",
+   "text": "年間ライセンス費用はいくらですか？",
+   "language": "ja",
+   "category": "pricing",
+   "reason": "asks for an annual licence cost"
+  },
+  {
+   "id": "p036",
+   "text": "500ユーザーの場合の価格を教えてください。",
+   "language": "ja",
+   "category": "pricing",
+   "reason": "asks for a price for 500 users"
+  },
+  {
+   "id": "p037",
+   "text": "3年契約の場合、割引はありますか？",
+   "language": "ja",
+   "category": "pricing",
+   "reason": "asks about a three-year discount"
+  },
+  {
+   "id": "p038",
+   "text": "導入支援の費用は別途かかりますか？",
+   "language": "ja",
+   "category": "pricing",
+   "reason": "asks whether implementation costs extra"
+  },
+  {
+   "id": "p039",
+   "text": "サポートの料金体系を教えてください。",
+   "language": "ja",
+   "category": "pricing",
+   "reason": "asks about support charges"
+  },
+  {
+   "id": "p040",
+   "text": "見積もりを提出してください。",
+   "language": "ja",
+   "category": "pricing",
+   "reason": "asks for a quotation"
+  },
+  {
+   "id": "l001",
+   "text": "What is your limitation of liability under the contract?",
+   "language": "en",
+   "category": "legal",
+   "reason": "liability"
+  },
+  {
+   "id": "l002",
+   "text": "Will you indemnify us against third-party intellectual property claims?",
+   "language": "en",
+   "category": "legal",
+   "reason": "indemnity"
+  },
+  {
+   "id": "l003",
+   "text": "What warranties do you give on service availability?",
+   "language": "en",
+   "category": "legal",
+   "reason": "warranties"
+  },
+  {
+   "id": "l004",
+   "text": "Which governing law and jurisdiction apply to the agreement?",
+   "language": "en",
+   "category": "legal",
+   "reason": "governing law"
+  },
+  {
+   "id": "l005",
+   "text": "Who owns the intellectual property in deliverables created for us?",
+   "language": "en",
+   "category": "legal",
+   "reason": "IP ownership"
+  },
+  {
+   "id": "l006",
+   "text": "Under what conditions can either party terminate the contract?",
+   "language": "en",
+   "category": "legal",
+   "reason": "termination"
+  },
+  {
+   "id": "l007",
+   "text": "Will you sign our data processing agreement without changes?",
+   "language": "en",
+   "category": "legal",
+   "reason": "data processing agreement terms"
+  },
+  {
+   "id": "l008",
+   "text": "Do you grant customers the right to audit your facilities?",
+   "language": "en",
+   "category": "legal",
+   "reason": "audit rights"
+  },
+  {
+   "id": "l009",
+   "text": "What service credits apply if you miss the availability SLA?",
+   "language": "en",
+   "category": "legal",
+   "reason": "service credits"
+  },
+  {
+   "id": "l010",
+   "text": "Are there penalties for late delivery?",
+   "language": "en",
+   "category": "legal",
+   "reason": "penalties"
+  },
+  {
+   "id": "l011",
+   "text": "What insurance cover will you carry for the term of the contract?",
+   "language": "en",
+   "category": "legal",
+   "reason": "insurance cover"
+  },
+  {
+   "id": "l012",
+   "text": "Who carries the risk if a breach is your fault?",
+   "language": "en",
+   "category": "legal",
+   "reason": "disguised: liability without the word"
+  },
+  {
+   "id": "l013",
+   "text": "Will you accept unlimited liability for data protection breaches?",
+   "language": "en",
+   "category": "legal",
+   "reason": "liability"
+  },
+  {
+   "id": "l014",
+   "text": "Can we terminate for convenience?",
+   "language": "en",
+   "category": "legal",
+   "reason": "termination"
+  },
+  {
+   "id": "l015",
+   "text": "Will you agree to our standard terms and conditions?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract terms"
+  },
+  {
+   "id": "l016",
+   "text": "Do you accept liquidated damages for missed milestones?",
+   "language": "en",
+   "category": "legal",
+   "reason": "damages"
+  },
+  {
+   "id": "l017",
+   "text": "What happens to our data on termination of the agreement?",
+   "language": "en",
+   "category": "legal",
+   "reason": "termination terms"
+  },
+  {
+   "id": "l018",
+   "text": "Will you include the EU Standard Contractual Clauses in our contract?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract terms"
+  },
+  {
+   "id": "l019",
+   "text": "Can you commit contractually to notifying us of a breach within 24 hours?",
+   "language": "en",
+   "category": "legal",
+   "reason": "a contractual commitment"
+  },
+  {
+   "id": "l020",
+   "text": "Will you place source code in escrow as a condition of the contract?",
+   "language": "en",
+   "category": "legal",
+   "reason": "escrow as a contract term"
+  },
+  {
+   "id": "l021",
+   "text": "Will you treat our supplier code of conduct as a binding obligation?",
+   "language": "en",
+   "category": "legal",
+   "reason": "a binding commitment"
+  },
+  {
+   "id": "l022",
+   "text": "What notice period applies before you change your terms of service?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract terms"
+  },
+  {
+   "id": "l023",
+   "text": "Will you subcontract any part of the contract without our consent?",
+   "language": "en",
+   "category": "legal",
+   "reason": "subcontracting terms"
+  },
+  {
+   "id": "l024",
+   "text": "Is there a cap on fee increases written into the agreement?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract terms on fees"
+  },
+  {
+   "id": "l025",
+   "text": "Do you accept step-in rights if you fail to perform?",
+   "language": "en",
+   "category": "legal",
+   "reason": "step-in rights"
+  },
+  {
+   "id": "l026",
+   "text": "Can we have a most-favoured-customer clause?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract clause"
+  },
+  {
+   "id": "l027",
+   "text": "What are the confidentiality obligations in your standard agreement?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract terms"
+  },
+  {
+   "id": "l028",
+   "text": "Will you name us as an additional insured on your policy?",
+   "language": "en",
+   "category": "legal",
+   "reason": "insurance cover"
+  },
+  {
+   "id": "l029",
+   "text": "Can you confirm in writing that our data will never leave the UK?",
+   "language": "en",
+   "category": "legal",
+   "reason": "disguised: a written commitment"
+  },
+  {
+   "id": "l030",
+   "text": "What remedies do we have if you fail the security requirements in schedule 3?",
+   "language": "en",
+   "category": "legal",
+   "reason": "disguised: remedies under a contract schedule"
+  },
+  {
+   "id": "l031",
+   "text": "Will you accept the liability provisions in our master services agreement?",
+   "language": "en",
+   "category": "legal",
+   "reason": "liability"
+  },
+  {
+   "id": "l032",
+   "text": "Is your SLA contractually binding, or a target?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract status of the SLA"
+  },
+  {
+   "id": "l033",
+   "text": "How long is the minimum term, and how does auto-renewal work?",
+   "language": "en",
+   "category": "legal",
+   "reason": "contract term and renewal"
+  },
+  {
+   "id": "l034",
+   "text": "Do you agree to be bound by our information security schedule?",
+   "language": "en",
+   "category": "legal",
+   "reason": "a binding commitment"
+  },
+  {
+   "id": "l035",
+   "text": "契約上の責任の上限はいくらですか？",
+   "language": "ja",
+   "category": "legal",
+   "reason": "liability cap"
+  },
+  {
+   "id": "l036",
+   "text": "第三者からの知的財産権侵害の請求について補償していただけますか？",
+   "language": "ja",
+   "category": "legal",
+   "reason": "indemnity"
+  },
+  {
+   "id": "l037",
+   "text": "準拠法と管轄裁判所はどこになりますか？",
+   "language": "ja",
+   "category": "legal",
+   "reason": "governing law"
+  },
+  {
+   "id": "l038",
+   "text": "契約はどのような場合に解除できますか？",
+   "language": "ja",
+   "category": "legal",
+   "reason": "termination"
+  },
+  {
+   "id": "l039",
+   "text": "当社のデータ処理契約に署名いただけますか？",
+   "language": "ja",
+   "category": "legal",
+   "reason": "data processing agreement"
+  },
+  {
+   "id": "l040",
+   "text": "SLAを満たさなかった場合のサービスクレジットはありますか？",
+   "language": "ja",
+   "category": "legal",
+   "reason": "service credits"
+  },
+  {
+   "id": "o001",
+   "text": "How does your organization comply with GDPR?",
+   "language": "en",
+   "category": "none",
+   "reason": "regulatory compliance practice, not contract terms"
+  },
+  {
+   "id": "o002",
+   "text": "Do your supplier contracts include security and data protection clauses?",
+   "language": "en",
+   "category": "none",
+   "reason": "about the bidder's own suppliers"
+  },
+  {
+   "id": "o003",
+   "text": "How do you manage cross-border data transfers?",
+   "language": "en",
+   "category": "none",
+   "reason": "privacy practice"
+  },
+  {
+   "id": "o004",
+   "text": "How do you protect intellectual property in your source code?",
+   "language": "en",
+   "category": "none",
+   "reason": "IP protection practice, not IP ownership terms"
+  },
+  {
+   "id": "o005",
+   "text": "Which regulators do you notify after a breach, and within what legal deadlines?",
+   "language": "en",
+   "category": "none",
+   "reason": "incident practice"
+  },
+  {
+   "id": "o006",
+   "text": "How do you scan open-source components for licence and security issues?",
+   "language": "en",
+   "category": "none",
+   "reason": "software composition practice"
+  },
+  {
+   "id": "o007",
+   "text": "How is access revoked when an employee's contract ends?",
+   "language": "en",
+   "category": "none",
+   "reason": "joiner-mover-leaver practice"
+  },
+  {
+   "id": "o008",
+   "text": "How do you secure contractors' access to production systems?",
+   "language": "en",
+   "category": "none",
+   "reason": "access control practice"
+  },
+  {
+   "id": "o009",
+   "text": "Do you track mean time to remediate as a security metric?",
+   "language": "en",
+   "category": "none",
+   "reason": "security metrics"
+  },
+  {
+   "id": "o010",
+   "text": "How are security policies communicated to new employees?",
+   "language": "en",
+   "category": "none",
+   "reason": "awareness practice"
+  },
+  {
+   "id": "o011",
+   "text": "What liaison do you have with law enforcement during incident response?",
+   "language": "en",
+   "category": "none",
+   "reason": "incident practice"
+  },
+  {
+   "id": "o012",
+   "text": "How do you ensure compliance with the NIST Cybersecurity Framework?",
+   "language": "en",
+   "category": "none",
+   "reason": "framework alignment"
+  },
+  {
+   "id": "o013",
+   "text": "How does your organization comply with HIPAA requirements?",
+   "language": "en",
+   "category": "none",
+   "reason": "regulatory compliance practice"
+  },
+  {
+   "id": "o014",
+   "text": "How do you secure payment card data in your systems?",
+   "language": "en",
+   "category": "none",
+   "reason": "data security, mentions payment"
+  },
+  {
+   "id": "o015",
+   "text": "Is your billing system in the scope of your SOC 2 report?",
+   "language": "en",
+   "category": "none",
+   "reason": "audit scope, mentions billing"
+  },
+  {
+   "id": "o016",
+   "text": "How do you stop price-scraping bots on your public website?",
+   "language": "en",
+   "category": "none",
+   "reason": "bot protection, mentions price"
+  },
+  {
+   "id": "o017",
+   "text": "What controls protect your finance team from invoice fraud?",
+   "language": "en",
+   "category": "none",
+   "reason": "fraud controls, mentions invoices"
+  },
+  {
+   "id": "o018",
+   "text": "How do you calculate the risk score for a vulnerability?",
+   "language": "en",
+   "category": "none",
+   "reason": "vulnerability practice"
+  },
+  {
+   "id": "o019",
+   "text": "How do you measure the business cost of downtime in your continuity planning?",
+   "language": "en",
+   "category": "none",
+   "reason": "continuity practice, mentions cost"
+  },
+  {
+   "id": "o020",
+   "text": "Is your internal SLA for patching critical vulnerabilities 72 hours?",
+   "language": "en",
+   "category": "none",
+   "reason": "internal remediation target, not a contractual SLA"
+  },
+  {
+   "id": "o021",
+   "text": "What is your internal SLA for triaging security alerts?",
+   "language": "en",
+   "category": "none",
+   "reason": "internal operations target"
+  },
+  {
+   "id": "o022",
+   "text": "How do you protect payroll data?",
+   "language": "en",
+   "category": "none",
+   "reason": "data security"
+  },
+  {
+   "id": "o023",
+   "text": "How do you review new supplier contracts for security requirements?",
+   "language": "en",
+   "category": "none",
+   "reason": "supplier assurance practice"
+  },
+  {
+   "id": "o024",
+   "text": "Does your Data Protection Officer review new processing activities?",
+   "language": "en",
+   "category": "none",
+   "reason": "privacy governance"
+  },
+  {
+   "id": "o025",
+   "text": "How are security policy waivers approved?",
+   "language": "en",
+   "category": "none",
+   "reason": "exception handling"
+  },
+  {
+   "id": "o026",
+   "text": "How do you ensure secure destruction of media when leased equipment is returned?",
+   "language": "en",
+   "category": "none",
+   "reason": "media disposal, mentions lease"
+  },
+  {
+   "id": "o027",
+   "text": "How do you secure your online checkout?",
+   "language": "en",
+   "category": "none",
+   "reason": "application security, mentions checkout"
+  },
+  {
+   "id": "o028",
+   "text": "How are licences for security tools tracked in your asset inventory?",
+   "language": "en",
+   "category": "none",
+   "reason": "asset management, mentions licences"
+  },
+  {
+   "id": "o029",
+   "text": "How do you handle customer data when an employee leaves?",
+   "language": "en",
+   "category": "none",
+   "reason": "access and data handling"
+  },
+  {
+   "id": "o030",
+   "text": "How do you prevent fraudulent refund requests in your support process?",
+   "language": "en",
+   "category": "none",
+   "reason": "fraud controls"
+  },
+  {
+   "id": "o031",
+   "text": "Do you encrypt backups that contain financial records?",
+   "language": "en",
+   "category": "none",
+   "reason": "encryption, mentions financial records"
+  },
+  {
+   "id": "o032",
+   "text": "What legal basis do you record for each processing activity?",
+   "language": "en",
+   "category": "none",
+   "reason": "GDPR record keeping practice"
+  },
+  {
+   "id": "o033",
+   "text": "How do you handle a cost-centre owner asking for elevated access?",
+   "language": "en",
+   "category": "none",
+   "reason": "access control"
+  },
+  {
+   "id": "o034",
+   "text": "How do you protect trade secrets shared with your engineers?",
+   "language": "en",
+   "category": "none",
+   "reason": "IP protection practice"
+  },
+  {
+   "id": "o035",
+   "text": "What terms appear in your acceptable use policy for staff?",
+   "language": "en",
+   "category": "none",
+   "reason": "internal policy, mentions terms"
+  },
+  {
+   "id": "o036",
+   "text": "How long are logs retained to meet regulatory requirements?",
+   "language": "en",
+   "category": "none",
+   "reason": "retention practice"
+  },
+  {
+   "id": "o037",
+   "text": "How does your organization protect data at rest?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o038",
+   "text": "What encryption standards are used for data in transit?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o039",
+   "text": "Describe your multi-factor authentication implementation.",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o040",
+   "text": "How does your organization handle security incidents?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o041",
+   "text": "How often do you conduct penetration testing?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o042",
+   "text": "What compliance certifications does your organization hold?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o043",
+   "text": "What is your backup strategy and recovery time objective?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o044",
+   "text": "How do you assess third-party vendor security?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o045",
+   "text": "How is remote access to your infrastructure secured?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o046",
+   "text": "How do you manage API security?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o047",
+   "text": "How do you protect against ransomware?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o048",
+   "text": "Describe your email security controls.",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o049",
+   "text": "How do you secure your supply chain software components?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o050",
+   "text": "What is your process for security due diligence on acquisitions?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o051",
+   "text": "How are cloud environments secured?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o052",
+   "text": "What is your vulnerability disclosure policy?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o053",
+   "text": "Describe your business continuity planning.",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o054",
+   "text": "How do you manage mobile device security?",
+   "language": "en",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o055",
+   "text": "データは保存時にどのように暗号化されていますか？",
+   "language": "ja",
+   "category": "none",
+   "reason": "ordinary security question"
+  },
+  {
+   "id": "o056",
+   "text": "GDPRにどのように準拠していますか？",
+   "language": "ja",
+   "category": "none",
+   "reason": "regulatory compliance practice"
+  },
+  {
+   "id": "o057",
+   "text": "退職者のアクセス権はどのように削除されますか？",
+   "language": "ja",
+   "category": "none",
+   "reason": "leaver practice"
+  },
+  {
+   "id": "o058",
+   "text": "脆弱性の修正期限（SLA）はどのように定めていますか？",
+   "language": "ja",
+   "category": "none",
+   "reason": "internal remediation target"
+  },
+  {
+   "id": "o059",
+   "text": "決済データはどのように保護していますか？",
+   "language": "ja",
+   "category": "none",
+   "reason": "data security, mentions payment"
+  },
+  {
+   "id": "o060",
+   "text": "インシデント発生時に規制当局へどのように報告しますか？",
+   "language": "ja",
+   "category": "none",
+   "reason": "incident practice"
+  }
+ ]
+}

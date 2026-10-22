@@ -82,7 +82,7 @@ Order: S1-1 and S1-2 first (independent), then S1-3, S1-4, S1-5, S1-6; F-9 any t
 | Japanese recall@5 at least 80% | 100% (machine-translated, unreviewed) | Yes |
 | Calibration error at most 0.10 | 0.036 | Yes |
 | 80% of unanswerable questions below the floor | 62.5% overall; 35.3% of near misses | **No** (residual accepted) |
-| F-12: fewer than 33 of 40 sample questions at 80% or more without evidence | 33 of 40; the 7 below include mean time to detect and DSARs, which the knowledge base does not answer | Partly: the two known gaps now sit below the bulk line |
+| F-12: fewer than 33 of 40 sample questions at 80% or more without evidence | 33 of 40; the 7 below include mean time to detect, which the knowledge base does not answer | Partly: the known gap now sits below the bulk line. Correction (Sprint 2): DSARs were also listed here as unanswerable, but entry KB-0015 (GDPR) does answer them (30-day response SLA); the item was removed from the near-miss set (set 2026-10-22.3) |
 
 **Found at the review and fixed.** BUG-4: source chips and the entry window multiplied similarity by 333 (Sprint 0's keyword ceiling), showing matches of 120%; now shown as similarity, labelled not a probability. The first unanswerable set held only off-topic questions, which made abstention look better than it is; 34 near misses were added (set 2026-10-22.2) and the calibration report now shows near misses and wrong top entries at or above the 80% bulk line (voyage-4: 1 of 34, 7 of 166).
 
