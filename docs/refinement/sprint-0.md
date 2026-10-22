@@ -1,6 +1,6 @@
 # Sprint 0 refinement: baseline and clean-up
 
-Refined 22 October 2026 against `main` at `25c6f07` (the original Bolt export of 11 May 2026). Status: **awaiting Rory's answers** (questions at the end of each story, collected in the final section).
+Refined 22 October 2026 against `main` at `25c6f07` (the original Bolt export of 11 May 2026). Status: **all nine stories Ready, Sprint 0** (answers agreed 22 October 2026, recorded at the end).
 
 ## Why this sprint exists
 
@@ -134,7 +134,7 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 | Read opportunities, sessions, questions, KB | Yes | Yes |
 | Create opportunity, run RFI session | Yes | Yes |
 | Edit or delete an opportunity | Yes | Creator only |
-| Add to KB (import or add-back) | Yes | No (proposes; admin approves later, logged as backlog) |
+| Add to KB (import or add-back) | Yes | Yes (agreed Q3) |
 | Delete KB entry | Yes | No |
 | Assign questions | Yes | Yes |
 | Update an assignment | Yes | Assignee only |
@@ -250,6 +250,16 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 | Q5 | Do you want to run it on your own PC? | (a) Yes: needs Docker Desktop and the Supabase CLI. (b) No: Claude runs it in the cloud workspace and you read the code and test results on GitHub | (b) for now, (a) before Sprint 4 so you can demo it |
 | Q6 | The original Bolt-hosted Supabase project | (a) Pause or delete it. (b) Keep it as the hosted demo | (a): it has open sign-up and shared-password users; a clean hosted project can be set up in Sprint 4 |
 
-## Answers and changes
+## Answers and changes (22 October 2026)
 
-(To be recorded after validation.)
+| # | Answer | Effect |
+|---|---|---|
+| Q1 | SheetJS 0.20.x from SheetJS's registry | S0-3 as written; `.xls` kept (test case 2 stays) |
+| Q2 | Invite-only | S0-5 as written (test case 10 stays) |
+| Q3 | Any member can add to the KB | Role matrix changed: members may import and add back; deleting entries stays admin-only. Every entry records `created_by`, so additions remain traceable. S0-4 test 6 and S0-5 tests follow the new matrix |
+| Q4 | Generated; label as synthetic | S0-8 README and a header note on both CSVs say "synthetic demo data" |
+| Q5 | Not yet | Claude runs the stack in the cloud workspace; Rory reads code and CI results on GitHub. Docker set-up on Rory's PC before Sprint 4 |
+| Q6 | Pause or delete the Bolt-hosted project | Action for Rory (Claude has no access to it): pause or delete it in the Supabase dashboard |
+| Size | Keep the sprint whole | No stories moved |
+
+All nine stories: **Ready, Sprint 0**.

@@ -19,15 +19,15 @@ Refinement: `docs/refinement/sprint-0.md`
 
 | ID | Story | Acceptance criteria (summary) | Size | Status |
 |---|---|---|---|---|
-| S0-1 | Remove misleading content | Factsheet deleted; random confidence removed; UI and docs describe what the code does | S | Refined |
-| S0-2 | Clean build | Zero type errors, zero lint errors, no high-severity audit findings | S | Refined |
-| S0-3 | Safe spreadsheet handling | Vulnerable library replaced; upload limits; export escapes formula injection | M | Refined |
-| S0-4 | Persist the knowledge base | Entries stored in the database with source; survive reload; imports and add-back write to it | M | Refined |
-| S0-5 | Fix access control | Users cannot make themselves admin; written role matrix; policies match it; no shared-password users in migrations; sign-up policy settled | M | Refined |
-| S0-6 | Reproducible local environment | One documented command sequence brings up database, seed data and app from a clean clone | M | Refined |
-| S0-7 | Tests and CI | Unit tests for pure logic; database access tests; GitHub Actions runs typecheck, lint, tests, audit on every push | M | Refined |
-| S0-8 | Documentation baseline | README rewritten; decisions log started; agent context file | S | Refined |
-| S0-9 | Spike: where the AI runs | Time-boxed note settling embedding and drafting model route and its hosting consequences | S | Refined |
+| S0-1 | Remove misleading content | Factsheet deleted; random confidence removed; UI and docs describe what the code does | S | Ready, Sprint 0 |
+| S0-2 | Clean build | Zero type errors, zero lint errors, no high-severity audit findings | S | Ready, Sprint 0 |
+| S0-3 | Safe spreadsheet handling | Vulnerable library replaced; upload limits; export escapes formula injection | M | Ready, Sprint 0 |
+| S0-4 | Persist the knowledge base | Entries stored in the database with source; survive reload; imports and add-back write to it | M | Ready, Sprint 0 |
+| S0-5 | Fix access control | Users cannot make themselves admin; written role matrix; policies match it; no shared-password users in migrations; sign-up policy settled | M | Ready, Sprint 0 |
+| S0-6 | Reproducible local environment | One documented command sequence brings up database, seed data and app from a clean clone | M | Ready, Sprint 0 |
+| S0-7 | Tests and CI | Unit tests for pure logic; database access tests; GitHub Actions runs typecheck, lint, tests, audit on every push | M | Ready, Sprint 0 |
+| S0-8 | Documentation baseline | README rewritten; decisions log started; agent context file | S | Ready, Sprint 0 |
+| S0-9 | Spike: where the AI runs | Time-boxed note settling embedding and drafting model route and its hosting consequences | S | Ready, Sprint 0 |
 
 ## Later sprints (one line each; refined at the previous sprint's close)
 
@@ -41,5 +41,6 @@ Refinement: `docs/refinement/sprint-0.md`
 
 ## Parked
 
-- Retire or reuse the original Bolt-hosted Supabase project (see S0-6 questions).
+- Rory to pause or delete the original Bolt-hosted Supabase project (agreed 22 Oct).
+- Edit and delete individual KB entries in the UI; admin review of member-added KB entries (to consider at Sprint 3 governance).
 - `JOB_STORIES.md` still says "what the AI is drawing on" (3.2); revisit wording once Sprint 2 lands.
