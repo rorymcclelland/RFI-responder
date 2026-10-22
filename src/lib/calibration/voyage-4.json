@@ -1,0 +1,54 @@
+{
+  "model": "voyage-4",
+  "evaluationSet": "2026-10-22.1 (calibrate split)",
+  "points": [
+    {
+      "score": 0.1838,
+      "probability": 0
+    },
+    {
+      "score": 0.3395,
+      "probability": 0
+    },
+    {
+      "score": 0.3431,
+      "probability": 0.3333
+    },
+    {
+      "score": 0.354,
+      "probability": 0.3333
+    },
+    {
+      "score": 0.3805,
+      "probability": 0.8261
+    },
+    {
+      "score": 0.4594,
+      "probability": 0.8261
+    },
+    {
+      "score": 0.4599,
+      "probability": 0.8511
+    },
+    {
+      "score": 0.551,
+      "probability": 0.8511
+    },
+    {
+      "score": 0.5523,
+      "probability": 0.9455
+    },
+    {
+      "score": 0.6259,
+      "probability": 0.9455
+    },
+    {
+      "score": 0.6282,
+      "probability": 1
+    },
+    {
+      "score": 0.7102,
+      "probability": 1
+    }
+  ]
+}

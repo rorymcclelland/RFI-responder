@@ -1,0 +1,46 @@
+{
+  "model": "bge-m3",
+  "evaluationSet": "2026-10-22.1 (calibrate split)",
+  "points": [
+    {
+      "score": 0.344,
+      "probability": 0
+    },
+    {
+      "score": 0.469,
+      "probability": 0
+    },
+    {
+      "score": 0.4938,
+      "probability": 0.25
+    },
+    {
+      "score": 0.5679,
+      "probability": 0.25
+    },
+    {
+      "score": 0.5691,
+      "probability": 0.7344
+    },
+    {
+      "score": 0.6399,
+      "probability": 0.7344
+    },
+    {
+      "score": 0.6406,
+      "probability": 0.92
+    },
+    {
+      "score": 0.6695,
+      "probability": 0.92
+    },
+    {
+      "score": 0.6722,
+      "probability": 1
+    },
+    {
+      "score": 0.7483,
+      "probability": 1
+    }
+  ]
+}

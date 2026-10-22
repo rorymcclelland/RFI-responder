@@ -1,0 +1,54 @@
+{
+  "model": "qwen3-embedding:0.6b",
+  "evaluationSet": "2026-10-22.1 (calibrate split)",
+  "points": [
+    {
+      "score": 0.2718,
+      "probability": 0
+    },
+    {
+      "score": 0.416,
+      "probability": 0
+    },
+    {
+      "score": 0.424,
+      "probability": 0.4444
+    },
+    {
+      "score": 0.4746,
+      "probability": 0.4444
+    },
+    {
+      "score": 0.4793,
+      "probability": 0.5
+    },
+    {
+      "score": 0.5051,
+      "probability": 0.5
+    },
+    {
+      "score": 0.5128,
+      "probability": 0.6176
+    },
+    {
+      "score": 0.5649,
+      "probability": 0.6176
+    },
+    {
+      "score": 0.565,
+      "probability": 0.9091
+    },
+    {
+      "score": 0.5943,
+      "probability": 0.9091
+    },
+    {
+      "score": 0.5955,
+      "probability": 1
+    },
+    {
+      "score": 0.7206,
+      "probability": 1
+    }
+  ]
+}
