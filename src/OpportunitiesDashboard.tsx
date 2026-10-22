@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, X, Briefcase, TrendingUp, CheckCircle2, XCircle, Clock, RefreshCw, ArrowRight, FileSpreadsheet, Check, Trash2, Users, ChevronDown, Pencil } from 'lucide-react';
+import { Plus, Search, X, Briefcase, TrendingUp, CheckCircle2, XCircle, Clock, RefreshCw, ArrowRight, FileSpreadsheet, Check, Trash2, ChevronDown, Pencil } from 'lucide-react';
 import { Opportunity, OpportunityStatus } from './types';
 import { supabase } from './lib/supabase';
 
@@ -34,7 +34,11 @@ function ContributorAvatars({ opportunityId }: { opportunityId: string }) {
           setContributors(
             data
               .map((r) => {
-                const p = r.user_profiles as { id: string; display_name: string; job_title: string } | null;
+                // Without generated database types supabase-js types an embedded row as an array,
+                // although a many-to-one join returns a single object at runtime. Accept either.
+                type ProfileRow = { id: string; display_name: string; job_title: string | null };
+                const joined = r.user_profiles as unknown as ProfileRow | ProfileRow[] | null;
+                const p = Array.isArray(joined) ? joined[0] ?? null : joined;
                 return p ? { id: p.id, displayName: p.display_name, jobTitle: p.job_title ?? '' } : null;
               })
               .filter(Boolean) as ContributorProfile[]

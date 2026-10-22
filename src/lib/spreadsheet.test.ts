@@ -144,7 +144,7 @@ describe('export escaping', () => {
   it('7. Excel export stores formula-like text as text, not a formula', async () => {
     const bytes = await buildXlsx('RFI Responses', ['Question'], [['=1+1']]);
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(bytes);
+    await wb.xlsx.load(bytes.buffer);
     const cell = wb.worksheets[0].getCell('A2');
     // In .xlsx a text cell is never evaluated, so no apostrophe is needed (it would show to the reader).
     expect(cell.formula).toBeUndefined();

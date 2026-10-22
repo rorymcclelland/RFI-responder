@@ -106,7 +106,7 @@ function parseCsv(bytes: Uint8Array): string[][] {
   } catch {
     throw new SpreadsheetError('The CSV file is not valid UTF-8 text. Save it as "CSV UTF-8" and try again.');
   }
-  const result = Papa.parse<string[]>(text.replace(/^﻿/, ''), {
+  const result = Papa.parse<string[]>(text.replace(/^\uFEFF/, '') /* strip a byte-order mark */, {
     skipEmptyLines: 'greedy',
     // Header + limit + 1 is enough to know the limit was exceeded.
     preview: LIMITS.maxRows + 2,
@@ -198,7 +198,7 @@ export async function buildXlsx(
   headers: string[],
   rows: string[][],
   columnWidths: number[] = [],
-): Promise<Uint8Array> {
+): Promise<Uint8Array<ArrayBuffer>> {
   const { default: ExcelJS } = await import('exceljs');
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(sheetName);
@@ -208,7 +208,7 @@ export async function buildXlsx(
     ws.addRow(r).alignment = { wrapText: true, vertical: 'top' };
   }
   columnWidths.forEach((w, i) => (ws.getColumn(i + 1).width = w));
-  return new Uint8Array(await wb.xlsx.writeBuffer());
+  return Uint8Array.from(new Uint8Array(await wb.xlsx.writeBuffer()));
 }
 
 export function escapeHtml(s: string): string {

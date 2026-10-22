@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Database, X, BookOpen, Tag, CheckCircle2,
-  Upload, Plus, FileText, ChevronLeft, Briefcase,
+  Plus, ChevronLeft, Briefcase,
   Inbox, Users, LogOut, Menu, Search, Sparkles,
 } from 'lucide-react';
 import { initialKnowledgeBase } from './knowledgeBase';
@@ -138,7 +138,7 @@ export default function App() {
       else setAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       if (s) {
         (async () => { await loadUserProfile(s.user.id); })();
@@ -149,6 +149,9 @@ export default function App() {
     });
 
     return () => subscription.unsubscribe();
+    // Subscribe once on mount. loadUserProfile only calls state setters and Supabase,
+    // so the first render's copy never goes stale.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadUserProfile(userId: string) {

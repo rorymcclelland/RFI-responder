@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Tag, Plus, X, Shield, Search, ChevronDown, Briefcase, Building2, SlidersHorizontal } from 'lucide-react';
+import { Users, Tag, X, Shield, Search, ChevronDown, Briefcase, Building2, SlidersHorizontal } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { UserProfile } from './types';
 

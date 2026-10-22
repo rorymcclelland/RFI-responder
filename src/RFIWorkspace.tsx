@@ -13,7 +13,7 @@ import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from
 import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
 import {
   Upload, FileSpreadsheet, ChevronDown, Sparkles, Loader2,
-  CheckCircle2, SkipForward, BarChart3, Download, Plus,
+  CheckCircle2, BarChart3, Download, Plus,
   FileDown, FileText, Sheet, RefreshCw, Clock, AlertTriangle,
   Search, X, MessageSquare, ChevronUp, User, ArrowRight,
 } from 'lucide-react';
@@ -187,6 +187,9 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
   const fileInput                         = useRef<HTMLInputElement>(null);
   const rawRows                           = useRef<Row[]>([]);
 
+  // Reload when the opportunity changes. loadPastSessions reads opportunityId from the
+  // render that triggered this effect, so it is never stale. (Sprint 2 splits this component.)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadPastSessions(true); }, [opportunityId]);
   useEffect(() => { if (sessionId) loadAssignments(sessionId); }, [sessionId]);
 
@@ -267,9 +270,11 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
         .order('created_at', { ascending: false }).limit(10),
     ]);
 
-    const toSession = (r: Record<string, unknown>) => ({
+    const toSession = (r: Record<string, unknown>): RFISession => ({
       id: r.id as string, opportunityId: r.opportunity_id as string | null,
-      fileName: r.file_name as string, status: r.status as string,
+      fileName: r.file_name as string,
+      // The database allows only these two values; anything else is treated as unfinished.
+      status: r.status === 'completed' ? 'completed' : 'in_progress',
       questionCount: r.question_count as number, acceptedCount: r.accepted_count as number,
       createdAt: r.created_at as string,
     });
@@ -377,7 +382,7 @@ export default function RFIWorkspace({ kb, onAddToKB, opportunityId, opportunity
       }
     }
     setTimeout(() => setStep('review'), 400);
-  }, [questionCol, fileName, kb]);
+  }, [questionCol, fileName, kb, opportunityId]);
 
   // ── Review actions ────────────────────────────────────────────────────────
 
