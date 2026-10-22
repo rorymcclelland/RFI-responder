@@ -170,3 +170,13 @@ Find the right knowledge-base entry **by meaning**, including from a Japanese qu
 | Q4 | Evaluation knowledge base is the 100 synthetic entries only | S1-1 and S1-4 as written |
 
 All seven stories: **Ready, Sprint 1**.
+
+## Changes during the build (22 October 2026)
+
+| Story | Change | Why |
+|---|---|---|
+| S1-3 | No separate `kb:reembed` command: the app fills gaps after imports and quietly on sign-in | Simpler, and covers model changes automatically |
+| S1-5 | Rank by meaning whenever a query vector exists; keywords only as the fallback. Migration `20261022170000_vector_first_retrieval.sql` replaces equal-weight fusion | The first comparison (`docs/evals/retrieval-2026-10-22.md`) showed fusion lowered English recall@5 from 98.0% to 78.5% (qwen3-embedding:0.6b) and from 95.0% to 79.5% (bge-m3) |
+| S1-2 | The Voyage provider waits and retries when rate-limited (Retry-After, else exponential back-off); the comparison uses smaller batches and patient retries | The first run skipped voyage-4: accounts without a payment method get only a few requests a minute |
+| S1-3 | Extension functions granted explicitly to signed-in users and the server | The Sprint 0 hardening stopped new functions being executable by default, which included pgvector's own |
+| S1-1 | Note: Japanese items translate the original question rather than reword it | Their 100% recall@5 shows crossing languages works, not that Japanese rewording does; reworded, reviewed Japanese items are a follow-up |

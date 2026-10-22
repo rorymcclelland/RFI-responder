@@ -26,7 +26,8 @@ import {
 import { auroc, cosine, meanReciprocalRank, rankBy, recallAt, reciprocalRankFusion, type Ranking } from './metrics';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BATCH = 64;
+/** Small batches keep each request under low-tier token-per-minute limits. */
+const BATCH = 16;
 
 interface Item { id: string; text: string; language: 'en' | 'ja'; kind: string; gold: string; split: string }
 
@@ -45,7 +46,13 @@ const env = { ...readEnvFile(join(ROOT, 'supabase/functions/.env')), ...process.
 const ollamaUrl = env.OLLAMA_URL_HOST ?? 'http://localhost:11434';
 
 const candidates: { label: string; make: () => EmbeddingProvider | string }[] = [
-  { label: 'voyage-4', make: () => (env.VOYAGE_API_KEY ? voyageProvider({ apiKey: env.VOYAGE_API_KEY, model: 'voyage-4' }) : 'VOYAGE_API_KEY not set in supabase/functions/.env') },
+  {
+    label: 'voyage-4',
+    // Patient retries: accounts without a payment method are limited to a few requests a minute.
+    make: () => (env.VOYAGE_API_KEY
+      ? voyageProvider({ apiKey: env.VOYAGE_API_KEY, model: 'voyage-4', retry: { attempts: 10, baseDelayMs: 20_000 } })
+      : 'VOYAGE_API_KEY not set in supabase/functions/.env'),
+  },
   { label: 'bge-m3', make: () => ollamaProvider({ baseUrl: ollamaUrl, model: 'bge-m3' }) },
   { label: 'qwen3-embedding:0.6b', make: () => ollamaProvider({ baseUrl: ollamaUrl, model: 'qwen3-embedding:0.6b' }) },
 ];

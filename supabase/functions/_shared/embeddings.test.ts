@@ -77,3 +77,31 @@ describe('checks shared by every provider', () => {
     expect(() => providerFromEnv({ EMBEDDING_PROVIDER: 'other' })).toThrow(/EMBEDDING_PROVIDER/);
   });
 });
+
+describe('rate limits (found in the first comparison run, 22 Oct)', () => {
+  it('waits and retries after a 429, honouring Retry-After', async () => {
+    const waits: number[] = [];
+    let n = 0;
+    const fetchMock = vi.fn(async () =>
+      n++ < 2 ? new Response('', { status: 429, headers: { 'Retry-After': '3' } }) : ok({ data: [{ index: 0, embedding: vec(0) }] }));
+    const p = voyageProvider({ apiKey: 'k', model: 'voyage-4', fetch: fetchMock, retry: { attempts: 4, baseDelayMs: 1000, sleep: async (ms) => { waits.push(ms); } } });
+    await p.embed(['a'], 'query');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(waits).toEqual([3000, 3000]);
+  });
+
+  it('backs off exponentially without Retry-After, then gives up with a 429', async () => {
+    const waits: number[] = [];
+    const fetchMock = vi.fn(async () => new Response('', { status: 429 }));
+    const p = voyageProvider({ apiKey: 'k', model: 'voyage-4', fetch: fetchMock, retry: { attempts: 3, baseDelayMs: 500, sleep: async (ms) => { waits.push(ms); } } });
+    await expect(p.embed(['a'], 'query')).rejects.toMatchObject({ status: 429 });
+    expect(waits).toEqual([500, 1000]);
+  });
+
+  it('does not retry other errors', async () => {
+    const fetchMock = vi.fn(async () => new Response('', { status: 401 }));
+    const p = voyageProvider({ apiKey: 'k', model: 'voyage-4', fetch: fetchMock, retry: { attempts: 3, baseDelayMs: 1, sleep: async () => {} } });
+    await expect(p.embed(['a'], 'query')).rejects.toMatchObject({ status: 502 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});

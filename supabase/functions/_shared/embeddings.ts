@@ -36,6 +36,27 @@ export class EmbeddingError extends Error {
 
 type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
 
+/** How to handle rate limiting (HTTP 429): retry after Retry-After, or exponential back-off. */
+export interface RetryPolicy {
+  /** Total tries, including the first. */
+  attempts: number;
+  baseDelayMs: number;
+  sleep?: (ms: number) => Promise<void>;
+}
+
+/** The app waits briefly; the evaluation scripts pass a patient policy. */
+const DEFAULT_RETRY: RetryPolicy = { attempts: 3, baseDelayMs: 1000 };
+
+async function withRateLimitRetry(call: () => Promise<Response>, policy: RetryPolicy): Promise<Response> {
+  const sleep = policy.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
+  for (let attempt = 1; ; attempt++) {
+    const res = await call();
+    if (res.status !== 429 || attempt >= policy.attempts) return res;
+    const retryAfter = Number(res.headers.get('Retry-After'));
+    await sleep(Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : policy.baseDelayMs * 2 ** (attempt - 1));
+  }
+}
+
 function checkVectors(vectors: unknown, count: number, model: string): number[][] {
   if (!Array.isArray(vectors) || vectors.length !== count) {
     throw new EmbeddingError(`The embedding service returned the wrong number of vectors for ${count} texts`, 502);
@@ -58,19 +79,19 @@ function providerFailure(provider: string, status: number): EmbeddingError {
   return new EmbeddingError(`${provider} returned an error (HTTP ${status})`, 502);
 }
 
-export function voyageProvider(opts: { apiKey: string; model: string; fetch?: Fetch }): EmbeddingProvider {
+export function voyageProvider(opts: { apiKey: string; model: string; fetch?: Fetch; retry?: RetryPolicy }): EmbeddingProvider {
   const doFetch = opts.fetch ?? fetch;
   return {
     name: 'voyage',
     model: opts.model,
     async embed(texts, kind) {
-      const res = await doFetch('https://api.voyageai.com/v1/embeddings', {
+      const res = await withRateLimitRetry(() => doFetch('https://api.voyageai.com/v1/embeddings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${opts.apiKey}` },
         body: JSON.stringify({ input: texts, model: opts.model, input_type: kind, output_dimension: EMBEDDING_DIMENSION }),
       }).catch(() => {
         throw new EmbeddingError('Voyage could not be reached', 503);
-      });
+      }), opts.retry ?? DEFAULT_RETRY);
       if (!res.ok) throw providerFailure('Voyage', res.status);
       const body = (await res.json()) as { data?: { index: number; embedding: number[] }[] };
       const ordered = [...(body.data ?? [])].sort((a, b) => a.index - b.index).map((d) => d.embedding);

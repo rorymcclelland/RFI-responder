@@ -42,13 +42,13 @@ describe('match_kb_entries (S1-5)', () => {
     expect(r.rows[0].similarity).toBeCloseTo(1, 5);
   });
 
-  it('2. an entry ranked high by both methods beats one ranked high by only one', async () => {
+  it('2. with a query vector, meaning decides the order; keywords do not reorder it (comparison, 22 Oct)', async () => {
     // By meaning: "encrypt at rest" first, "backup strategy" second.
-    // By keywords: only "backup strategy" mentions daily backups.
-    // Fused: backup = 1/62 + 1/61 beats encrypt = 1/61 alone.
+    // By keywords: only "backup strategy" mentions daily backups. Equal-weight fusion
+    // would have put it first; the comparison showed that fusion hurts, so it stays second.
     const r = await match(member, vec(0, 3, 0.2), 'daily backups');
-    const order = r.rows.map((x) => x.question);
-    expect(order[0]).toBe('Describe your backup strategy.');
+    expect(r.rows.map((x) => x.question).slice(0, 2)).toEqual(['How do you encrypt data at rest?', 'Describe your backup strategy.']);
+    expect(r.rows[1].keyword_rank).toBeGreaterThan(0);
   });
 
   it('never compares vectors from a different model', async () => {
