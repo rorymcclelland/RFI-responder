@@ -1,6 +1,6 @@
 # Sprint 0 refinement: baseline and clean-up
 
-Refined 22 October 2026 against `main` at `25c6f07` (the original Bolt export of 11 May 2026). Status: **all nine stories Ready, Sprint 0** (answers agreed 22 October 2026, recorded at the end).
+Refined 22 October 2026 against `main` at `25c6f07` (the original Bolt export of 11 May 2026). Status: **all nine stories Ready, Sprint 0** (answers agreed 22 October 2026, recorded at the end). Updated the same day to align with the product brief, `docs/PRODUCT.md`: see "Changes after the product brief" at the end.
 
 ## Why this sprint exists
 
@@ -102,10 +102,10 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 
 **Before and after.** Before: 8 entries hard-coded in `knowledgeBase.ts`; imports and add-back live only in browser memory. After: a `kb_entries` table; imports and add-back write to it; the KB modal reads from it; each entry records source, who added it and when.
 
-**What changes.** Migration: `kb_entries (id, question, answer, tags text[], source, origin enum('seed','import','rfi'), origin_ref, created_by, created_at, updated_at)`, RLS per the S0-5 role matrix. `App.tsx`: load from the database, `addToKB` inserts. `BulkUploadModal`: insert in batches with a duplicate check (same question text, case-insensitive). Seed data moves to the dev seed (S0-6), not a migration. Remove `initialKnowledgeBase` from the bundle.
+**What changes.** Migration: `kb_entries (id, question, answer, tags text[], source, origin enum('seed','manual','import','response'), origin_ref, created_by, created_at, updated_at, superseded_by references kb_entries, last_reviewed_at)`. The provenance and versioning columns are created now so nothing has to be back-filled when learning arrives in Sprint 3; in this sprint they are written (origin, origin_ref, created_by) or left empty (superseded_by, last_reviewed_at). Hand-added and imported entries are tagged `manual` and `import`, RLS per the S0-5 role matrix. `App.tsx`: load from the database, `addToKB` inserts. `BulkUploadModal`: insert in batches with a duplicate check (same question text, case-insensitive). Seed data moves to the dev seed (S0-6), not a migration. Remove `initialKnowledgeBase` from the bundle.
 
 **Test cases.**
-1. Import the 100-row security CSV; reload; 100 entries present with source "Data Protection Policy v3.1" etc.
+1. Import the 100-row security CSV; reload; 100 entries present with source "Data Protection Policy v3.1" etc., origin `import`, and `created_by` set to the importer.
 2. Accept answers in an RFI, "add to KB", reload: they are there, tagged with origin `rfi` and the file name.
 3. Import the same CSV twice: second import reports 100 duplicates skipped, adds none.
 4. Edge: row missing an answer: skipped and reported, others imported.
@@ -113,7 +113,7 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 6. Access: a non-admin member can read entries; whether they can add or delete follows the role matrix (S0-5 test cases).
 7. Hostile: answer text containing HTML renders as text in the KB modal.
 
-**Out of scope.** Editing and deleting individual entries in the UI (logged as a backlog candidate), embeddings (Sprint 1).
+**Out of scope.** Editing and deleting individual entries in the UI (logged as a backlog candidate), embeddings (Sprint 1), learning at export and supersession (Sprint 3). The existing "add to KB" button stays for now, tagged origin `response`; Sprint 3 replaces it with learning at export.
 
 **Boundaries.** Rule 2 (synthetic data: the seed set and the 100 Q&As stay generic), rule 5.
 
@@ -127,22 +127,25 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 
 **Before and after.** Before: any user can `update user_profiles set is_admin = true where id = auth.uid()` from the browser console. Anyone can sign up. Sessions, questions and opportunities are readable and editable by every signed-in user. After: a written role matrix, policies that implement it, and a test for every cell.
 
-**Proposed role matrix** (for Rory to confirm):
+**Role matrix** (agreed; aligned with the product brief). "Member" is any signed-in user; the **response owner** is per response (the opportunity's `owner_id`, defaulting to its creator), not a global role.
 
-| Action | Admin | Member |
-|---|---|---|
-| Read opportunities, sessions, questions, KB | Yes | Yes |
-| Create opportunity, run RFI session | Yes | Yes |
-| Edit or delete an opportunity | Yes | Creator only |
-| Add to KB (import or add-back) | Yes | Yes (agreed Q3) |
-| Delete KB entry | Yes | No |
-| Assign questions | Yes | Yes |
-| Update an assignment | Yes | Assignee only |
-| Edit own display name, title, expertise tags | Yes | Yes |
-| Change anyone's `is_admin` | Yes | No |
-| Create users | Yes (invite) | No |
+| Action | Admin | Response owner | Member |
+|---|---|---|---|
+| Read opportunities, sessions, questions, KB | Yes | Yes | Yes |
+| Create an opportunity (and become its owner), run an RFI session | Yes | Yes | Yes |
+| Edit an opportunity, change its owner | Yes | Yes | No |
+| Permanently delete an opportunity | Yes (created in error only) | No | No |
+| Add to KB (import or add-back) | Yes | Yes | Yes (agreed Q3) |
+| Delete KB entry | Yes | No | No |
+| Assign questions on a response | Yes | Yes | No |
+| Update an assignment | Yes | Yes | Assignee only |
+| Edit own display name, title, expertise tags | Yes | Yes | Yes |
+| Change anyone's `is_admin` | Yes | No | No |
+| Create users | Yes (invite) | No | No |
 
-**What changes.** New migration: column-level protection on `is_admin` (revoke update on that column from `authenticated`; admin changes go through a `security definer` function that checks the caller is admin), insert policy that forces `is_admin = false`. Policies rewritten to the matrix. Open sign-up switched off in Supabase auth settings and the sign-up form removed; admins invite users. Seeded shared-password users removed from migrations (dev seed only, S0-6). Existing migrations are left as history; changes are new migrations.
+Archiving replaces deletion as the normal route in Sprint 3; until then the delete button is shown to admins only.
+
+**What changes.** New migration: column-level protection on `is_admin` (revoke update on that column from `authenticated`; admin changes go through a `security definer` function that checks the caller is admin), insert policy that forces `is_admin = false`. `opportunities.owner_id` added (back-filled from `created_by`). Policies rewritten to the matrix. Open sign-up switched off in Supabase auth settings and the sign-up form removed; admins invite users. Seeded shared-password users removed from migrations (dev seed only, S0-6). Existing migrations are left as history; changes are new migrations.
 
 **Test cases** (database tests, run as each role):
 1. Member updates own `display_name`: allowed.
@@ -151,13 +154,15 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 4. Member updates another user's profile: denied.
 5. Admin promotes a member via the function: allowed and logged.
 6. Member calls the promote function: denied.
-7. Member deletes an opportunity they did not create: denied; admin: allowed.
+7. Owner or member deletes an opportunity: denied; admin: allowed.
+12. Owner edits their own opportunity and reassigns ownership: allowed; a non-owner member: denied.
+13. Owner assigns a question on their response: allowed; a member who is not the owner: denied.
 8. Member updates an assignment not assigned to them: denied.
 9. Anonymous (anon key, no session) reads any table: zero rows.
 10. Sign-up endpoint with the anon key: rejected.
 11. Fresh migration run contains no `auth.users` inserts.
 
-**Out of scope.** SSO, multi-tenant separation between organisations (one team per deployment is assumed and documented).
+**Out of scope.** SSO, multi-tenant separation between organisations (one organisation per deployment, confirmed in the product brief).
 
 **Boundaries.** Rules 3 and 5.
 
@@ -211,7 +216,7 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 
 **The job.** The repo explains itself honestly from day one, and decisions are recorded as they are made, so the Sprint 4 documentation is assembly rather than archaeology.
 
-**What changes.** README: what it is, current status (stated plainly: keyword retrieval and template drafting until Sprints 1 and 2), stack, setup, scripts, project rules. `docs/decisions/` with numbered short decision records: 0001 keep React, Vite and Supabase; 0002 spreadsheet library; 0003 role matrix; 0004 local-first environment; 0005 AI route (from S0-9). `CLAUDE.md` (agent context: rules, commands, where things live). `.bolt/` removed. `JOB_STORIES.md` moved to `docs/`.
+**What changes.** README: what it is (opening from `docs/PRODUCT.md`), current status (stated plainly: keyword retrieval and template drafting until Sprints 1 and 2), stack, setup, scripts, project rules. `docs/decisions/` with numbered short decision records: 0001 keep React, Vite and Supabase; 0002 spreadsheet library; 0003 role matrix; 0004 local-first environment; 0005 AI route (from S0-9). `CLAUDE.md` (agent context: rules, commands, where things live). `.bolt/` removed. `JOB_STORIES.md` moved to `docs/`.
 
 **Test cases.**
 1. A reader with only the README can describe what the tool does today without overstating it.
@@ -263,3 +268,16 @@ Nothing in Sprints 1 to 4 is worth building on the code as it stands. It does no
 | Size | Keep the sprint whole | No stories moved |
 
 All nine stories: **Ready, Sprint 0**.
+
+## Changes after the product brief (22 October 2026)
+
+Rory briefed the original intent (now `docs/PRODUCT.md`). Effect on Sprint 0, which stays a clean-up sprint:
+
+| Story | Change |
+|---|---|
+| S0-4 | Knowledge-base table gains provenance and versioning columns now (`origin` includes `manual` and `response`, `superseded_by`, `last_reviewed_at`), so Sprint 3's learning loop needs no back-fill |
+| S0-5 | Role matrix gains the per-response **owner** (`opportunities.owner_id`). Only the owner or an admin edits a response or assigns its questions; permanent deletion is admin-only, ahead of archiving in Sprint 3. Two test cases added (12, 13) |
+| S0-8 | README opens from the product brief |
+| Backlog | Rule 4 reworded so the owner's recorded bulk approval counts as human approval; rule 7 added (learning only with provenance). Later sprints re-ranked into five: retrieval and calibration; grounded drafting and safety gates; workflow and learning loop; ingestion and governance pack; publish |
+
+Sizes unchanged: S0-4 and S0-5 stay M. All nine stories remain **Ready, Sprint 0**.
