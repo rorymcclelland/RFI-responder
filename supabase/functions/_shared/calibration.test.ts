@@ -1,6 +1,6 @@
 // Sprint 1, story S1-6 test 1: turning a similarity into a calibrated confidence.
 import { describe, expect, it } from 'vitest';
-import { calibratedConfidence, type CalibrationTable } from './calibration';
+import { calibratedConfidence, type CalibrationTable } from './calibration.ts';
 
 const table: CalibrationTable = {
   model: 'test-model',

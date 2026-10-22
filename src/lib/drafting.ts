@@ -1,7 +1,9 @@
 /**
  * Drafting and scoring for one RFI question.
  *
- * Today (Sprint 0) this is deliberately simple and fully deterministic:
+ * Sprint 0's keyword method, kept as the evaluation baseline and for column detection.
+ * The app's drafting runs server-side from Sprint 2 (supabase/functions/process-questions).
+ * Originally (Sprint 0) this was deliberately simple and fully deterministic:
  * - retrieval is keyword based (TF-IDF with cosine similarity, see ../retrieval.ts);
  * - the draft is assembled from the best-matching knowledge-base answers, with
  *   their references, and nothing is generated or invented;
@@ -12,14 +14,10 @@
  * database) so it stays easy to test.
  */
 import { retrieveTopK } from '../retrieval';
-import type { KnowledgeEntry, RetrievedSource } from '../types';
+import type { KnowledgeEntry } from '../types';
+import { draftAnswer } from '../../supabase/functions/_shared/assemble.ts';
 
-/** Shown when the best match is below the calibrated confidence floor (S1-6). The sources stay visible. */
-export const NO_CONFIDENT_MATCH_TEXT =
-  'No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.';
-
-/** Shown instead of a draft when no knowledge-base entry shares any terms with the question. */
-export const NO_MATCH_TEXT = 'No matching knowledge-base entry was found for this question. It needs an answer written by a person.';
+export { draftAnswer, NO_CONFIDENT_MATCH_TEXT, NO_MATCH_TEXT } from '../../supabase/functions/_shared/assemble.ts';
 
 /**
  * A raw TF-IDF cosine score of this size or more is treated as a full match.
@@ -31,34 +29,8 @@ export const SCORE_CEILING = 0.3;
 /** Number of knowledge-base entries retrieved per question. */
 export const TOP_K = 3;
 
-/** Sentences shorter than this are usually fragments ("e.g", "v2") and are skipped. */
-const MIN_SENTENCE_LENGTH = 30;
-
-/** How many sentences are taken from each matched answer. */
-const SENTENCES_PER_SOURCE = 2;
-
-function keySentences(answer: string): string[] {
-  return answer
-    .split(/(?<=[.!?])\s+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length >= MIN_SENTENCE_LENGTH);
-}
-
-/** Assemble a draft from matched sources only. Sources with a zero score are ignored. */
-export function draftAnswer(sources: RetrievedSource[]): string {
-  const used = sources.filter((s) => s.score > 0);
-  if (used.length === 0) return NO_MATCH_TEXT;
-
-  const paragraphs = used
-    .map((s) => keySentences(s.entry.answer).slice(0, SENTENCES_PER_SOURCE).join(' '))
-    .filter((p) => p.length > 0);
-  const body = [...new Set(paragraphs)].join(' ');
-  const refs = used.map((s) => s.entry.id).join(', ');
-  return `${body}\n\n[References: ${refs}]`;
-}
-
 export interface ScoredQuestion {
-  sources: RetrievedSource[];
+  sources: ReturnType<typeof retrieveTopK>;
   generatedAnswer: string;
   /** 0..1, from the top retrieval score scaled by SCORE_CEILING. */
   confidence: number;

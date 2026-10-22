@@ -1,6 +1,9 @@
 /** HTTP helpers shared by the Edge Functions (Deno). */
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2';
 import { EmbeddingError } from './embeddings.ts';
+import { HttpError } from './errors.ts';
+
+export { HttpError };
 
 /** Origins allowed to call the functions from a browser: APP_ORIGIN, comma-separated. */
 function allowedOrigins(): string[] {
@@ -46,7 +49,8 @@ export function serve(handler: (req: Request) => Promise<Response>) {
     try {
       return await handler(req);
     } catch (err) {
-      if (err instanceof EmbeddingError) return json(req, err.status, { error: err.message });
+      // Our own errors carry a safe message and a status; anything else is hidden.
+      if (err instanceof EmbeddingError || err instanceof HttpError) return json(req, err.status, { error: err.message });
       console.error(err);
       return json(req, 500, { error: 'Unexpected error' });
     }

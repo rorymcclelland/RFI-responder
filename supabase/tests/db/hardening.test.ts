@@ -145,9 +145,8 @@ describe('finding 5: sessions stay with their response', () => {
     await as(other, async (q) => {
       const s = await q<{ id: string }>(
         `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id) VALUES ('o.xlsx', 'in_progress', 1, $1) RETURNING id`, [victimOpp]);
-      const qn = await q(
-        `INSERT INTO rfi_questions (session_id, position, question, generated_answer, final_answer, confidence, retrieval_score, status)
-         VALUES ($1, 0, 'Q?', 'A', 'A', 0.5, 0.15, 'pending')`, [s.rows[0].id]);
+      // From Sprint 2 (S2-2a) members insert only the question; scores are written server-side.
+      const qn = await q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'Q?')`, [s.rows[0].id]);
       expect(qn.rowCount).toBe(1);
       const read = await q('SELECT 1 FROM rfi_questions WHERE session_id = $1', [s.rows[0].id]);
       expect(read.rowCount).toBe(1);

@@ -89,6 +89,22 @@ function confidenceLabel(c: number | null): { label: string; dot: string; bar: s
   return               { label: 'Low',    dot: 'bg-coral-500',   bar: 'bg-coral-500',   text: 'text-coral-600' };
 }
 
+/** Why a question is never bulk-approved (S2-2a, S2-3), as the reviewer sees it. */
+const GATE_BADGE: Record<NonNullable<RFIQuestion['gate']>, { label: string; cls: string }> = {
+  pricing:     { label: 'Pricing: a person answers', cls: 'bg-coral-50 text-coral-700 border-coral-200' },
+  legal:       { label: 'Legal: review individually', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+  unchecked:   { label: 'Not fully checked', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  translation: { label: 'Translated draft', cls: 'bg-sky-50 text-sky-700 border-sky-200' },
+};
+
+/** What the Proposed Response box holds, for its tooltip. */
+const DRAFT_KIND_TIP: Record<NonNullable<RFIQuestion['draftKind']>, string> = {
+  generated: 'Written by a language model from the matched knowledge-base entries only, citing them. Every citation and figure was checked against the entries before it was offered.',
+  assembled: 'Assembled from sentences of the matched knowledge-base answers, with references. Nothing was generated.',
+  insufficient_evidence: 'No draft: the matched entries do not answer this question. A person needs to write the answer.',
+  person_required: 'No draft: pricing questions are always answered by a person.',
+};
+
 const STATUS_RING: Record<RFIQuestion['status'], string> = {
   pending:  'border-ink-200 hover:border-ink-300',
   accepted: 'border-emerald-300 bg-emerald-50/20',
@@ -306,8 +322,14 @@ export default function RFIQuestionCard({
           </p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className={`text-2xs font-black uppercase tracking-wide ${conf.text}`}>
-              {conf.label} — {pct}%
+              {pct === null ? conf.label : `${conf.label}: ${pct}%`}
             </span>
+            {question.gate && (
+              <span title={question.gateReason ?? undefined} className={`status-pill text-2xs ${GATE_BADGE[question.gate].cls}`}>
+                {GATE_BADGE[question.gate].label}
+              </span>
+            )}
+            {!question.processed && <span className="status-pill text-2xs bg-ink-50 text-ink-500 border-ink-200">Not processed yet</span>}
             {question.status === 'accepted' && (
               <span className="flex items-center gap-1 text-2xs text-emerald-700 font-bold">
                 <CheckCircle2 size={11} />
@@ -345,8 +367,8 @@ export default function RFIQuestionCard({
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Confidence', value: question.confidence, tip: question.confidence === null
-                  ? 'Not calibrated: matching was keyword-only, or there is no calibration table for the embedding model in use.'
-                  : 'The measured chance that the top knowledge-base entry is the right one, calibrated on the evaluation set for this embedding model (docs/evals).' },
+                  ? 'Not calibrated: matching was keyword-only, the answerability check was unavailable, or there is no calibration table for the models in use. Bulk approval is not available for this question.'
+                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals).` },
               { label: 'Similarity', value: question.retrievalScore, tip: 'Cosine similarity between the question and the best-matching entry (or the keyword score when matching was keyword-only). Not a probability.' },
             ].map((m) => {
               if (m.value === null) {
@@ -424,7 +446,7 @@ export default function RFIQuestionCard({
             <div className="flex items-center justify-between mb-3">
               <p className="section-label flex items-center gap-1.5">
                 {editing ? 'Edit Response' : 'Proposed Response'}
-                {!editing && <InfoTip text="Draft assembled from the best-matching knowledge-base answers, with references. Accept as-is, edit, or skip." />}
+                {!editing && <InfoTip text={`${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'} Accept as it is, edit, or skip.`} />}
               </p>
               {!editing && question.status !== 'skipped' && (
                 <button
@@ -460,6 +482,22 @@ export default function RFIQuestionCard({
             )}
           </div>
 
+          {(question.gateReason || question.processingNote) && (
+            <div className="space-y-1.5 text-xs font-medium leading-relaxed">
+              {question.gateReason && <p className="text-ink-600"><strong>Held back from bulk approval:</strong> {question.gateReason}</p>}
+              {question.processingNote && <p className="text-amber-700">{question.processingNote}</p>}
+            </div>
+          )}
+          {(question.provenance.draftModel || question.provenance.judgeModel || question.provenance.embeddingModel) && (
+            <p className="text-2xs text-ink-400 font-medium">
+              {[
+                question.provenance.embeddingModel && `Matched with ${question.provenance.embeddingModel}`,
+                question.provenance.judgeModel && `checked by ${question.provenance.judgeModel}`,
+                question.provenance.draftModel && `drafted by ${question.provenance.draftModel} (${question.provenance.promptVersion})`,
+              ].filter(Boolean).join(', ')}.
+            </p>
+          )}
+
           {/* Action buttons */}
           {!editing && (
             <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
@@ -494,7 +532,7 @@ export default function RFIQuestionCard({
             <div className="flex items-start gap-2.5 p-3.5 bg-coral-50 border border-coral-200 rounded-xl">
               <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-coral-500" />
               <p className="text-xs text-coral-700 font-medium leading-relaxed">
-                Low confidence — the KB may not cover this topic. Review carefully before accepting.
+                Low confidence: the knowledge base probably does not answer this. Review carefully before accepting.
               </p>
             </div>
           )}

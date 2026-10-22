@@ -3,7 +3,7 @@
  *
  * The top match's cosine similarity is mapped to the observed chance that the top
  * entry is the right one, using a table fitted on the evaluation set for that
- * embedding model (`npm run eval:calibrate`, tables in ./calibration/). Between
+ * embedding model (`npm run eval:calibrate`, generated into ./calibration-tables.ts). Between
  * breakpoints the value is interpolated linearly; outside them it holds the end
  * values. No table for the model, or no similarity, means no calibrated confidence.
  */

@@ -114,6 +114,20 @@ export async function as<T>(user: TestUser | null, fn: (q: Query) => Promise<T>)
   }
 }
 
+/** Run `fn` as the service role (what Edge Functions use), inside a rolled-back transaction. */
+export async function asServiceRole<T>(fn: (q: Query) => Promise<T>): Promise<T> {
+  const client = await getPool().connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE service_role');
+    await client.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ role: 'service_role' })]);
+    return await fn((sql, params) => client.query(sql, params));
+  } finally {
+    await client.query('ROLLBACK').catch(() => undefined);
+    client.release();
+  }
+}
+
 /** Expect the statement to be refused by Postgres (permission or policy error). */
 export async function refused(p: Promise<unknown>): Promise<string> {
   try {

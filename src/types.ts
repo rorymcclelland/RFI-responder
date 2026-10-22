@@ -45,7 +45,25 @@ export interface RFIQuestion {
   retrievalScore: number;
   sources: RetrievedSource[];
   status: RFIStatus;
+  /**
+   * Sprint 2 (S2-2a, S2-3): why this question is never bulk-approved, set server-side.
+   * Null for questions processed before Sprint 2, and for ordinary questions.
+   */
+  gate: QuestionGate | null;
+  gateReason: string | null;
+  /** How the draft was made (null before Sprint 2). */
+  draftKind: DraftKind | null;
+  language: 'en' | 'ja' | null;
+  /** Anything the reviewer should know about how this question was processed. */
+  processingNote: string | null;
+  /** Provenance: which models and prompt produced the score and draft. */
+  provenance: { embeddingModel: string | null; judgeModel: string | null; draftModel: string | null; promptVersion: string | null; calibrationSet: string | null };
+  /** False until the server has processed the question. */
+  processed: boolean;
 }
+
+export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation';
+export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
 
 export interface RFISession {
   id: string;

@@ -77,7 +77,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type-check the Edge Functions (Deno)
-        run: deno check --config supabase/functions/deno.json supabase/functions/embed/index.ts supabase/functions/embed-entries/index.ts
+        run: deno check --config supabase/functions/deno.json supabase/functions/*/index.ts
       - name: Start Supabase (database, auth and API only)
         run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor,realtime,storage-api,postgres-meta
       - name: Apply every migration and the dev seed from scratch
@@ -101,7 +101,7 @@ jobs:
         run: |
           eval "$(supabase status -o env)"
           # A provider that cannot be reached, and a fake key that must never be echoed.
-          printf 'EMBEDDING_PROVIDER=ollama\nEMBEDDING_MODEL=bge-m3\nOLLAMA_URL=http://127.0.0.1:9\nVOYAGE_API_KEY=sk-should-never-appear\n' > /tmp/fn.env
+          printf 'EMBEDDING_PROVIDER=ollama\nEMBEDDING_MODEL=bge-m3\nOLLAMA_URL=http://127.0.0.1:9\nVOYAGE_API_KEY=sk-should-never-appear\nANTHROPIC_API_KEY=sk-ant-should-never-appear\n' > /tmp/fn.env
           supabase functions serve --env-file /tmp/fn.env > /tmp/functions.log 2>&1 &
           sleep 15
           F="$API_URL/functions/v1"
@@ -121,3 +121,29 @@ jobs:
           [ "$code" = "503" ] || fail "embed-entries with unreachable provider should get 503" "got $code $(cat /tmp/r2.json)"
           if grep -q 'sk-should-never-appear' /tmp/r.json /tmp/r2.json; then fail "Key leaked" "a response contained the provider key"; fi
           echo "embed: $(cat /tmp/r.json)"; echo "embed-entries: $(cat /tmp/r2.json)"
+          # process-questions (Sprint 2, S2-2a): refusals, then a real batch with every provider failing.
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$F/process-questions" -H 'Content-Type: application/json' -d '{}')
+          [ "$code" = "401" ] || fail "process-questions without JWT should get 401" "got $code"
+          eleven=$(python3 -c 'import json,uuid; print(json.dumps({"sessionId":str(uuid.uuid4()),"questionIds":[str(uuid.uuid4()) for _ in range(11)]}))')
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/process-questions" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d "$eleven")
+          [ "$code" = "400" ] || fail "11 questions should get 400" "got $code $(cat /tmp/r.json)"
+          R="$API_URL/rest/v1"
+          H=(-H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -H 'Prefer: return=representation')
+          SID=$(curl -s -X POST "$R/rfi_sessions" "${H[@]}" -d '{"file_name":"ci.csv","status":"in_progress","question_count":2}' | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["id"])')
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$R/rfi_questions" "${H[@]}" -d "{\"session_id\":\"$SID\",\"position\":0,\"question\":\"Q\",\"confidence\":1}")
+          [ "$code" -ge 400 ] || fail "A member must not be able to set confidence" "got $code $(cat /tmp/r.json)"
+          QS=$(curl -s -X POST "$R/rfi_questions" "${H[@]}" -d "[{\"session_id\":\"$SID\",\"position\":0,\"question\":\"What is the annual licence cost?\"},{\"session_id\":\"$SID\",\"position\":1,\"question\":\"How do you encrypt data at rest?\"}]")
+          IDS=$(echo "$QS" | python3 -c 'import sys,json; print(json.dumps([q["id"] for q in json.load(sys.stdin)]))')
+          code=$(curl -s -o /tmp/p.json -w '%{http_code}' -X POST "$F/process-questions" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d "{\"sessionId\":\"$SID\",\"questionIds\":$IDS}")
+          [ "$code" = "200" ] || fail "process-questions should succeed with failing providers" "got $code $(cat /tmp/p.json)"
+          echo "process-questions: $(cat /tmp/p.json)"
+          if grep -q 'should-never-appear' /tmp/p.json; then fail "Key leaked" "process-questions returned a key"; fi
+          python3 - <<'PY' || fail "process-questions did not fail safe" "$(cat /tmp/p.json)"
+          import json
+          p = {x['draftKind'] + ':' + str(x['gate']) for x in json.load(open('/tmp/p.json'))['processed']}
+          # Pricing caught by the rules alone; the other question unchecked (classifier down), drafted by assembly, no confidence.
+          assert 'person_required:pricing' in p, p
+          assert any(v.endswith(':unchecked') for v in p), p
+          PY
+          code=$(curl -s -o /tmp/b.json -w '%{http_code}' -X POST "$R/rpc/bulk_accept" "${H[@]}" -d "{\"p_session\":\"$SID\",\"p_min_confidence\":0}")
+          echo "bulk_accept: $code $(cat /tmp/b.json)"

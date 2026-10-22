@@ -21,7 +21,7 @@ import {
   type CandidateEntry,
 } from '../supabase/functions/_shared/answerability';
 import { claudeClient } from '../supabase/functions/_shared/claude';
-import { selectDraftSources } from '../src/lib/retrievalClient';
+import { selectDraftSources } from '../supabase/functions/_shared/sources';
 import { auroc, cosine } from './metrics';
 import { diskCache, env, hashKey, loadKb, ROOT, withRetry } from './lib';
 

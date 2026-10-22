@@ -1,68 +1,62 @@
-// Found in the end-to-end run on 22 October 2026: bulk accept changed the screen but
-// never saved, so reopening a response lost every bulk decision.
+// Bulk approval goes through the database function bulk_accept (Sprint 2, S2-2a), which
+// enforces who may approve and what is held back; questions are inserted as text only and
+// processed server-side in batches of ten.
 import { describe, expect, it, vi } from 'vitest';
-import { bulkAcceptInDb } from './sessions';
-
-function fakeClient(result: { error: null | { message: string } }) {
-  const calls: unknown[][] = [];
-  const chain: Record<string, (...a: unknown[]) => unknown> = {};
-  for (const m of ['update', 'eq', 'gte']) {
-    chain[m] = (...a: unknown[]) => { calls.push([m, ...a]); return chain; };
-  }
-  (chain as unknown as PromiseLike<unknown>).then = ((res: (v: unknown) => unknown) => Promise.resolve(result).then(res)) as never;
-  const from = vi.fn((table: string) => { calls.push(['from', table]); return chain; });
-  return { client: { from } as never, calls };
-}
+import { bulkAcceptInDb, describeBulk, insertQuestions, processInBatches } from './sessions';
 
 describe('bulkAcceptInDb', () => {
-  it('accepts pending questions of this session at or above the threshold, in one update', async () => {
-    const { client, calls } = fakeClient({ error: null });
-    await bulkAcceptInDb(client, 'session-1', 0.8);
-    expect(calls).toEqual([
-      ['from', 'rfi_questions'],
-      ['update', { status: 'accepted' }],
-      ['eq', 'session_id', 'session-1'],
-      ['eq', 'status', 'pending'],
-      ['gte', 'confidence', 0.8],
-    ]);
+  it('calls bulk_accept with the session and threshold, and returns what it did', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: { accepted: 3, heldGated: 2, heldUncalibrated: 1, belowThreshold: 4 }, error: null });
+    const r = await bulkAcceptInDb({ rpc } as never, 'session-1', 0.8);
+    expect(rpc).toHaveBeenCalledWith('bulk_accept', { p_session: 'session-1', p_min_confidence: 0.8 });
+    expect(r.accepted).toBe(3);
+    expect(describeBulk(r, 0.8)).toBe(
+      '3 accepted; 4 below 80%; 2 held back for individual review (pricing, legal, unchecked or translated); 1 without calibrated confidence.',
+    );
   });
 
-  it('accept-all uses no threshold', async () => {
-    const { client, calls } = fakeClient({ error: null });
-    await bulkAcceptInDb(client, 'session-1', null);
-    expect(calls.some((c) => c[0] === 'gte')).toBe(false);
-  });
-
-  it('reports a failure instead of hiding it', async () => {
-    const { client } = fakeClient({ error: { message: 'permission denied' } });
-    await expect(bulkAcceptInDb(client, 'session-1', 0.8)).rejects.toThrow(/not saved: permission denied/);
+  it('reports a refusal instead of hiding it', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: { message: 'Only the response owner or an admin can approve questions in bulk' } });
+    await expect(bulkAcceptInDb({ rpc } as never, 'session-1', 0.8)).rejects.toThrow(/not saved: Only the response owner/);
   });
 });
 
-describe('saveQuestionPatch and insertQuestions (F-9)', () => {
-  it('1. saves status and final answer, and reports a refusal', async () => {
-    const { saveQuestionPatch } = await import('./sessions');
-    const okClient = fakeClient({ error: null });
-    await saveQuestionPatch(okClient.client, 'q1', { status: 'accepted', finalAnswer: 'Yes.' });
-    expect(okClient.calls).toEqual([['from', 'rfi_questions'], ['update', { status: 'accepted', final_answer: 'Yes.' }], ['eq', 'id', 'q1']]);
-    const bad = fakeClient({ error: { message: 'permission denied' } });
-    await expect(saveQuestionPatch(bad.client, 'q1', { status: 'skipped' })).rejects.toThrow(/not saved: permission denied/);
+describe('insertQuestions', () => {
+  it('inserts only the question text, in batches, and returns the new ids in order', async () => {
+    const inserted: unknown[] = [];
+    const from = vi.fn(() => ({
+      insert: (rows: { question: string }[]) => {
+        inserted.push(...rows);
+        return { select: () => Promise.resolve({ data: rows.map((r) => ({ id: `id-${r.question}` })), error: null }) };
+      },
+    }));
+    const ids = await insertQuestions({ from } as never, 's1', [{ position: 0, question: 'a' }, { position: 1, question: 'b' }, { position: 2, question: 'c' }], 2);
+    expect(ids).toEqual(['id-a', 'id-b', 'id-c']);
+    expect(from).toHaveBeenCalledTimes(2);
+    expect(inserted[0]).toEqual({ session_id: 's1', position: 0, question: 'a' });
   });
 
-  it('does nothing when there is nothing to save', async () => {
-    const { saveQuestionPatch } = await import('./sessions');
-    const c = fakeClient({ error: null });
-    await saveQuestionPatch(c.client, 'q1', {});
-    expect(c.calls).toEqual([]);
-  });
-
-  it('2. inserts in batches and reports a failed batch', async () => {
-    const { insertQuestions } = await import('./sessions');
-    const calls: number[] = [];
+  it('says how many were saved before a failure (F-9)', async () => {
     let n = 0;
-    const client = { from: () => ({ insert: async (rows: unknown[]) => { calls.push(rows.length); return { error: n++ === 1 ? { message: 'too big' } : null }; } }) } as never;
-    await expect(insertQuestions(client, Array.from({ length: 60 }, (_, i) => ({ id: String(i) })), 25))
-      .rejects.toThrow(/25 of 60 questions were saved.*too big/);
-    expect(calls).toEqual([25, 25]);
+    const from = () => ({
+      insert: () => ({ select: () => Promise.resolve(n++ === 0 ? { data: [{ id: '1' }, { id: '2' }], error: null } : { data: null, error: { message: 'denied' } }) }),
+    });
+    await expect(insertQuestions({ from } as never, 's1', Array.from({ length: 3 }, (_, i) => ({ position: i, question: String(i) })), 2))
+      .rejects.toThrow(/Only 2 of 3 questions were saved: denied/);
+  });
+});
+
+describe('processInBatches', () => {
+  it('sends ten at a time, reports progress, and returns questions that failed', async () => {
+    const invoke = vi.fn()
+      .mockResolvedValueOnce({ data: { processed: Array.from({ length: 10 }, (_, i) => ({ id: `q${i}`, saved: i !== 3 })) }, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: 'Edge Function returned a non-2xx status code' } });
+    const progress: number[] = [];
+    const ids = Array.from({ length: 12 }, (_, i) => `q${i}`);
+    const r = await processInBatches({ functions: { invoke } } as never, 's1', ids, (done) => progress.push(done));
+    expect(invoke.mock.calls[0]).toEqual(['process-questions', { body: { sessionId: 's1', questionIds: ids.slice(0, 10) } }]);
+    expect(progress).toEqual([10, 12]);
+    expect(r.failed).toEqual(['q3', 'q10', 'q11']);
+    expect(r.reasons).toEqual(['Edge Function returned a non-2xx status code']);
   });
 });
