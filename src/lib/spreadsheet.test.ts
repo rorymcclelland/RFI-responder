@@ -30,7 +30,7 @@ async function xlsxFrom(rows: (string | number)[][]): Promise<Uint8Array> {
   return new Uint8Array(await wb.xlsx.writeBuffer());
 }
 
-const sampleCsv = readFileSync(new URL('../../sample-questions.csv', import.meta.url), 'utf8');
+const sampleCsv = readFileSync(new URL('../../sample-data/sample-questions.csv', import.meta.url), 'utf8');
 
 describe('parseSpreadsheet: normal cases', () => {
   it('1. the sample CSV and the same data as .xlsx give the same questions', async () => {

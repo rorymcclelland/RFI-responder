@@ -42,7 +42,7 @@ Job stories follow the format: **When** [situation], **I want to** [motivation],
 
 **3.1** When I am setting up the tool for the first time, I want to bulk-import existing Q&A pairs from a CSV or spreadsheet, so I do not have to enter hundreds of entries manually.
 
-**3.2** When I want to verify what the AI is drawing on, I want to open the Knowledge Base modal and browse or search all entries, so I can confirm coverage before running a new session.
+**3.2** *(Wording looks ahead to Sprint 2; until then drafts are assembled from matching entries, not generated.)* When I want to verify what the AI is drawing on, I want to open the Knowledge Base modal and browse or search all entries, so I can confirm coverage before running a new session.
 
 **3.3** When I finish reviewing an RFI, I want to add accepted answers back into the Knowledge Base in one click, so future RFIs on similar topics benefit from the work already done.
 

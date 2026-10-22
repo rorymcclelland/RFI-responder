@@ -101,7 +101,7 @@ BEGIN
 END $$;
 
 -- Starter knowledge base: eight synthetic security answers, added by the admin.
--- For a fuller set, sign in and import rfp_security_qa.csv (100 synthetic Q&As).
+-- For a fuller set, sign in and import sample-data/security-qa.csv (100 synthetic Q&As).
 INSERT INTO public.kb_entries (question, answer, tags, source, origin, origin_ref, created_by)
 SELECT e->>'question', e->>'answer',
        ARRAY(SELECT jsonb_array_elements_text(e->'tags')), e->>'source',

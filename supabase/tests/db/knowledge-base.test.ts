@@ -10,7 +10,7 @@ interface ImportResult { inserted: number; duplicates: number; invalid: number }
 
 // The synthetic 100-question file shipped with the repo, mapped as the import screen maps it.
 const csv = Papa.parse<Record<string, string>>(
-  readFileSync(new URL('../../../rfp_security_qa.csv', import.meta.url), 'utf8'),
+  readFileSync(new URL('../../../sample-data/security-qa.csv', import.meta.url), 'utf8'),
   { header: true, skipEmptyLines: true },
 ).data;
 const securityQA: Entry[] = csv.map((r) => ({
@@ -23,7 +23,7 @@ const securityQA: Entry[] = csv.map((r) => ({
 let admin: TestUser;
 let member: TestUser;
 
-const importAs = (user: TestUser | null, entries: unknown, origin = 'import', ref = 'rfp_security_qa.csv') =>
+const importAs = (user: TestUser | null, entries: unknown, origin = 'import', ref = 'security-qa.csv') =>
   (q: Parameters<Parameters<typeof as>[1]>[0]) =>
     q<{ r: ImportResult }>('SELECT import_kb_entries($1::jsonb, $2::kb_origin, $3) AS r', [
       JSON.stringify(entries), origin, ref,
@@ -47,7 +47,7 @@ describe('import_kb_entries', () => {
       expect(rows.rows[0]).toEqual({
         source: 'Data Protection Policy v3.1',
         origin: 'import',
-        origin_ref: 'rfp_security_qa.csv',
+        origin_ref: 'security-qa.csv',
         created_by: member.id,
         ref: expect.stringMatching(/^KB-\d{4}$/),
       });
