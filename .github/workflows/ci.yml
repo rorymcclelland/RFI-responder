@@ -79,11 +79,11 @@ jobs:
             -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
             -d '{"email":"intruder@example.com","password":"Intruder2026pw"}')
           cat /tmp/signup.json; echo
-          if [ "$code" -lt 400 ]; then echo "Sign-up was allowed (HTTP $code)"; exit 1; fi
+          if [ "$code" -lt 400 ]; then echo "::error title=Sign-up was allowed (HTTP $code)::$(head -c 500 /tmp/signup.json)"; exit 1; fi
       - name: Seeded admin can sign in
         run: |
           eval "$(supabase status -o env)"
-          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$API_URL/auth/v1/token?grant_type=password" \
+          code=$(curl -s -o /tmp/signin.json -w '%{http_code}' -X POST "$API_URL/auth/v1/token?grant_type=password" \
             -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
             -d '{"email":"sarah.chen@example.com","password":"LocalDev2026pw"}')
-          test "$code" = "200" || { echo "Sign-in failed (HTTP $code)"; exit 1; }
+          test "$code" = "200" || { echo "::error title=Seeded sign-in failed (HTTP $code)::$(head -c 500 /tmp/signin.json)"; exit 1; }
