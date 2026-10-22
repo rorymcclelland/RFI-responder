@@ -48,7 +48,7 @@ The heart of the product. Every entry records who added it, from where (manual, 
 
 ## Later: multilingual
 
-Knowledge may be captured, and RFIs received and answered, in different languages. The aim is that knowledge captured in any supported language is usable in all of them, with drafts written in the RFI's own language and machine-translated answers reviewed by a person before they are learned. Backlog candidate C-1.
+Knowledge may be captured, and RFIs received and answered, in different languages. The aim is that knowledge captured in any supported language is usable in all of them, with drafts written in the RFI's own language and machine-translated answers reviewed by a person before they are learned. Starting languages: English and Japanese. Backlog candidate C-1.
 
 ## Scope and non-goals
 
@@ -66,5 +66,5 @@ Knowledge may be captured, and RFIs received and answered, in different language
 | 22 Oct 2026 | Pricing and legal or contractual questions never auto-approved; pricing never auto-learned |
 | 22 Oct 2026 | Learning happens at export; manual additions immediate and tagged |
 | 22 Oct 2026 | Spreadsheet and Word ingestion first; PDF and pasted text later |
-| 22 Oct 2026 | Multilingual knowledge base added as a backlog candidate; the AI-route spike must assess multilingual capability |
+| 22 Oct 2026 | Multilingual knowledge base added as a backlog candidate, English and Japanese first; the AI-route spike must assess multilingual capability |
 | 22 Oct 2026 | Overview of in-flight responses with due dates; archive, never delete (admin hard delete for errors only); outcome recorded |
