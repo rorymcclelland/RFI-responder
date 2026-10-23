@@ -245,7 +245,7 @@ An independent security review found seven issues, all fixed and tested (`202610
 
 **Bugs found and fixed in the sprint.** BUG-14: the review queue did not load (PostgREST resolves a link to the same table by column name, not constraint name). BUG-15: with the functions server down the app said only "non-2xx status code"; it now says the AI service is not running and how to start it. BUG-16: the exchange-rate wording on the Usage tab.
 
-**Decisions at the review.** The governance pack accepted as written. Sprint 5 to be confirmed (below).
+**Decisions at the review.** The governance pack accepted as written. Sprint 5 confirmed as proposed (below).
 
 ### Where every Sprint 4 review item now lives
 
@@ -260,7 +260,7 @@ An independent security review found seven issues, all fixed and tested (`202610
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 4 review)
 
-**Sprint 5 (proposed at the Sprint 4 review): Word ingestion and judge consistency.**
+**Sprint 5 (confirmed 23 October 2026): Word ingestion and judge consistency.**
 - Word documents (.docx) ingested with AI-assisted question extraction alongside spreadsheets, through the same hostile-input rules, inside the usage caps, with a preview to correct the list before saving. Why: the brief's first ingestion format after spreadsheets.
 - An extraction evaluation set and red-team cases (instructions planted in a document). Why: the first time an LLM reads a whole untrusted document.
 - F-22 judge consistency across repeated runs. Why: the judge now decides confidence, gates and supersession, and the Sprint 4 run showed the same question at 99%+ and 75%.
