@@ -29,6 +29,7 @@ describe('validateSettings', () => {
     [{ alert_share: 1.2 }, /warning point/],
     [{ gbp_per_usd: 0 }, /exchange rate/],
     [{ review_interval_months: 0 }, /review interval/],
+    [{ est_usd_per_question: 0 }, /reserve per question/],
   ])('refuses %o', (change, message) => {
     expect(validateSettings(change)).toMatch(message);
   });

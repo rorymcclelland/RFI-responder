@@ -14,10 +14,14 @@ export interface UsageReport {
   byUser: { userId: string | null; name: string | null; calls: number; spentGbp: number }[];
   byModel: { provider: string; model: string; kind: string; calls: number; inputTokens: number; outputTokens: number; spentGbp: number }[];
   unpricedCalls: number;
+  /** F-29: questions processed this month and the measured processing cost per question (dollars). */
+  questionsProcessed: number;
+  avgUsdPerQuestion: number | null;
 }
 export interface AiSettings {
   daily_question_cap: number; daily_embed_cap: number; monthly_budget_gbp: number;
   alert_share: number; gbp_per_usd: number; review_interval_months: number;
+  est_usd_per_question: number;
   updated_at: string;
 }
 export interface AiPrice { provider: string; model: string; input_usd_per_mtok: number; output_usd_per_mtok: number; checked_on: string; source_url: string }
@@ -50,13 +54,15 @@ export async function loadUsageAdmin(client: SupabaseClient): Promise<{ report: 
       byUser: r.byUser.map((u) => ({ ...u, spentGbp: num(u.spentGbp) })),
       byModel: r.byModel.map((m) => ({ ...m, spentGbp: num(m.spentGbp), inputTokens: num(m.inputTokens), outputTokens: num(m.outputTokens) })),
       unpricedCalls: num(r.unpricedCalls),
+      questionsProcessed: num(r.questionsProcessed ?? 0),
+      avgUsdPerQuestion: r.avgUsdPerQuestion === null || r.avgUsdPerQuestion === undefined ? null : num(r.avgUsdPerQuestion),
     },
     settings: settings.data as AiSettings,
     prices: (prices.data ?? []) as AiPrice[],
   };
 }
 
-export type SettingsChange = Partial<Pick<AiSettings, 'daily_question_cap' | 'daily_embed_cap' | 'monthly_budget_gbp' | 'alert_share' | 'gbp_per_usd' | 'review_interval_months'>>;
+export type SettingsChange = Partial<Pick<AiSettings, 'daily_question_cap' | 'daily_embed_cap' | 'monthly_budget_gbp' | 'alert_share' | 'gbp_per_usd' | 'review_interval_months' | 'est_usd_per_question'>>;
 
 /** Checks the values before sending them; the database checks them again. */
 export function validateSettings(change: SettingsChange): string | null {
@@ -66,6 +72,7 @@ export function validateSettings(change: SettingsChange): string | null {
   if (change.monthly_budget_gbp !== undefined && !(Number.isFinite(change.monthly_budget_gbp) && change.monthly_budget_gbp >= 0)) return 'The monthly budget must be 0 or more.';
   if (change.alert_share !== undefined && !(change.alert_share > 0 && change.alert_share <= 1)) return 'The warning point must be between 1% and 100%.';
   if (change.gbp_per_usd !== undefined && !(change.gbp_per_usd > 0)) return 'The exchange rate must be more than 0.';
+  if (change.est_usd_per_question !== undefined && !(change.est_usd_per_question > 0)) return 'The reserve per question must be more than 0.';
   if (change.review_interval_months !== undefined && !(Number.isInteger(change.review_interval_months) && change.review_interval_months >= 1 && change.review_interval_months <= 60)) {
     return 'The review interval must be between 1 and 60 months.';
   }

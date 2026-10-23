@@ -47,6 +47,7 @@ const SETTING_FIELDS: { key: keyof SettingsChange; label: string; help: string; 
   { key: 'daily_embed_cap', label: 'Knowledge-base texts indexed per person per day', help: 'Covers imports and new entries.', step: 1 },
   { key: 'monthly_budget_gbp', label: 'Monthly budget (£)', help: 'Processing stops for everyone when this month\'s estimated spend reaches it.', step: 1 },
   { key: 'alert_share', label: 'Warn admins at (% of budget)', help: 'Admins see a warning from this point.', step: 5, percent: true },
+  { key: 'est_usd_per_question', label: 'Reserve per question (US$)', help: 'Held against the budget while a question is processed, until its real cost is recorded. Compare it with the measured average above.', step: 0.001 },
   { key: 'gbp_per_usd', label: 'Pounds per US dollar', help: 'Providers price in dollars. 1.00 counts each dollar as a pound, which overstates spend; set the current rate for a truer figure.', step: 0.01 },
   { key: 'review_interval_months', label: 'Review knowledge-base entries every (months)', help: 'Entries past this are reported, and drafts citing them are held from bulk approval.', step: 1 },
 ];
@@ -114,6 +115,7 @@ function UsageTab() {
         <p className="text-xs text-ink-500">
           Estimated from the token counts each provider reported and the prices below, converted at £{Number(settings.gbp_per_usd).toFixed(2)} to the dollar.
           {status.exhausted ? ' The budget is reached: processing is stopped for everyone.' : status.alert ? ' Past the warning point.' : ''}
+          {report.avgUsdPerQuestion !== null && ` Measured this month: $${report.avgUsdPerQuestion.toFixed(4)} per question over ${report.questionsProcessed} processed; each question reserves $${Number(settings.est_usd_per_question).toFixed(4)}.`}
           {report.unpricedCalls > 0 && ` ${report.unpricedCalls} call${report.unpricedCalls === 1 ? '' : 's'} used a model with no price, so the figure is too low.`}
         </p>
       </div>

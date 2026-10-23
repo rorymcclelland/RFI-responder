@@ -464,6 +464,8 @@ describe('Sprint 4 security review findings', () => {
 
   it('3b. reservations count against the budget before any usage is recorded, across users', async () => {
     // £10 budget, 1.00 GBP per USD, $0.01 estimated per question: 1,000 questions of headroom.
+    // (Sprint 5 lowered the default to $0.002; this test sets $0.01 to keep its arithmetic.)
+    await asSuperuser(`UPDATE ai_settings SET est_usd_per_question = 0.01`);
     const users = await Promise.all([1, 2, 3, 4].map(() => createUser()));
     const got = [];
     for (const u of users) got.push(await reserve(u, 'questions', 300));
@@ -473,6 +475,7 @@ describe('Sprint 4 security review findings', () => {
     const later = await createUser();
     await asSuperuser(`DELETE FROM ai_reservations WHERE user_id = $1`, [users[0].id]);
     expect((await reserve(later, 'questions', 300)).allowed).toBe(300);
+    await asSuperuser(`UPDATE ai_settings SET est_usd_per_question = 0.002`);
   });
 
   it('3c. settle_reservation is for the Edge Functions only', async () => {

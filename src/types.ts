@@ -116,7 +116,8 @@ export interface OpportunityContributor {
   profile?: UserProfile;
 }
 
-export type AssignmentStatus = 'pending' | 'in_review' | 'answered' | 'approved';
+/** 'closed' is set only when the response's export is recorded (Sprint 5, F-26). */
+export type AssignmentStatus = 'pending' | 'in_review' | 'answered' | 'approved' | 'closed';
 
 export interface QuestionAssignment {
   id: string;

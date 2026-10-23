@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Inbox, Clock, TrendingUp, CheckCircle2, CheckCheck, ChevronDown, RefreshCw, MessageSquare, X, ArrowRight } from 'lucide-react';
+import { Inbox, Clock, TrendingUp, CheckCircle2, CheckCheck, ChevronDown, RefreshCw, MessageSquare, X, ArrowRight, Lock } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { QuestionAssignment, AssignmentStatus } from './types';
 
@@ -13,9 +13,12 @@ const STATUS_CONFIG: Record<AssignmentStatus, {
   in_review: { label: 'In Review', icon: <TrendingUp size={12} />,   pill: 'bg-amber-50 text-amber-700 border-amber-200',       next: 'answered' },
   answered:  { label: 'Answered',  icon: <CheckCircle2 size={12} />, pill: 'bg-sky-50 text-sky-700 border-sky-200',             next: 'approved' },
   approved:  { label: 'Approved',  icon: <CheckCheck size={12} />,   pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', next: null },
+  closed:    { label: 'Closed',    icon: <Lock size={12} />,         pill: 'bg-ink-50 text-ink-400 border-ink-200',             next: null },
 };
 
 const STATUS_ORDER: AssignmentStatus[] = ['pending', 'in_review', 'answered', 'approved'];
+/** Filters: the steps, plus assignments closed when their response was exported (F-26). */
+const FILTERS: AssignmentStatus[] = [...STATUS_ORDER, 'closed'];
 
 // ─── Notes modal ──────────────────────────────────────────────────────────────
 
@@ -331,7 +334,7 @@ export default function UserInbox({ userId, isAdmin }: Props) {
             className={`text-xs px-3 py-2 rounded-lg font-bold transition-all ${
               statusFilter === 'all' ? 'bg-ink-900 text-white' : 'text-ink-500 hover:text-ink-800 hover:bg-ink-50'
             }`}>All</button>
-          {STATUS_ORDER.map((s) => (
+          {FILTERS.map((s) => (
             <button key={s} onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
               className={`text-xs px-3 py-2 rounded-lg font-bold transition-all ${
                 statusFilter === s ? 'bg-ink-900 text-white' : 'text-ink-500 hover:text-ink-800 hover:bg-ink-50'
