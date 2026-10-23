@@ -6,14 +6,16 @@ Product brief: [`docs/PRODUCT.md`](docs/PRODUCT.md). Backlog: [`docs/BACKLOG.md`
 
 ## Status
 
-Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 to 2 are complete** (clean-up; retrieval and confidence; grounded drafting and safety gates). What the code does today, stated plainly:
+Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 to 3 are complete** (clean-up; retrieval and confidence; grounded drafting and safety gates; workflow and the learning loop). What the code does today, stated plainly:
 
 - **Processing happens on the server.** Each uploaded question goes to a Supabase Edge Function, which matches it against the knowledge base by meaning (voyage-4, or a local model through Ollama), asks Claude whether the matched entries actually answer it, checks it for pricing and legal or contractual terms, and drafts an answer. Provider keys never reach the browser.
 - **Drafts are grounded and checked.** Claude writes only from the matched entries and cites them; code then rejects a draft that cites an entry it was not given, or contains a figure or link not in its sources. When the entries do not answer the question, there is no draft. Pricing questions are never drafted. Japanese questions get Japanese drafts, labelled as translations.
 - **Confidence is calibrated** on synthetic evaluation sets (`docs/evals/`): the measured chance that the knowledge base answers the question with the top entry. The sets are small, so the figures are estimates.
-- **Bulk approval is limited by the database**, not the screen: only the response owner or an admin, and never for pricing, legal, translated, unprocessed or uncalibrated questions, or ones without a draft. Anyone on the team can still accept a single question.
+- **Bulk approval is limited by the database**, not the screen: only the response owner or an admin, and never for pricing, legal, translated, unprocessed or uncalibrated questions, or ones without a draft. A single question is decided only by the response owner, an admin, or someone it is assigned to, and every approval is recorded (who, how, at what threshold).
+- **The knowledge base learns at export.** Recording an export is refused while any question is pending. It then turns edited and person-written answers into entries linked to the response they came from, replaces an entry only when the answer is a near-duplicate the checker confirmed (threshold measured per embedding model), and confirms entries that unedited drafts used. Pricing and Japanese answers, and anything the server did not process, are never learned.
+- **Responses are archived, not deleted.** An archived response keeps its outcome (won, lost, withdrawn) and can no longer be changed. An admin can delete a response created in error, with a reason, and the deletion is logged.
 
-Features in the code, tested end to end in a browser against local Supabase: responses (opportunities) with an owner; uploading questions from `.xlsx` or `.csv`; review lowest-confidence first, with accept, edit, skip and bulk approval; assigning questions to colleagues by expertise, with an inbox; export to Excel, CSV and Word; a shared knowledge base with import and add-back; invite-only accounts with admin, owner and member rights enforced in the database.
+Features in the code, tested end to end in a browser against local Supabase: an overview of responses in flight with owner, due date, progress, overdue and at-risk flags; uploading questions from `.xlsx` or `.csv`; review lowest-confidence first, with accept, edit, skip and bulk approval; assigning questions to colleagues, with suggestions from stated expertise and who wrote or approved similar answers, and an inbox; export to Excel, CSV and Word; a shared knowledge base with import; invite-only accounts with admin, owner and member rights enforced in the database.
 
 ## Project rules
 

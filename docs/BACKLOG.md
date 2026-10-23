@@ -164,25 +164,62 @@ Refinement: `docs/refinement/sprint-3.md` (answers recorded 23 October). Each it
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S3-1 | Overview of responses in flight: owner, due date, progress, overdue and at-risk flags | Rory's brief: several responses at once | Ready, Sprint 3 |
-| S3-2 | Recorded approvals (who, individual or bulk, threshold, model and prompt versions) and a readiness gate before export | Rule 4 says bulk approval counts when recorded; the audit trail completes Sprint 2's controls | Ready, Sprint 3 |
-| S3-3 | Archive with outcome (won or lost); admin-only hard delete for responses created in error, logged | Rory's brief: archive, never delete | Ready, Sprint 3 |
-| S3-4 | Learning at export: edited and person-written answers (including legal) become entries with provenance, near-duplicates superseded (F-11, threshold measured in S3-4b), origin_ref set by the system (F-6), pricing and Japanese never learned; unedited drafts confirm their entries | The self-improving knowledge base; replaces the manual Add to KB button | Ready, Sprint 3 |
-| S3-4b | Near-duplicate threshold measured on the Sprint 1 evaluation set | Supersession must not replace a different question's entry | Ready, Sprint 3 |
-| S3-5 | Questions editable only by the owner, assignees and admins (F-7) | Same tables as S3-2 | Ready, Sprint 3 |
-| S3-6 | Expert suggestions from answer history as well as stated expertise | Uses the provenance S3-4 records | Ready, Sprint 3 |
-| F-17 | Show high confidence as "99% or more", never "100%" | Small, and the card changes anyway | Ready, Sprint 3 |
-| F-23 | Start a new upload from the review screen | Small, and the workspace changes anyway | Ready, Sprint 3 |
+| S3-1 | Overview of responses in flight: owner, due date, progress, overdue and at-risk flags | Rory's brief: several responses at once | Done, Sprint 3 |
+| S3-2 | Recorded approvals (who, individual or bulk, threshold, model and prompt versions) and a readiness gate before export | Rule 4 says bulk approval counts when recorded; the audit trail completes Sprint 2's controls | Done, Sprint 3 |
+| S3-3 | Archive with outcome (won or lost); admin-only hard delete for responses created in error, logged | Rory's brief: archive, never delete | Done, Sprint 3 |
+| S3-4 | Learning at export: edited and person-written answers (including legal) become entries with provenance, near-duplicates superseded (F-11, threshold measured in S3-4b), origin_ref set by the system (F-6), pricing and Japanese never learned; unedited drafts confirm their entries | The self-improving knowledge base; replaces the manual Add to KB button | Done, Sprint 3 (learning became an allow list after the security review) |
+| S3-4b | Near-duplicate threshold measured on the Sprint 1 evaluation set | Supersession must not replace a different question's entry | Done, Sprint 3: voyage-4 0.30, qwen 0.47, each with 1.9% wrong supersessions (bar 2%) |
+| S3-5 | Questions editable only by the owner, assignees and admins (F-7) | Same tables as S3-2 | Done, Sprint 3 |
+| S3-6 | Expert suggestions from answer history as well as stated expertise | Uses the provenance S3-4 records | Done, Sprint 3 |
+| F-17 | Show high confidence as "99% or more", never "100%" | Small, and the card changes anyway | Done, Sprint 3 |
+| F-23 | Start a new upload from the review screen | Small, and the workspace changes anyway | Done, Sprint 3 |
 
 No spike: near-duplicate detection uses the vectors already stored, with a threshold measured on the evaluation set.
 
-## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 0 review)
+All nine committed items closed as done; nothing returned to the backlog.
 
-(Sprint 3 is above.)
+### Sprint 3 review (23 October 2026)
 
-**Sprint 4: ingestion and governance pack.** Per-user rate limits and cost caps on processing (F-21); review of member-added knowledge-base entries, which the draft checks trust. Word documents ingested with AI-assisted question extraction alongside spreadsheets (PDF and pasted text stay in the backlog); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); cost caps and rate limits; KB review dates and a stale-entry report; light mapping to NIST AI RMF and the EU AI Act transparency duties.
+**Checks, with evidence.** CI green on all three jobs at `a83e0ec` (181 unit tests; 150 database tests, including one per role-matrix row for every new table and function; the real Supabase stack). Near-duplicate thresholds in `docs/evals/duplicates-2026-10-23.md`. End-to-end on Rory's PC, on a new synthetic response of six questions:
 
-**Sprint 5: documentation and publish.** Architecture diagram, evaluation reports, governance pack, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match.
+| Check (agreed at refinement) | Result | Held? |
+|---|---|---|
+| Overview shows owner, due date, stage, progress, overdue and at risk | Due tomorrow with 2 of 6 decided showed "At risk"; cleared once exported | Yes |
+| Every approval recorded (who, how, threshold) | "by Sarah Chen, bulk at 80%" and "by Maya Patel" on screen; rows in `approvals` | Yes |
+| Export blocked while anything is pending | Disabled with the reason; enabled once all six were decided | Yes |
+| Learning: edits learned with provenance, unedited drafts confirm, pricing never learned | 1 added (KB-0109, linked to response, session and question, indexed at once), 3 confirmed, 1 pricing not learned; the edit sat beside KB-0012 because the judge said KB-0012 does not answer it | Yes |
+| Only owner, admin or assignee decides (F-7) | Tom: no controls; database refused a direct update (0 rows) and bulk approval (403). Maya, once assigned, edited and accepted | Yes |
+| Archive with outcome; archived responses read-only | Archived as won; database refused a new session and an edit, even from an admin | Yes |
+| Admin-only delete with a reason, logged | Throwaway response deleted; export, archive and delete all in the audit log with details | Yes |
+| Expert suggestions give reasons | Stated expertise, and "wrote KB-0012" | Yes |
+
+An independent security review found five gaps, all fixed and tested (`20261023150000_sprint3_review_fixes.sql`, decision 0003): self-assignment onto another response's question, learning by block list, members creating archived responses or adding to others' responses, a writable `origin_ref`, and supersession trusting a verdict about another entry.
+
+**Bugs found and fixed in the sprint.** BUG-10: an edited or person-written answer sat under "Proposed Response", whose tooltip says every citation and figure was checked (rule 1); it is now labelled as a person's answer. BUG-11: the approval line appeared only after a reload. BUG-12: an archived response still offered New upload and Start New RFI (the database refused both). BUG-13: assigning or unassigning ignored errors.
+
+**Decisions at the review.** Proposed for Rory: accept F-24 as a residual (below); confirm the next sprint.
+
+### Where every Sprint 3 review item now lives
+
+| Item | Now |
+|---|---|
+| Five security review findings | Done in Sprint 3 (review), decision 0003 |
+| BUG-10 to BUG-13 | Done in Sprint 3 (review) |
+| F-24 `app.*` transaction settings can be forged over a direct SQL connection | Proposed as an accepted residual (members only reach the API, which cannot set them) |
+| F-25 Learning confirms every matched entry, not only the ones the draft cited | Backlog, from Sprint 3 review |
+| F-26 Assignments stay open after a response is exported or archived ("1 with experts" on an archived response) | Backlog, from Sprint 3 review |
+| MFA draft at 75% with a "no" verdict | Folded into F-18 (judge says "no" to answerable questions) |
+| F-6, F-7, F-11 | Done in Sprint 3 (S3-4, S3-5, S3-4 with S3-4b) |
+
+## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 3 review)
+
+**Sprint 4 (proposed at the Sprint 3 review): cost controls and governance pack.** Per-user rate limits and cost caps on processing (F-21); review of member-added knowledge-base entries, which the draft checks trust; knowledge-base review dates and a stale-entry report (uses `last_reviewed_at`, which Sprint 3 now sets); confirm only cited entries (F-25); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); light mapping to NIST AI RMF and the EU AI Act transparency duties.
+
+**Sprint 5: ingestion.** Word documents ingested with AI-assisted question extraction alongside spreadsheets, with its own evaluation set and red-team cases (an LLM reading a whole untrusted document); close assignments at export (F-26). PDF and pasted text stay in the backlog.
+
+**Sprint 6: documentation and publish.** Architecture diagram, evaluation reports, governance pack, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match.
+
+**Not yet in a sprint, ranked at the Sprint 3 review.** 1. F-18 judge says "no" to answerable questions (it now also decides supersession; candidate for Sprint 5 with the new evaluation work). 2. C-1 multilingual knowledge base (after ingestion; the strongest demonstration still unbuilt). 3. F-16 calibration stability (larger set, intervals). 4. F-19 faithfulness judge on planted unfaithful drafts. 5. F-22 judge consistency across runs. 6. F-20 rerankers (needs a Voyage payment method). 7. F-10 narrow windows (before the Sprint 6 screenshots). 8. F-8 leaked-password protection (hosted project only; before publishing). 9. F-2 generated database types. 10. F-3 invite screen. 11. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and a second reviewer). 12. F-4 Tailwind 4.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -190,7 +227,7 @@ No spike: near-duplicate detection uses the vectors already stored, with a thres
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 onwards from Sprint 2; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 onwards from Sprint 3; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -198,24 +235,27 @@ No spike: near-duplicate detection uses the vectors already stored, with a thres
 | F-2 | Generate database types (`npm run types`) and use them in the app | Needs the local Supabase stack |
 | F-3 | In-app "invite user" screen, via a server-side function with the service key | Invites go through the Supabase dashboard for now |
 | F-4 | Move to Tailwind 4 | Clears the remaining dev-only audit findings (decision 0002) |
-| F-5 | Split `RFIWorkspace.tsx` (870 lines) | Planned with Sprint 2's drafting rewrite |
-| F-6 | Validate `kb_entries.origin_ref` server-side | Free text until Sprint 3's learning at export sets it |
-| F-7 | Make questions within a session editable only by the owner, assignees and admins | Team-editable until Sprint 3's readiness workflow |
+| F-5 | Split `RFIWorkspace.tsx` (870 lines) | Done, Sprint 2. Planned with Sprint 2's drafting rewrite |
+| F-6 | Validate `kb_entries.origin_ref` server-side | Done, Sprint 3. Free text until Sprint 3's learning at export sets it |
+| F-7 | Make questions within a session editable only by the owner, assignees and admins | Done, Sprint 3. Team-editable until Sprint 3's readiness workflow |
 | F-8 | Turn on leaked-password protection in the hosted project | The Bolt migration claiming to do this was a no-op (decision 0003) |
 | F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Found in the end-to-end run; a failed save is silent |
 | F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Found in the end-to-end run |
-| F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Found in the end-to-end run; Sprint 3, with supersession |
-| F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
+| F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Done, Sprint 3. Found in the end-to-end run; Sprint 3, with supersession |
+| F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | Done, Sprint 2. From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
 | F-14 | Japanese evaluation items are machine translations of the original questions, unreviewed | From the Sprint 1 review; reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
 | F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
 | F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
-| F-17 | High confidence is shown as "100%" | From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
+| F-17 | High confidence is shown as "100%" | Done, Sprint 3. From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
 | F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | From the Sprint 2 review; judge prompt, and showing the verdict on the card |
 | F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
 | F-20 | Voyage rerank-2.5 and rerank-3 not yet compared with the Claude judge | Returned from S2-1; needs a Voyage payment method for the rate limit. Cheaper and faster if as good |
 | F-21 | No per-user rate limit or cost cap on processing | From the Sprint 2 security review; folded into Sprint 4 |
 | F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | From the Sprint 2 review; accepted residual of S2-5 (r028) |
-| F-23 | The review screen has no way to start a new upload | Found in the Sprint 2 end-to-end run |
+| F-23 | The review screen has no way to start a new upload | Done, Sprint 3. Found in the Sprint 2 end-to-end run |
+| F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Proposed as an accepted residual |
+| F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
+| F-26 | Assignments stay open after a response is exported or archived | From the Sprint 3 end-to-end run; close them at export, or show them as closed |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
