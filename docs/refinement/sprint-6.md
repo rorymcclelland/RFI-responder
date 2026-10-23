@@ -173,3 +173,15 @@ Also re-run here without API calls: the near-duplicate threshold for learning, w
 The re-measure overwrote Sprint 5's same-day reports; they were restored from git and the Sprint 6 runs filed as `*-2026-10-23-sprint6.*`. The scripts now never overwrite a report (a same-day rerun gets `-2`, `-3`), and the newest report is found by name.
 
 Per the refinement, missing the consistency bar means majority of three is planned for Sprint 7 and refined at this sprint's close; Rory decides there whether the remaining variation (mostly "yes" against "partly", both drafted) still warrants it.
+
+## End-to-end check (Rory's PC, 24 October 2026)
+
+| Check | Result | Held? |
+|---|---|---|
+| A member's entry holds a question that cites it (S6-4) | Tom added KB-0111; his new question drew on it at 99%+ and was held: "Cites KB-0111, not reviewed by an admin yet" | Yes |
+| The card shows the checker's verdict and reason (S6-3) | "Yes. KB-0111 directly states that enterprise customers can supply their own encryption keys..." | Yes |
+| Reviewing the entry releases the held question, without reprocessing (S6-4) | Sarah approved KB-0111; Tom's question lost its hold, and bulk approval at 80% accepted both questions | Yes |
+| "All eligible" approvals (S6-6) | Sprint 5's cards read "bulk, all eligible" | Yes |
+| The Sent list names the assignee (S6-7) | "to Maya Patel"; All shows "by Sarah Chen, to Maya Patel" | Yes |
+
+Fixed from the run: the review confirmation still said questions already processed keep their gate (now: questions waiting on the entry are released unless another cited entry awaits review), and the checker line repeated the entry number when the reason began with it. A refused save (S6-5) was not provoked in the browser; it is covered by unit tests.

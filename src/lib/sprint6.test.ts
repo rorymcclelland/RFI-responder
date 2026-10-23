@@ -21,6 +21,10 @@ describe('S6-3 the checker on the card', () => {
     expect(checkerSummary({ verdict: 'no', bestRef: 'KB-0003', reason: 'Neither entry names a product.' }, 'claude-haiku-5-5', 0.2)).toEqual({ label: 'No', detail: 'KB-0003: Neither entry names a product.' });
   });
 
+  it('does not repeat the entry when the reason starts with it (end-to-end run)', () => {
+    expect(checkerSummary({ verdict: 'yes', bestRef: 'KB-0111', reason: 'KB-0111 directly states it.' }, 'm', 0.99)?.detail).toBe('KB-0111 directly states it.');
+  });
+
   it('3. a failed check reads "not available", never a verdict', () => {
     expect(checkerSummary({ verdict: null, bestRef: null, reason: null }, 'claude-haiku-5-5', null)).toEqual({ label: 'Not available', detail: null });
   });

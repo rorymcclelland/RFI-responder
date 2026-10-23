@@ -29,7 +29,9 @@ export function checkerSummary(
     // Before Sprint 6 a reply that could not be read was stored as "no", with no reason.
     return { label, detail: 'No reason recorded. Before 24 October 2026 a check that could not be read was recorded as No.' };
   }
-  const detail = [checker.bestRef, checker.reason].filter(Boolean).join(': ') || null;
+  // The reason usually names the entry itself; then the entry is not repeated in front of it.
+  const ref = checker.bestRef && !checker.reason?.startsWith(checker.bestRef) ? checker.bestRef : null;
+  const detail = [ref, checker.reason].filter(Boolean).join(': ') || null;
   return { label, detail };
 }
 

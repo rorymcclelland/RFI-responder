@@ -224,7 +224,7 @@ function ReviewTab({ mode }: { mode: 'unreviewed' | 'overdue' }) {
     setError(''); setNotice('');
     try {
       await reviewEntry(supabase, e.id, edits);
-      setNotice(`${e.ref} reviewed${edits ? ' with corrections' : ''}. Questions processed from now on can cite it in bulk-approvable drafts; questions already processed keep their gate.`);
+      setNotice(`${e.ref} reviewed${edits ? ' with corrections' : ''}. Questions waiting on it in open responses are released for bulk approval, unless they cite another entry still awaiting review.`);
       await load();
     } catch (err) {
       setError((err as Error).message);
