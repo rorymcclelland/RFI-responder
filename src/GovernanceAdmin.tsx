@@ -112,7 +112,7 @@ function UsageTab() {
           <div className={`h-full ${status.exhausted ? 'bg-coral-500' : status.alert ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${share * 100}%` }} />
         </div>
         <p className="text-xs text-ink-500">
-          Estimated from the token counts each provider reported and the prices below, at {settings.gbp_per_usd} pounds per dollar.
+          Estimated from the token counts each provider reported and the prices below, converted at £{Number(settings.gbp_per_usd).toFixed(2)} to the dollar.
           {status.exhausted ? ' The budget is reached: processing is stopped for everyone.' : status.alert ? ' Past the warning point.' : ''}
           {report.unpricedCalls > 0 && ` ${report.unpricedCalls} call${report.unpricedCalls === 1 ? '' : 's'} used a model with no price, so the figure is too low.`}
         </p>

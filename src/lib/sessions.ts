@@ -75,8 +75,13 @@ export async function functionErrorMessage(error: unknown): Promise<{ message: s
   const e = error as { message?: string; context?: unknown } | null;
   const ctx = e?.context;
   if (ctx instanceof Response) {
-    const body = (await ctx.clone().json().catch(() => null)) as { error?: unknown } | null;
+    const body = (await ctx.clone().json().catch(() => null)) as { error?: unknown; message?: unknown } | null;
     if (body && typeof body.error === 'string') return { message: body.error, status: ctx.status };
+    // The local gateway answers { message } when the functions server is not running.
+    if (body && typeof body.message === 'string') {
+      const down = ctx.status === 503 && /name resolution failed/i.test(body.message);
+      return { message: down ? 'The AI service is not running (start it with: npx supabase functions serve)' : body.message, status: ctx.status };
+    }
     return { message: e?.message ?? 'no response', status: ctx.status };
   }
   return { message: e?.message ?? 'no response', status: null };

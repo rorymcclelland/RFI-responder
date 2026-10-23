@@ -65,11 +65,15 @@ export async function loadOverdueEntries(client: SupabaseClient): Promise<EntryF
   return ((data ?? []) as Record<string, unknown>[]).map(toEntry);
 }
 
-/** Current entries nobody with authority has reviewed, oldest first (admins). */
+/**
+ * Current entries nobody with authority has reviewed, oldest first (admins). A link to another
+ * row of the same table is embedded by its column name (PostgREST does not resolve the
+ * constraint-name hint for a self-reference; found in the Sprint 4 end-to-end run).
+ */
 export async function loadEntriesToReview(client: SupabaseClient): Promise<EntryForReview[]> {
   const { data, error } = await client
     .from('kb_entries')
-    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:kb_entries!kb_entries_proposed_replacement_of_fkey(ref, answer)')
+    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:proposed_replacement_of(ref, answer)')
     .is('reviewed_at', null)
     .is('superseded_by', null)
     .order('created_at', { ascending: true });

@@ -50,8 +50,11 @@ describe('the review queue', () => {
     });
     const is2 = vi.fn(() => ({ order }));
     const is1 = vi.fn(() => ({ is: is2 }));
-    const c = { from: () => ({ select: () => ({ is: is1 }) }) } as never;
+    const select = vi.fn(() => ({ is: is1 }));
+    const c = { from: () => ({ select }) } as never;
     const [e] = await loadEntriesToReview(c);
+    // The entry a proposal would replace is embedded by column name (a self-reference).
+    expect(select.mock.calls[0]).toEqual([expect.stringContaining('replaces:proposed_replacement_of(ref, answer)')]);
     expect(is1).toHaveBeenCalledWith('reviewed_at', null);
     expect(is2).toHaveBeenCalledWith('superseded_by', null);
     expect(e).toMatchObject({ ref: 'KB-0201', addedBy: 'Tom Richardson', tags: [] });

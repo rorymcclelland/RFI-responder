@@ -90,6 +90,17 @@ describe('processInBatches at the usage caps (Sprint 4, S4-1)', () => {
     expect(r.reasons).toEqual(["This month's AI budget has been reached"]);
   });
 
+  it('says plainly when the functions server is not running (gateway 503)', async () => {
+    const invoke = vi.fn().mockResolvedValueOnce({
+      data: null,
+      error: Object.assign(new Error('Edge Function returned a non-2xx status code'), {
+        context: new Response(JSON.stringify({ message: 'name resolution failed' }), { status: 503 }),
+      }),
+    });
+    const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a'], () => undefined);
+    expect(r.reasons).toEqual(['The AI service is not running (start it with: npx supabase functions serve)']);
+  });
+
   it('falls back to the generic message when the reply has no reason', async () => {
     const invoke = vi.fn().mockResolvedValueOnce({ data: null, error: new Error('Failed to send a request') });
     const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a'], () => undefined);
