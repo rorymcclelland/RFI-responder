@@ -63,3 +63,12 @@ export function expectedCalibrationError(items: Prediction[], bins = 10): number
   return reliabilityBins(items, bins).reduce(
     (s, b) => s + (b.count / items.length) * Math.abs(b.meanPredicted - b.observed), 0);
 }
+
+/**
+ * Sprint 6: rows the app would leave uncalibrated (an unreadable check, no score) are not fitted
+ * on; the report states how many were dropped.
+ */
+export function usableForCalibration<T extends { topScore: number | null; unreadable?: boolean }>(rows: T[]): { usable: (T & { topScore: number })[]; dropped: number } {
+  const usable = rows.filter((r) => !r.unreadable && typeof r.topScore === 'number' && Number.isFinite(r.topScore)) as (T & { topScore: number })[];
+  return { usable, dropped: rows.length - usable.length };
+}

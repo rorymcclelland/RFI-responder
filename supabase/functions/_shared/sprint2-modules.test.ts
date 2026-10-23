@@ -157,16 +157,15 @@ describe('answerability (S2-1 test 1)', () => {
     await expect(odd.check('q', entries)).rejects.toThrow(/unreadable/);
   });
 
-  it('judge: verdict orders the score, similarity breaks ties, and unreadable output counts as "no"', async () => {
+  it('judge: verdict orders the score, similarity breaks ties, and unreadable output fails the check (Sprint 6, Q2)', async () => {
     expect(judgeScore('yes', 0.1)).toBeGreaterThan(judgeScore('partly', 0.9));
     expect(judgeScore('partly', 0.6)).toBeGreaterThan(judgeScore('partly', 0.5));
     const yes = await claudeJudge({ client: fakeClient({ verdict: 'yes', best_ref: 'KB-0021', reason: 'r' }), model: 'm' }).check('q', entries);
     expect(yes).toMatchObject({ verdict: 'yes', bestRef: 'KB-0021', score: 2.62 });
-    for (const bad of [null, { verdict: 'certainly' }, { verdict: 'yes', best_ref: 'KB-9999' }]) {
-      const r = await claudeJudge({ client: fakeClient(bad), model: 'm' }).check('q', entries);
-      if (bad && (bad as { verdict: string }).verdict === 'yes') expect(r.bestRef).toBeNull();
-      else expect(r.verdict).toBe('no');
+    for (const bad of [null, { verdict: 'certainly' }]) {
+      await expect(claudeJudge({ client: fakeClient(bad), model: 'm' }).check('q', entries)).rejects.toThrow(/unreadable/);
     }
+    expect((await claudeJudge({ client: fakeClient({ verdict: 'yes', best_ref: 'KB-9999' }), model: 'm' }).check('q', entries)).bestRef).toBeNull();
   });
 
   it('no entries means score 0 without calling any provider', async () => {

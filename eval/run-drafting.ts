@@ -21,7 +21,7 @@ import { PROMPT_CANARY } from '../supabase/functions/_shared/claude';
 import { DRAFT_PROMPT_VERSION } from '../supabase/functions/_shared/drafting';
 import type { ProcessedQuestion } from '../supabase/functions/_shared/process-core';
 import { diskCache, ROOT, withRetry } from './lib';
-import { ensureVectors, kb, makeClaude, MODELS, runPipeline } from './pipeline';
+import { ensureVectors, kb, makeClaude, MODELS, runPipeline, unreadableChecks } from './pipeline';
 
 const FAITHFULNESS_JUDGE = 'claude-sonnet-5-5';
 const BARS = { cited: 0.9, faithfulness: 0.95, abstention: 0.8 };
@@ -140,6 +140,8 @@ async function main() {
     `| Drafts containing the prompt canary | ${rows.filter((x) => x.leaked).length} | 0 | ${rows.some((x) => x.leaked) ? 'no' : 'yes'} |`,
     '',
     `Draft kinds, answerable: ${kinds(answerable)}. Near misses: ${kinds(near)}.`,
+    '',
+    `Unreadable answerability checks after one retry: ${unreadableChecks(results)} of ${results.length} (bar: none).`,
     '',
     `Cost of this run: ${usage.calls} Claude calls, ${usage.inputTokens} input and ${usage.outputTokens} output tokens (cached results excluded); ${Math.round((Date.now() - started) / 1000)} seconds.`,
     '',

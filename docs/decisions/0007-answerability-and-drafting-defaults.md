@@ -13,7 +13,7 @@ Date: 23 October 2026. Status: agreed at the Sprint 2 review.
 **Decisions.**
 1. Defaults: `ANSWERABILITY_CHECKER`, `GATE_MODEL` and `DRAFT_MODEL` are `claude-haiku-5-5`, configurable per deployment.
 2. Confidence is calibrated on the combination of embedding model and checker (`voyage-4 + claude-haiku-5-5`); a combination without a table gives no calibrated confidence, and a configured checker without a key fails closed.
-3. Model output is never trusted on its own: drafts are checked in code (citations, figures, links, the prompt canary); unreadable output from the judge counts as "no", from the classifier as "legal", from the drafter as "insufficient evidence".
+3. Model output is never trusted on its own: drafts are checked in code (citations, figures, links, the prompt canary); unreadable output from the judge counts as "no", from the classifier as "legal", from the drafter as "insufficient evidence". **Changed in Sprint 6:** the judge and the classifier retry once after an unreadable reply; a judge reply still unreadable is a failed check (no calibrated confidence, never bulk-approved), not a "no", because at a 300-token limit about a third of replies were cut off and calibration learned from them (`docs/refinement/sprint-6.md`).
 4. Bulk approval requires processing by the server, calibrated confidence, a draft, and no gate (pricing, legal, unchecked, translation); enforced in the database.
 
 **Residuals accepted.** The floor bar is met by the pipeline (no draft for near misses), not by the score alone; right-entry citation one question short of 90%; one Japanese injection raised the judge's verdict, contained by the translation gate. Calibration on about 180 items is unstable (F-16).

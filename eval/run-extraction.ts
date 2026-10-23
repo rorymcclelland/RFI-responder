@@ -99,7 +99,7 @@ async function main() {
     '',
     ...clean.flatMap((r) => [...r.score.missed.map((q) => `- ${r.name}, missed: ${q}`), ...r.score.extra.map((q) => `- ${r.name}, extra: ${q}`)]),
     '',
-    `Cost of this run: ${usage.length} Claude calls, ${sum((u) => u.input_tokens, usage as never)} input and ${sum((u) => u.output_tokens, usage as never)} output tokens (cached documents cost nothing).`,
+    `Cost of this run: ${usage.length} Claude calls, ${usage.reduce((n, u) => n + u.input_tokens, 0)} input and ${usage.reduce((n, u) => n + u.output_tokens, 0)} output tokens (cached documents cost nothing).`,
     '',
   ];
   writeFileSync(join(ROOT, `docs/evals/extraction-${date}.md`), lines.join('\n'));

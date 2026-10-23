@@ -22,7 +22,7 @@ import {
 import { claudeClient } from '../supabase/functions/_shared/claude';
 import { auroc } from './metrics';
 import { candidatesFor, vectorsFor } from './judge-inputs';
-import { diskCache, env, hashKey, loadKb, ROOT, withRetry } from './lib';
+import { cachedCheck, diskCache, env, hashKey, judgeCacheParts, loadKb, ROOT, stopReasonCounts } from './lib';
 
 interface Item { id: string; text: string; language: string; kind: string; gold: string; split: string }
 
@@ -61,6 +61,7 @@ async function main() {
   const { list, skipped } = checkers();
   const results: Record<string, unknown>[] = [];
   const costs: Record<string, { calls: number; seconds: number }> = {};
+  const unreadable: Record<string, string[][]> = {};
 
   for (const emb of EMBEDDINGS) {
     const vecs = vectorsFor(emb.dir);
@@ -71,7 +72,8 @@ async function main() {
     const docVecs = kb.map((e) => vecs.doc[hashKey(`${e.question}\n${e.answer}`)]);
     for (const c of list) {
       const method = `${emb.label} + ${c.model}`;
-      const cache = diskCache<AnswerabilityResult>('answerability', c.model);
+      // Sprint 6: the judge's cache follows its prompt version and reply limit.
+      const cache = diskCache<AnswerabilityResult>('answerability', ...(c.name === 'claude-judge' ? judgeCacheParts(c.model) : [c.model]));
       const started = Date.now();
       let calls = 0;
       for (const [n, item] of set.items.entries()) {
@@ -79,12 +81,16 @@ async function main() {
         if (!q) continue;
         const cands = candidatesFor(kb, docVecs, q);
         const key = JSON.stringify([item.text, cands.map((e) => e.ref)]);
-        let r = cache.get(key);
-        if (!r) {
-          r = await withRetry(c.model, () => c.check(item.text, cands));
-          cache.set(key, r);
+        const checked = await cachedCheck(cache, key, () => c.check(item.text, cands), { attempts: 4, waitMs: 5000 });
+        if (checked.ok && checked.fresh) calls++;
+        if (!checked.ok) {
+          // An unreadable check leaves the question uncalibrated in the app: kept out of the fit, counted.
           calls++;
+          (unreadable[method] ??= []).push(checked.stopReasons);
+          results.push({ id: item.id, language: item.language, kind: item.kind, split: item.split, gold: item.gold, method, topScore: null, topIsGold: false, verdict: null, similarity: cands[0]?.similarity ?? 0, unreadable: true });
+          continue;
         }
+        const r = checked.result;
         // Judge scores include similarity, which depends on the embedding model: recompute from the verdict.
         const score = r.verdict ? { no: 0, partly: 1, yes: 2 }[r.verdict] + Math.max(0, Math.min(1, cands[0]?.similarity ?? 0)) : r.score;
         results.push({
@@ -110,7 +116,7 @@ async function main() {
     '|---|---|---|---|',
   ];
   for (const m of methods) {
-    const rows = results.filter((r) => r.method === m) as { kind: string; language: string; topScore: number }[];
+    const rows = results.filter((r) => r.method === m && !r.unreadable) as { kind: string; language: string; topScore: number }[];
     const ans = rows.filter((r) => !UNANSWERABLE.has(r.kind));
     const near = rows.filter((r) => r.kind === 'near-miss');
     const all = rows.filter((r) => UNANSWERABLE.has(r.kind));
@@ -119,6 +125,10 @@ async function main() {
     lines.push(`| ${m} | ${auroc(ans.map((r) => r.topScore), near.map((r) => r.topScore)).toFixed(3)} | ${auroc(ans.map((r) => r.topScore), all.map((r) => r.topScore)).toFixed(3)} | ${nearJa.length ? auroc(ansJa.map((r) => r.topScore), nearJa.map((r) => r.topScore)).toFixed(3) : 'n/a'} |`);
   }
   lines.push('', 'For comparison, similarity alone (Sprint 1): near-miss AUROC 0.892 for voyage-4, 0.879 for qwen3-embedding:0.6b.', '');
+  // Sprint 6: unreadable checks (after the judge's one retry) are left out of the AUROC and counted here.
+  lines.push('| Embedding + checker | Unreadable checks after one retry | Stop reasons |', '|---|---|---|');
+  for (const m of methods) lines.push(`| ${m} | ${unreadable[m]?.length ?? 0} of ${results.filter((r) => r.method === m).length} | ${stopReasonCounts(unreadable[m] ?? [])} |`);
+  lines.push('');
   lines.push(`New API calls this run: ${Object.entries(costs).map(([k, v]) => `${k} ${v.calls} (${v.seconds}s)`).join(', ') || 'none (all cached)'}.`, '');
   if (skipped.length) lines.push('**Skipped:**', '', ...skipped.map((s) => `- ${s}`), '');
 

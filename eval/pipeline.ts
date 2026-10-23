@@ -121,3 +121,7 @@ export async function runPipeline(
   process.stdout.write('\n');
   return out;
 }
+
+/** Sprint 6: questions whose answerability check was unreadable twice (bar: none). */
+export const unreadableChecks = (results: ProcessedQuestion[]) =>
+  results.filter((r) => r.processing_note?.includes('gave an unreadable answer twice')).length;

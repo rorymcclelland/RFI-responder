@@ -9,7 +9,7 @@
  * - Pricing, legal, unchecked and translated questions carry a `gate` and are never bulk-approved.
  * - Pricing questions are never drafted.
  */
-import type { AnswerabilityChecker } from './answerability.ts';
+import { UnreadableReplyError, type AnswerabilityChecker } from './answerability.ts';
 import { draftAnswer, NO_CONFIDENT_MATCH_TEXT, NO_MATCH_TEXT, PRICING_TEXT } from './assemble.ts';
 import { calibratedConfidence, NO_MATCH_FLOOR, type CalibrationTable } from './calibration.ts';
 import type { ClaudeClient } from './claude.ts';
@@ -42,6 +42,8 @@ export interface ProcessedQuestion {
   judge_model: string | null;
   /** The entry the answerability checker said answers it best; supersession requires it to be the top source. */
   judge_best_ref: string | null;
+  /** The checker's one-sentence reason, made safe to show (Sprint 6, S6-3). */
+  judge_reason: string | null;
   draft_model: string | null;
   prompt_version: string | null;
   calibration_set: string | null;
@@ -143,20 +145,21 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       (async () => {
         if (!vector || !embeddingModel || sources.length === 0) return null;
         if (!deps.checker) {
-          return { method: embeddingModel, score: topSimilarity, verdict: null as string | null, model: null as string | null, bestRef: null as string | null, failed: false };
+          return { method: embeddingModel, score: topSimilarity, verdict: null as string | null, model: null as string | null, bestRef: null as string | null, reason: null as string | null, failed: false, unreadable: false };
         }
         try {
           const r = await deps.checker.check(
             q.question,
             sources.map((s) => ({ ref: s.entry.id, question: s.entry.question, answer: s.entry.answer, similarity: s.score })),
           );
-          return { method: `${embeddingModel} + ${deps.checker.model}`, score: r.score, verdict: r.verdict ?? null, model: r.model, bestRef: r.bestRef, failed: false };
-        } catch {
-          return { method: null, score: null, verdict: null, model: deps.checker.model, bestRef: null, failed: true };
+          return { method: `${embeddingModel} + ${deps.checker.model}`, score: r.score, verdict: r.verdict ?? null, model: r.model, bestRef: r.bestRef, reason: r.reason ?? null, failed: false, unreadable: false };
+        } catch (err) {
+          return { method: null, score: null, verdict: null, model: deps.checker.model, bestRef: null, reason: null, failed: true, unreadable: err instanceof UnreadableReplyError };
         }
       })(),
     ]);
-    if (judged?.failed) notes.push('The answerability check was unavailable, so confidence is not calibrated.');
+    if (judged?.unreadable) notes.push('The answerability check gave an unreadable answer twice, so confidence is not calibrated and the question is reviewed individually.');
+    else if (judged?.failed) notes.push('The answerability check was unavailable, so confidence is not calibrated.');
 
     const confidence = judged?.method ? calibratedConfidence(judged.score, judged.method, deps.tables) : null;
     const calibrationSet = judged?.method && confidence !== null ? deps.tables[judged.method]?.evaluationSet ?? null : null;
@@ -238,6 +241,7 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       embedding_model: embeddingModel,
       judge_model: judged?.model ?? null,
       judge_best_ref: judged?.bestRef ?? null,
+      judge_reason: judged?.reason ?? null,
       draft_model: draftModel,
       prompt_version: promptVersion,
       calibration_set: calibrationSet,

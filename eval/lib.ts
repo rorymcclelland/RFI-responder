@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Papa from 'papaparse';
 import type { KnowledgeEntry } from '../src/types';
+import { JUDGE_MAX_TOKENS, JUDGE_PROMPT_VERSION, UnreadableReplyError } from '../supabase/functions/_shared/answerability';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -68,4 +69,48 @@ export async function withRetry<T>(label: string, fn: () => Promise<T>, attempts
       await new Promise((r) => setTimeout(r, 5000 * attempt));
     }
   }
+}
+
+/**
+ * Sprint 6: judge caches are kept per prompt version and reply limit, so a changed prompt never
+ * silently reuses old answers (refinement finding).
+ */
+export function judgeCacheParts(model: string): string[] {
+  return [model, `${JUDGE_PROMPT_VERSION}-max${JUDGE_MAX_TOKENS}`];
+}
+
+export type Checked<T> = { ok: true; result: T; fresh: boolean } | { ok: false; stopReasons: string[] };
+
+/**
+ * One check, from the cache or fresh. Transport errors are retried (a dropped connection should not
+ * lose a run); an unreadable reply (already retried once by the judge, as in the app) is returned
+ * for counting and never cached.
+ */
+export async function cachedCheck<T>(
+  cache: { get: (k: string) => T | undefined; set: (k: string, v: T) => void },
+  key: string,
+  fn: () => Promise<T>,
+  retry: { attempts: number; waitMs: number } = { attempts: 4, waitMs: 5000 },
+): Promise<Checked<T>> {
+  const hit = cache.get(key);
+  if (hit !== undefined) return { ok: true, result: hit, fresh: false };
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const result = await fn();
+      cache.set(key, result);
+      return { ok: true, result, fresh: true };
+    } catch (err) {
+      if (err instanceof UnreadableReplyError) return { ok: false, stopReasons: err.stopReasons };
+      if (attempt >= retry.attempts) throw err;
+      console.log(`\n  ${(err as Error).message}; retrying in ${(retry.waitMs * attempt) / 1000}s`);
+      await new Promise((r) => setTimeout(r, retry.waitMs * attempt));
+    }
+  }
+}
+
+/** "max_tokens 2, refusal 1" for the reports, or "none". */
+export function stopReasonCounts(lists: string[][]): string {
+  const counts = new Map<string, number>();
+  for (const r of lists.flat()) counts.set(r, (counts.get(r) ?? 0) + 1);
+  return counts.size ? [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([r, n]) => `${r} ${n}`).join(', ') : 'none';
 }

@@ -16,7 +16,7 @@ import { PROMPT_CANARY } from '../supabase/functions/_shared/claude';
 import type { ProcessedQuestion } from '../supabase/functions/_shared/process-core';
 import type { MatchRow } from '../supabase/functions/_shared/sources';
 import { ROOT } from './lib';
-import { ensureVectors, makeClaude, MODELS, runPipeline } from './pipeline';
+import { ensureVectors, makeClaude, MODELS, runPipeline, unreadableChecks } from './pipeline';
 
 interface Pair { id: string; clean: string; injected: string; language: string; forbidden: string[]; attack: string }
 interface KbAttack { id: string; question: string; answer: string; probe: string; forbidden: string[] }
@@ -90,6 +90,8 @@ async function main() {
     '|---|---|---|---|---|',
     ...questionRows.map((x) => `| ${x.p.id} | ${x.p.attack} | ${x.clean.gate ?? '-'}, ${x.clean.verdict ?? '-'}, ${x.clean.draft_kind} | ${x.injected.gate ?? '-'}, ${x.injected.verdict ?? '-'}, ${x.injected.draft_kind} | ${x.problems.length ? `**${x.problems.join('; ')}**` : 'held'} |`),
     ...kbRows.map((x) => `| ${x.k.id} | injected entry | ${x.clean.gate ?? '-'}, ${x.clean.verdict ?? '-'}, ${x.clean.draft_kind} | ${x.injected.gate ?? '-'}, ${x.injected.verdict ?? '-'}, ${x.injected.draft_kind} | ${x.problems.length ? `**${x.problems.join('; ')}**` : 'held'} |`),
+    '',
+    `Unreadable answerability checks after one retry: ${unreadableChecks([...out, ...plain, ...attacked])} of ${out.length + plain.length + attacked.length} (bar: none).`,
     '',
     `Cost of this run: ${usage.calls} Claude calls, ${usage.inputTokens} input and ${usage.outputTokens} output tokens; ${Math.round((Date.now() - started) / 1000)} seconds.`,
     '',

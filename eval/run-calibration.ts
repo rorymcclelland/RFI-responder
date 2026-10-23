@@ -13,14 +13,14 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { calibratedConfidence, NO_MATCH_FLOOR, type CalibrationTable } from '../supabase/functions/_shared/calibration';
-import { expectedCalibrationError, isotonicFit, reliabilityBins, toBreakpoints } from './calibration-fit';
+import { expectedCalibrationError, isotonicFit, reliabilityBins, toBreakpoints, usableForCalibration } from './calibration-fit';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BARS = { ece: 0.1, abstention: 0.8 };
 /** The bulk-approval line in the app (project rule 4): the confidence that matters most for safety. */
 const BULK_LINE = 0.8;
 
-interface ItemResult { id: string; kind: string; split: string; method: string; topScore: number; topIsGold: boolean; language?: string }
+interface ItemResult { id: string; kind: string; split: string; method: string; topScore: number | null; topIsGold: boolean; language?: string; unreadable?: boolean }
 
 /** Newest report of a kind, or null. */
 function latestReport(kind: string): string | null {
@@ -65,9 +65,12 @@ const lines: string[] = [
 const details: string[] = [];
 const allTables: Record<string, CalibrationTable> = {};
 const perLanguage: string[] = [];
+const droppedNotes: string[] = [];
 
 for (const model of models) {
-  const rows = data.results.filter((r) => r.method === model);
+  // Sprint 6: an unreadable check leaves a question uncalibrated in the app, so it is not fitted on.
+  const { usable: rows, dropped } = usableForCalibration(data.results.filter((r) => r.method === model));
+  if (dropped) droppedNotes.push(`${model}: ${dropped} questions left out because the check was unreadable (they are never bulk-approved in the app).`);
   const fitRows = rows.filter((r) => r.split === 'calibrate');
   const testRows = rows.filter((r) => r.split === 'test');
   const table: CalibrationTable = {
@@ -89,7 +92,7 @@ for (const model of models) {
   const ansBelow = ans.filter((p) => p.p < NO_MATCH_FLOOR).length / (ans.length || 1);
   const meets = ece <= BARS.ece && unansBelow >= BARS.abstention;
   // Both splits: the bulk line is a safety check, not a fit, and every near miss counts.
-  const conf = (r: ItemResult) => calibratedConfidence(r.topScore, model, tables) ?? 0;
+  const conf = (r: (typeof rows)[number]) => calibratedConfidence(r.topScore, model, tables) ?? 0;
   const nearAll = rows.filter((r) => r.kind === 'near-miss');
   const nearOver = nearAll.filter((r) => conf(r) >= BULK_LINE).length;
   const over = rows.filter((r) => conf(r) >= BULK_LINE);
@@ -127,6 +130,7 @@ lines.push(
   '|---|---|---|---|---|',
   ...perLanguage,
 );
+if (droppedNotes.length) lines.push('', '**Left out of the fit and the checks:**', '', ...droppedNotes.map((n) => `- ${n}`));
 lines.push('', '"Answerable below floor" is the cost of the floor: answerable questions sent to a person although the knowledge base had the answer.', '', `The last two columns are the safety check for bulk approval: questions an owner could approve in bulk at ${pct(BULK_LINE)} although the top entry does not answer them. Pricing and legal questions are never bulk-approved whatever their score (project rule 4).`, ...details, '');
 writeFileSync(join(ROOT, `docs/evals/calibration-${date}.md`), lines.join('\n'));
 console.log(lines.join('\n'));

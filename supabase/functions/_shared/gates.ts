@@ -111,7 +111,9 @@ export function ruleGate(question: string): { category: GateCategory | null; mat
   return { category: null, matched: [] };
 }
 
-export const GATE_PROMPT_VERSION = 'gate-2026-10-22.1';
+export const GATE_PROMPT_VERSION = 'gate-2026-10-24.1';
+/** Room for the reply; Sprint 6 raised it from 200 after cut-off replies. */
+export const GATE_MAX_TOKENS = 512;
 
 const GATE_SYSTEM = `You classify questions from a customer's request for information (RFI) or questionnaire, sent to a company bidding for work.
 
@@ -138,17 +140,20 @@ export async function classifierGate(
   model: string,
   question: string,
 ): Promise<{ category: GateCategory | null; reason: string }> {
-  const { data } = await client.json<{ category?: string; reason?: string }>({
-    model,
-    system: GATE_SYSTEM,
-    user: JSON.stringify({ question }),
-    schema: GATE_SCHEMA,
-    maxTokens: 200,
-  });
-  const reason = typeof data?.reason === 'string' ? safeNote(data.reason) : '';
-  if (data?.category === 'pricing') return { category: 'pricing', reason };
-  if (data?.category === 'none') return { category: null, reason };
-  if (data?.category === 'legal') return { category: 'legal', reason };
+  // Sprint 6: one retry after an unreadable reply, then the existing fail-safe.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const { data } = await client.json<{ category?: string; reason?: string }>({
+      model,
+      system: GATE_SYSTEM,
+      user: JSON.stringify({ question }),
+      schema: GATE_SCHEMA,
+      maxTokens: GATE_MAX_TOKENS,
+    });
+    const reason = typeof data?.reason === 'string' ? safeNote(data.reason) : '';
+    if (data?.category === 'pricing') return { category: 'pricing', reason };
+    if (data?.category === 'none') return { category: null, reason };
+    if (data?.category === 'legal') return { category: 'legal', reason };
+  }
   return { category: 'legal', reason: 'The classifier gave an unreadable answer, so the question is gated to be safe.' };
 }
 
