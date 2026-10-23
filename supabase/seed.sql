@@ -204,11 +204,12 @@ FROM jsonb_array_elements('[
 ON CONFLICT DO NOTHING;
 
 -- Two sample responses at different stages, owned by different people.
-INSERT INTO public.opportunities (name, status, created_by, owner_id)
-SELECT v.name, v.status, u.id, u.id
+-- Due dates relative to the day the seed runs, so the overview shows one due soon.
+INSERT INTO public.opportunities (name, due_date, created_by, owner_id)
+SELECT v.name, current_date + v.days, u.id, u.id
 FROM (VALUES
-  ('Bluefin Freight (fictional): security questionnaire', 'in_progress', 'priya.sharma@example.com'),
-  ('Larkspur Health (fictional): data platform RFI',   'new',         'james.okafor@example.com')
-) AS v(name, status, email)
+  ('Bluefin Freight (fictional): security questionnaire', 2,  'priya.sharma@example.com'),
+  ('Larkspur Health (fictional): data platform RFI',      14, 'james.okafor@example.com')
+) AS v(name, days, email)
 JOIN auth.users u ON u.email = v.email
 WHERE NOT EXISTS (SELECT 1 FROM public.opportunities o WHERE o.name = v.name);

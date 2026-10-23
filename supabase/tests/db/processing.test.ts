@@ -8,6 +8,25 @@ let owner: TestUser;
 let member: TestUser;
 let session: string;
 let orphanSession: string;
+let responseId: string;
+
+/** Sprint 3 (F-7): give `user` an assignment for question `id`, so they may decide it. */
+async function assign(user: TestUser, id: string): Promise<void> {
+  await asSuperuser(
+    `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by)
+     SELECT $1::text, q.session_id, s.opportunity_id, $2, $3 FROM rfi_questions q JOIN rfi_sessions s ON s.id = q.session_id WHERE q.id = $4::uuid`,
+    [id, user.id, owner.id, id]);
+}
+
+/** Expect a change not to happen: refused with an error, or (row-level security) applied to no rows. */
+async function notApplied(p: Promise<{ rowCount: number | null }>): Promise<void> {
+  try {
+    const r = await p;
+    expect(r.rowCount).toBe(0);
+  } catch (err) {
+    expect((err as Error).message).toBeTruthy();
+  }
+}
 
 const one = async <T>(sql: string, params: unknown[] = []) => (await asSuperuser<T & object>(sql, params)).rows[0];
 
@@ -26,6 +45,7 @@ beforeAll(async () => {
   member = await createUser();
   const opp = (await one<{ id: string }>(
     `INSERT INTO opportunities (name, created_by, owner_id) VALUES ('R', $1, $1) RETURNING id`, [owner.id])).id;
+  responseId = opp;
   session = (await one<{ id: string }>(
     `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id) VALUES ('r.xlsx', 'in_progress', 0, $1) RETURNING id`, [opp])).id;
   orphanSession = (await one<{ id: string }>(
@@ -141,6 +161,10 @@ describe('the rules hold for direct updates too, not only through bulk_accept', 
   it('a member cannot accept several questions in one statement', async () => {
     const a = await question(session);
     const b = await question(session);
+    await notApplied(as(member, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b])));
+    // Even assigned to both, a member cannot accept them together.
+    await assign(member, a);
+    await assign(member, b);
     await refused(as(member, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b])));
   });
 
@@ -148,20 +172,21 @@ describe('the rules hold for direct updates too, not only through bulk_accept', 
     const a = await question(session);
     const b = await question(session, { gate: 'pricing' });
     const msg = await refused(as(owner, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b])));
-    expect(msg).toMatch(/individually/);
+    expect(msg).toMatch(/individually|bulk approval/);
   });
 
-  it('the owner can accept several calibrated, ungated questions in one statement', async () => {
+  it('Sprint 3 (S3-2): even the owner accepts several questions only through bulk_accept, so it is recorded as bulk', async () => {
     const a = await question(session);
     const b = await question(session);
-    const r = await as(owner, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b]));
-    expect(r.rowCount).toBe(2);
+    const msg = await refused(as(owner, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b])));
+    expect(msg).toMatch(/bulk approval/);
   });
 });
 
-describe('4. a person can still accept a gated question individually', () => {
-  it.each(['pricing', 'legal', 'unchecked', 'translation'])('a member accepts one %s question with an edited answer', async (gate) => {
+describe('4. a person can still accept a gated question individually (Sprint 3: if they may decide it)', () => {
+  it.each(['pricing', 'legal', 'unchecked', 'translation'])('an assignee accepts one %s question with an edited answer', async (gate) => {
     const id = await question(session, { gate, confidence: null });
+    await assign(member, id);
     const r = await as(member, (q) =>
       q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Answered by a person.' WHERE id = $1`, [id]));
     expect(r.rowCount).toBe(1);
@@ -192,6 +217,8 @@ describe('security review findings (Sprint 2)', () => {
     const a = await question(session);
     const b = await question(session);
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [a, b]);
+    await assign(member, a);
+    await assign(member, b);
     await refused(as(member, (q) => q(`UPDATE rfi_questions SET final_answer = 'We charge nothing' WHERE id IN ($1, $2)`, [a, b])));
     await refused(as(member, (q) => q(`UPDATE rfi_questions SET status = 'pending' WHERE id IN ($1, $2)`, [a, b])));
   });
@@ -199,6 +226,7 @@ describe('security review findings (Sprint 2)', () => {
   it('finding 3: changing an accepted answer reopens it for a fresh decision', async () => {
     const id = await question(session, { gate: 'pricing' });
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Priced by a person.' WHERE id = $1`, [id]);
+    await assign(member, id);
     await as(member, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = 'We charge nothing' WHERE id = $1`, [id]);
       const r = await q<{ status: string }>(`SELECT status FROM rfi_questions WHERE id = $1`, [id]);

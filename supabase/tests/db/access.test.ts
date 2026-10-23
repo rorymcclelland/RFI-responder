@@ -23,7 +23,7 @@ beforeAll(async () => {
   other = await createUser({ name: 'Other' });
 
   const o = await asSuperuser<{ id: string }>(
-    `INSERT INTO opportunities (name, status, created_by, owner_id) VALUES ('Acme RFI', 'new', $1, $1) RETURNING id`,
+    `INSERT INTO opportunities (name, created_by, owner_id) VALUES ('Acme RFI', $1, $1) RETURNING id`,
     [owner.id],
   );
   oppId = o.rows[0].id;
@@ -127,9 +127,16 @@ describe('opportunities (responses)', () => {
       [owner.id],
     );
     const id = r.rows[0].id;
-    expect((await as(owner, (q) => q('DELETE FROM opportunities WHERE id = $1', [id]))).rowCount).toBe(0);
-    expect((await as(member, (q) => q('DELETE FROM opportunities WHERE id = $1', [id]))).rowCount).toBe(0);
-    expect((await as(admin, (q) => q('DELETE FROM opportunities WHERE id = $1', [id]))).rowCount).toBe(1);
+    // Sprint 3 (S3-3): nobody deletes directly; an admin uses delete_response with a reason, logged.
+    for (const u of [owner, member, admin]) await refused(as(u, (q) => q('DELETE FROM opportunities WHERE id = $1', [id])));
+    await refused(as(owner, (q) => q(`SELECT delete_response($1, 'Created in error by mistake')`, [id])));
+    await refused(as(admin, (q) => q(`SELECT delete_response($1, 'oops')`, [id])));
+    await as(admin, async (q) => {
+      await q(`SELECT delete_response($1, 'Created in error by mistake')`, [id]);
+      expect((await q('SELECT 1 FROM opportunities WHERE id = $1', [id])).rowCount).toBe(0);
+      const log = await q<{ details: { reason: string } }>(`SELECT details FROM audit_log WHERE action = 'response.deleted' AND target_id = $1`, [id]);
+      expect(log.rows[0].details.reason).toBe('Created in error by mistake');
+    });
   });
 
   it('12. the owner can edit and hand over their opportunity; a non-owner cannot', async () => {

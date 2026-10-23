@@ -95,12 +95,8 @@ describe('import_kb_entries', () => {
     expect(r.rowCount).toBe(0);
   });
 
-  it('records answers added back from a response with origin "response"', async () => {
-    await as(member, async (q) => {
-      await importAs(member, [{ question: 'From a response?', answer: 'Yes.', tags: [], source: 'RFI: acme.xlsx' }], 'response', 'acme.xlsx')(q);
-      const r = await q<{ origin: string }>(`SELECT origin FROM kb_entries WHERE question = 'From a response?'`);
-      expect(r.rows[0].origin).toBe('response');
-    });
+  it('F-6 (Sprint 3): members cannot create entries that claim to come from a response; only record_export does', async () => {
+    await refused(as(member, importAs(member, [{ question: 'From a response?', answer: 'Yes.', tags: [], source: 'RFI: acme.xlsx' }], 'response', 'acme.xlsx')));
   });
 
   it('refuses the "seed" origin through the API', async () => {
