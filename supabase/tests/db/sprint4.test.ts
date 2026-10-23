@@ -294,4 +294,82 @@ describe('S4-3 member-added entries: add, review and hold', () => {
   });
 });
 
+describe('S4-4 review dates, the overdue report and F-25', () => {
+  type Overdue = { ref: string; review_due: string; recent_citations: number };
+  const overdue = async () => (await as(admin, (q) => q<Overdue>(`SELECT ref, review_due, recent_citations FROM overdue_entries()`))).rows;
+
+  it('1. an entry created 13 months ago and never reviewed since is in the report; one confirmed last month is not', async () => {
+    const old = await entry({ question: 'Old entry (S4-4 t1)?', createdAt: new Date(Date.now() - 400 * 864e5).toISOString() });
+    const fresh = await entry({ question: 'Confirmed entry (S4-4 t1)?', createdAt: new Date(Date.now() - 400 * 864e5).toISOString(),
+      lastReviewedAt: new Date(Date.now() - 30 * 864e5).toISOString() });
+    const refs = (await overdue()).map((r) => r.ref);
+    expect(refs).toContain(old.ref);
+    expect(refs).not.toContain(fresh.ref);
+    expect((await reviewStatus([old.ref]))[0].overdue_since).not.toBeNull();
+  });
+
+  it('2. learning confirms only the entries the draft cited (F-25)', async () => {
+    const cited = await entry({ question: 'Cited entry (S4-4 t2)?', lastReviewedAt: '2025-01-01' });
+    const matched = await entry({ question: 'Matched only (S4-4 t2)?', lastReviewedAt: '2025-01-01' });
+    const s = await session(await response(owner.id));
+    const id = await question(s, { sources: [cited.ref, matched.ref], cited: [cited.ref] });
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+    await as(owner, async (q) => {
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(r.rows[0].record_export.confirmed).toBe(1);
+      const d = await q<{ ref: string; recent: boolean }>(
+        `SELECT ref, last_reviewed_at > now() - interval '1 minute' AS recent FROM kb_entries WHERE ref = ANY($1) ORDER BY ref`, [[cited.ref, matched.ref]]);
+      expect(Object.fromEntries(d.rows.map((x) => [x.ref, x.recent]))).toEqual({ [cited.ref]: true, [matched.ref]: false });
+    });
+  });
+
+  it('3. a draft citing an overdue entry is held from bulk; an answer accepted individually is still learned', async () => {
+    const s = await session(await response(owner.id));
+    const stale = await question(s, { gate: 'stale_source', text: 'Stale-sourced question (S4-4 t3)?', final: 'Updated by a person.' });
+    await as(owner, async (q) => {
+      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept($1, 0.5)`, [s]);
+      expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldGated: 1 });
+      await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [stale]);
+      const ex = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(ex.rows[0].record_export.added).toBe(1);
+    });
+  });
+
+  it('4. changing the interval moves entries in and out of the report without changing them', async () => {
+    const e = await entry({ question: 'Seven months old (S4-4 t4)?', createdAt: new Date(Date.now() - 210 * 864e5).toISOString() });
+    expect((await overdue()).map((r) => r.ref)).not.toContain(e.ref);
+    await as(admin, async (q) => {
+      await q(`UPDATE ai_settings SET review_interval_months = 6`);
+      expect((await q<Overdue>(`SELECT ref FROM overdue_entries()`)).rows.map((r) => r.ref)).toContain(e.ref);
+    });
+  });
+
+  it('5. only admins see the report and mark entries reviewed; marking is logged and clears it', async () => {
+    const e = await entry({ question: 'Due for review (S4-4 t5)?', createdAt: new Date(Date.now() - 400 * 864e5).toISOString() });
+    await refused(as(member, (q) => q(`SELECT * FROM overdue_entries()`)));
+    await refused(as(member, (q) => q(`SELECT review_entry($1)`, [e.id])));
+    await as(admin, async (q) => {
+      await q(`SELECT review_entry($1)`, [e.id]);
+      expect((await q<Overdue>(`SELECT ref FROM overdue_entries()`)).rows.map((r) => r.ref)).not.toContain(e.ref);
+      expect((await q(`SELECT 1 FROM audit_log WHERE action = 'kb.reviewed' AND target_id = $1`, [e.id])).rowCount).toBe(1);
+    });
+  });
+
+  it('6. superseded entries never appear in the report', async () => {
+    const old = await entry({ question: 'Superseded old (S4-4 t6)?', createdAt: new Date(Date.now() - 400 * 864e5).toISOString() });
+    const neu = await entry({ question: 'Superseding new (S4-4 t6)?' });
+    await asSuperuser(`UPDATE kb_entries SET superseded_by = $2 WHERE id = $1`, [old.id, neu.id]);
+    expect((await overdue()).map((r) => r.ref)).not.toContain(old.ref);
+  });
+
+  it('the report counts how often an overdue entry was cited in the last 90 days, most-used first among equals', async () => {
+    const e = await entry({ question: 'Often cited (S4-4)?', createdAt: new Date(Date.now() - 400 * 864e5).toISOString() });
+    const s = await session(await response(owner.id));
+    await question(s, { sources: [e.ref] });
+    await question(s, { sources: [e.ref] });
+    const row = (await overdue()).find((r) => r.ref === e.ref)!;
+    expect(Number(row.recent_citations)).toBe(2);
+  });
+});
+
 void one;

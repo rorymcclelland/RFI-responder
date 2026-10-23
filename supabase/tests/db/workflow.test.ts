@@ -278,6 +278,8 @@ describe('S3-4 learning at export', () => {
   it('3. an unedited draft adds nothing and confirms the entries it came from', async () => {
     const old = await entry('MFA? (S3-4 t3)', 'MFA everywhere.', ['mfa']);
     const { s, id } = await exportOne({ sources: [[old.ref, 0.8]] });
+    // From Sprint 4 (F-25) only cited entries are confirmed; processing records them in cited_refs.
+    await asSuperuser(`UPDATE rfi_questions SET cited_refs = $2 WHERE id = $1`, [id, [old.ref]]);
     await as(owner, async (q) => {
       await accept(q, id);
       const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);

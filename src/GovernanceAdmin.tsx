@@ -10,9 +10,9 @@ import {
   formatGbp, loadUsageAdmin, loadUsageStatus, saveSettings,
   type AiPrice, type AiSettings, type SettingsChange, type UsageReport, type UsageStatus,
 } from './lib/usage';
-import { describeOrigin, loadEntriesToReview, reviewEntry, type EntryForReview } from './lib/entryReview';
+import { describeOrigin, loadEntriesToReview, loadOverdueEntries, reviewEntry, type EntryForReview } from './lib/entryReview';
 
-type Tab = 'usage' | 'review';
+type Tab = 'usage' | 'review' | 'overdue';
 
 export default function GovernanceAdmin() {
   const [tab, setTab] = useState<Tab>('usage');
@@ -23,7 +23,7 @@ export default function GovernanceAdmin() {
         <p className="text-sm text-ink-500 mt-1">What the AI costs and what limits it, and the state of the knowledge base. Admins only.</p>
       </div>
       <div className="flex gap-2 border-b border-ink-100" role="tablist">
-        {([['usage', 'Usage and limits'], ['review', 'Entries to review']] as [Tab, string][]).map(([key, label]) => (
+        {([['usage', 'Usage and limits'], ['review', 'Entries to review'], ['overdue', 'Overdue for review']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             role="tab"
@@ -36,7 +36,8 @@ export default function GovernanceAdmin() {
         ))}
       </div>
       {tab === 'usage' && <UsageTab />}
-      {tab === 'review' && <ReviewTab />}
+      {tab === 'review' && <ReviewTab mode="unreviewed" />}
+      {tab === 'overdue' && <ReviewTab mode="overdue" />}
     </div>
   );
 }
@@ -197,26 +198,29 @@ function UsageTab() {
   );
 }
 
-/** S4-3: entries added by members (or learned from an assignee's answer) waiting for an admin. */
-function ReviewTab() {
+/**
+ * S4-3: entries added by members (or learned from an assignee's answer) waiting for an admin.
+ * S4-4: entries past their review date. Both are cleared the same way, with review_entry().
+ */
+function ReviewTab({ mode }: { mode: 'unreviewed' | 'overdue' }) {
   const [entries, setEntries] = useState<EntryForReview[] | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const load = useCallback(async () => {
     setError('');
     try {
-      setEntries(await loadEntriesToReview(supabase));
+      setEntries(await (mode === 'overdue' ? loadOverdueEntries(supabase) : loadEntriesToReview(supabase)));
     } catch (err) {
       setError((err as Error).message);
     }
-  }, []);
+  }, [mode]);
   useEffect(() => { load(); }, [load]);
 
   const approve = async (e: EntryForReview, edits?: { question: string; answer: string }) => {
     setError(''); setNotice('');
     try {
       await reviewEntry(supabase, e.id, edits);
-      setNotice(`${e.ref} reviewed${edits ? ' with corrections' : ''}. Questions processed from now on can cite it in bulk-approvable drafts.`);
+      setNotice(`${e.ref} reviewed${edits ? ' with corrections' : ''}. Questions processed from now on can cite it in bulk-approvable drafts; questions already processed keep their gate.`);
       await load();
     } catch (err) {
       setError((err as Error).message);
@@ -227,12 +231,14 @@ function ReviewTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-500">
-        Entries added by team members go into the knowledge base at once, but drafts that cite them are never bulk-approved until an admin reviews them here.
+        {mode === 'overdue'
+          ? 'Entries not reviewed or confirmed within the review interval (set under Usage and limits). Drafts that cite them are never bulk-approved until they are reviewed again. An answer accepted unedited at export also counts as a confirmation.'
+          : 'Entries added by team members go into the knowledge base at once, but drafts that cite them are never bulk-approved until an admin reviews them here.'}
       </p>
       {error && <p className="text-sm text-coral-600 flex items-center gap-2"><AlertTriangle size={14} /> {error}</p>}
       {notice && <p className="text-sm text-emerald-700">{notice}</p>}
       {entries.length === 0 ? (
-        <div className="card p-6 text-center text-sm text-ink-500"><CheckCircle2 size={16} className="inline mr-1 text-emerald-600" /> Nothing waiting for review.</div>
+        <div className="card p-6 text-center text-sm text-ink-500"><CheckCircle2 size={16} className="inline mr-1 text-emerald-600" /> {mode === 'overdue' ? 'No entry is overdue for review.' : 'Nothing waiting for review.'}</div>
       ) : entries.map((e) => <ReviewCard key={e.id} entry={e} onApprove={approve} />)}
     </div>
   );
@@ -247,6 +253,11 @@ function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e
       <div className="flex items-center gap-2 text-xs text-ink-500">
         <span className="font-bold text-ink-700 bg-ink-50 border border-ink-100 px-2 py-0.5 rounded-full">{entry.ref}</span>
         <span>{describeOrigin(entry)}, {new Date(entry.createdAt).toLocaleDateString()}</span>
+        {entry.dueSince && (
+          <span className="text-amber-700 font-bold">
+            Due since {new Date(entry.dueSince).toLocaleDateString()}{entry.recentCitations ? `; cited ${entry.recentCitations} time${entry.recentCitations === 1 ? '' : 's'} in 90 days` : ''}
+          </span>
+        )}
       </div>
       {editing ? (
         <div className="space-y-2">
@@ -269,7 +280,7 @@ function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e
         ) : (
           <>
             <button onClick={() => setEditing(true)} className="btn-ghost text-sm"><Pencil size={13} /> Correct</button>
-            <button onClick={() => onApprove(entry)} className="btn-primary text-sm"><CheckCircle2 size={14} /> Approve</button>
+            <button onClick={() => onApprove(entry)} className="btn-primary text-sm"><CheckCircle2 size={14} /> {entry.dueSince ? 'Still correct' : 'Approve'}</button>
           </>
         )}
       </div>

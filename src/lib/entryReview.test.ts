@@ -1,6 +1,6 @@
 // Sprint 4, S4-3: adding entries by hand and the admin review queue.
 import { describe, expect, it, vi } from 'vitest';
-import { addEntry, describeOrigin, loadEntriesToReview, parseTags, reviewEntry, validateEntry } from './entryReview';
+import { addEntry, describeOrigin, loadEntriesToReview, loadOverdueEntries, parseTags, reviewEntry, validateEntry } from './entryReview';
 
 const entry = { question: 'Do you use MFA?', answer: 'Yes, for all staff.', tags: ['MFA'], source: 'Policy v2' };
 
@@ -71,5 +71,23 @@ describe('the review queue', () => {
   it('says plainly where a learned entry came from', () => {
     expect(describeOrigin({ origin: 'response', originRef: 'response:x', addedBy: 'Maya Patel' }))
       .toMatch(/approved by Maya Patel, who is not the response owner or an admin/);
+  });
+});
+
+describe('the overdue report (S4-4)', () => {
+  it('reads overdue_entries with the due date and recent citations', async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: [{ id: 'e9', ref: 'KB-0009', question: 'Q', answer: 'A', tags: ['x'], source: 'Policy', origin: 'seed', origin_ref: null,
+        added_by: null, created_at: '2025-01-01T00:00:00Z', last_reviewed_at: null, review_due: '2026-01-01T00:00:00Z', recent_citations: '3' }],
+      error: null,
+    });
+    const [e] = await loadOverdueEntries({ rpc } as never);
+    expect(rpc).toHaveBeenCalledWith('overdue_entries');
+    expect(e).toMatchObject({ ref: 'KB-0009', dueSince: '2026-01-01T00:00:00Z', recentCitations: 3, addedBy: null });
+    expect(describeOrigin(e)).toBe('Seed data');
+  });
+  it('reports a refusal', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: { message: 'Only an admin can see the overdue-entries report' } });
+    await expect(loadOverdueEntries({ rpc } as never)).rejects.toThrow(/could not be read: Only an admin/);
   });
 });
