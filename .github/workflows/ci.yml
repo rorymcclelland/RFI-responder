@@ -131,7 +131,7 @@ jobs:
           [ "$code" = "400" ] || fail "11 questions should get 400" "got $code $(cat /tmp/r.json)"
           R="$API_URL/rest/v1"
           H=(-H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -H 'Prefer: return=representation')
-          SID=$(curl -s -X POST "$R/rfi_sessions" "${H[@]}" -d '{"file_name":"ci.csv","status":"in_progress","question_count":2}' | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["id"])')
+          SID=$(curl -s -X POST "$R/rfi_sessions" "${H[@]}" -d '{"file_name":"ci.csv","question_count":2}' | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["id"])')
           code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$R/rfi_questions" "${H[@]}" -d "{\"session_id\":\"$SID\",\"position\":0,\"question\":\"Q\",\"confidence\":1}")
           [ "$code" -ge 400 ] || fail "A member must not be able to set confidence" "got $code $(cat /tmp/r.json)"
           QS=$(curl -s -X POST "$R/rfi_questions" "${H[@]}" -d "[{\"session_id\":\"$SID\",\"position\":0,\"question\":\"What is the annual licence cost?\"},{\"session_id\":\"$SID\",\"position\":1,\"question\":\"How do you encrypt data at rest?\"}]")

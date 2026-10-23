@@ -64,14 +64,16 @@ describe('1. members cannot write scores, gates or drafts; the service role can'
     await refused(as(member, (q) => q(`UPDATE rfi_questions SET ${set} WHERE id = $1`, [id])));
   });
 
-  it('a member can insert a question, but not with a score or gate', async () => {
-    await as(member, async (q) => {
+  it('the owner can insert a question, but not with a score or gate', async () => {
+    // Sprint 3 review: only the response owner or an admin adds questions.
+    await refused(as(member, (q) => q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 1, 'New?')`, [session])));
+    await as(owner, async (q) => {
       const r = await q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 1, 'New?') RETURNING id`, [session]);
       expect(r.rowCount).toBe(1);
     });
-    await refused(as(member, (q) =>
+    await refused(as(owner, (q) =>
       q(`INSERT INTO rfi_questions (session_id, position, question, confidence) VALUES ($1, 1, 'New?', 1)`, [session])));
-    await refused(as(member, (q) =>
+    await refused(as(owner, (q) =>
       q(`INSERT INTO rfi_questions (session_id, position, question, status) VALUES ($1, 1, 'New?', 'accepted')`, [session])));
   });
 

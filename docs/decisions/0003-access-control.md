@@ -60,3 +60,15 @@ A second reviewer, given the code but not the reasoning, probed the Sprint 2 cha
 6. Members held DELETE on questions and sessions (no policy allowed it, but it was one policy away), now revoked; the bulk check decides by the database role in use, so a forged claim cannot switch it off.
 
 Residuals accepted for now: a member can still accept questions one statement at a time (each is an individual decision); any member can add knowledge-base entries, so the draft checks trust the cited entries' own figures and links (Sprint 4's governance pack adds review of member-added entries); there is no per-user rate limit on processing (Sprint 4's cost caps).
+
+## Independent review, Sprint 3 (23 October 2026)
+
+A third reviewer, given the code but not the reasoning, probed the Sprint 3 workflow (decision rights, recording an export, learning, archive and delete) as a member who does not own the response. It confirmed that only `bulk_accept` can approve more than one question, that direct deletes are refused, that `delete_response` needs an admin and a reason, and that archived responses cannot be changed. It found five gaps, fixed in `20261023150000_sprint3_review_fixes.sql`, each with a test (`supabase/tests/db/workflow.test.ts`, "Sprint 3 security review findings", plus updated tests in `access.test.ts`, `hardening.test.ts` and `processing.test.ts`):
+
+1. A member could assign themselves on their own response with the id of another response's question, and then decide that question. An assignment must now name a question in its own session (trigger), and `can_decide_question` counts an assignment only when its session and response match the question's.
+2. Learning worked from a block list, so questions never processed or never gate-checked could be learned. It is now an allow list: only questions the server processed, in English, with no gate other than legal (`not_learned_unchecked` records the rest).
+3. Members could create responses already archived or exported, and add sessions and questions to other people's responses. New responses take only a name and due date; only the owner or an admin adds sessions and questions.
+4. Members could still write `kb_entries.origin_ref` directly. Only `import_kb_entries` (the file name, with origin import or manual) and `record_export` (learned entries) set it now; `import_kb_entries` became a checked `SECURITY DEFINER` function to allow this.
+5. Supersession trusted any "yes" verdict, even when the judge meant a different entry. The server now records the judge's best entry (`judge_best_ref`), and learning supersedes the top entry only when they match.
+
+Residual accepted: the transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection. Members only reach the database through the API, which cannot set them, so this is recorded rather than fixed. The "Still accepted until Sprint 3" items from the first review are now closed (questions are owner-editable, `origin_ref` is system-set).

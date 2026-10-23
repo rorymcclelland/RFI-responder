@@ -21,17 +21,18 @@ async function session(opp: string): Promise<string> {
 /** A processed question. `sources` are [ref, similarity]; the draft is the generated answer unless `final` differs. */
 async function question(s: string, o: {
   status?: string; gate?: string | null; language?: string; confidence?: number; verdict?: string;
-  generated?: string; final?: string | null; sources?: [string, number][]; text?: string; kind?: string;
+  generated?: string; final?: string | null; sources?: [string, number][]; text?: string; kind?: string; bestRef?: string | null;
 } = {}): Promise<string> {
   const generated = o.generated ?? 'We encrypt data at rest with AES-256.';
   return (await one<{ id: string }>(
     `INSERT INTO rfi_questions (session_id, position, question, generated_answer, final_answer, confidence, status, gate, language,
-       verdict, sources_json, embedding_model, judge_model, draft_model, prompt_version, calibration_set, draft_kind, processed_at)
-     VALUES ($1, 0, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'voyage-4', 'claude-haiku-5-5', 'claude-haiku-5-5', 'draft-1', 'set 1', $11, now())
+       verdict, sources_json, embedding_model, judge_model, draft_model, prompt_version, calibration_set, draft_kind, processed_at, judge_best_ref)
+     VALUES ($1, 0, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'voyage-4', 'claude-haiku-5-5', 'claude-haiku-5-5', 'draft-1', 'set 1', $11, now(), $12)
      RETURNING id`,
     [s, o.text ?? 'How is data encrypted at rest?', generated, o.final === undefined ? null : o.final, o.confidence ?? 0.9,
       o.status ?? 'pending', o.gate ?? null, o.language ?? 'en', o.verdict ?? 'yes',
-      JSON.stringify((o.sources ?? []).map(([id, score]) => ({ id, score }))), o.kind ?? 'generated'])).id;
+      JSON.stringify((o.sources ?? []).map(([id, score]) => ({ id, score }))), o.kind ?? 'generated',
+      o.bestRef === undefined ? o.sources?.[0]?.[0] ?? null : o.bestRef])).id;
 }
 async function entry(question: string, answer: string, tags: string[] = ['encryption'], createdBy: string | null = null): Promise<{ id: string; ref: string }> {
   return one<{ id: string; ref: string }>(
@@ -379,5 +380,74 @@ describe('S3-6 expert suggestions', () => {
     const opp = await response();
     const id = await question(await session(opp));
     await refused(as(null, (q) => q(`SELECT * FROM suggest_experts($1)`, [id])));
+  });
+});
+
+describe('Sprint 3 security review findings', () => {
+  it('1. a member cannot point an assignment at another response\'s question, and a forged one gives no rights', async () => {
+    const victim = await response({ name: 'Victim' });
+    const vs = await session(victim);
+    const target = await question(vs);
+    const mine = (await one<{ id: string }>(`INSERT INTO opportunities (name, created_by, owner_id) VALUES ('Mine', $1, $1) RETURNING id`, [member.id])).id;
+    await refused(as(member, (q) => q(
+      `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by) VALUES ($1, NULL, $2, $3, $3)`,
+      [target, mine, member.id])));
+    const ms = await session(mine);
+    await refused(as(member, (q) => q(
+      `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by) VALUES ($1, $2, $3, $4, $4)`,
+      [target, ms, mine, member.id])));
+    // Even a row written around the checks (as the database owner) does not let them decide it.
+    await asSuperuser(`ALTER TABLE question_assignments DISABLE TRIGGER question_assignments_question_matches`);
+    await asSuperuser(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by) VALUES ($1, $2, $3, $4, $4)`,
+      [target, ms, mine, member.id]);
+    await asSuperuser(`ALTER TABLE question_assignments ENABLE TRIGGER question_assignments_question_matches`);
+    expect((await as(member, (q) => q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Poison' WHERE id = $1`, [target]))).rowCount).toBe(0);
+  });
+
+  it('2. learning is an allow list: unprocessed, unchecked and Japanese-text questions are not learned', async () => {
+    const opp = await response();
+    const s = await session(opp);
+    const unprocessed = (await one<{ id: string }>(
+      `INSERT INTO rfi_questions (session_id, position, question, final_answer, status) VALUES ($1, 0, 'Unprocessed? (r2)', 'Learn me', 'pending') RETURNING id`, [s])).id;
+    const unchecked = await question(s, { text: 'What is the price per seat? (r2)', gate: 'unchecked', final: '£5.' });
+    const jaText = await question(s, { text: '価格はいくらですか？(r2)', language: 'en', final: '5ポンド' });
+    await as(owner, async (q) => {
+      for (const id of [unprocessed, unchecked, jaText]) await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(r.rows[0].record_export).toMatchObject({ not_learned_unchecked: 2, not_learned_japanese: 1 });
+      expect(r.rows[0].record_export.added).toBeUndefined();
+    });
+  });
+
+  it('3. members cannot insert a response that is already archived or exported', async () => {
+    await refused(as(member, (q) => q(`INSERT INTO opportunities (name, archived_at, outcome) VALUES ('Fake win', now(), 'won')`)));
+    await refused(as(member, (q) => q(`INSERT INTO opportunities (name, exported_at) VALUES ('Fake', now())`)));
+    const r = await as(member, (q) => q(`INSERT INTO opportunities (name, due_date) VALUES ('Real', current_date + 7) RETURNING id`));
+    expect(r.rowCount).toBe(1);
+  });
+
+  it('4. members cannot set origin_ref directly; an import records its file name and cannot claim origin response', async () => {
+    await refused(as(member, (q) => q(
+      `INSERT INTO kb_entries (question, answer, origin, origin_ref) VALUES ('Forged? (r4)', 'x', 'manual', 'response:abc/session:def/question:ghi')`)));
+    await as(member, async (q) => {
+      await q(`SELECT import_kb_entries($1::jsonb, 'import', 'answers.csv')`, [JSON.stringify([{ question: 'Imported? (r4)', answer: 'Yes.', tags: [], source: 'Policy v1' }])]);
+      const r = await q<{ origin_ref: string | null; origin: string }>(`SELECT origin_ref, origin FROM kb_entries WHERE question = 'Imported? (r4)'`);
+      expect(r.rows[0]).toEqual({ origin_ref: 'answers.csv', origin: 'import' });
+    });
+    await refused(as(member, (q) => q(`SELECT import_kb_entries('[{"question":"x? (r4)","answer":"y"}]'::jsonb, 'response', 'r')`)));
+  });
+
+  it('5. a "yes" about another entry does not supersede the top source', async () => {
+    const top = await entry('Top entry? (r5)', 'Top.', ['x']);
+    const other = await entry('Other entry? (r5)', 'Other.', ['x']);
+    const opp = await response();
+    const s = await session(opp);
+    const id = await question(s, { text: 'A question (r5)', final: 'Edited.', sources: [[top.ref, 0.9], [other.ref, 0.85]], verdict: 'yes', bestRef: other.ref });
+    await as(owner, async (q) => {
+      await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(r.rows[0].record_export.added).toBe(1);
+      expect((await q<{ superseded_by: string | null }>(`SELECT superseded_by FROM kb_entries WHERE id = $1`, [top.id])).rows[0].superseded_by).toBeNull();
+    });
   });
 });

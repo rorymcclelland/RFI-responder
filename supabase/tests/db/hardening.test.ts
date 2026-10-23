@@ -13,6 +13,8 @@ let victimSession: string;
 let memberOpp: string;
 let memberSession: string;
 let assignmentForMember: string;
+let victimQuestion: string;
+let memberQuestion: string;
 
 const one = async <T>(sql: string, params: unknown[] = []) => (await asSuperuser<T & object>(sql, params)).rows[0];
 
@@ -32,9 +34,14 @@ beforeAll(async () => {
     `INSERT INTO opportunities (name, created_by, owner_id) VALUES ('Mine', $1, $1) RETURNING id`, [member.id])).id;
   memberSession = (await one<{ id: string }>(
     `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id) VALUES ('m.xlsx', 'in_progress', 1, $1) RETURNING id`, [memberOpp])).id;
+  // From Sprint 3 an assignment must point at a real question in its session.
+  victimQuestion = (await one<{ id: string }>(
+    `INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'Original question') RETURNING id`, [victimSession])).id;
+  memberQuestion = (await one<{ id: string }>(
+    `INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'Mine?') RETURNING id`, [memberSession])).id;
   assignmentForMember = (await one<{ id: string }>(
     `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text)
-     VALUES ('q-1', $1, $2, $3, $4, 'Original question') RETURNING id`, [victimSession, victimOpp, member.id, owner.id])).id;
+     VALUES ($5, $1, $2, $3, $4, 'Original question') RETURNING id`, [victimSession, victimOpp, member.id, owner.id, victimQuestion])).id;
 });
 afterAll(closePool);
 
@@ -43,7 +50,7 @@ describe('finding 1: assignments stay on their own response', () => {
     await as(member, async (q) => {
       const r = await q<{ id: string }>(
         `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by)
-         VALUES ('q9', $1, $2, $3, $3) RETURNING id`, [memberSession, memberOpp, member.id]);
+         VALUES ($4, $1, $2, $3, $3) RETURNING id`, [memberSession, memberOpp, member.id, memberQuestion]);
       await refused(q(`UPDATE question_assignments SET opportunity_id = $2 WHERE id = $1`, [r.rows[0].id, victimOpp]));
     });
   });
@@ -51,7 +58,7 @@ describe('finding 1: assignments stay on their own response', () => {
   it("an owner cannot create an assignment that points at another response's session", async () => {
     await refused(as(member, (q) =>
       q(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by)
-         VALUES ('q9', $1, $2, $3, $3)`, [victimSession, memberOpp, member.id])));
+         VALUES ($4, $1, $2, $3, $3)`, [victimSession, memberOpp, member.id, victimQuestion])));
   });
 });
 
@@ -141,15 +148,14 @@ describe('finding 5: sessions stay with their response', () => {
     await refused(as(other, (q) => q(`UPDATE rfi_sessions SET opportunity_id = $2 WHERE id = $1`, [victimSession, memberOpp])));
   });
 
-  it('a member can run a session and add its questions (team-shared until Sprint 3)', async () => {
-    await as(other, async (q) => {
-      const s = await q<{ id: string }>(
-        `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id) VALUES ('o.xlsx', 'in_progress', 1, $1) RETURNING id`, [victimOpp]);
-      // From Sprint 2 (S2-2a) members insert only the question; scores are written server-side.
+  it('Sprint 3 review: only the owner or an admin adds sessions and questions to a response', async () => {
+    await refused(as(other, (q) =>
+      q(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('o.xlsx', 1, $1)`, [victimOpp])));
+    await refused(as(other, (q) => q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'Q?')`, [victimSession])));
+    await as(owner, async (q) => {
+      const s = await q<{ id: string }>(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('o.xlsx', 1, $1) RETURNING id`, [victimOpp]);
       const qn = await q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'Q?')`, [s.rows[0].id]);
       expect(qn.rowCount).toBe(1);
-      const read = await q('SELECT 1 FROM rfi_questions WHERE session_id = $1', [s.rows[0].id]);
-      expect(read.rowCount).toBe(1);
     });
   });
 });

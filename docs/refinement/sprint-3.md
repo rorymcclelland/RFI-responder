@@ -146,3 +146,15 @@ A "New upload" button on the review screen returns to the upload step for the sa
 | Q4 | Only the response owner, an admin, or an assignee may decide a question |
 
 S3-4 test case 4 now reads: pricing and Japanese answers are never learned; legal answers are learned like any other, with provenance. All nine items are Ready, Sprint 3.
+
+## Changes during the build
+
+| Change | Why |
+|---|---|
+| Learning is an allow list: only server-processed English questions with no gate other than legal are learned; the rest are recorded as `not_learned_unchecked` (or pricing, Japanese) | Independent review, finding 2: a block list let unprocessed or unchecked questions into the knowledge base |
+| Supersession also requires the judge's best entry (`judge_best_ref`, new column written by `process-questions`) to be the top entry | Review finding 5: a "yes" about another entry could replace the wrong one |
+| Only the owner or an admin adds sessions and questions to a response; new responses take only a name and due date | Review finding 3 |
+| Assignments must name a question in their own session, and only such assignments give decision rights | Review finding 1: a self-assignment could carry rights over another response's question |
+| Imports record their file name as `origin_ref` through a checked function; members cannot write the column directly | Review finding 4 |
+
+The review and its one accepted residual are recorded in decision 0003.

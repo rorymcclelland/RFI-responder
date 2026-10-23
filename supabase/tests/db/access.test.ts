@@ -10,6 +10,7 @@ let member: TestUser;
 let other: TestUser;
 let oppId: string;
 let sessionId: string;
+let questionId: string;
 
 let usersAfterMigrations = -1;
 
@@ -32,6 +33,9 @@ beforeAll(async () => {
     [oppId],
   );
   sessionId = s.rows[0].id;
+  // From Sprint 3 an assignment must point at a real question in its session.
+  questionId = (await asSuperuser<{ id: string }>(
+    `INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'Do you use MFA?') RETURNING id`, [sessionId])).rows[0].id;
 });
 
 afterAll(closePool);
@@ -106,8 +110,8 @@ describe('opportunities (responses)', () => {
   it('a new opportunity is owned by its creator', async () => {
     await as(member, async (q) => {
       const r = await q<{ owner_id: string }>(
-        `INSERT INTO opportunities (name, created_by) VALUES ('Mine', $1) RETURNING owner_id`,
-        [member.id],
+        // Sprint 3 review: members set only name and due date; creator and owner are set by the database.
+        `INSERT INTO opportunities (name) VALUES ('Mine') RETURNING owner_id`,
       );
       expect(r.rows[0].owner_id).toBe(member.id);
     });
@@ -162,8 +166,8 @@ describe('question assignments', () => {
   const insertAssignment = (by: TestUser, to: TestUser) => (q: Parameters<Parameters<typeof as>[1]>[0]) =>
     q(
       `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text)
-       VALUES ('q-1', $1, $2, $3, $4, 'Do you use MFA?') RETURNING id`,
-      [sessionId, oppId, to.id, by.id],
+       VALUES ($5, $1, $2, $3, $4, 'Do you use MFA?') RETURNING id`,
+      [sessionId, oppId, to.id, by.id, questionId],
     );
 
   it('13. the owner can assign a question on their response; a non-owner member cannot', async () => {
@@ -180,8 +184,8 @@ describe('question assignments', () => {
   it('8. only the assignee, the owner or an admin can update an assignment', async () => {
     const r = await asSuperuser<{ id: string }>(
       `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text)
-       VALUES ('q-2', $1, $2, $3, $4, 'Q?') RETURNING id`,
-      [sessionId, oppId, member.id, owner.id],
+       VALUES ($5, $1, $2, $3, $4, 'Q?') RETURNING id`,
+      [sessionId, oppId, member.id, owner.id, questionId],
     );
     const id = r.rows[0].id;
     const upd = (u: TestUser) => as(u, (q) => q(`UPDATE question_assignments SET status = 'in_review' WHERE id = $1`, [id]));

@@ -156,7 +156,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       .filter((x) => x.question);
     const { data: session, error } = await supabase
       .from('rfi_sessions')
-      .insert({ file_name: fileName, status: 'in_progress', question_count: asked.length, opportunity_id: opportunityId })
+      .insert({ file_name: fileName, question_count: asked.length, opportunity_id: opportunityId })
       .select().maybeSingle();
     if (error || !session) {
       setUploadError(`The session could not be created: ${error?.message ?? 'no response'}`);

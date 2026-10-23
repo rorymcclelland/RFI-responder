@@ -40,6 +40,8 @@ export interface ProcessedQuestion {
   language: 'en' | 'ja';
   embedding_model: string | null;
   judge_model: string | null;
+  /** The entry the answerability checker said answers it best; supersession requires it to be the top source. */
+  judge_best_ref: string | null;
   draft_model: string | null;
   prompt_version: string | null;
   calibration_set: string | null;
@@ -131,16 +133,16 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       (async () => {
         if (!vector || !embeddingModel || sources.length === 0) return null;
         if (!deps.checker) {
-          return { method: embeddingModel, score: topSimilarity, verdict: null as string | null, model: null as string | null, failed: false };
+          return { method: embeddingModel, score: topSimilarity, verdict: null as string | null, model: null as string | null, bestRef: null as string | null, failed: false };
         }
         try {
           const r = await deps.checker.check(
             q.question,
             sources.map((s) => ({ ref: s.entry.id, question: s.entry.question, answer: s.entry.answer, similarity: s.score })),
           );
-          return { method: `${embeddingModel} + ${deps.checker.model}`, score: r.score, verdict: r.verdict ?? null, model: r.model, failed: false };
+          return { method: `${embeddingModel} + ${deps.checker.model}`, score: r.score, verdict: r.verdict ?? null, model: r.model, bestRef: r.bestRef, failed: false };
         } catch {
-          return { method: null, score: null, verdict: null, model: deps.checker.model, failed: true };
+          return { method: null, score: null, verdict: null, model: deps.checker.model, bestRef: null, failed: true };
         }
       })(),
     ]);
@@ -201,6 +203,7 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       language,
       embedding_model: embeddingModel,
       judge_model: judged?.model ?? null,
+      judge_best_ref: judged?.bestRef ?? null,
       draft_model: draftModel,
       prompt_version: promptVersion,
       calibration_set: calibrationSet,
