@@ -11,18 +11,17 @@
  * retrieval report, so `npm run eval:calibrate` can fit and check each combination.
  * Results are cached in eval/.cache/answerability/, so reruns cost nothing.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   claudeJudge,
   voyageRerankChecker,
   type AnswerabilityChecker,
   type AnswerabilityResult,
-  type CandidateEntry,
 } from '../supabase/functions/_shared/answerability';
 import { claudeClient } from '../supabase/functions/_shared/claude';
-import { selectDraftSources } from '../supabase/functions/_shared/sources';
-import { auroc, cosine } from './metrics';
+import { auroc } from './metrics';
+import { candidatesFor, vectorsFor } from './judge-inputs';
 import { diskCache, env, hashKey, loadKb, ROOT, withRetry } from './lib';
 
 interface Item { id: string; text: string; language: string; kind: string; gold: string; split: string }
@@ -58,27 +57,6 @@ function checkers(): { list: AnswerabilityChecker[]; skipped: string[] } {
   return { list, skipped };
 }
 
-/** The entries the app would draft from, using the same selection rule as the app. */
-function candidatesFor(docVecs: number[][], queryVec: number[]): CandidateEntry[] {
-  const rows = kb
-    .map((e, i) => ({ ref: e.ref, question: e.question, answer: e.answer, tags: e.tags, source: e.source ?? '', similarity: cosine(queryVec, docVecs[i]) }))
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 5)
-    .map((r) => ({ ...r, id: r.ref, keyword_rank: 0, fused_score: r.similarity, embedding_model: null }));
-  return selectDraftSources(rows).map((s) => ({ ref: s.entry.id, question: s.entry.question, answer: s.entry.answer, similarity: s.score }));
-}
-
-function vectorsFor(dir: string): { doc: Record<string, number[]>; query: Record<string, number[]> } | string {
-  const base = join(ROOT, 'eval/.cache', dir);
-  if (!existsSync(join(base, 'document.json')) || !existsSync(join(base, 'query.json'))) {
-    return `no cached vectors in eval/.cache/${dir}; run npm run eval:retrieval first`;
-  }
-  return {
-    doc: JSON.parse(readFileSync(join(base, 'document.json'), 'utf8')),
-    query: JSON.parse(readFileSync(join(base, 'query.json'), 'utf8')),
-  };
-}
-
 async function main() {
   const { list, skipped } = checkers();
   const results: Record<string, unknown>[] = [];
@@ -99,7 +77,7 @@ async function main() {
       for (const [n, item] of set.items.entries()) {
         const q = vecs.query[hashKey(item.text)];
         if (!q) continue;
-        const cands = candidatesFor(docVecs, q);
+        const cands = candidatesFor(kb, docVecs, q);
         const key = JSON.stringify([item.text, cands.map((e) => e.ref)]);
         let r = cache.get(key);
         if (!r) {
