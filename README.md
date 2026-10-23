@@ -6,13 +6,14 @@ Product brief: [`docs/PRODUCT.md`](docs/PRODUCT.md). Backlog: [`docs/BACKLOG.md`
 
 ## Status
 
-Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 (clean-up) and 1 (retrieval and confidence) are complete.** What the code does today, stated plainly:
+Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 to 2 are complete** (clean-up; retrieval and confidence; grounded drafting and safety gates). What the code does today, stated plainly:
 
-- **Retrieval is by meaning.** Questions and knowledge-base entries are turned into vectors by an embedding model (voyage-4 hosted, or a local model through Ollama) in a Supabase Edge Function, so the provider key never reaches the browser. Japanese questions find English entries. If embedding is unavailable, matching falls back to keywords and says so.
-- **Confidence is calibrated**: the measured chance that the top entry is the right one, for the model in use, from an evaluation set of 364 synthetic questions (`docs/evals/`). Its known limit: a question on a topic the knowledge base covers, but whose specific answer it lacks, can still score 60 to 80%, and occasionally more. Sprint 2 adds a check of whether the entry actually answers the question.
-- **Drafts are assembled, not generated.** Each draft is made of sentences from the best-matching knowledge-base answers, with their references. No language model writes text yet; Sprint 2 adds grounded drafting.
+- **Processing happens on the server.** Each uploaded question goes to a Supabase Edge Function, which matches it against the knowledge base by meaning (voyage-4, or a local model through Ollama), asks Claude whether the matched entries actually answer it, checks it for pricing and legal or contractual terms, and drafts an answer. Provider keys never reach the browser.
+- **Drafts are grounded and checked.** Claude writes only from the matched entries and cites them; code then rejects a draft that cites an entry it was not given, or contains a figure or link not in its sources. When the entries do not answer the question, there is no draft. Pricing questions are never drafted. Japanese questions get Japanese drafts, labelled as translations.
+- **Confidence is calibrated** on synthetic evaluation sets (`docs/evals/`): the measured chance that the knowledge base answers the question with the top entry. The sets are small, so the figures are estimates.
+- **Bulk approval is limited by the database**, not the screen: only the response owner or an admin, and never for pricing, legal, translated, unprocessed or uncalibrated questions, or ones without a draft. Anyone on the team can still accept a single question.
 
-Features in the code, tested end to end in a browser against local Supabase: responses (opportunities) with an owner; uploading questions from `.xlsx` or `.csv`; drafts with references; review lowest-confidence first, with accept, edit, skip and bulk-accept above a confidence threshold (disabled when confidence is not calibrated); assigning questions to colleagues by expertise, with an inbox; export to Excel, CSV and Word; a shared knowledge base with import and add-back; invite-only accounts with admin, owner and member rights enforced in the database.
+Features in the code, tested end to end in a browser against local Supabase: responses (opportunities) with an owner; uploading questions from `.xlsx` or `.csv`; review lowest-confidence first, with accept, edit, skip and bulk approval; assigning questions to colleagues by expertise, with an inbox; export to Excel, CSV and Word; a shared knowledge base with import and add-back; invite-only accounts with admin, owner and member rights enforced in the database.
 
 ## Project rules
 

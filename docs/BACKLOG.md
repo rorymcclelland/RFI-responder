@@ -107,25 +107,79 @@ Goal: a draft that says only what the knowledge base supports, and questions tha
 
 | ID | Story | Why in this sprint | Size | Status |
 |---|---|---|---|---|
-| S2-0 | Evaluation sets: gate set (pricing, legal, lookalikes), drafting labels, red-team set (injected questions and entries) | They judge the rest of the sprint; written first | S | Ready, Sprint 2 |
-| S2-1 | Answerability check: compare Voyage rerank-2.5, rerank-3 and Claude Haiku 5.5 as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met | M | Ready, Sprint 2 |
-| S2-2a | Server-side processing and enforcement: an Edge Function scores, gates and drafts; members can no longer write confidence or gates; bulk accept becomes a database function that refuses gated questions | Refinement found the controls run in the browser, where a signed-in user could switch them off (rules 4 and 5) | M | Ready, Sprint 2 |
-| S2-2b | Grounded drafting: Claude drafts from matched entries only, cites them, says "insufficient evidence"; citations and figures checked in code; no draft for pricing | The product's promise; decision 0005 | M | Ready, Sprint 2 |
-| S2-3 | Pricing and legal gates: rules and a classifier, gated if either fires; rules still work when Claude is down | Project rule 4 | M | Ready, Sprint 2 |
-| S2-4 | Drafting evaluation: citation accuracy, faithfulness, coverage, abstention; model and prompt version saved with every draft | Measure drafting as Sprint 1 measured retrieval | M | Ready, Sprint 2 |
-| S2-5 | Red team: injected questions and knowledge-base entries change nothing | Rule 6; first sprint where an LLM reads untrusted text | S | Ready, Sprint 2 |
-| F-5 | Split `RFIWorkspace.tsx` | S2-2a removes its scoring anyway | S | Ready, Sprint 2 |
-| F-13 | Calibration per language | Same run as S2-1 | S | Ready, Sprint 2 |
+| S2-0 | Evaluation sets: gate set (pricing, legal, lookalikes), drafting labels, red-team set (injected questions and entries) | They judge the rest of the sprint; written first | S | Done, Sprint 2 (plus 30 held-out gate questions) |
+| S2-1 | Answerability check: compare Voyage rerank-2.5, rerank-3 and Claude Haiku 5.5 as judge on the Sprint 1 set; the chosen signal feeds calibrated confidence | The one Sprint 1 bar not met | M | Done, Sprint 2, with a residual Rory accepted: by score alone 56% of near misses fall below the floor (bar 80%); judged as a system, the drafter refuses all of them. Rerankers not compared: split out as F-20 |
+| S2-2a | Server-side processing and enforcement: an Edge Function scores, gates and drafts; members can no longer write confidence or gates; bulk accept becomes a database function that refuses gated questions | Refinement found the controls run in the browser, where a signed-in user could switch them off (rules 4 and 5) | M | Done, Sprint 2 (plus the security review's fixes and two end-to-end fixes) |
+| S2-2b | Grounded drafting: Claude drafts from matched entries only, cites them, says "insufficient evidence"; citations and figures checked in code; no draft for pricing | The product's promise; decision 0005 | M | Done, Sprint 2, with a residual Rory accepted: right entry cited 89.8% (bar 90%); all misses are refusals |
+| S2-3 | Pricing and legal gates: rules and a classifier, gated if either fires; rules still work when Claude is down | Project rule 4 | M | Done, Sprint 2 |
+| S2-4 | Drafting evaluation: citation accuracy, faithfulness, coverage, abstention; model and prompt version saved with every draft | Measure drafting as Sprint 1 measured retrieval | M | Done, Sprint 2 |
+| S2-5 | Red team: injected questions and knowledge-base entries change nothing | Rule 6; first sprint where an LLM reads untrusted text | S | Done, Sprint 2, with a residual Rory accepted: 1 of 35 injections raised the judge's verdict, contained by the translation gate; judge stability tracked as F-22 |
+| F-5 | Split `RFIWorkspace.tsx` | S2-2a removes its scoring anyway | S | Done, Sprint 2 |
+| F-13 | Calibration per language | Same run as S2-1 | S | Done, Sprint 2 |
 
 Refinement: `docs/refinement/sprint-2.md`. Order: S2-0 first; S2-1 and S2-3 in parallel; S2-2a; S2-2b with F-5; then S2-4, S2-5 and F-13. No spike: S2-1 compares three known options by measurement, and the stories after it take a score whichever wins. The Anthropic key is in place. A little larger than Sprint 1; if it runs long, F-13 and then S2-5 return to the backlog (S2-5 must land before any hosted demo).
 
+### Sprint 2 review (23 October 2026)
+
+**Checks, with evidence.** CI green on all three jobs (162 unit tests; 121 database tests; the real Supabase stack, including a batch processed with every provider failing). Evaluations on Rory's PC, all in `docs/evals/`:
+
+| Bar (agreed at refinement) | Result | Held? |
+|---|---|---|
+| Every pricing and legal question gated | 100 of 100 | Yes |
+| At most 15% of lookalikes gated | 12.9% (9 of 70) | Yes |
+| No near miss at or above the 80% bulk line | 0 of 33 (voyage-4 + Claude judge) | Yes |
+| At least 80% of near misses below the floor | 56% by score; 100% get no draft | Residual accepted (judged as a system) |
+| At most 10% of answerable questions below the floor | 2% | Yes |
+| Calibration error at most 0.10 | 0.041 | Yes |
+| Right entry cited for at least 90% of answerable questions | 89.8% (all misses are refusals) | Residual accepted |
+| Faithfulness at least 95% of claims | 100% of 280; Rory agreed with the judge on 9 of 9 | Yes |
+| At least 80% of near misses answered "insufficient evidence" | 100% of 20 | Yes |
+| No injection succeeds | 1 of 35 changed a verdict, contained | Residual accepted |
+
+End-to-end on Rory's PC: 46 questions processed server-side; near misses refused with reasons; bulk approval at 80% as an admin accepted 30 and held back 16 with reasons (7 below 80%, 2 legal, 7 with no draft); the database's own count agreed; a member who does not own the response was refused bulk approval, multi-row accepts and score writes, and could still accept one gated question; anonymous visitors were refused everything. An independent security review found six gaps, all fixed and tested (decision 0003).
+
+**Bugs found and fixed in the sprint.** BUG-5: bulk approval could accept a question with no draft (100% confidence, failed drafting call). BUG-6: Rory's local `.env` held the service-role key as the browser key; the app now refuses to start with a secret key. BUG-7: the dev proxy captured the browser's requests for shared code (blank page). BUG-8: sessions from before Sprint 2 looked eligible for bulk approval on screen (the database refused correctly). BUG-9: the CI bundle check matched the key guard's own wording. Plus a Sprint 1 labelling error (the DSAR "near miss" was answerable), corrected.
+
+**Decisions at the review.** Three residuals accepted, as above. Defaults: Claude Haiku 5.5 as answerability judge, gate classifier and drafter (decision 0007). Sprint 3 confirmed as proposed.
+
+### Where every Sprint 2 review item now lives
+
+| Item | Now |
+|---|---|
+| F-16 Calibration unstable on about 180 items | Backlog, from Sprint 2 review |
+| F-17 Confidence shown as "100%" | Sprint 3 (touches the question card) |
+| F-18 Judge says "no" for answerable questions; shown as 63% beside a refusal | Backlog, from Sprint 2 review |
+| F-19 Faithfulness judge not yet tested on unfaithful drafts | Backlog, from Sprint 2 review |
+| F-20 Rerankers not compared (Voyage rate limit) | Backlog, returned from S2-1 |
+| F-21 No per-user rate limit or cost cap on processing | Folded into Sprint 4's cost caps |
+| F-22 Judge consistency across repeated runs | Backlog, from Sprint 2 review (accepted residual of S2-5) |
+| F-23 No way to start a new upload from the review screen | Sprint 3 (touches the workspace) |
+| Member-added entries are trusted by the draft checks | Sprint 4 governance pack (review of member-added entries) |
+| BUG-5 to BUG-9 | Done in Sprint 2 (review) |
+
+
+## Sprint 3: workflow and the learning loop (confirmed 23 October 2026)
+
+To be refined before building. Proposed contents, each with its reason:
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| S3-1 | Overview of responses in flight: owner, due date, progress, overdue and at-risk flags | Rory's brief: several responses at once | Proposed |
+| S3-2 | Recorded approvals (who, individual or bulk, threshold, model and prompt versions) and a readiness gate before export | Rule 4 says bulk approval counts when recorded; the audit trail completes Sprint 2's controls | Proposed |
+| S3-3 | Archive with outcome (won or lost); admin-only hard delete for responses created in error, logged | Rory's brief: archive, never delete | Proposed |
+| S3-4 | Learning at export: accepted answers become entries with provenance, near-duplicates superseded (F-11), origin_ref set by the system (F-6), pricing never learned | The self-improving knowledge base; replaces the manual Add to KB button | Proposed |
+| S3-5 | Questions editable only by the owner, assignees and admins (F-7) | Same tables as S3-2 | Proposed |
+| S3-6 | Expert suggestions from answer history as well as stated expertise | Uses the provenance S3-4 records | Proposed |
+| F-17 | Show high confidence as "99% or more", never "100%" | Small, and the card changes anyway | Proposed |
+| F-23 | Start a new upload from the review screen | Small, and the workspace changes anyway | Proposed |
+
+No spike: near-duplicate detection uses the vectors already stored, with a threshold measured on the evaluation set.
+
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 0 review)
 
-(Sprint 2 is proposed in full above.)
+(Sprint 3 is above.)
 
-**Sprint 3: workflow and the learning loop.** Overview of responses in flight (owner, due date, progress, overdue and at-risk flags); per-response owner role; bulk approval recorded; readiness gate before export; archive with outcome (won or lost), admin-only hard delete for errors, logged; learning at export with provenance and supersession of near-duplicates (F-11), pricing never learned; session questions editable only by owner, assignees and admins (F-7); origin_ref set by the system (F-6); expert recommendation from answer history as well as stated expertise; audit trail of every approval with model and prompt version.
-
-**Sprint 4: ingestion and governance pack.** Word documents ingested with AI-assisted question extraction alongside spreadsheets (PDF and pasted text stay in the backlog); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); cost caps and rate limits; KB review dates and a stale-entry report; light mapping to NIST AI RMF and the EU AI Act transparency duties.
+**Sprint 4: ingestion and governance pack.** Per-user rate limits and cost caps on processing (F-21); review of member-added knowledge-base entries, which the draft checks trust. Word documents ingested with AI-assisted question extraction alongside spreadsheets (PDF and pasted text stay in the backlog); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); cost caps and rate limits; KB review dates and a stale-entry report; light mapping to NIST AI RMF and the EU AI Act transparency duties.
 
 **Sprint 5: documentation and publish.** Architecture diagram, evaluation reports, governance pack, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match.
 
@@ -135,7 +189,7 @@ Refinement: `docs/refinement/sprint-2.md`. Order: S2-0 first; S2-1 and S2-3 in p
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 onwards from Sprint 1; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 onwards from Sprint 2; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -153,6 +207,14 @@ Refinement: `docs/refinement/sprint-2.md`. Order: S2-0 first; S2-1 and S2-3 in p
 | F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
 | F-14 | Japanese evaluation items are machine translations of the original questions, unreviewed | From the Sprint 1 review; reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
 | F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
+| F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
+| F-17 | High confidence is shown as "100%" | From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
+| F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | From the Sprint 2 review; judge prompt, and showing the verdict on the card |
+| F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
+| F-20 | Voyage rerank-2.5 and rerank-3 not yet compared with the Claude judge | Returned from S2-1; needs a Voyage payment method for the rate limit. Cheaper and faster if as good |
+| F-21 | No per-user rate limit or cost cap on processing | From the Sprint 2 security review; folded into Sprint 4 |
+| F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | From the Sprint 2 review; accepted residual of S2-5 (r028) |
+| F-23 | The review screen has no way to start a new upload | Found in the Sprint 2 end-to-end run |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
