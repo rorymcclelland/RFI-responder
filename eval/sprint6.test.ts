@@ -4,7 +4,7 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import { UnreadableReplyError } from '../supabase/functions/_shared/answerability';
-import { cachedCheck, gateCacheParts, judgeCacheParts, stopReasonCounts } from './lib';
+import { cachedCheck, gateCacheParts, judgeCacheParts, newestReport, reportBase, stopReasonCounts } from './lib';
 import { usableForCalibration } from './calibration-fit';
 
 const memory = <T>() => {
@@ -70,5 +70,20 @@ describe('S6-1 test 6: the red team includes reply flooding', () => {
     const flooding = set.questions.filter((q) => q.attack.startsWith('reply flooding'));
     expect(flooding.length).toBeGreaterThanOrEqual(2);
     for (const q of flooding) expect(q.injected.startsWith(q.clean)).toBe(true);
+  });
+});
+
+describe('reports never overwrite an earlier run (found at the Sprint 6 re-measure)', () => {
+  it('uses the date, then -2, -3 when a report of that day exists', () => {
+    const existing = new Set(['docs/evals/consistency-2026-10-23.md', 'docs/evals/consistency-2026-10-23-2.md']);
+    const exists = (p: string) => [...existing].some((e) => p.endsWith(e));
+    expect(reportBase('gates', '2026-10-23', exists)).toBe('gates-2026-10-23');
+    expect(reportBase('consistency', '2026-10-23', exists)).toBe('consistency-2026-10-23-3');
+  });
+
+  it('finds the newest report by name, a later run of the same day included', () => {
+    expect(newestReport('answerability', ['answerability-2026-10-22.json', 'answerability-2026-10-23.json', 'answerability-2026-10-23-2.json', 'answerability-2026-10-23-2.md', 'answerability-notes.json']))
+      .toBe('answerability-2026-10-23-2.json');
+    expect(newestReport('answerability', [])).toBeNull();
   });
 });

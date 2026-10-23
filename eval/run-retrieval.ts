@@ -24,6 +24,7 @@ import {
   type EmbedKind,
 } from '../supabase/functions/_shared/embeddings';
 import { auroc, cosine, meanReciprocalRank, rankBy, recallAt, reciprocalRankFusion, type Ranking } from './metrics';
+import { reportBase } from './lib';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** Small batches keep each request under low-tier token-per-minute limits. */
@@ -198,6 +199,7 @@ async function main() {
   const methods = [...new Set(results.map((r) => r.method))];
   const summary = methods.map((m) => summarise(results, m));
   const date = new Date().toISOString().slice(0, 10);
+  const base = reportBase('retrieval', date);
   const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 
   const md = [
@@ -218,10 +220,10 @@ async function main() {
   ].join('\n');
 
   mkdirSync(join(ROOT, 'docs/evals'), { recursive: true });
-  writeFileSync(join(ROOT, `docs/evals/retrieval-${date}.md`), md + '\n');
-  writeFileSync(join(ROOT, `docs/evals/retrieval-${date}.json`), JSON.stringify({ date, setVersion: set.version, summary, skipped, results }, null, 1));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), md + '\n');
+  writeFileSync(join(ROOT, `docs/evals/${base}.json`), JSON.stringify({ date, setVersion: set.version, summary, skipped, results }, null, 1));
   console.log(md);
-  console.log(`\nWritten: docs/evals/retrieval-${date}.md and .json`);
+  console.log(`\nWritten: docs/evals/${base}.md and .json`);
 }
 
 main().catch((err) => {

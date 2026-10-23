@@ -13,17 +13,18 @@
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT } from './lib';
+import { newestReport, reportBase, ROOT } from './lib';
 
 const MAX_WRONG = 0.02;
 interface Row { id: string; kind: string; language: string; method: string; topIsGold: boolean; verdict: string | null; similarity: number; unreadable?: boolean }
 
-const latest = (kind: string) => readdirSync(join(ROOT, 'docs/evals')).filter((f) => new RegExp(`^${kind}-.*\\.json$`).test(f)).sort().pop()!;
+const latest = (kind: string) => newestReport(kind, readdirSync(join(ROOT, 'docs/evals')))!;
 const file = latest('answerability');
 const data = JSON.parse(readFileSync(join(ROOT, 'docs/evals', file), 'utf8')) as { setVersion: string; results: Row[] };
 
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 const date = new Date().toISOString().slice(0, 10);
+const base = reportBase('duplicates', date);
 const lines = [
   `# Near-duplicate threshold, ${date}`,
   '',
@@ -60,6 +61,6 @@ for (const method of [...new Set(data.results.map((r) => r.method))]) {
 }
 lines.push('', 'A question whose similarity is below the threshold is learned as a new entry beside the existing ones, so a missed duplicate costs a duplicate entry, not lost knowledge.', '');
 
-writeFileSync(join(ROOT, `docs/evals/duplicates-${date}.md`), lines.join('\n'));
+writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
 writeFileSync(join(ROOT, 'supabase/functions/_shared/duplicate-thresholds.json'), JSON.stringify({ evaluationSet: data.setVersion, maxWrong: MAX_WRONG, thresholds }, null, 2) + '\n');
 console.log(lines.join('\n'));

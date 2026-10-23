@@ -121,3 +121,21 @@ export function gateCacheParts(model: string): string[] {
   return [model, `${GATE_PROMPT_VERSION}-max${GATE_MAX_TOKENS}`];
 }
 
+/**
+ * A report's file name without extension: the kind and date, then -2, -3... if a report of that day
+ * already exists, so a rerun never overwrites a committed report (found at the Sprint 6 re-measure).
+ */
+export function reportBase(kind: string, date: string, exists: (path: string) => boolean = existsSync): string {
+  for (let n = 1; ; n++) {
+    const base = n === 1 ? `${kind}-${date}` : `${kind}-${date}-${n}`;
+    if (!exists(join(ROOT, 'docs/evals', `${base}.md`)) && !exists(join(ROOT, 'docs/evals', `${base}.json`))) return base;
+  }
+}
+
+/** The newest JSON report of a kind, ordered by name without extension (so a same-day rerun comes last). */
+export function newestReport(kind: string, files: string[]): string | null {
+  const re = new RegExp(`^${kind}-\\d{4}-\\d{2}-\\d{2}(-[a-z0-9]+)?\\.json$`);
+  const found = files.filter((f) => re.test(f)).sort((a, b) => a.replace(/\.json$/, '').localeCompare(b.replace(/\.json$/, '')));
+  return found.length ? found[found.length - 1] : null;
+}
+

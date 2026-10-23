@@ -196,3 +196,12 @@ describe('Sprint 6 security review', () => {
     });
   });
 });
+
+describe('S6-2 learning thresholds follow the latest duplicates evaluation', () => {
+  it('the database holds the thresholds in duplicate-thresholds.json', async () => {
+    const { readFileSync } = await import('node:fs');
+    const file = JSON.parse(readFileSync(new URL('../../functions/_shared/duplicate-thresholds.json', import.meta.url), 'utf8')) as { thresholds: Record<string, number> };
+    const rows = (await asSuperuser<{ embedding_model: string; threshold: string }>(`SELECT embedding_model, threshold FROM learning_thresholds`)).rows;
+    expect(Object.fromEntries(rows.map((r) => [r.embedding_model, Number(r.threshold)]))).toEqual(file.thresholds);
+  });
+});

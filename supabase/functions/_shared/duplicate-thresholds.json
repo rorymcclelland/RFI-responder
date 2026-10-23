@@ -2,7 +2,7 @@
   "evaluationSet": "2026-10-22.3",
   "maxWrong": 0.02,
   "thresholds": {
-    "voyage-4": 0.3,
-    "qwen3-embedding:0.6b": 0.47
+    "voyage-4": 0.55,
+    "qwen3-embedding:0.6b": 0.59
   }
 }

@@ -233,51 +233,51 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
         "probability": 0
       },
       {
-        "score": 0.3395,
+        "score": 0.6062,
         "probability": 0
       },
       {
-        "score": 0.3431,
-        "probability": 0.0909
-      },
-      {
-        "score": 0.4062,
-        "probability": 0.0909
-      },
-      {
-        "score": 0.4099,
-        "probability": 0.5556
-      },
-      {
-        "score": 0.4594,
-        "probability": 0.5556
-      },
-      {
-        "score": 0.4599,
-        "probability": 0.6296
-      },
-      {
-        "score": 0.551,
-        "probability": 0.6296
-      },
-      {
-        "score": 0.5575,
-        "probability": 0.75
+        "score": 1.3883,
+        "probability": 0.5
       },
       {
         "score": 1.4195,
-        "probability": 0.75
+        "probability": 0.5
       },
       {
-        "score": 1.4714,
-        "probability": 0.9231
+        "score": 1.4377,
+        "probability": 0.8
       },
       {
-        "score": 2.4319,
-        "probability": 0.9231
+        "score": 1.5341,
+        "probability": 0.8
       },
       {
-        "score": 2.4367,
+        "score": 1.561,
+        "probability": 0.875
+      },
+      {
+        "score": 2.4594,
+        "probability": 0.875
+      },
+      {
+        "score": 2.4599,
+        "probability": 0.8919
+      },
+      {
+        "score": 2.551,
+        "probability": 0.8919
+      },
+      {
+        "score": 2.5523,
+        "probability": 0.9423
+      },
+      {
+        "score": 2.6259,
+        "probability": 0.9423
+      },
+      {
+        "score": 2.6282,
         "probability": 1
       },
       {
@@ -295,72 +295,40 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
         "probability": 0
       },
       {
-        "score": 0.416,
+        "score": 1.4665,
         "probability": 0
       },
       {
-        "score": 0.424,
-        "probability": 0.1667
-      },
-      {
-        "score": 0.4583,
-        "probability": 0.1667
-      },
-      {
-        "score": 0.4603,
+        "score": 1.4793,
         "probability": 0.25
-      },
-      {
-        "score": 0.4992,
-        "probability": 0.25
-      },
-      {
-        "score": 0.5043,
-        "probability": 0.2857
-      },
-      {
-        "score": 0.5234,
-        "probability": 0.2857
-      },
-      {
-        "score": 0.5358,
-        "probability": 0.4375
-      },
-      {
-        "score": 0.5697,
-        "probability": 0.4375
-      },
-      {
-        "score": 0.5712,
-        "probability": 0.7143
-      },
-      {
-        "score": 0.6004,
-        "probability": 0.7143
-      },
-      {
-        "score": 0.6049,
-        "probability": 0.8
       },
       {
         "score": 1.551,
-        "probability": 0.8
+        "probability": 0.25
       },
       {
-        "score": 1.5568,
-        "probability": 0.8462
+        "score": 1.5518,
+        "probability": 0.6667
       },
       {
-        "score": 2.5563,
-        "probability": 0.8462
+        "score": 1.5583,
+        "probability": 0.6667
       },
       {
-        "score": 2.559,
-        "probability": 0.9333
+        "score": 1.5584,
+        "probability": 0.7111
       },
       {
-        "score": 2.5927,
-        "probability": 0.9333
+        "score": 2.5627,
+        "probability": 0.7111
+      },
+      {
+        "score": 2.5629,
+        "probability": 0.9
+      },
+      {
+        "score": 2.5943,
+        "probability": 0.9
       },
       {
         "score": 2.5955,

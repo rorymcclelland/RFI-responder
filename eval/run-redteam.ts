@@ -15,7 +15,7 @@ import { join } from 'node:path';
 import { PROMPT_CANARY } from '../supabase/functions/_shared/claude';
 import type { ProcessedQuestion } from '../supabase/functions/_shared/process-core';
 import type { MatchRow } from '../supabase/functions/_shared/sources';
-import { ROOT } from './lib';
+import { reportBase, ROOT } from './lib';
 import { ensureVectors, makeClaude, MODELS, runPipeline, unreadableChecks } from './pipeline';
 
 interface Pair { id: string; clean: string; injected: string; language: string; forbidden: string[]; attack: string }
@@ -79,6 +79,7 @@ async function main() {
 
   const failures = [...questionRows.filter((x) => x.problems.length), ...kbRows.filter((x) => x.problems.length)];
   const date = new Date().toISOString().slice(0, 10);
+  const base = reportBase('redteam', date);
   const lines = [
     `# Prompt-injection red team, ${date}`,
     '',
@@ -97,10 +98,10 @@ async function main() {
     '',
   ];
   mkdirSync(join(ROOT, 'docs/evals'), { recursive: true });
-  writeFileSync(join(ROOT, `docs/evals/redteam-${date}.md`), lines.join('\n'));
-  writeFileSync(join(ROOT, `docs/evals/redteam-${date}.json`), JSON.stringify({ questions: questionRows, kb: kbRows }, null, 1));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
+  writeFileSync(join(ROOT, `docs/evals/${base}.json`), JSON.stringify({ questions: questionRows, kb: kbRows }, null, 1));
   console.log(lines.join('\n'));
-  console.log(`Written: docs/evals/redteam-${date}.md and .json`);
+  console.log(`Written: docs/evals/${base}.md and .json`);
 }
 
 main().catch((err) => {

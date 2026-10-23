@@ -13,7 +13,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { claudeClient } from '../supabase/functions/_shared/claude';
 import { classifierGate, GATE_PROMPT_VERSION, ruleGate } from '../supabase/functions/_shared/gates';
-import { diskCache, env, gateCacheParts, ROOT, withRetry } from './lib';
+import { diskCache, env, gateCacheParts, reportBase, ROOT, withRetry } from './lib';
 
 const MODEL = 'claude-haiku-5-5';
 const BARS = { recall: 1, falsePositive: 0.15 };
@@ -56,6 +56,7 @@ async function main() {
     return { caught, of: gatedSet.length, wrong, ofLook: lookalikes.length, recall: caught / (gatedSet.length || 1), fp: wrong / (lookalikes.length || 1) };
   };
   const date = new Date().toISOString().slice(0, 10);
+  const base = reportBase('gates', date);
   const lines = [
     `# Pricing and legal gates, ${date}`,
     '',
@@ -87,9 +88,9 @@ async function main() {
   lines.push('', `Gated under the other category (still gated, so still safe): ${mislabelled.length}.`, '');
 
   mkdirSync(join(ROOT, 'docs/evals'), { recursive: true });
-  writeFileSync(join(ROOT, `docs/evals/gates-${date}.md`), lines.join('\n'));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
   console.log(lines.join('\n'));
-  console.log(`Written: docs/evals/gates-${date}.md`);
+  console.log(`Written: docs/evals/${base}.md`);
 }
 
 main().catch((err) => {

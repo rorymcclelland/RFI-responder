@@ -19,7 +19,7 @@ import { CALIBRATION_TABLES } from '../supabase/functions/_shared/calibration-ta
 import { claudeClient } from '../supabase/functions/_shared/claude';
 import { meteredClaude, type UsageRow } from '../supabase/functions/_shared/usage';
 import { candidatesFor, vectorsFor } from './judge-inputs';
-import { cachedCheck, diskCache, env, hashKey, judgeCacheParts, loadKb, ROOT, stopReasonCounts } from './lib';
+import { cachedCheck, diskCache, env, hashKey, judgeCacheParts, loadKb, reportBase, ROOT, stopReasonCounts } from './lib';
 import { consistency } from './sprint5-metrics';
 
 interface Item { id: string; text: string; language: string; kind: string; split: string }
@@ -80,6 +80,7 @@ async function main() {
   const share = (f: (r: (typeof results)[number]) => boolean, list = results) => (list.length ? list.filter(f).length / list.length : 0);
   const kinds = [...new Set(results.map((r) => r.item.kind))];
   const date = new Date().toISOString().slice(0, 10);
+  const base = reportBase('consistency', date);
   const lines = [
     `# Checker consistency across runs, ${date}`,
     '',
@@ -101,7 +102,7 @@ async function main() {
     `Cost of this run: ${usage.length} new Claude calls, ${usage.reduce((n, u) => n + u.input_tokens, 0)} input and ${usage.reduce((n, u) => n + u.output_tokens, 0)} output tokens (cached answers cost nothing).`,
     '',
   ];
-  writeFileSync(join(ROOT, `docs/evals/consistency-${date}.md`), lines.join('\n'));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
   console.log(lines.slice(0, 10).join('\n'));
 }
 

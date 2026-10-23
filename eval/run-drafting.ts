@@ -20,7 +20,7 @@ import Papa from 'papaparse';
 import { PROMPT_CANARY } from '../supabase/functions/_shared/claude';
 import { DRAFT_PROMPT_VERSION } from '../supabase/functions/_shared/drafting';
 import type { ProcessedQuestion } from '../supabase/functions/_shared/process-core';
-import { diskCache, ROOT, withRetry } from './lib';
+import { diskCache, reportBase, ROOT, withRetry } from './lib';
 import { ensureVectors, kb, makeClaude, MODELS, runPipeline, unreadableChecks } from './pipeline';
 
 const FAITHFULNESS_JUDGE = 'claude-sonnet-5-5';
@@ -126,6 +126,8 @@ async function main() {
     .map(([k, v]) => `${k} ${v}`).join(', ');
 
   const date = new Date().toISOString().slice(0, 10);
+
+  const base = reportBase('drafting', date);
   const lines = [
     `# Drafting evaluation, ${date}`,
     '',
@@ -174,10 +176,10 @@ async function main() {
       note: '',
     }))));
   }
-  writeFileSync(join(ROOT, `docs/evals/drafting-${date}.md`), lines.join('\n'));
-  writeFileSync(join(ROOT, `docs/evals/drafting-${date}.json`), JSON.stringify(rows.map((x) => ({ ...x.r, id: x.label.id, cited: x.cited, citesGold: x.citesGold, claims: faith.get(x.label.id)?.claims ?? [] })), null, 1));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
+  writeFileSync(join(ROOT, `docs/evals/${base}.json`), JSON.stringify(rows.map((x) => ({ ...x.r, id: x.label.id, cited: x.cited, citesGold: x.citesGold, claims: faith.get(x.label.id)?.claims ?? [] })), null, 1));
   console.log(lines.join('\n'));
-  console.log(`Written: docs/evals/drafting-${date}.md, .json, and the review sheet docs/evals/drafting-review-sheet.csv (mark "faithful" yes or no for each row).`);
+  console.log(`Written: docs/evals/${base}.md, .json, and the review sheet docs/evals/drafting-review-sheet.csv (mark "faithful" yes or no for each row).`);
 }
 
 main().catch((err) => {

@@ -20,7 +20,7 @@ import { claudeClient } from '../supabase/functions/_shared/claude';
 import { EXTRACT_PROMPT_VERSION, extractQuestions, type ExtractResult } from '../supabase/functions/_shared/extraction';
 import { meteredClaude, type UsageRow } from '../supabase/functions/_shared/usage';
 import { readWordDocument } from '../src/lib/wordDocument';
-import { diskCache, env, ROOT, withRetry } from './lib';
+import { diskCache, env, reportBase, ROOT, withRetry } from './lib';
 import { redTeamChanged, scoreExtraction } from './sprint5-metrics';
 import { toBuffer, wordSet, WORD_SET_VERSION } from './word-set';
 
@@ -72,6 +72,8 @@ async function main() {
   ] as const;
 
   const date = new Date().toISOString().slice(0, 10);
+
+  const base = reportBase('extraction', date);
   const lines = [
     `# Question extraction from Word documents, ${date}`,
     '',
@@ -102,8 +104,8 @@ async function main() {
     `Cost of this run: ${usage.length} Claude calls, ${usage.reduce((n, u) => n + u.input_tokens, 0)} input and ${usage.reduce((n, u) => n + u.output_tokens, 0)} output tokens (cached documents cost nothing).`,
     '',
   ];
-  writeFileSync(join(ROOT, `docs/evals/extraction-${date}.md`), lines.join('\n'));
-  writeFileSync(join(ROOT, `docs/evals/extraction-${date}.json`), JSON.stringify({ setVersion: WORD_SET_VERSION, model: MODEL, promptVersion: EXTRACT_PROMPT_VERSION, rows: rows.map((r) => ({ name: r.name, layout: r.layout, method: r.result.method, dropped: r.result.dropped, score: r.score })) }, null, 2));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
+  writeFileSync(join(ROOT, `docs/evals/${base}.json`), JSON.stringify({ setVersion: WORD_SET_VERSION, model: MODEL, promptVersion: EXTRACT_PROMPT_VERSION, rows: rows.map((r) => ({ name: r.name, layout: r.layout, method: r.result.method, dropped: r.result.dropped, score: r.score })) }, null, 2));
   console.log(lines.slice(0, 13).join('\n'));
 }
 

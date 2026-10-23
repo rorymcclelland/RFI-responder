@@ -22,7 +22,7 @@ import {
 import { claudeClient } from '../supabase/functions/_shared/claude';
 import { auroc } from './metrics';
 import { candidatesFor, vectorsFor } from './judge-inputs';
-import { cachedCheck, diskCache, env, hashKey, judgeCacheParts, loadKb, ROOT, stopReasonCounts } from './lib';
+import { cachedCheck, diskCache, env, hashKey, judgeCacheParts, loadKb, reportBase, ROOT, stopReasonCounts } from './lib';
 
 interface Item { id: string; text: string; language: string; kind: string; gold: string; split: string }
 
@@ -110,6 +110,7 @@ async function main() {
 
   const methods = [...new Set(results.map((r) => r.method as string))];
   const date = new Date().toISOString().slice(0, 10);
+  const base = reportBase('answerability', date);
   const lines = [
     `# Answerability comparison, ${date}`,
     '',
@@ -136,10 +137,10 @@ async function main() {
   if (skipped.length) lines.push('**Skipped:**', '', ...skipped.map((s) => `- ${s}`), '');
 
   mkdirSync(join(ROOT, 'docs/evals'), { recursive: true });
-  writeFileSync(join(ROOT, `docs/evals/answerability-${date}.md`), lines.join('\n'));
-  writeFileSync(join(ROOT, `docs/evals/answerability-${date}.json`), JSON.stringify({ date, setVersion: set.version, skipped, results }, null, 1));
+  writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
+  writeFileSync(join(ROOT, `docs/evals/${base}.json`), JSON.stringify({ date, setVersion: set.version, skipped, results }, null, 1));
   console.log(lines.join('\n'));
-  console.log(`Written: docs/evals/answerability-${date}.md and .json`);
+  console.log(`Written: docs/evals/${base}.md and .json`);
 }
 
 main().catch((err) => {

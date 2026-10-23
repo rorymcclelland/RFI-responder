@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { calibratedConfidence, NO_MATCH_FLOOR, type CalibrationTable } from '../supabase/functions/_shared/calibration';
 import { expectedCalibrationError, isotonicFit, reliabilityBins, toBreakpoints, usableForCalibration } from './calibration-fit';
+import { newestReport, reportBase } from './lib';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BARS = { ece: 0.1, abstention: 0.8 };
@@ -24,8 +25,7 @@ interface ItemResult { id: string; kind: string; split: string; method: string; 
 
 /** Newest report of a kind, or null. */
 function latestReport(kind: string): string | null {
-  const files = readdirSync(join(ROOT, 'docs/evals')).filter((f) => new RegExp(`^${kind}-.*\\.json$`).test(f)).sort();
-  return files.length ? files[files.length - 1] : null;
+  return newestReport(kind, readdirSync(join(ROOT, 'docs/evals')));
 }
 const latest = latestReport('retrieval');
 if (!latest) {
@@ -51,6 +51,7 @@ const S2_BARS = { nearBelow: 0.8, answerableBelow: 0.1, nearAtBulk: 0 };
 // Vector-only methods: the app calibrates on the top cosine similarity.
 const models = [...new Set(data.results.map((r) => r.method))].filter((m) => !m.includes('keyword'));
 const date = new Date().toISOString().slice(0, 10);
+const base = reportBase('calibration', date);
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 const lines: string[] = [
   `# Calibration, ${date}`,
@@ -132,7 +133,7 @@ lines.push(
 );
 if (droppedNotes.length) lines.push('', '**Left out of the fit and the checks:**', '', ...droppedNotes.map((n) => `- ${n}`));
 lines.push('', '"Answerable below floor" is the cost of the floor: answerable questions sent to a person although the knowledge base had the answer.', '', `The last two columns are the safety check for bulk approval: questions an owner could approve in bulk at ${pct(BULK_LINE)} although the top entry does not answer them. Pricing and legal questions are never bulk-approved whatever their score (project rule 4).`, ...details, '');
-writeFileSync(join(ROOT, `docs/evals/calibration-${date}.md`), lines.join('\n'));
+writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
 console.log(lines.join('\n'));
 writeFileSync(
   join(ROOT, 'supabase/functions/_shared/calibration-tables.ts'),
@@ -146,4 +147,4 @@ import type { CalibrationTable } from './calibration.ts';
 export const CALIBRATION_TABLES: Record<string, CalibrationTable> = ${JSON.stringify(allTables, null, 2)};
 `,
 );
-console.log(`\nWritten: docs/evals/calibration-${date}.md and supabase/functions/_shared/calibration-tables.ts`);
+console.log(`\nWritten: docs/evals/${base}.md and supabase/functions/_shared/calibration-tables.ts`);
