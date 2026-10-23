@@ -10,7 +10,7 @@
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { claudeClient } from '../_shared/claude.ts';
-import { extractQuestions, validateExtractRequest } from '../_shared/extraction.ts';
+import { extractQuestions, sentSize, validateExtractRequest } from '../_shared/extraction.ts';
 import { json, requireUser, serve } from '../_shared/http.ts';
 import { finishUsage, meteredClaude, reserveQuota, type UsageRow } from '../_shared/usage.ts';
 
@@ -20,8 +20,10 @@ serve(async (req) => {
   const env = Deno.env.toObject();
   const admin = createClient(env.SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
 
-  // One document; 429 past the daily limit or the budget, 503 if the check cannot run.
-  const { reservation } = await reserveQuota(admin, user.id, 'extract', 1);
+  // One document, its estimate sized by what is sent; 429 past the daily limit or the budget,
+  // 503 if the check cannot run.
+  const size = blocks.reduce((n, b) => n + sentSize(b), 0);
+  const { reservation } = await reserveQuota(admin, user.id, 'extract', 1, Math.min(size, 1_000_000));
   const usage: UsageRow[] = [];
   try {
     const client = env.ANTHROPIC_API_KEY ? meteredClaude(claudeClient({ apiKey: env.ANTHROPIC_API_KEY }), 'extract', usage) : null;

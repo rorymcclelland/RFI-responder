@@ -104,9 +104,11 @@ export async function readWordDocument(file: UploadLike): Promise<WordDocument> 
     throw new WordDocumentError('The document is compressed too far to be safe to open.');
   }
 
-  const xml = await documentPart.async('string');
+  // The declared sizes can lie (security review), so inflation is counted as it happens and stopped
+  // at the limit, whatever the zip claims.
+  const xml = await inflateCapped(documentPart, WORD_LIMITS.maxDocumentXml);
   const numberingPart = zip.file('word/numbering.xml');
-  const numbering = numberingPart && unpacked(numberingPart) <= 5 * 1024 * 1024 ? parseNumbering(await numberingPart.async('string')) : new Map();
+  const numbering = numberingPart ? parseNumbering(await inflateCapped(numberingPart, 1024 * 1024)) : new Map();
   const blocks = extractBlocks(xml, numbering);
   const chars = blocks.reduce((n, b) => n + b.text.length, 0);
   if (chars > WORD_LIMITS.maxChars) {
@@ -114,6 +116,47 @@ export async function readWordDocument(file: UploadLike): Promise<WordDocument> 
   }
   if (blocks.length === 0) throw new WordDocumentError('The document has no text to read.');
   return { blocks, chars };
+}
+
+/** Inflates one part, counting the real output and stopping as soon as it passes the limit. */
+function inflateCapped(file: JSZip.JSZipObject, limit: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Uint8Array[] = [];
+    let total = 0;
+    let stopped = false;
+    const stream = (file as unknown as { internalStream(type: 'uint8array'): StreamHelper }).internalStream('uint8array');
+    stream
+      .on('data', (chunk: Uint8Array) => {
+        if (stopped) return;
+        total += chunk.length;
+        if (total > limit) {
+          stopped = true;
+          stream.pause();
+          reject(new WordDocumentError('The document is too large when unpacked.'));
+          return;
+        }
+        chunks.push(chunk);
+      })
+      .on('error', () => {
+        if (!stopped) reject(new WordDocumentError('This file is not a Word document (.docx).'));
+        stopped = true;
+      })
+      .on('end', () => {
+        if (stopped) return;
+        const all = new Uint8Array(total);
+        let at = 0;
+        for (const c of chunks) { all.set(c, at); at += c.length; }
+        resolve(new TextDecoder('utf-8').decode(all));
+      })
+      .resume();
+  });
+}
+interface StreamHelper {
+  on(event: 'data', f: (chunk: Uint8Array) => void): StreamHelper;
+  on(event: 'error', f: (e: unknown) => void): StreamHelper;
+  on(event: 'end', f: () => void): StreamHelper;
+  pause(): StreamHelper;
+  resume(): StreamHelper;
 }
 
 // ─── XML helpers ────────────────────────────────────────────────────────────
@@ -142,27 +185,55 @@ const TOKEN = /<(\/?)([A-Za-z][\w.]*:[\w.]+|[A-Za-z][\w.]*)([^>]*?)(\/?)>|([^<]+
 interface Level { start: number; format: string; text: string }
 type Numbering = Map<string, Level[]>;
 
+/** Reads numbering definitions in one pass with the tokenizer (no backtracking patterns: security review). */
 function parseNumbering(xml: string): Numbering {
   const abstracts = new Map<string, Level[]>();
-  for (const a of xml.matchAll(/<w:abstractNum\b[^>]*w:abstractNumId="(\d+)"[^>]*>([\s\S]*?)<\/w:abstractNum>/g)) {
-    const levels: Level[] = [];
-    for (const l of a[2].matchAll(/<w:lvl\b[^>]*w:ilvl="(\d+)"[^>]*>([\s\S]*?)<\/w:lvl>/g)) {
-      const body = l[2];
-      levels[Number(l[1])] = {
-        start: Number(/<w:start w:val="(\d+)"/.exec(body)?.[1] ?? 1),
-        format: /<w:numFmt w:val="([^"]+)"/.exec(body)?.[1] ?? 'decimal',
-        text: decodeXml(/<w:lvlText w:val="([^"]*)"/.exec(body)?.[1] ?? ''),
-      };
+  const numToAbstract = new Map<string, string>();
+  let abstractId: string | null = null;
+  let level: { ilvl: number; def: Level } | null = null;
+  let numId: string | null = null;
+  for (const m of xml.matchAll(TOKEN)) {
+    const [, closing, tag, attrs = ''] = m;
+    if (!tag) continue;
+    const val = () => attr(attrs, 'w:val');
+    switch (tag) {
+      case 'w:abstractNum':
+        abstractId = closing ? null : attr(attrs, 'w:abstractNumId') ?? null;
+        if (abstractId !== null && !abstracts.has(abstractId)) abstracts.set(abstractId, []);
+        break;
+      case 'w:lvl':
+        if (closing) {
+          if (level && abstractId !== null) abstracts.get(abstractId)![level.ilvl] = level.def;
+          level = null;
+        } else {
+          const ilvl = Number(attr(attrs, 'w:ilvl'));
+          level = Number.isInteger(ilvl) && ilvl >= 0 && ilvl <= 8 ? { ilvl, def: { start: 1, format: 'decimal', text: '' } } : null;
+        }
+        break;
+      case 'w:start':
+        if (level) level.def.start = Math.min(Math.max(Number(val()) || 1, 0), 10_000); // capped (security review)
+        break;
+      case 'w:numFmt':
+        if (level) level.def.format = val() ?? 'decimal';
+        break;
+      case 'w:lvlText':
+        if (level) level.def.text = (val() ?? '').slice(0, 40);
+        break;
+      case 'w:num':
+        numId = closing ? null : attr(attrs, 'w:numId') ?? null;
+        break;
+      case 'w:abstractNumId':
+        if (numId !== null && val() !== undefined) numToAbstract.set(numId, val()!);
+        break;
     }
-    abstracts.set(a[1], levels);
   }
   const nums: Numbering = new Map();
-  for (const n of xml.matchAll(/<w:num\b[^>]*w:numId="(\d+)"[^>]*>([\s\S]*?)<\/w:num>/g)) {
-    const abs = /<w:abstractNumId w:val="(\d+)"/.exec(n[2])?.[1];
-    if (abs && abstracts.has(abs)) nums.set(n[1], abstracts.get(abs)!);
-  }
+  for (const [n, a] of numToAbstract) if (abstracts.has(a)) nums.set(n, abstracts.get(a)!);
   return nums;
 }
+
+/** A list number is passed on only if it looks like one: short, and letters, digits and . ( ) - only. */
+export const SAFE_NUMBER = /^[\p{L}\p{N}.()\- ]{1,20}$/u;
 
 function formatNumber(n: number, format: string): string {
   switch (format) {
@@ -276,10 +347,12 @@ function extractBlocks(xml: string, numbering: Numbering): WordBlock[] {
       counters.set(pp.numId!, c);
       const def = levels[lvl];
       if (def && def.format !== 'bullet' && def.format !== 'none') {
-        number = def.text.replace(/%(\d)/g, (_, k: string) => {
+        const formatted = def.text.replace(/%(\d)/g, (_, k: string) => {
           const i = Number(k) - 1;
           return formatNumber(c[i] ?? levels[i]?.start ?? 1, levels[i]?.format ?? 'decimal');
-        });
+        }).trim();
+        // Markup or anything long is dropped, never passed on (security review, finding 1).
+        if (SAFE_NUMBER.test(formatted)) number = formatted;
       }
     }
     push({ kind: 'paragraph', text: pp.text, ...(number ? { number } : {}) });

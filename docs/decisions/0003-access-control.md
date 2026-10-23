@@ -78,3 +78,7 @@ Residual accepted: the transaction settings `app.bulk_threshold` and `app.deleti
 A fourth reviewer probed the Sprint 4 changes (usage caps, entry review, review dates, the private markers). It found seven issues, fixed in `20261024140000_sprint4_review_fixes.sql` and the Edge Functions and listed in `docs/refinement/sprint-4.md`. The two that mattered most: any member, as the owner of a response of their own, could turn their text into a reviewed entry that replaced an admin-reviewed one (learned entries now count as reviewed only on an admin's approval, and other replacements wait as proposals), and could clear an entry's review date by exporting (now only with an admin's approval). Two functions checked `current_user` inside `SECURITY DEFINER`, where it is always the owner; they now rely on grants or the session's role setting.
 
 **Threat model, stated plainly.** Members reach the database only through the API (PostgREST and the Edge Functions), which cannot set session settings or forge JWT claims. Someone with a direct database connection as `authenticated` controls their own claims and so `auth.uid()`; such connections are for administrators only.
+
+## Independent review, Sprint 5 (23 October 2026)
+
+A fifth reviewer probed Word ingestion. Access rules held (customer numbers insert-only, closed assignments guarded, reservations service-role only); the findings were about hostile documents and one gap in the assignment guard (a closed assignment could be deleted and recreated). All five are fixed and listed in `docs/refinement/sprint-5.md`.

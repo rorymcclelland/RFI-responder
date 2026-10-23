@@ -1,6 +1,6 @@
 // Sprint 3: what goes into the exported response.
 import { describe, expect, it } from 'vitest';
-import { exportRows, NOT_ANSWERED } from '../exportUtils';
+import { exportRows, NOT_ANSWERED, wordHtml } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
 const q = (position: number, status: RFIQuestion['status'], final = `Answer ${position}`, generated = final): RFIQuestion => ({
@@ -23,6 +23,12 @@ describe('exportRows', () => {
   it('Sprint 5: uses the customer\'s own numbers where the document had them', () => {
     const rows = exportRows([{ ...q(1, 'accepted'), customerRef: '3(a)' }, q(2, 'accepted')]);
     expect(rows.map((r) => r.number)).toEqual(['3(a)', '2']);
+  });
+
+  it('Sprint 5 security review: the Word export escapes the number as well as the question and answer', () => {
+    const html = wordHtml([{ ...q(1, 'accepted', '<b>A</b>'), question: 'Q <i>?', customerRef: '<img src=\\\\e.vu\\a>' }]);
+    expect(html).not.toMatch(/<img|<b>A|<i>\?/);
+    expect(html).toContain('&lt;img src=');
   });
 
   it('removes references and marks edited answers', () => {

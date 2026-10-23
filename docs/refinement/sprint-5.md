@@ -142,3 +142,22 @@ An owner can upload a Word questionnaire, check the questions the tool found, co
 | Q7 | **Split multi-part questions into parts** (not the recommendation): each part is built from verbatim pieces (lead-in plus part) and checked against the document; S5-2 test 4b and S5-3 test 4 added, and the preview can merge parts back |
 
 All seven items are Ready, Sprint 5.
+
+## Changes during the build
+
+| Change | Why |
+|---|---|
+| The table layouts in the Word set head their question column "Item", not "Question" | With "Question" headers the rule fallback alone found 90.7% and the 95% bar would not have tested the AI; with "Item" it finds 51.9% |
+| Questions keep the customer's number in a new column, `customer_ref`, used by the export | Refinement promised to keep the customer's numbering; there was nowhere to store it |
+
+## Independent security review (23 October 2026)
+
+A reviewer given the code but not the reasoning found five issues, all reproduced and fixed with tests (`src/lib/wordDocument.test.ts`, `supabase/functions/_shared/extraction.test.ts`, `src/lib/export.test.ts`, `supabase/tests/db/sprint5.test.ts`; migration `20261025130000_sprint5_review_fixes.sql`):
+
+1. **Markup reached the Word export.** A list format in the document's numbering, or a crafted customer number, was written into the exported file unescaped (it could make Word fetch from a remote server). The export now escapes the number; the reader, the server and the database all accept only letters, digits, spaces and . ( ) - in a number, at most 20 characters; the server ignores the model's number and uses the document's own (the paragraph's, or the first cell of a table row).
+2. **"Checked against the document" was too loose.** Substrings of non-adjacent blocks passed, so a negation could be dropped or words joined into a new request. Now a question must be a whole block, a whole sentence of one block, or whole blocks next to each other; a part must be a lettered part, with the lead-in from the start of the same block; the wording shown is the document's. The preview says exactly that. With a perfect model the evaluation set still gives 100% recall and 100% of numbers kept.
+3. **A crafted .docx could crash or freeze the tab.** A huge list start, thousands of unclosed numbering tags, and a zip that understated its unpacked size. The list start is capped, numbering is read in one pass with the tokenizer, and inflation is counted as it happens and stopped at the limit.
+4. **More than 200,000 characters could reach Claude, and the reserve was too low.** Numbers now count towards the limit, empty blocks are refused, chunk overlap is at most a quarter of a chunk, and an extraction reserves $0.0005 per 1,000 characters sent ($0.10 at the limit) instead of a flat $0.02.
+5. **A closed assignment could be deleted and recreated open.** Closed assignments can no longer be deleted, except with their response.
+
+Also fixed: the prompt canary was added twice. Held, per the reviewer: the reservation order and the 20-a-day cap, the closed-assignment guard, `customer_ref` rights, every new `SECURITY DEFINER` function's checks, React escaping in the preview and card, formula neutralising in CSV and Excel, the reader's linear tokenizer and refusals.

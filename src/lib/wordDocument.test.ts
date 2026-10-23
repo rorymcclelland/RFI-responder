@@ -88,3 +88,56 @@ describe('readWordDocument (S5-1)', () => {
     await expect(readWordDocument(await makeDocx(p('')))).rejects.toThrow(/no text/);
   });
 });
+
+describe('Sprint 5 security review: hostile Word files (finding 3, finding 1)', () => {
+  const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const numberingWith = (lvl: string) =>
+    `<w:numbering ${W}><w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0">${lvl}</w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>`;
+  const timed = async <T>(f: () => Promise<T>) => { const t = Date.now(); const r = await f().catch((e: Error) => e); return { r, ms: Date.now() - t }; };
+
+  it('a huge list start is capped, so numbering stays fast and short', async () => {
+    const doc = await makeDocx(p('Q one?', { num: [1, 0] }).repeat(10), {
+      numbering: numberingWith('<w:start w:val="10000000000"/><w:numFmt w:val="upperRoman"/><w:lvlText w:val="%1"/>'),
+    });
+    const { r, ms } = await timed(() => readWordDocument(doc));
+    expect(ms).toBeLessThan(1000);
+    expect((r as { blocks: { number?: string }[] }).blocks.every((b) => !b.number || b.number.length <= 20)).toBe(true);
+  });
+
+  it('thousands of unclosed numbering elements are read in linear time', async () => {
+    const doc = await makeDocx(p('Q?', { num: [1, 0] }), { numbering: `<w:numbering ${W}>` + '<w:abstractNum w:abstractNumId="1">'.repeat(20_000) });
+    const { ms } = await timed(() => readWordDocument(doc));
+    expect(ms).toBeLessThan(1500);
+  });
+
+  it('a zip that declares a small size but inflates to a large one is stopped while inflating', async () => {
+    const big = `<?xml version="1.0"?><w:document ${W}><w:body>${p('Q?')}${'<w:p></w:p>'.repeat(3_000_000)}</w:body></w:document>`;
+    const zip = new JSZip();
+    zip.file('word/document.xml', big);
+    const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+    // Rewrite the declared uncompressed size of the document part to 2,000 bytes (local header and central directory).
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    for (let i = 0; i < bytes.length - 4; i++) {
+      const sig = view.getUint32(i, true);
+      if (sig === 0x04034b50) view.setUint32(i + 22, 2000, true);
+      if (sig === 0x02014b50) view.setUint32(i + 24, 2000, true);
+    }
+    const { r, ms } = await timed(() => readWordDocument(upload(bytes, 'liar.docx')));
+    expect(r).toBeInstanceOf(WordDocumentError);
+    expect((r as Error).message).toMatch(/too large when unpacked|not a Word document/);
+    expect(ms).toBeLessThan(3000);
+  });
+
+  it('a list number with markup or over 20 characters is dropped, not passed on', async () => {
+    const markup = await makeDocx(p('Q markup?', { num: [1, 0] }), {
+      numbering: numberingWith('<w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="&amp;lt;img src=//e.vu/%1&amp;gt;"/>'),
+    });
+    expect((await readWordDocument(markup)).blocks[0].number).toBeUndefined();
+    const long = await makeDocx(p('Q long?', { num: [1, 0] }), {
+      numbering: numberingWith('<w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="Requirement %1.%1.%1.%1:"/>'),
+    });
+    const { blocks } = await readWordDocument(long);
+    expect(blocks[0]).toMatchObject({ text: 'Q long?' });
+    expect(blocks[0].number).toBeUndefined();
+  });
+});

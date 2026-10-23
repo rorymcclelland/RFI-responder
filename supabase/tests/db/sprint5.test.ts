@@ -101,7 +101,8 @@ describe('S5-2 extraction inside the caps', () => {
   it('a document reserves an estimated cost against the budget', async () => {
     const u = await createUser();
     await asServiceRole(async (q) => {
-      const r = await q<{ r: { reservation: string } }>(`SELECT reserve_quota($1, 'extract', 1) AS r`, [u.id]);
+      // Sized by the characters sent (Sprint 5 review): 40,000 characters at $0.0005 per 1,000.
+      const r = await q<{ r: { reservation: string } }>(`SELECT reserve_quota($1, 'extract', 1, 40000) AS r`, [u.id]);
       const est = await q<{ kind: string; est_usd: string }>(`SELECT kind, est_usd FROM ai_reservations WHERE id = $1`, [r.rows[0].r.reservation]);
       expect(est.rows[0].kind).toBe('extract');
       expect(Number(est.rows[0].est_usd)).toBeCloseTo(0.02, 6);
@@ -126,5 +127,41 @@ describe('S5-3 the customer\'s own numbering is kept', () => {
     await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', $2)`, [s, 'x'.repeat(21)])));
     const id = await question(s);
     await refused(as(owner, (q) => q(`UPDATE rfi_questions SET customer_ref = '9' WHERE id = $1`, [id])));
+  });
+});
+
+describe('Sprint 5 security review findings', () => {
+  it('1. a customer number can hold only letters, digits, spaces and . ( ) -', async () => {
+    const s = await session(await response(owner.id));
+    await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '<img src=x>')`, [s])));
+    await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '\\\\host\\a')`, [s])));
+    const ok = await as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '4.2 (b)')`, [s]));
+    expect(ok.rowCount).toBe(1);
+  });
+
+  it('4. an extraction reserves by the characters sent, not a flat amount per document', async () => {
+    const u = await createUser();
+    await asServiceRole(async (q) => {
+      const big = await q<{ r: { reservation: string } }>(`SELECT reserve_quota($1, 'extract', 1, 200000) AS r`, [u.id]);
+      const small = await q<{ r: { reservation: string } }>(`SELECT reserve_quota($1, 'extract', 1, 3000) AS r`, [u.id]);
+      const est = await q<{ id: string; est_usd: string }>(`SELECT id, est_usd FROM ai_reservations WHERE id IN ($1, $2)`, [big.rows[0].r.reservation, small.rows[0].r.reservation]);
+      const byId = Object.fromEntries(est.rows.map((r) => [r.id, Number(r.est_usd)]));
+      expect(byId[big.rows[0].r.reservation]).toBeCloseTo(0.1, 6);
+      expect(byId[small.rows[0].r.reservation]).toBeCloseTo(0.0015, 6);
+    });
+  });
+
+  it('5. a closed assignment cannot be deleted by the owner; deleting the response still removes it', async () => {
+    const opp = await response(owner.id);
+    const s = await session(opp);
+    const qid = await question(s);
+    const expert = await createUser();
+    const a = await one<{ id: string }>(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, status)
+      VALUES ($1, $2, $3, $4, $5, 'closed') RETURNING id`, [qid, s, opp, expert.id, owner.id]);
+    await refused(as(owner, (q) => q(`DELETE FROM question_assignments WHERE id = $1`, [a.id])));
+    await as(admin, async (q) => {
+      await q(`SELECT delete_response($1, 'Created in error for a test')`, [opp]);
+      expect((await q(`SELECT 1 FROM question_assignments WHERE id = $1`, [a.id])).rowCount).toBe(0);
+    });
   });
 });

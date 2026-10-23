@@ -45,7 +45,7 @@ describe('question drafts (S5-3)', () => {
   });
 
   it('5 and 6. the summary says how the questions were found and what was left out', () => {
-    expect(describeExtraction(result)).toBe('Found 3 questions with AI, each checked against the document. 2 suggestions were not found in the document and were left out.');
+    expect(describeExtraction(result)).toBe('Found 3 questions with AI. Each is a whole sentence or lettered part, word for word as it appears in the document. 2 suggestions were not found in the document and were left out.');
     expect(describeExtraction({ ...result, method: 'rules', dropped: 0 })).toBe(
       'Found 3 questions by simple rules, not AI (the AI service was unavailable). Check the list carefully: rules miss questions without a question mark.');
   });

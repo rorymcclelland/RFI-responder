@@ -75,5 +75,5 @@ export function describeExtraction(r: Pick<ExtractionResult, 'method' | 'dropped
   const dropped = r.dropped > 0
     ? ` ${r.dropped} suggestion${r.dropped === 1 ? ' was' : 's were'} not found in the document and ${r.dropped === 1 ? 'was' : 'were'} left out.`
     : '';
-  return `${found} with AI, each checked against the document.${dropped}`;
+  return `${found} with AI. Each is a whole sentence or lettered part, word for word as it appears in the document.${dropped}`;
 }

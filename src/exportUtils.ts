@@ -64,7 +64,8 @@ export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'ex
 
 // ─── Word (HTML-based .doc — opens in Word/LibreOffice) ───────────────────────
 
-export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') {
+/** The Word export's HTML. Every value from a document or a person is escaped (Sprint 5 security review). */
+export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export'): string {
   const exported = exportRows(questions);
   const answered = exported.filter((r) => r.answer !== NOT_ANSWERED).length;
   const date     = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -74,7 +75,7 @@ export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') 
       (r) => `
       <tr>
         <td style="width:5%;padding:8px 6px;border:1px solid #e2e8f0;vertical-align:top;
-                   font-size:12px;color:#64748b;font-weight:bold;">${r.number}</td>
+                   font-size:12px;color:#64748b;font-weight:bold;">${escapeHtml(r.number)}</td>
         <td style="width:40%;padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;
                    font-size:13px;color:#1e293b;">${escapeHtml(r.question)}</td>
         <td style="padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;
@@ -117,6 +118,9 @@ export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') 
       </table>
     </body>
     </html>`;
+  return html;
+}
 
-  triggerDownload('\ufeff' + html, `${stem(sourceFileName)}.doc`, 'application/msword');
+export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') {
+  triggerDownload('\ufeff' + wordHtml(questions, sourceFileName), `${stem(sourceFileName)}.doc`, 'application/msword');
 }

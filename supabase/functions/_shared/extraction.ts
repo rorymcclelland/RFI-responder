@@ -3,17 +3,19 @@
  *
  * The browser reads the .docx into text blocks (src/lib/wordDocument.ts) and sends only those.
  * Claude proposes which blocks hold questions; code then keeps only what it can find in the
- * document itself, so the model can neither invent a question nor add one because text in the
- * document told it to:
- * - a single question must match its cited block (spacing, quotes, dashes, case and a repeated
- *   list number aside); when it is the whole block, the document's own wording is shown;
- * - a multi-part question is split into parts (Rory, refinement Q7), each built from two verbatim
- *   pieces of one cited block: the shared lead-in ("Describe") and the part ("your backup policy");
+ * document itself, so the model can neither invent a question nor build one from fragments
+ * because text in the document told it to (tightened after the Sprint 5 security review):
+ * - a single question must be a whole block, a whole sentence of one block, or two or three
+ *   whole blocks next to each other (spacing, quotes, dashes, case and a list number aside);
+ * - a multi-part question is split into parts (Rory, refinement Q7): the lead-in is the text
+ *   before the block's first (a)/(i) marker and each part is the text between two markers;
+ * - the wording shown is always the document's, never the model's copy;
+ * - a number is kept only if it is the block's own (or a part number built from it);
  * - anything else is dropped and counted.
  * If Claude is unavailable, simple rules run instead and the result says so. Pure: the Claude
  * client is passed in, so this is unit-tested with a fake.
  */
-import { PROMPT_CANARY, type ClaudeClient } from './claude.ts';
+import type { ClaudeClient } from './claude.ts';
 import { HttpError } from './errors.ts';
 
 export const EXTRACT_PROMPT_VERSION = 'extract-2026-10-23.1';
@@ -60,10 +62,11 @@ export function validateExtractRequest(body: unknown): { blocks: Block[] } {
   let chars = 0;
   for (const b of raw as Record<string, unknown>[]) {
     const ok = b && typeof b.id === 'string' && /^b\d{1,6}$/.test(b.id) && typeof b.kind === 'string' && KINDS.has(b.kind)
-      && typeof b.text === 'string' && b.text.length <= 20_000
+      && typeof b.text === 'string' && b.text.trim().length > 0 && b.text.length <= 20_000
       && (b.number === undefined || (typeof b.number === 'string' && b.number.length <= 20));
     if (!ok) throw new HttpError('A block in the request is not valid', 400);
-    chars += (b.text as string).length;
+    // Everything sent to the model counts, not only the text (security review, finding 4).
+    chars += (b.text as string).length + ((b.number as string | undefined)?.length ?? 0);
     const int = (v: unknown) => (Number.isInteger(v) ? (v as number) : undefined);
     blocks.push({
       id: b.id as string, kind: b.kind as Block['kind'], text: b.text as string,
@@ -92,6 +95,9 @@ const LEADING_NUMBER = /^\s*(\(?[a-z]{1,2}\)|\(?\d+(\.\d+)*[.)]?|[a-z]{1,2}\d+[.
 const stripNumber = (s: string) => s.replace(LEADING_NUMBER, '');
 const tidy = (s: string) => s.replace(/\s+/g, ' ').trim();
 
+/** What one block costs to send: its text, number and the JSON around them. */
+export const sentSize = (b: Block) => b.text.length + (b.number?.length ?? 0) + 40;
+
 /** Splits blocks into chunks of about maxChars, overlapping by a few blocks so nothing is cut in half. */
 export function chunkBlocks(blocks: Block[], maxChars = 30_000, overlap = 3): Block[][] {
   const chunks: Block[][] = [];
@@ -99,13 +105,15 @@ export function chunkBlocks(blocks: Block[], maxChars = 30_000, overlap = 3): Bl
   while (start < blocks.length) {
     let end = start;
     let size = 0;
-    while (end < blocks.length && (end === start || size + blocks[end].text.length <= maxChars)) {
-      size += blocks[end].text.length;
+    while (end < blocks.length && (end === start || size + sentSize(blocks[end]) <= maxChars)) {
+      size += sentSize(blocks[end]);
       end++;
     }
     chunks.push(blocks.slice(start, end));
     if (end >= blocks.length) break;
-    start = Math.max(start + 1, end - overlap);
+    // Overlap a few blocks, but never more than a quarter of the chunk, so overlap cannot
+    // multiply what is sent (security review, finding 4).
+    start = end - Math.min(overlap, Math.floor((end - start) / 4));
   }
   return chunks;
 }
@@ -152,7 +160,7 @@ export async function extractQuestions(
 ): Promise<ExtractResult> {
   if (!deps.client) return { questions: rulesExtract(blocks), dropped: 0, method: 'rules', model: null, promptVersion: null };
   const byId = new Map(blocks.map((b, i) => [b.id, { block: b, index: i }]));
-  const found: (FoundQuestion & { order: number })[] = [];
+  const found: (FoundQuestion & { order: [number, number] })[] = [];
   const seen = new Set<string>();
   let dropped = 0;
   let model: string | null = null;
@@ -162,7 +170,7 @@ export async function extractQuestions(
       const inChunk = new Set(chunk.map((b) => b.id));
       const result = await deps.client.json<{ items?: Item[] }>({
         model: deps.model,
-        system: `${EXTRACT_SYSTEM}\n\n[${PROMPT_CANARY}]`,
+        system: EXTRACT_SYSTEM, // the client adds the canary
         user: JSON.stringify({ blocks: chunk.map((b) => ({ id: b.id, kind: b.kind, text: b.text, ...(b.number ? { number: b.number } : {}) })) }),
         schema: SCHEMA,
         maxTokens: 8000,
@@ -178,40 +186,87 @@ export async function extractQuestions(
         const key = `${normaliseForMatch(q.number)}|${normaliseForMatch(q.question)}`;
         if (seen.has(key)) return;
         seen.add(key);
-        found.push({ ...q, order: byId.get(q.blockIds[0])!.index * 1000 + k });
+        found.push({ ...q, order: [byId.get(q.blockIds[0])!.index, k] });
       });
     }
   } catch {
     return { questions: rulesExtract(blocks), dropped: 0, method: 'rules', model: null, promptVersion: null };
   }
-  found.sort((a, b) => a.order - b.order);
+  found.sort((a, b) => a.order[0] - b.order[0] || a.order[1] - b.order[1]);
   const questions: FoundQuestion[] = found.map((f) => ({ question: f.question, number: f.number, blockIds: f.blockIds, part: f.part, fromBlock: f.fromBlock }));
   return { questions, dropped, method: 'ai', model, promptVersion: EXTRACT_PROMPT_VERSION };
 }
 
+/** A list number is kept only if it looks like one (security review, finding 1). */
+export const SAFE_NUMBER = /^[\p{L}\p{N}.()\- ]{1,20}$/u;
+
+/** Sentences of a block: split after . ? or ! followed by a space. */
+const sentences = (t: string) => t.split(/(?<=[.?!])\s+/).map(tidy).filter(Boolean);
+
+/** Lettered parts: "Describe (a) X and (b) Y." gives the lead-in "Describe" and parts X, Y. */
+const MARKER = /(^|\s)\(?([a-h]|i{1,3}|iv|v|vi{0,3})\)\s+/g;
+export function lettered(text: string): { stem: string; parts: { label: string; text: string }[] } | null {
+  const marks = [...text.matchAll(MARKER)].map((m) => ({ at: m.index! + m[1].length, end: m.index! + m[0].length, label: m[2] }));
+  if (marks.length < 2) return null;
+  const stem = tidy(text.slice(0, marks[0].at)).replace(/[:,;]$/, '').trim();
+  if (!stem) return null;
+  const parts = marks.map((m, i) => ({
+    label: m.label,
+    text: tidy(text.slice(m.end, i + 1 < marks.length ? marks[i + 1].at : undefined))
+      .replace(/[.;,:?]$/, '')
+      .replace(/,?\s+(and|or)$/i, '')
+      .trim(),
+  }));
+  return parts.every((p) => p.text.length > 0) ? { stem, parts } : null;
+}
+
+/** For a table cell, the reference in the first cell of its row ("A1"), when there is one. */
+function rowReference(cell: Block, byId: Map<string, { block: Block; index: number }>): string {
+  if (cell.kind !== 'cell' || !cell.table || !cell.row || cell.col === 1) return '';
+  for (const { block } of byId.values()) {
+    if (block.kind === 'cell' && block.table === cell.table && block.row === cell.row && block.col === 1) {
+      return block.text.length <= 10 && SAFE_NUMBER.test(block.text) ? block.text : '';
+    }
+  }
+  return '';
+}
+
 function checkItem(item: Item, inChunk: Set<string>, byId: Map<string, { block: Block; index: number }>): FoundQuestion | null {
-  const ids = Array.isArray(item.block_ids) ? item.block_ids.filter((x): x is string => typeof x === 'string') : [];
+  const ids = Array.isArray(item.block_ids) ? [...new Set(item.block_ids.filter((x): x is string => typeof x === 'string'))] : [];
   const text = typeof item.text === 'string' ? tidy(stripNumber(item.text)) : '';
   const stem = typeof item.stem === 'string' ? tidy(item.stem) : '';
-  const number = typeof item.number === 'string' ? item.number.trim().slice(0, 20) : '';
-  if (ids.length === 0 || ids.length > 5 || !ids.every((id) => inChunk.has(id) && byId.has(id)) || text.length < 3) return null;
-  const cited = ids.map((id) => byId.get(id)!.block);
-  const haystack = normaliseForMatch(cited.map((b) => b.text).join(' '));
+  if (ids.length === 0 || ids.length > 3 || !ids.every((id) => inChunk.has(id) && byId.has(id)) || text.length < 2) return null;
+  const cited = ids.map((id) => byId.get(id)!).sort((a, b) => a.index - b.index);
+  // Cited blocks must be next to each other in the document.
+  if (cited.some((c, i) => i > 0 && c.index !== cited[i - 1].index + 1)) return null;
+  const blocks = cited.map((c) => c.block);
+  const first = blocks[0];
+  const fromBlock = blocks.map((b) => b.text).join(' ');
+  const own = (b: Block) => tidy(stripNumber(b.text));
+  const blockNumber = (first.number && SAFE_NUMBER.test(first.number) ? first.number : LEADING_NUMBER.exec(first.text)?.[0].trim() ?? '')
+    || rowReference(first, byId);
+  const safeBlockNumber = SAFE_NUMBER.test(blockNumber) ? blockNumber : '';
   const needle = normaliseForMatch(text);
-  if (!haystack.includes(needle)) return null;
 
   if (stem) {
-    // A part: the lead-in and the part must both be in the cited block (Q7).
-    if (!haystack.includes(normaliseForMatch(stem))) return null;
-    const question = tidy(`${stem} ${text}`);
-    if (question.length < 8) return null;
-    return { question, number, blockIds: ids, part: true, fromBlock: cited[0].text };
+    // A part: one block, lead-in before the first marker, the part between two markers.
+    if (blocks.length !== 1) return null;
+    const l = lettered(own(first));
+    if (!l || normaliseForMatch(l.stem) !== normaliseForMatch(stem).replace(/[:,;]$/, '')) return null;
+    const part = l.parts.find((p) => normaliseForMatch(p.text) === needle.replace(/[.;,:?]$/, ''));
+    if (!part) return null;
+    const base = safeBlockNumber.replace(/[.)]$/, '');
+    return { question: `${l.stem} ${part.text}`, number: base ? `${base}(${part.label})` : '', blockIds: ids, part: true, fromBlock };
   }
-  // The whole block: show the document's own wording, not the model's copy of it.
-  const whole = tidy(stripNumber(cited[0].text));
-  const question = cited.length === 1 && normaliseForMatch(whole) === needle ? whole : text;
-  if (question.length < 3) return null;
-  return { question, number: number || cited[0].number || '', blockIds: ids, part: false, fromBlock: cited[0].text };
+
+  // A single question: whole blocks next to each other, or a whole sentence of one block.
+  const candidates = [blocks.map(own).join(' '), ...(blocks.length === 1 ? sentences(own(first)) : [])];
+  const match = candidates.find((c) => normaliseForMatch(c) === needle);
+  if (!match) return null;
+  const whole = match === candidates[0];
+  if (!whole && match.split(' ').length < 3) return null; // a fragment of a sentence is not a question
+  // The number is always the block's own; the model's is not trusted (security review, finding 1).
+  return { question: match, number: safeBlockNumber, blockIds: ids, part: false, fromBlock };
 }
 
 // ─── Fallback rules ─────────────────────────────────────────────────────────
@@ -234,13 +289,14 @@ export function rulesExtract(blocks: Block[]): FoundQuestion[] {
       const col = b.table ? tableQuestionCols.get(b.table) : undefined;
       if (col === undefined || b.col !== col || (b.row ?? 1) <= 1) continue;
       const ref = blocks.find((c) => c.table === b.table && c.row === b.row && c.col === 1 && c.col !== col);
-      out.push({ question: tidy(b.text), number: ref && ref.text.length <= 10 ? ref.text : '', blockIds: [b.id], part: false, fromBlock: b.text });
+      out.push({ question: tidy(b.text), number: ref && SAFE_NUMBER.test(ref.text) && ref.text.length <= 10 ? ref.text : '', blockIds: [b.id], part: false, fromBlock: b.text });
       continue;
     }
     const text = tidy(stripNumber(b.text));
     if (text.length >= 8 && (text.endsWith('?') || IMPERATIVE.test(text))) {
       const typed = LEADING_NUMBER.exec(b.text)?.[0].trim() ?? '';
-      out.push({ question: text, number: b.number ?? typed, blockIds: [b.id], part: false, fromBlock: b.text });
+      const n = b.number ?? typed;
+      out.push({ question: text, number: SAFE_NUMBER.test(n) ? n : '', blockIds: [b.id], part: false, fromBlock: b.text });
     }
   }
   return out;

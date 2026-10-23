@@ -67,6 +67,12 @@ describe('reserveQuota', () => {
       .rejects.toMatchObject({ status: 429, message: quotaMessage('monthly_budget') });
   });
 
+  it('passes the size for a document, so the estimate scales with it', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: { allowed: 1, reason: null, reservation: 'r9' }, error: null });
+    await reserveQuota({ rpc }, 'u', 'extract', 1, 41_000);
+    expect(rpc).toHaveBeenCalledWith('reserve_quota', { p_user: 'u', p_kind: 'extract', p_n: 1, p_size: 41_000 });
+  });
+
   it('fails closed with 503 when the reservation cannot be made', async () => {
     await expect(reserveQuota(rpc(null, { message: 'db down' }), 'u', 'embed', 3)).rejects.toMatchObject({ status: 503 });
   });
