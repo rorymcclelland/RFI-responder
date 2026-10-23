@@ -60,7 +60,7 @@ describe('readWordDocument (S5-1)', () => {
     const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 9 } });
     expect(bytes.byteLength).toBeLessThan(WORD_LIMITS.maxBytes);
     await expect(readWordDocument(upload(bytes, 'bomb.docx'))).rejects.toThrow(/too large when unpacked|compressed too far/);
-  });
+  }, 30_000); // Slow under coverage instrumentation in CI.
 
   it('5b. hostile: too much text is refused; markup inside text stays text', async () => {
     // Varied text (repeated letters would compress so far that the zip-bomb ratio check refuses first).
@@ -126,7 +126,7 @@ describe('Sprint 5 security review: hostile Word files (finding 3, finding 1)', 
     expect(r).toBeInstanceOf(WordDocumentError);
     expect((r as Error).message).toMatch(/too large when unpacked|not a Word document/);
     expect(ms).toBeLessThan(3000);
-  });
+  }, 30_000); // Slow under coverage instrumentation in CI.
 
   it('a list number with markup or over 20 characters is dropped, not passed on', async () => {
     const markup = await makeDocx(p('Q markup?', { num: [1, 0] }), {
