@@ -168,3 +168,15 @@ The knowledge base can be trusted as it grows, the AI spend has a ceiling, and a
 | Q5 | Responses kept until an admin deletes one created in error; usage records kept 13 months; audit log kept indefinitely; all documented in the pack |
 
 All five stories are Ready, Sprint 4.
+
+## Changes during the build
+
+| Change | Why |
+|---|---|
+| Prices are stored in dollars, as published; the pound budget uses an admin-set rate that defaults to 1.00 (each dollar counted as a pound) | No reliable current exchange rate was found to cite (rule 1); 1.00 overstates spend, so the cap bites early, never late |
+| Daily indexing cap set at 5,000 texts per person (not asked at refinement) | Two full 2,000-row imports a day with headroom; admin can change it |
+| The settings row and the four price rows are inserted by the migration | They are configuration the functions need to run (with dates and sources), not sample data; recorded here because the project rule says no data in migrations |
+| Answers whose drafts carried a source gate (`unreviewed_source`, `stale_source`) are learned like legal answers | The gate concerns the cited entries, not the question; a person accepted the answer individually, and a learned entry goes through the S4-3 review rule |
+| An admin's review clears the gate only for questions processed afterwards | Questions already processed keep their gate; F-28 |
+| Voyage's training opt-out is a manual step in Voyage's dashboard, recorded as a planned control (R-11) | It is an account setting, not something the code can do |
+| The EU AI Act check found a gap: exported files carry no machine-readable marker that a model drafted the answer | F-27 |

@@ -270,6 +270,8 @@ No spike: prices and provider terms are lookups inside S4-5.
 | F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Sprint 4: Rory chose to fix it rather than accept it |
 | F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
 | F-26 | Assignments stay open after a response is exported or archived | From the Sprint 3 end-to-end run; close them at export, or show them as closed |
+| F-27 | Exported answers carry no machine-readable marker that a model drafted them (EU AI Act Article 50(2) may apply to the provider) | From Sprint 4's framework check (`docs/governance/FRAMEWORKS.md`) |
+| F-28 | Reviewing an entry clears the review gate only for questions processed afterwards; questions already processed keep it until reprocessed | From the Sprint 4 build |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
