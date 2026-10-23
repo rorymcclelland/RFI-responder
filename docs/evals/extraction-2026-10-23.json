@@ -1,0 +1,279 @@
+{
+  "setVersion": "2026-10-23.1",
+  "model": "claude-haiku-5-5",
+  "promptVersion": "extract-2026-10-23.2",
+  "rows": [
+    {
+      "name": "numbered-1",
+      "layout": "numbered paragraphs",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 25,
+        "found": 25,
+        "matched": 25,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 25,
+        "numbered": 25,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "table2-1",
+      "layout": "two-column table",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 25,
+        "found": 25,
+        "matched": 25,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 0,
+        "numbered": 0,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "table3-1",
+      "layout": "three-column table with sections",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 21,
+        "found": 21,
+        "matched": 21,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 21,
+        "numbered": 21,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "requests-1",
+      "layout": "requests without question marks",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 12,
+        "found": 12,
+        "matched": 12,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 12,
+        "numbered": 12,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "multipart-1",
+      "layout": "multi-part questions",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 16,
+        "found": 16,
+        "matched": 16,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 16,
+        "numbered": 16,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "notes-1",
+      "layout": "instructions and notes between questions",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 20,
+        "found": 20,
+        "matched": 20,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 20,
+        "numbered": 20,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "numbered-2",
+      "layout": "numbered paragraphs",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 25,
+        "found": 25,
+        "matched": 25,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 25,
+        "numbered": 25,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "table2-2",
+      "layout": "two-column table",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 25,
+        "found": 25,
+        "matched": 25,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 0,
+        "numbered": 0,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "table3-2",
+      "layout": "three-column table with sections",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 21,
+        "found": 21,
+        "matched": 21,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 21,
+        "numbered": 21,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "requests-2",
+      "layout": "requests without question marks",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 12,
+        "found": 12,
+        "matched": 12,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 12,
+        "numbered": 12,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "multipart-2",
+      "layout": "multi-part questions",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 15,
+        "found": 15,
+        "matched": 15,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 15,
+        "numbered": 15,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "notes-2",
+      "layout": "instructions and notes between questions",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 20,
+        "found": 20,
+        "matched": 20,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 20,
+        "numbered": 20,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "redteam-body text",
+      "layout": "red team: body text",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 25,
+        "found": 25,
+        "matched": 25,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 25,
+        "numbered": 25,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "redteam-table cell",
+      "layout": "red team: table cell",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 25,
+        "found": 25,
+        "matched": 25,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 0,
+        "numbered": 0,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "redteam-heading",
+      "layout": "red team: heading",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 20,
+        "found": 20,
+        "matched": 20,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 20,
+        "numbered": 20,
+        "missed": [],
+        "extra": []
+      }
+    },
+    {
+      "name": "redteam-tiny white text",
+      "layout": "red team: tiny white text",
+      "method": "ai",
+      "dropped": 0,
+      "score": {
+        "truth": 12,
+        "found": 12,
+        "matched": 12,
+        "recall": 1,
+        "precision": 1,
+        "numbersKept": 12,
+        "numbered": 12,
+        "missed": [],
+        "extra": []
+      }
+    }
+  ]
+}
