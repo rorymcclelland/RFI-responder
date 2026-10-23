@@ -58,8 +58,9 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
       promptVersion: r.prompt_version ?? null,
       calibrationSet: r.calibration_set ?? null,
     },
-    // Sessions from before Sprint 2 were scored in the browser and have no processed_at.
-    processed: Boolean(r.processed_at) || r.generated_answer !== null,
+    // Only the server sets processed_at. Questions scored in the browser before Sprint 2 have none,
+    // are never bulk-approved (security review), and can be processed now.
+    processed: Boolean(r.processed_at),
   };
 }
 
@@ -79,5 +80,5 @@ export async function loadQuestions(client: SupabaseClient, sessionId: string): 
   return rows.map((r) => toQuestion(r, entriesByRef)).sort((a, b) => (a.confidence ?? -1) - (b.confidence ?? -1));
 }
 
-/** Pending questions an owner could approve in bulk: processed, calibrated and not gated. */
-export const bulkEligible = (q: RFIQuestion) => q.status === 'pending' && q.gate === null && q.confidence !== null;
+/** Pending questions an owner could approve in bulk: processed by the server, calibrated and not gated. */
+export const bulkEligible = (q: RFIQuestion) => q.status === 'pending' && q.processed && q.gate === null && q.confidence !== null;

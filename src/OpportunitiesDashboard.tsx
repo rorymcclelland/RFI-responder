@@ -408,7 +408,7 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
           <div>
             <h1 className="text-3xl font-black text-ink-900 tracking-tight">Opportunities</h1>
             <p className="text-ink-500 mt-1.5 text-sm font-medium">
-              Each opportunity holds an RFI session with drafts assembled from the knowledge base.
+              Each opportunity holds RFI sessions, with drafts written from the knowledge base for a person to review.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">

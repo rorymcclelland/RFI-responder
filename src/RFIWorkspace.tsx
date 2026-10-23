@@ -206,7 +206,8 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
   const accepted    = questions.filter((q) => q.status === 'accepted');
   const pending     = questions.filter((q) => q.status === 'pending');
   const skipped     = questions.filter((q) => q.status === 'skipped');
-  const unprocessed = questions.filter((q) => !q.processed);
+  // Pending questions the server has not processed (a failed batch, or a session from before Sprint 2).
+  const unprocessed = questions.filter((q) => !q.processed && q.status === 'pending');
 
   const finishSession = async () => {
     if (sessionId) {
@@ -335,9 +336,12 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
       {unprocessed.length > 0 && (
         <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-medium">
           <AlertTriangle size={14} className="flex-shrink-0" />
-          <span className="flex-1">{unprocessed.length} question{unprocessed.length !== 1 ? 's have' : ' has'} not been matched or drafted yet.</span>
+          <span className="flex-1">
+            {unprocessed.length} pending question{unprocessed.length !== 1 ? 's have' : ' has'} not been checked and drafted by the server
+            (a batch failed, or the session is from before Sprint 2), so {unprocessed.length !== 1 ? 'they are' : 'it is'} not available for bulk approval.
+          </span>
           <button onClick={() => sessionId && processAndReload(sessionId, unprocessed.map((q) => q.id))} className="btn-ghost text-xs py-1.5">
-            <RefreshCw size={12} /> Try again
+            <RefreshCw size={12} /> Process now
           </button>
         </div>
       )}
