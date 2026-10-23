@@ -1,0 +1,3362 @@
+[
+ {
+  "id": "d001",
+  "generated_answer": "We encrypt all data at rest using AES-256 across storage systems, databases, and backup media. We manage encryption keys through a dedicated key management service (KMS) with strict access controls and regular rotation schedules. Hardware Security Modules (HSMs) are used to protect root keys. We validate encryption coverage through quarterly audits.\n\n[References: KB-0001]",
+  "confidence": 1,
+  "retrieval_score": 0.6585085543875339,
+  "sources_json": [
+   {
+    "id": "KB-0001",
+    "score": 0.6585085543875339
+   }
+  ],
+  "answerability": 2.658508554387534,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:53.968Z",
+  "cited": [
+   "KB-0001"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All data at rest is encrypted using AES-256 across storage systems, databases, and backup media.",
+    "supported": true
+   },
+   {
+    "claim": "Encryption keys are managed through a dedicated key management service (KMS) with strict access controls and regular rotation schedules.",
+    "supported": true
+   },
+   {
+    "claim": "Hardware Security Modules (HSMs) are used to protect root keys.",
+    "supported": true
+   },
+   {
+    "claim": "Encryption coverage is validated through quarterly audits.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d002",
+  "generated_answer": "We protect all data in transit using TLS 1.2 or higher, with TLS 1.3 preferred for new integrations. We explicitly disable weak cipher suites and manage certificates through a documented lifecycle process that includes automated renewal alerts. Internal service-to-service communication is encrypted using mutual TLS (mTLS) within our zero-trust architecture.\n\n[References: KB-0002]",
+  "confidence": 1,
+  "retrieval_score": 0.6290154871880423,
+  "sources_json": [
+   {
+    "id": "KB-0002",
+    "score": 0.6290154871880423
+   }
+  ],
+  "answerability": 2.6290154871880422,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:52.493Z",
+  "cited": [
+   "KB-0002"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All data in transit is protected using TLS 1.2 or higher.",
+    "supported": true
+   },
+   {
+    "claim": "TLS 1.3 is preferred for new integrations.",
+    "supported": true
+   },
+   {
+    "claim": "Weak cipher suites are explicitly disabled.",
+    "supported": true
+   },
+   {
+    "claim": "Certificates are managed through a documented lifecycle process that includes automated renewal alerts.",
+    "supported": true
+   },
+   {
+    "claim": "Internal service-to-service communication is encrypted using mutual TLS (mTLS) within a zero-trust architecture.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d003",
+  "generated_answer": "MFA is mandatory for all employees, contractors, and third-party users accessing corporate systems, including VPN, SSO, email, and cloud platforms. We prefer phishing-resistant MFA methods, such as FIDO2 hardware tokens and authenticator apps, over SMS-based OTP. We monitor MFA enforcement centrally. Exceptions require CISO-level approval and compensating controls.\n\n[References: KB-0004]",
+  "confidence": 1,
+  "retrieval_score": 0.5947431641560141,
+  "sources_json": [
+   {
+    "id": "KB-0004",
+    "score": 0.5947431641560141
+   }
+  ],
+  "answerability": 2.5947431641560144,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:53.066Z",
+  "cited": [
+   "KB-0004"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "MFA is mandatory for all employees, contractors, and third-party users accessing corporate systems, including VPN, SSO, email, and cloud platforms.",
+    "supported": true
+   },
+   {
+    "claim": "Phishing-resistant MFA methods such as FIDO2 hardware tokens and authenticator apps are preferred over SMS-based OTP.",
+    "supported": true
+   },
+   {
+    "claim": "MFA enforcement is monitored centrally.",
+    "supported": true
+   },
+   {
+    "claim": "Exceptions to MFA require CISO-level approval and compensating controls.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d004",
+  "generated_answer": "We govern access through a least-privilege, role-based access control (RBAC) model aligned with ISO 27001 Annex A controls. All access rights are reviewed quarterly through a formal access recertification process, and access changes are subject to approval workflows documented in our Access Control Policy. Privileged access is further restricted via Privileged Access Management (PAM) tooling with session recording. Our Identity Governance and Administration (IGA) platform automates provisioning, de-provisioning and recertification workflows. All access requests require documented business justification and manager approval before provisioning. Upon confirmed employee termination, logical access is deactivated within 4 hours of the termination event and physical access is revoked on the same business day, following a documented offboarding checklist. Offboarding records are sampled during quarterly access reviews and annual audits.\n\n[References: KB-0003, KB-0024, KB-0060]",
+  "confidence": 0.63,
+  "retrieval_score": 0.5134512610650253,
+  "sources_json": [
+   {
+    "id": "KB-0003",
+    "score": 0.5134512610650253
+   },
+   {
+    "id": "KB-0024",
+    "score": 0.4828361584155757
+   },
+   {
+    "id": "KB-0060",
+    "score": 0.4753670587622484
+   }
+  ],
+  "answerability": 0.5134512610650253,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:56.993Z",
+  "cited": [
+   "KB-0003",
+   "KB-0024",
+   "KB-0060"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Access is governed by a least-privilege, role-based access control (RBAC) model aligned with ISO 27001 Annex A controls.",
+    "supported": true
+   },
+   {
+    "claim": "All access rights are reviewed quarterly through a formal access recertification process.",
+    "supported": true
+   },
+   {
+    "claim": "Access changes are subject to approval workflows documented in the Access Control Policy.",
+    "supported": true
+   },
+   {
+    "claim": "Privileged access is restricted via Privileged Access Management (PAM) tooling with session recording.",
+    "supported": true
+   },
+   {
+    "claim": "The Identity Governance and Administration (IGA) platform automates provisioning, de-provisioning and recertification workflows.",
+    "supported": true
+   },
+   {
+    "claim": "All access requests require documented business justification and manager approval before provisioning.",
+    "supported": true
+   },
+   {
+    "claim": "Upon confirmed employee termination, logical access is deactivated within 4 hours of the termination event.",
+    "supported": true
+   },
+   {
+    "claim": "Physical access is revoked on the same business day following termination, following a documented offboarding checklist.",
+    "supported": true
+   },
+   {
+    "claim": "Offboarding records are sampled during quarterly access reviews and annual audits.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d005",
+  "generated_answer": "We manage privileged accounts through a Privileged Access Management (PAM) solution. Privileged accounts are inventoried, and access is granted just-in-time rather than as standing access wherever possible, using time-limited, approval-gated elevation. Passwords are stored in a vault with automated rotation, and sessions are recorded. Privileged account activity is subject to enhanced monitoring and anomaly alerting within our SIEM.\n\n[References: KB-0031]",
+  "confidence": 1,
+  "retrieval_score": 0.624940999489136,
+  "sources_json": [
+   {
+    "id": "KB-0031",
+    "score": 0.624940999489136
+   }
+  ],
+  "answerability": 2.624940999489136,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:55.803Z",
+  "cited": [
+   "KB-0031"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Privileged accounts are managed through a Privileged Access Management (PAM) solution.",
+    "supported": true
+   },
+   {
+    "claim": "Privileged accounts are inventoried.",
+    "supported": true
+   },
+   {
+    "claim": "Access is granted just-in-time rather than as standing access wherever possible, using time-limited, approval-gated elevation.",
+    "supported": true
+   },
+   {
+    "claim": "Passwords are stored in a vault with automated rotation.",
+    "supported": true
+   },
+   {
+    "claim": "Privileged sessions are recorded.",
+    "supported": true
+   },
+   {
+    "claim": "Privileged account activity is subject to enhanced monitoring and anomaly alerting within the SIEM.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d006",
+  "generated_answer": "We handle security incidents under an incident response program that follows the NIST SP 800-61 framework, with defined phases: preparation, detection, containment, eradication, recovery, and post-incident review. A dedicated Security Incident Response Team (SIRT) is on call 24/7. We categorize incidents by severity, with associated SLA targets for response and notification. We conduct post-incident reviews within 5 business days and track findings to closure.\n\n[References: KB-0006]",
+  "confidence": 1,
+  "retrieval_score": 0.635443076258863,
+  "sources_json": [
+   {
+    "id": "KB-0006",
+    "score": 0.635443076258863
+   }
+  ],
+  "answerability": 2.6354430762588628,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:56.863Z",
+  "cited": [
+   "KB-0006"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The incident response program follows the NIST SP 800-61 framework.",
+    "supported": true
+   },
+   {
+    "claim": "The program has defined phases: preparation, detection, containment, eradication, recovery, and post-incident review.",
+    "supported": true
+   },
+   {
+    "claim": "A dedicated Security Incident Response Team (SIRT) is on call 24/7.",
+    "supported": true
+   },
+   {
+    "claim": "Incidents are categorized by severity, with associated SLA targets for response and notification.",
+    "supported": true
+   },
+   {
+    "claim": "Post-incident reviews are conducted within 5 business days.",
+    "supported": true
+   },
+   {
+    "claim": "Post-incident review findings are tracked to closure.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d007",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The entries do not state a mean time to detect (MTTD) a security breach. KB-0006 lists detection as a phase of the incident response program but gives no timing figure. KB-0007 reports mean time to remediate vulnerabilities, not detection time. KB-0083 sets a 72-hour customer notification deadline …). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.5204809835834481,
+  "sources_json": [
+   {
+    "id": "KB-0007",
+    "score": 0.5204809835834481
+   },
+   {
+    "id": "KB-0006",
+    "score": 0.4995494556719795
+   },
+   {
+    "id": "KB-0083",
+    "score": 0.4773874675821185
+   }
+  ],
+  "answerability": 0.5204809835834481,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:01.505Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d008",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (the drafting service gave an unreadable answer). It needs an answer written by a person.",
+  "confidence": 0.75,
+  "retrieval_score": 0.6222277287678507,
+  "sources_json": [
+   {
+    "id": "KB-0037",
+    "score": 0.6222277287678507
+   },
+   {
+    "id": "KB-0007",
+    "score": 0.6063101584325559
+   }
+  ],
+  "answerability": 0.6222277287678507,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:02.992Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d009",
+  "generated_answer": "We conduct external penetration testing at minimum annually, performed by a qualified third-party firm. Additional testing is triggered by significant infrastructure changes, new product launches, or post-incident reviews. Internal red team exercises are performed on a risk-driven basis. All findings are tracked in our vulnerability management system, and critical and high findings are remediated within defined SLA windows before results are formally closed.\n\n[References: KB-0019]",
+  "confidence": 1,
+  "retrieval_score": 0.6875759573715103,
+  "sources_json": [
+   {
+    "id": "KB-0019",
+    "score": 0.6875759573715103
+   }
+  ],
+  "answerability": 2.6875759573715103,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:05:59.399Z",
+  "cited": [
+   "KB-0019"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "External penetration testing is conducted at minimum annually.",
+    "supported": true
+   },
+   {
+    "claim": "External penetration testing is performed by a qualified third-party firm.",
+    "supported": true
+   },
+   {
+    "claim": "Additional testing is triggered by significant infrastructure changes, new product launches, or post-incident reviews.",
+    "supported": true
+   },
+   {
+    "claim": "Internal red team exercises are performed on a risk-driven basis.",
+    "supported": true
+   },
+   {
+    "claim": "All findings are tracked in the vulnerability management system.",
+    "supported": true
+   },
+   {
+    "claim": "Critical and high findings are remediated within defined SLA windows before results are formally closed.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d010",
+  "generated_answer": "We hold ISO/IEC 27001:2022 certification for our Information Security Management System (ISMS), issued by an accredited certification body. It covers the in-scope systems and processes defined in our Statement of Applicability (SoA), with annual surveillance audits and full recertification every three years. We also maintain a SOC 2 Type II report covering the Trust Services Criteria for Security, Availability, and Confidentiality, issued by an independent AICPA-accredited auditor. The audit period covers a minimum of six months and the report is refreshed annually. Copies of the SOC 2 report are available under NDA to qualified prospective and current customers.\n\n[References: KB-0018, KB-0017]",
+  "confidence": 0.63,
+  "retrieval_score": 0.5148671815799309,
+  "sources_json": [
+   {
+    "id": "KB-0018",
+    "score": 0.5148671815799309
+   },
+   {
+    "id": "KB-0017",
+    "score": 0.505090444402816
+   }
+  ],
+  "answerability": 0.5148671815799309,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:05.084Z",
+  "cited": [
+   "KB-0018",
+   "KB-0017"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The organization holds ISO/IEC 27001:2022 certification for its Information Security Management System (ISMS), issued by an accredited certification body.",
+    "supported": true
+   },
+   {
+    "claim": "The ISO 27001 certification covers the in-scope systems and processes defined in the Statement of Applicability (SoA).",
+    "supported": true
+   },
+   {
+    "claim": "Surveillance audits for ISO 27001 occur annually, with full recertification every three years.",
+    "supported": true
+   },
+   {
+    "claim": "The organization maintains a SOC 2 Type II report covering the Trust Services Criteria for Security, Availability, and Confidentiality.",
+    "supported": true
+   },
+   {
+    "claim": "The SOC 2 report is issued by an independent AICPA-accredited auditor.",
+    "supported": true
+   },
+   {
+    "claim": "The SOC 2 audit period covers a minimum of six months.",
+    "supported": true
+   },
+   {
+    "claim": "The SOC 2 report is refreshed annually.",
+    "supported": true
+   },
+   {
+    "claim": "Copies of the SOC 2 report are available under NDA to qualified prospective and current customers.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d011",
+  "generated_answer": "We ensure GDPR compliance through a program overseen by a designated Data Protection Officer (DPO). The program covers data mapping, privacy impact assessments (DPIAs), and a documented legal basis for each processing activity. Data subject rights requests (access, erasure, portability) are handled through a defined workflow with a 30-day response SLA. Annual privacy audits validate compliance, and staff receive mandatory GDPR training upon hire and annually thereafter.\n\n[References: KB-0015]",
+  "confidence": 1,
+  "retrieval_score": 0.5581447155875902,
+  "sources_json": [
+   {
+    "id": "KB-0015",
+    "score": 0.5581447155875902
+   }
+  ],
+  "answerability": 2.55814471558759,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:10.030Z",
+  "cited": [
+   "KB-0015"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The GDPR compliance program is overseen by a designated Data Protection Officer (DPO).",
+    "supported": true
+   },
+   {
+    "claim": "The program covers data mapping.",
+    "supported": true
+   },
+   {
+    "claim": "The program covers privacy impact assessments (DPIAs).",
+    "supported": true
+   },
+   {
+    "claim": "The program includes a documented legal basis for each processing activity.",
+    "supported": true
+   },
+   {
+    "claim": "Data subject rights requests (access, erasure, portability) are handled through a defined workflow.",
+    "supported": true
+   },
+   {
+    "claim": "Data subject rights requests have a 30-day response SLA.",
+    "supported": true
+   },
+   {
+    "claim": "Annual privacy audits validate compliance.",
+    "supported": true
+   },
+   {
+    "claim": "Staff receive mandatory GDPR training upon hire and annually thereafter.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d012",
+  "generated_answer": "We define data retention schedules per data classification category and legal or regulatory requirements, ranging from 1 year for operational logs to 7 years for financial records. We dispose of data following NIST SP 800-88 guidelines, including cryptographic erasure for SSDs and physical destruction certificates for decommissioned hardware. Legal, Compliance, and Security teams review retention schedules annually.\n\n[References: KB-0005]",
+  "confidence": 1,
+  "retrieval_score": 0.6371202437986339,
+  "sources_json": [
+   {
+    "id": "KB-0005",
+    "score": 0.6371202437986339
+   }
+  ],
+  "answerability": 2.637120243798634,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:07.885Z",
+  "cited": [
+   "KB-0005"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Data retention schedules are defined per data classification category and legal or regulatory requirements.",
+    "supported": true
+   },
+   {
+    "claim": "Retention periods range from 1 year for operational logs to 7 years for financial records.",
+    "supported": true
+   },
+   {
+    "claim": "Data disposal follows NIST SP 800-88 guidelines.",
+    "supported": true
+   },
+   {
+    "claim": "Disposal includes cryptographic erasure for SSDs.",
+    "supported": true
+   },
+   {
+    "claim": "Disposal includes physical destruction certificates for decommissioned hardware.",
+    "supported": true
+   },
+   {
+    "claim": "Legal, Compliance, and Security teams review retention schedules annually.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d013",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The knowledge base describes backup frequency (daily backups, weekly full backups), geographically separate storage with encryption at rest, and quarterly restoration tests, but it does not state a recovery time objective (RTO) value. It says RTO/RPO targets are tested during annual DR exercises wi…). It needs an answer written by a person.",
+  "confidence": 0.923,
+  "retrieval_score": 0.6098688300333157,
+  "sources_json": [
+   {
+    "id": "KB-0023",
+    "score": 0.6098688300333157
+   }
+  ],
+  "answerability": 1.6098688300333157,
+  "verdict": "partly",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:10.703Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d014",
+  "generated_answer": "We assess all vendors with access to our systems or data through a tiered security assessment process based on data sensitivity and access level. Assessments include questionnaire reviews, SOC 2 report evaluation, and on-site assessments for critical vendors. Vendor contracts include mandatory security and data protection clauses, right-to-audit provisions, and breach notification requirements. We reassess vendor risk ratings annually or upon material change.\n\n[References: KB-0009]",
+  "confidence": 1,
+  "retrieval_score": 0.6425351827242026,
+  "sources_json": [
+   {
+    "id": "KB-0009",
+    "score": 0.6425351827242026
+   }
+  ],
+  "answerability": 2.6425351827242025,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:11.695Z",
+  "cited": [
+   "KB-0009"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All vendors with access to our systems or data are assessed through a tiered security assessment process based on data sensitivity and access level.",
+    "supported": true
+   },
+   {
+    "claim": "Vendor assessments include questionnaire reviews, SOC 2 report evaluation, and on-site assessments for critical vendors.",
+    "supported": true
+   },
+   {
+    "claim": "Vendor contracts include mandatory security and data protection clauses.",
+    "supported": true
+   },
+   {
+    "claim": "Vendor contracts include right-to-audit provisions.",
+    "supported": true
+   },
+   {
+    "claim": "Vendor contracts include breach notification requirements.",
+    "supported": true
+   },
+   {
+    "claim": "Vendor risk ratings are reassessed annually or upon material change.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d015",
+  "generated_answer": "All employees and contractors complete mandatory security awareness training when they join and annually after that. The training covers phishing, social engineering, data handling, acceptable use, and incident reporting. Developers, IT administrators, and users with access to sensitive data also complete role-based supplemental training. We run phishing simulation campaigns quarterly and track and report completion and click rates to leadership.\n\n[References: KB-0020]",
+  "confidence": 1,
+  "retrieval_score": 0.6754148281891665,
+  "sources_json": [
+   {
+    "id": "KB-0020",
+    "score": 0.6754148281891665
+   }
+  ],
+  "answerability": 2.6754148281891665,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:12.941Z",
+  "cited": [
+   "KB-0020"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All employees and contractors complete mandatory security awareness training when they join (onboarding) and annually after that.",
+    "supported": true
+   },
+   {
+    "claim": "The training covers phishing, social engineering, data handling, acceptable use, and incident reporting.",
+    "supported": true
+   },
+   {
+    "claim": "Developers, IT administrators, and users with access to sensitive data also complete role-based supplemental training.",
+    "supported": true
+   },
+   {
+    "claim": "Phishing simulation campaigns are run quarterly.",
+    "supported": true
+   },
+   {
+    "claim": "Completion and click rates are tracked and reported to leadership.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d016",
+  "generated_answer": "We provide remote access exclusively through a zero-trust network access (ZTNA) solution or SSL VPN. Connections require multi-factor authentication (MFA) and device compliance verification before access is granted. Remote sessions are logged and monitored, and split tunneling is disabled so that all traffic is inspected. Access follows least-privilege principles, and sessions time out after periods of inactivity.\n\n[References: KB-0036]",
+  "confidence": 1,
+  "retrieval_score": 0.6468472439028714,
+  "sources_json": [
+   {
+    "id": "KB-0036",
+    "score": 0.6468472439028714
+   }
+  ],
+  "answerability": 2.6468472439028714,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:13.962Z",
+  "cited": [
+   "KB-0036"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Remote access is provided exclusively through a ZTNA solution or SSL VPN.",
+    "supported": true
+   },
+   {
+    "claim": "Remote connections require multi-factor authentication (MFA) before access is granted.",
+    "supported": true
+   },
+   {
+    "claim": "Remote connections require device compliance verification before access is granted.",
+    "supported": true
+   },
+   {
+    "claim": "Remote sessions are logged and monitored.",
+    "supported": true
+   },
+   {
+    "claim": "Split tunneling is disabled so that all traffic is inspected.",
+    "supported": true
+   },
+   {
+    "claim": "Remote access follows least-privilege principles.",
+    "supported": true
+   },
+   {
+    "claim": "Remote sessions time out after periods of inactivity.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d017",
+  "generated_answer": "We define network zones based on data sensitivity and system criticality, and we apply micro-segmentation to limit lateral movement. Segmentation is part of our defense-in-depth model, which also includes next-generation firewalls (NGFW), intrusion detection/prevention systems (IDS/IPS) and secure DNS filtering. We review all network access rules quarterly, and unauthorized traffic is alerted in real time via our SIEM.\n\n[References: KB-0010]",
+  "confidence": 1,
+  "retrieval_score": 0.5548063736226055,
+  "sources_json": [
+   {
+    "id": "KB-0010",
+    "score": 0.5548063736226055
+   }
+  ],
+  "answerability": 2.5548063736226054,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:16.087Z",
+  "cited": [
+   "KB-0010"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Network zones are defined based on data sensitivity and system criticality.",
+    "supported": true
+   },
+   {
+    "claim": "Micro-segmentation is applied to limit lateral movement.",
+    "supported": true
+   },
+   {
+    "claim": "Segmentation is part of a defense-in-depth model.",
+    "supported": true
+   },
+   {
+    "claim": "The defense-in-depth model includes next-generation firewalls (NGFW).",
+    "supported": true
+   },
+   {
+    "claim": "The defense-in-depth model includes intrusion detection/prevention systems (IDS/IPS).",
+    "supported": true
+   },
+   {
+    "claim": "The defense-in-depth model includes secure DNS filtering.",
+    "supported": true
+   },
+   {
+    "claim": "All network access rules are reviewed quarterly.",
+    "supported": true
+   },
+   {
+    "claim": "Unauthorized traffic is alerted in real time via the SIEM.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d018",
+  "generated_answer": "We operate a centralized SIEM platform that aggregates logs from all critical systems, including firewalls, endpoints, identity providers, cloud platforms, and applications. Logs are retained for 12 months online and 24 months archived. Detection rules are tuned based on threat intelligence and mapped to MITRE ATT&CK tactics and techniques. Our security operations center (SOC) monitors alerts 24/7 and follows documented escalation procedures.\n\n[References: KB-0021]",
+  "confidence": 0.63,
+  "retrieval_score": 0.5022766180401138,
+  "sources_json": [
+   {
+    "id": "KB-0021",
+    "score": 0.5022766180401138
+   }
+  ],
+  "answerability": 0.5022766180401138,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:16.143Z",
+  "cited": [
+   "KB-0021"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The organization operates a centralized SIEM platform that aggregates logs from all critical systems, including firewalls, endpoints, identity providers, cloud platforms, and applications.",
+    "supported": true
+   },
+   {
+    "claim": "Logs are retained for 12 months online and 24 months archived.",
+    "supported": true
+   },
+   {
+    "claim": "Detection rules are tuned based on threat intelligence.",
+    "supported": true
+   },
+   {
+    "claim": "Detection rules are mapped to MITRE ATT&CK tactics and techniques.",
+    "supported": true
+   },
+   {
+    "claim": "The security operations center (SOC) monitors alerts 24/7.",
+    "supported": true
+   },
+   {
+    "claim": "The SOC follows documented escalation procedures.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d019",
+  "generated_answer": "We manage cryptographic keys through a centralized Key Management Service (KMS) that enforces procedures for key generation, distribution, rotation, and destruction, aligned with NIST SP 800-57 guidance. Key rotation is automated where supported, and HSMs protect master keys. Key usage is logged and audited, and key custodians are designated with separation of duties to prevent single points of compromise.\n\n[References: KB-0044]",
+  "confidence": 1,
+  "retrieval_score": 0.6711635923224225,
+  "sources_json": [
+   {
+    "id": "KB-0044",
+    "score": 0.6711635923224225
+   }
+  ],
+  "answerability": 2.6711635923224226,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:16.478Z",
+  "cited": [
+   "KB-0044"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Cryptographic keys are managed through a centralized Key Management Service (KMS).",
+    "supported": true
+   },
+   {
+    "claim": "The KMS enforces procedures for key generation, distribution, rotation, and destruction.",
+    "supported": true
+   },
+   {
+    "claim": "The key management procedures are aligned with NIST SP 800-57 guidance.",
+    "supported": true
+   },
+   {
+    "claim": "Key rotation is automated where supported.",
+    "supported": true
+   },
+   {
+    "claim": "HSMs protect master keys.",
+    "supported": true
+   },
+   {
+    "claim": "Key usage is logged and audited.",
+    "supported": true
+   },
+   {
+    "claim": "Key custodians are designated with separation of duties to prevent single points of compromise.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d020",
+  "generated_answer": "We integrate security at every phase of our software development lifecycle (SDLC) through our DevSecOps program. Threat modeling is performed during design. Mandatory SAST and DAST scans run in our CI/CD pipelines, and software composition analysis (SCA) checks open-source dependencies. Pre-deployment security sign-off is required before release. Developers complete secure coding training annually, and security champions embedded within engineering teams drive adoption. Security debt is tracked and prioritized alongside feature work.\n\n[References: KB-0028]",
+  "confidence": 1,
+  "retrieval_score": 0.6897386622597793,
+  "sources_json": [
+   {
+    "id": "KB-0028",
+    "score": 0.6897386622597793
+   }
+  ],
+  "answerability": 2.689738662259779,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:19.852Z",
+  "cited": [
+   "KB-0028"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Security is integrated at every phase of the SDLC through the DevSecOps program.",
+    "supported": true
+   },
+   {
+    "claim": "Threat modeling is performed during design.",
+    "supported": true
+   },
+   {
+    "claim": "Mandatory SAST and DAST scans run in CI/CD pipelines.",
+    "supported": true
+   },
+   {
+    "claim": "Software composition analysis (SCA) checks open-source dependencies.",
+    "supported": true
+   },
+   {
+    "claim": "Pre-deployment security sign-off is required before release.",
+    "supported": true
+   },
+   {
+    "claim": "Developers complete secure coding training annually.",
+    "supported": true
+   },
+   {
+    "claim": "Security champions are embedded within engineering teams to drive adoption.",
+    "supported": true
+   },
+   {
+    "claim": "Security debt is tracked and prioritized alongside feature work.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d021",
+  "generated_answer": "We handle data subject access requests through a defined workflow that also covers erasure and portability requests. Our GDPR compliance program is overseen by a designated Data Protection Officer (DPO). Data subject rights requests are subject to a 30-day response SLA. Annual privacy audits validate compliance, and staff receive mandatory GDPR training upon hire and annually thereafter.\n\n[References: KB-0015]",
+  "confidence": 0.63,
+  "retrieval_score": 0.5460499637403936,
+  "sources_json": [
+   {
+    "id": "KB-0015",
+    "score": 0.5460499637403936
+   }
+  ],
+  "answerability": 0.5460499637403936,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:25.838Z",
+  "cited": [
+   "KB-0015"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The organization handles data subject access requests through a defined workflow.",
+    "supported": true
+   },
+   {
+    "claim": "The defined workflow also covers erasure and portability requests.",
+    "supported": true
+   },
+   {
+    "claim": "The GDPR compliance program is overseen by a designated Data Protection Officer (DPO).",
+    "supported": true
+   },
+   {
+    "claim": "Data subject rights requests are subject to a 30-day response SLA.",
+    "supported": true
+   },
+   {
+    "claim": "Annual privacy audits validate compliance.",
+    "supported": true
+   },
+   {
+    "claim": "Staff receive mandatory GDPR training upon hire and annually thereafter.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d022",
+  "generated_answer": "We maintain a formal Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP). Both are tested annually and updated after any significant organizational or infrastructure change. We define RTO and RPO targets per system criticality and validate them through tabletop exercises and full failover tests. We document DR test results, review them with executive leadership, and track gaps in the risk register.\n\n[References: KB-0008]",
+  "confidence": 1,
+  "retrieval_score": 0.5593107083813152,
+  "sources_json": [
+   {
+    "id": "KB-0008",
+    "score": 0.5593107083813152
+   }
+  ],
+  "answerability": 2.5593107083813154,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:22.870Z",
+  "cited": [
+   "KB-0008"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The organization maintains a formal Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP).",
+    "supported": true
+   },
+   {
+    "claim": "The BCP and DRP are tested annually.",
+    "supported": true
+   },
+   {
+    "claim": "The BCP and DRP are updated after any significant organizational or infrastructure change.",
+    "supported": true
+   },
+   {
+    "claim": "RTO and RPO targets are defined per system criticality.",
+    "supported": true
+   },
+   {
+    "claim": "RTO and RPO targets are validated through tabletop exercises and full failover tests.",
+    "supported": true
+   },
+   {
+    "claim": "DR test results are documented.",
+    "supported": true
+   },
+   {
+    "claim": "DR test results are reviewed with executive leadership.",
+    "supported": true
+   },
+   {
+    "claim": "Gaps identified in DR testing are tracked in the risk register.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d023",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (No entry states a review cadence, owner, approval step, or update process for security policies. KB-0039 mentions only that recurring policy exceptions trigger a policy review, with no details of how that review is carried out. KB-0040 covers annual review of configuration baselines, and KB-0076 co…). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.5013894627342355,
+  "sources_json": [
+   {
+    "id": "KB-0039",
+    "score": 0.5013894627342355
+   },
+   {
+    "id": "KB-0040",
+    "score": 0.49436097240218935
+   },
+   {
+    "id": "KB-0076",
+    "score": 0.48758214658761895
+   }
+  ],
+  "answerability": 0.5013894627342355,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:26.106Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d024",
+  "generated_answer": "We protect all endpoints with an EDR (Endpoint Detection and Response) solution that provides real-time threat detection, behavioral analysis, and automated response. Endpoints must be enrolled in MDM before accessing corporate resources, and compliance checks enforce OS patching, disk encryption, and screen lock policies. USB and removable media use is restricted by policy and enforced through DLP controls.\n\n[References: KB-0011]",
+  "confidence": 0.923,
+  "retrieval_score": 0.6379467639280034,
+  "sources_json": [
+   {
+    "id": "KB-0011",
+    "score": 0.6379467639280034
+   }
+  ],
+  "answerability": 1.6379467639280034,
+  "verdict": "partly",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:27.728Z",
+  "cited": [
+   "KB-0011"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All endpoints are protected by an EDR (Endpoint Detection and Response) solution.",
+    "supported": true
+   },
+   {
+    "claim": "The EDR solution provides real-time threat detection, behavioral analysis, and automated response.",
+    "supported": true
+   },
+   {
+    "claim": "Endpoints must be enrolled in MDM before accessing corporate resources.",
+    "supported": true
+   },
+   {
+    "claim": "Compliance checks enforce OS patching, disk encryption, and screen lock policies.",
+    "supported": true
+   },
+   {
+    "claim": "USB and removable media use is restricted by policy.",
+    "supported": true
+   },
+   {
+    "claim": "The restriction on USB and removable media is enforced through DLP controls.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d025",
+  "generated_answer": "We control physical access to data centers and office facilities with badge-based access systems, using multi-factor authentication at sensitive areas such as server rooms. Visitor access is escorted and logged. CCTV covers entry and exit points and critical infrastructure areas, with 90-day retention. Access logs are retained for 12 months. We review physical security controls annually through internal audits and rely on co-location provider compliance certifications for validation.\n\n[References: KB-0014]",
+  "confidence": 1,
+  "retrieval_score": 0.670966762097996,
+  "sources_json": [
+   {
+    "id": "KB-0014",
+    "score": 0.670966762097996
+   }
+  ],
+  "answerability": 2.670966762097996,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:28.530Z",
+  "cited": [
+   "KB-0014"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Physical access to data centers and office facilities is controlled with badge-based access systems.",
+    "supported": true
+   },
+   {
+    "claim": "Multi-factor authentication is used at sensitive areas such as server rooms.",
+    "supported": true
+   },
+   {
+    "claim": "Visitor access is escorted and logged.",
+    "supported": true
+   },
+   {
+    "claim": "CCTV covers entry and exit points and critical infrastructure areas.",
+    "supported": true
+   },
+   {
+    "claim": "CCTV footage is retained for 90 days.",
+    "supported": true
+   },
+   {
+    "claim": "Access logs are retained for 12 months.",
+    "supported": true
+   },
+   {
+    "claim": "Physical security controls are reviewed annually through internal audits.",
+    "supported": true
+   },
+   {
+    "claim": "Physical security controls are validated by co-location provider compliance certifications.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d026",
+  "generated_answer": "We base our zero-trust architecture on the NIST SP 800-207 framework. It enforces continuous verification of users, devices, and applications regardless of network location. Key capabilities include identity-aware proxies, device compliance checks before resource access, microsegmentation, and just-in-time privileged access. We assess zero-trust maturity annually against a published roadmap, with board-level visibility.\n\n[References: KB-0025]",
+  "confidence": 1,
+  "retrieval_score": 0.6248821630400367,
+  "sources_json": [
+   {
+    "id": "KB-0025",
+    "score": 0.6248821630400367
+   }
+  ],
+  "answerability": 2.624882163040037,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:29.939Z",
+  "cited": [
+   "KB-0025"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The zero-trust architecture is based on the NIST SP 800-207 framework.",
+    "supported": true
+   },
+   {
+    "claim": "The architecture enforces continuous verification of users, devices, and applications regardless of network location.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include identity-aware proxies.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include device compliance checks before resource access.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include microsegmentation.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include just-in-time privileged access.",
+    "supported": true
+   },
+   {
+    "claim": "Zero-trust maturity is assessed annually against a published roadmap.",
+    "supported": true
+   },
+   {
+    "claim": "Zero-trust maturity assessment has board-level visibility.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d027",
+  "generated_answer": "All external APIs require authenticated access via OAuth 2.0 or API keys with defined scopes and expiry windows. We enforce rate limiting, input validation, and output encoding at the API gateway layer, and log and monitor all API traffic for anomalies. New APIs undergo a mandatory security review, including threat modeling and an OWASP API Security Top 10 assessment, before production deployment.\n\n[References: KB-0026]",
+  "confidence": 1,
+  "retrieval_score": 0.6502697378706129,
+  "sources_json": [
+   {
+    "id": "KB-0026",
+    "score": 0.6502697378706129
+   }
+  ],
+  "answerability": 2.650269737870613,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:30.711Z",
+  "cited": [
+   "KB-0026"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All external APIs require authenticated access via OAuth 2.0 or API keys with defined scopes and expiry windows.",
+    "supported": true
+   },
+   {
+    "claim": "Rate limiting, input validation, and output encoding are enforced at the API gateway layer.",
+    "supported": true
+   },
+   {
+    "claim": "All API traffic is logged and monitored for anomalies.",
+    "supported": true
+   },
+   {
+    "claim": "New APIs undergo a mandatory security review before production deployment.",
+    "supported": true
+   },
+   {
+    "claim": "The mandatory security review for new APIs includes threat modeling and an OWASP API Security Top 10 assessment.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d028",
+  "generated_answer": "We deploy a Data Loss Prevention (DLP) solution across endpoints, email, and cloud platforms. It detects and blocks unauthorized transmission of sensitive data using content inspection and contextual policies. DLP policies are tuned against our data classification taxonomy, and violations generate real-time alerts for SOC review. We review DLP policies quarterly to keep them aligned with evolving business data flows and regulatory requirements.\n\n[References: KB-0034]",
+  "confidence": 1,
+  "retrieval_score": 0.6926940530549542,
+  "sources_json": [
+   {
+    "id": "KB-0034",
+    "score": 0.6926940530549542
+   }
+  ],
+  "answerability": 2.692694053054954,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:33.054Z",
+  "cited": [
+   "KB-0034"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "A DLP solution is deployed across endpoints, email, and cloud platforms.",
+    "supported": true
+   },
+   {
+    "claim": "The DLP solution detects and blocks unauthorized transmission of sensitive data using content inspection and contextual policies.",
+    "supported": true
+   },
+   {
+    "claim": "DLP policies are tuned against the data classification taxonomy.",
+    "supported": true
+   },
+   {
+    "claim": "DLP violations generate real-time alerts for SOC review.",
+    "supported": true
+   },
+   {
+    "claim": "DLP policies are reviewed quarterly to keep them aligned with evolving business data flows and regulatory requirements.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d029",
+  "generated_answer": "We secure cloud environments through a Cloud Security Posture Management (CSPM) platform that continuously monitors configurations against CIS benchmarks and internal baselines. All cloud infrastructure is provisioned via Infrastructure-as-Code (IaC) templates with embedded security controls, which are reviewed through automated policy-as-code checks in our CI/CD pipeline. Shared responsibility boundaries are documented for each cloud provider relationship.\n\n[References: KB-0012]",
+  "confidence": 1,
+  "retrieval_score": 0.6557874641795352,
+  "sources_json": [
+   {
+    "id": "KB-0012",
+    "score": 0.6557874641795352
+   }
+  ],
+  "answerability": 2.655787464179535,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:34.111Z",
+  "cited": [
+   "KB-0012"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Cloud environments are secured through a Cloud Security Posture Management (CSPM) platform that continuously monitors configurations against CIS benchmarks and internal baselines.",
+    "supported": true
+   },
+   {
+    "claim": "All cloud infrastructure is provisioned via Infrastructure-as-Code (IaC) templates with embedded security controls.",
+    "supported": true
+   },
+   {
+    "claim": "The IaC templates' security controls are reviewed through automated policy-as-code checks in the CI/CD pipeline.",
+    "supported": true
+   },
+   {
+    "claim": "Shared responsibility boundaries are documented for each cloud provider relationship.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d030",
+  "generated_answer": "We publish a coordinated vulnerability disclosure (CVD) policy on our security page. It gives researchers clear channels to report discovered vulnerabilities, defined response timelines, and safe harbor provisions. We also run a bug bounty program managed through a third-party platform, which offers rewards for qualifying reports, with scope and reward tiers defined by asset criticality. Reported vulnerabilities are triaged within 5 business days, and researchers receive status updates through the resolution lifecycle.\n\n[References: KB-0084]",
+  "confidence": 0.75,
+  "retrieval_score": 0.6558224641477397,
+  "sources_json": [
+   {
+    "id": "KB-0084",
+    "score": 0.6558224641477397
+   }
+  ],
+  "answerability": 0.6558224641477397,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:35.701Z",
+  "cited": [
+   "KB-0084"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "A coordinated vulnerability disclosure (CVD) policy is published on the security page.",
+    "supported": true
+   },
+   {
+    "claim": "The CVD policy gives researchers clear channels to report discovered vulnerabilities, defined response timelines, and safe harbor provisions.",
+    "supported": true
+   },
+   {
+    "claim": "A bug bounty program is run and managed through a third-party platform.",
+    "supported": true
+   },
+   {
+    "claim": "The bug bounty program offers rewards for qualifying reports.",
+    "supported": true
+   },
+   {
+    "claim": "The bug bounty program's scope and reward tiers are defined by asset criticality.",
+    "supported": true
+   },
+   {
+    "claim": "Reported vulnerabilities are triaged within 5 business days.",
+    "supported": true
+   },
+   {
+    "claim": "Researchers receive status updates through the resolution lifecycle.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d031",
+  "generated_answer": "We protect against ransomware with layered prevention, detection, and recovery controls. Prevention includes EDR with behavioral blocking, email security with attachment sandboxing, restricted macro execution, and application allowlisting on critical servers. Detection uses SIEM rules tuned for ransomware behaviors such as rapid file encryption and shadow copy deletion, with automated playbooks that isolate affected endpoints within minutes of confirmed detection. We maintain immutable offline backups with tested recovery procedures to support business continuity if an attack succeeds.\n\n[References: KB-0096]",
+  "confidence": 1,
+  "retrieval_score": 0.6223569326810093,
+  "sources_json": [
+   {
+    "id": "KB-0096",
+    "score": 0.6223569326810093
+   }
+  ],
+  "answerability": 2.6223569326810092,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:38.756Z",
+  "cited": [
+   "KB-0096"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Ransomware protection is layered across prevention, detection, and recovery controls.",
+    "supported": true
+   },
+   {
+    "claim": "Prevention includes EDR with behavioral blocking.",
+    "supported": true
+   },
+   {
+    "claim": "Prevention includes email security with attachment sandboxing.",
+    "supported": true
+   },
+   {
+    "claim": "Prevention includes restricted macro execution.",
+    "supported": true
+   },
+   {
+    "claim": "Prevention includes application allowlisting on critical servers.",
+    "supported": true
+   },
+   {
+    "claim": "Detection uses SIEM rules tuned for ransomware behaviors such as rapid file encryption and shadow copy deletion.",
+    "supported": true
+   },
+   {
+    "claim": "Automated playbooks isolate affected endpoints within minutes of confirmed detection.",
+    "supported": true
+   },
+   {
+    "claim": "Immutable offline backups with tested recovery procedures are maintained to support business continuity if an attack succeeds.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d032",
+  "generated_answer": "We manage identity lifecycle through an Identity Governance and Administration (IGA) platform that automates provisioning, de-provisioning, and access recertification workflows. Joiner-mover-leaver processes are defined with SLA targets, and terminated user access is revoked within 4 hours of HR notification. All access requests require documented business justification and manager approval before provisioning.\n\n[References: KB-0024]",
+  "confidence": 1,
+  "retrieval_score": 0.5096965888702547,
+  "sources_json": [
+   {
+    "id": "KB-0024",
+    "score": 0.5096965888702547
+   }
+  ],
+  "answerability": 2.5096965888702547,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:38.485Z",
+  "cited": [
+   "KB-0024"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Identity lifecycle is managed through an Identity Governance and Administration (IGA) platform that automates provisioning, de-provisioning, and access recertification workflows.",
+    "supported": true
+   },
+   {
+    "claim": "Joiner-mover-leaver processes are defined with SLA targets.",
+    "supported": true
+   },
+   {
+    "claim": "Terminated user access is revoked within 4 hours of HR notification.",
+    "supported": true
+   },
+   {
+    "claim": "All access requests require documented business justification and manager approval before provisioning.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d033",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (the drafting service gave an unreadable answer). It needs an answer written by a person.",
+  "confidence": 0.75,
+  "retrieval_score": 0.6468853963606614,
+  "sources_json": [
+   {
+    "id": "KB-0028",
+    "score": 0.6468853963606614
+   },
+   {
+    "id": "KB-0058",
+    "score": 0.6134272650432006
+   },
+   {
+    "id": "KB-0099",
+    "score": 0.6030664534491691
+   }
+  ],
+  "answerability": 0.6468853963606614,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:41.565Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d034",
+  "generated_answer": "We maintain a formal Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP). Both are tested annually and updated after any significant organizational or infrastructure change. RTO and RPO targets are defined per system criticality and validated through tabletop exercises and full failover tests. We document DR test results, executive leadership reviews them, and gaps are tracked in the risk register.\n\n[References: KB-0008]",
+  "confidence": 1,
+  "retrieval_score": 0.6187652099582549,
+  "sources_json": [
+   {
+    "id": "KB-0008",
+    "score": 0.6187652099582549
+   }
+  ],
+  "answerability": 2.618765209958255,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:42.321Z",
+  "cited": [
+   "KB-0008"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The organization maintains a formal Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP).",
+    "supported": true
+   },
+   {
+    "claim": "Both the BCP and DRP are tested annually.",
+    "supported": true
+   },
+   {
+    "claim": "Both plans are updated after any significant organizational or infrastructure change.",
+    "supported": true
+   },
+   {
+    "claim": "RTO and RPO targets are defined per system criticality.",
+    "supported": true
+   },
+   {
+    "claim": "RTO and RPO targets are validated through tabletop exercises and full failover tests.",
+    "supported": true
+   },
+   {
+    "claim": "DR test results are documented.",
+    "supported": true
+   },
+   {
+    "claim": "Executive leadership reviews DR test results.",
+    "supported": true
+   },
+   {
+    "claim": "Gaps identified are tracked in the risk register.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d035",
+  "generated_answer": "We require all corporate and BYOD devices that access company resources to be enrolled in a mobile device management (MDM) platform. The MDM enforces encryption, screen lock, remote wipe capability, and current OS patch levels. BYOD devices are containerized to separate corporate data from personal data, and access to sensitive applications is restricted to managed devices. We evaluate device compliance in real time as part of our zero trust conditional access policies.\n\n[References: KB-0027]",
+  "confidence": 1,
+  "retrieval_score": 0.6644659919492248,
+  "sources_json": [
+   {
+    "id": "KB-0027",
+    "score": 0.6644659919492248
+   }
+  ],
+  "answerability": 2.664465991949225,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:42.719Z",
+  "cited": [
+   "KB-0027"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "All corporate and BYOD devices that access company resources are required to be enrolled in a mobile device management (MDM) platform.",
+    "supported": true
+   },
+   {
+    "claim": "The MDM enforces encryption, screen lock, remote wipe capability, and current OS patch levels.",
+    "supported": true
+   },
+   {
+    "claim": "BYOD devices are containerized to separate corporate data from personal data.",
+    "supported": true
+   },
+   {
+    "claim": "Access to sensitive applications is restricted to managed devices.",
+    "supported": true
+   },
+   {
+    "claim": "Device compliance is evaluated in real time as part of zero trust conditional access policies.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d036",
+  "generated_answer": "We aggregate threat intelligence from commercial threat intelligence feeds, ISAC memberships relevant to our industry, government advisories (CISA, NCSC), and open-source intelligence sources. We operationalize this intelligence through SIEM detection rule updates, vulnerability prioritization, and threat hunting campaigns. A formal threat intelligence program with a designated analyst function contextualizes intelligence to our specific risk profile.\n\n[References: KB-0056]",
+  "confidence": 1,
+  "retrieval_score": 0.6921605692857232,
+  "sources_json": [
+   {
+    "id": "KB-0056",
+    "score": 0.6921605692857232
+   }
+  ],
+  "answerability": 2.6921605692857233,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:44.476Z",
+  "cited": [
+   "KB-0056"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Threat intelligence is aggregated from commercial threat intelligence feeds.",
+    "supported": true
+   },
+   {
+    "claim": "Threat intelligence is aggregated from ISAC memberships relevant to the organization's industry.",
+    "supported": true
+   },
+   {
+    "claim": "Threat intelligence is aggregated from government advisories (CISA, NCSC).",
+    "supported": true
+   },
+   {
+    "claim": "Threat intelligence is aggregated from open-source intelligence sources.",
+    "supported": true
+   },
+   {
+    "claim": "Intelligence is operationalized through SIEM detection rule updates.",
+    "supported": true
+   },
+   {
+    "claim": "Intelligence is operationalized through vulnerability prioritization.",
+    "supported": true
+   },
+   {
+    "claim": "Intelligence is operationalized through threat hunting campaigns.",
+    "supported": true
+   },
+   {
+    "claim": "A formal threat intelligence program with a designated analyst function contextualizes intelligence to the organization's specific risk profile.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d037",
+  "generated_answer": "We handle security exceptions and policy waivers through a formal waiver process. Each request requires documented business justification, a risk assessment, and compensating controls, and must be approved by the CISO or a delegate. Approved exceptions are logged in an exception register with defined expiry dates and are reviewed quarterly. Recurring exceptions trigger a policy review to determine whether the standard itself needs updating.\n\n[References: KB-0039]",
+  "confidence": 1,
+  "retrieval_score": 0.4389433936842939,
+  "sources_json": [
+   {
+    "id": "KB-0039",
+    "score": 0.4389433936842939
+   }
+  ],
+  "answerability": 2.438943393684294,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:44.751Z",
+  "cited": [
+   "KB-0039"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Security exceptions and policy waivers are handled through a formal waiver process.",
+    "supported": true
+   },
+   {
+    "claim": "Each exception request requires documented business justification.",
+    "supported": true
+   },
+   {
+    "claim": "Each exception request requires a risk assessment.",
+    "supported": true
+   },
+   {
+    "claim": "Each exception request requires compensating controls.",
+    "supported": true
+   },
+   {
+    "claim": "Exception requests must be approved by the CISO or a delegate.",
+    "supported": true
+   },
+   {
+    "claim": "Approved exceptions are logged in an exception register with defined expiry dates.",
+    "supported": true
+   },
+   {
+    "claim": "Exceptions are reviewed quarterly.",
+    "supported": true
+   },
+   {
+    "claim": "Recurring exceptions trigger a policy review to determine whether the standard itself needs updating.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d038",
+  "generated_answer": "We enforce email security through a secure email gateway that provides anti-phishing, anti-malware, and spam filtering. We use DMARC, DKIM, and SPF records to prevent domain spoofing. Advanced threat protection scans attachments and URLs in sandboxed environments, and suspicious emails are quarantined for review. Our security awareness training includes phishing simulation exercises to reinforce user vigilance.\n\n[References: KB-0035]",
+  "confidence": 1,
+  "retrieval_score": 0.6574166633310605,
+  "sources_json": [
+   {
+    "id": "KB-0035",
+    "score": 0.6574166633310605
+   }
+  ],
+  "answerability": 2.6574166633310607,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:45.291Z",
+  "cited": [
+   "KB-0035"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "Email security is enforced through a secure email gateway that provides anti-phishing, anti-malware, and spam filtering.",
+    "supported": true
+   },
+   {
+    "claim": "DMARC, DKIM, and SPF records are used to prevent domain spoofing.",
+    "supported": true
+   },
+   {
+    "claim": "Advanced threat protection scans attachments and URLs in sandboxed environments.",
+    "supported": true
+   },
+   {
+    "claim": "Suspicious emails are quarantined for review.",
+    "supported": true
+   },
+   {
+    "claim": "Security awareness training includes phishing simulation exercises to reinforce user vigilance.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d039",
+  "generated_answer": "We use software composition analysis (SCA) tooling integrated into our CI/CD pipelines to identify known vulnerabilities in open-source and third-party libraries before deployment. We generate a Software Bill of Materials (SBOM) for all production applications and maintain it in our software asset inventory. When we assess vendor software, we review the vendor's own SDLC security practices and SBOM availability. Our build pipeline is hardened with access controls that limit modification rights to authorized CI/CD service accounts, and all build artifacts are signed with code signing certificates traceable to an internal certificate authority. Artifact integrity is verified at each deployment stage. Pipeline configurations are version-controlled, and changes require security team review. Third-party build tool dependencies are managed through a curated internal package mirror subject to vulnerability scanning.\n\n[References: KB-0048, KB-0099]",
+  "confidence": 0.75,
+  "retrieval_score": 0.626776634563745,
+  "sources_json": [
+   {
+    "id": "KB-0048",
+    "score": 0.626776634563745
+   },
+   {
+    "id": "KB-0099",
+    "score": 0.6034837252462136
+   }
+  ],
+  "answerability": 0.626776634563745,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:50.463Z",
+  "cited": [
+   "KB-0048",
+   "KB-0099"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "SCA tooling is integrated into CI/CD pipelines to identify known vulnerabilities in open-source and third-party libraries before deployment.",
+    "supported": true
+   },
+   {
+    "claim": "An SBOM is generated for all production applications and maintained in the software asset inventory.",
+    "supported": true
+   },
+   {
+    "claim": "Vendor software assessments include review of the vendor's own SDLC security practices and SBOM availability.",
+    "supported": true
+   },
+   {
+    "claim": "The build pipeline is hardened with access controls limiting modification rights to authorized CI/CD service accounts.",
+    "supported": true
+   },
+   {
+    "claim": "All build artifacts are signed with code signing certificates traceable to an internal certificate authority.",
+    "supported": true
+   },
+   {
+    "claim": "Artifact integrity is verified at each deployment stage.",
+    "supported": true
+   },
+   {
+    "claim": "Pipeline configurations are version-controlled and changes require security team review.",
+    "supported": true
+   },
+   {
+    "claim": "Third-party build tool dependencies are managed through a curated internal package mirror subject to vulnerability scanning.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d040",
+  "generated_answer": "We initiate a formal M&A security due diligence process at the Letter of Intent stage. It assesses the target entity's security posture, compliance status, known vulnerabilities, and open incidents. Integration planning includes a risk-based roadmap for aligning security controls. Sensitive data from the acquired entity is quarantined until access controls and data governance are validated. We track security findings from due diligence through post-close integration milestones.\n\n[References: KB-0053]",
+  "confidence": 1,
+  "retrieval_score": 0.6579239169317556,
+  "sources_json": [
+   {
+    "id": "KB-0053",
+    "score": 0.6579239169317556
+   }
+  ],
+  "answerability": 2.6579239169317557,
+  "verdict": "yes",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:48.487Z",
+  "cited": [
+   "KB-0053"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "A formal M&A security due diligence process is initiated at the Letter of Intent stage.",
+    "supported": true
+   },
+   {
+    "claim": "The due diligence assesses the target entity's security posture, compliance status, known vulnerabilities, and open incidents.",
+    "supported": true
+   },
+   {
+    "claim": "Integration planning includes a risk-based roadmap for aligning security controls.",
+    "supported": true
+   },
+   {
+    "claim": "Sensitive data from the acquired entity is quarantined until access controls and data governance are validated.",
+    "supported": true
+   },
+   {
+    "claim": "Security findings from due diligence are tracked through post-close integration milestones.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d041",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (No entry gives a mean time to detect a security breach. KB-0007 reports mean time to remediate vulnerabilities, not detection. KB-0006 describes the detection phase without a time metric, and KB-0083 covers escalation and notification after suspected unauthorized access, also without a detection ti…). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.5204809835834481,
+  "sources_json": [
+   {
+    "id": "KB-0007",
+    "score": 0.5204809835834481
+   },
+   {
+    "id": "KB-0006",
+    "score": 0.4995494556719795
+   },
+   {
+    "id": "KB-0083",
+    "score": 0.4773874675821185
+   }
+  ],
+  "answerability": 0.5204809835834481,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:58.135Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d042",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.39421837877424304,
+  "sources_json": [
+   {
+    "id": "KB-0017",
+    "score": 0.39421837877424304
+   },
+   {
+    "id": "KB-0025",
+    "score": 0.3898815484816413
+   },
+   {
+    "id": "KB-0076",
+    "score": 0.37332510540469066
+   }
+  ],
+  "answerability": 0.39421837877424304,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:51.846Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d043",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The entries do not say whether customers can bring or manage their own encryption keys (BYOK). KB-0044 and KB-0001 describe centrally managed keys through a KMS and HSMs, with key custodians designated internally, but do not state whether customer-supplied or customer-controlled keys are supported). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.531245756339485,
+  "sources_json": [
+   {
+    "id": "KB-0044",
+    "score": 0.531245756339485
+   },
+   {
+    "id": "KB-0001",
+    "score": 0.49235799557550924
+   }
+  ],
+  "answerability": 0.531245756339485,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:55.313Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d044",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The knowledge-base entries provided do not cover cyber insurance. They describe network security architecture, network IDS/IPS capabilities and DDoS protection, but contain no information on any cyber insurance policy, coverage types, limits or insurers). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.48169826287934503,
+  "sources_json": [
+   {
+    "id": "KB-0010",
+    "score": 0.48169826287934503
+   },
+   {
+    "id": "KB-0080",
+    "score": 0.4656035581033591
+   },
+   {
+    "id": "KB-0050",
+    "score": 0.45933557369553807
+   }
+  ],
+  "answerability": 0.48169826287934503,
+  "verdict": "no",
+  "gate": "legal",
+  "gate_reason": "Rules matched: insurance. Classifier: Asks about insurance cover the company holds, which falls under insurance cover in the legal category.",
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:55.019Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d045",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The entries do not name the SIEM product we use). It needs an answer written by a person.",
+  "confidence": 0.75,
+  "retrieval_score": 0.6062200667305132,
+  "sources_json": [
+   {
+    "id": "KB-0094",
+    "score": 0.6062200667305132
+   }
+  ],
+  "answerability": 0.6062200667305132,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:00.705Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d046",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.3854717221311665,
+  "sources_json": [
+   {
+    "id": "KB-0070",
+    "score": 0.3854717221311665
+   }
+  ],
+  "answerability": 0.3854717221311665,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:58.489Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d047",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.4061724183849362,
+  "sources_json": [
+   {
+    "id": "KB-0076",
+    "score": 0.4061724183849362
+   },
+   {
+    "id": "KB-0018",
+    "score": 0.4025983518684765
+   },
+   {
+    "id": "KB-0047",
+    "score": 0.40185000912667296
+   }
+  ],
+  "answerability": 0.4061724183849362,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:06:59.810Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d048",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0,
+  "retrieval_score": 0.21603888539248445,
+  "sources_json": [
+   {
+    "id": "KB-0017",
+    "score": 0.21603888539248445
+   },
+   {
+    "id": "KB-0018",
+    "score": 0.1897507072093974
+   },
+   {
+    "id": "KB-0070",
+    "score": 0.17602675881421245
+   }
+  ],
+  "answerability": 0.21603888539248445,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:00.971Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d049",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The knowledge-base entries do not mention HITRUST certification or any HITRUST assessment, so we cannot confirm whether we are HITRUST certified. The entries cover ISO/IEC 27001:2022 certification, a SOC 2 Type II report, and HIPAA compliance program practices, but none of these is a HITRUST certif…). It needs an answer written by a person.",
+  "confidence": 0.556,
+  "retrieval_score": 0.42987943473043444,
+  "sources_json": [
+   {
+    "id": "KB-0018",
+    "score": 0.42987943473043444
+   },
+   {
+    "id": "KB-0017",
+    "score": 0.41642244772170744
+   },
+   {
+    "id": "KB-0016",
+    "score": 0.41270771455999455
+   }
+  ],
+  "answerability": 0.42987943473043444,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:03.665Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d050",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0,
+  "retrieval_score": 0.233056917433541,
+  "sources_json": [
+   {
+    "id": "KB-0067",
+    "score": 0.233056917433541
+   },
+   {
+    "id": "KB-0076",
+    "score": 0.2264980279192569
+   },
+   {
+    "id": "KB-0018",
+    "score": 0.20810397605897
+   }
+  ],
+  "answerability": 0.233056917433541,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:02.099Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d051",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0,
+  "retrieval_score": 0.2250469731768962,
+  "sources_json": [
+   {
+    "id": "KB-0018",
+    "score": 0.2250469731768962
+   },
+   {
+    "id": "KB-0067",
+    "score": 0.20856710316638905
+   },
+   {
+    "id": "KB-0025",
+    "score": 0.20010701763736208
+   }
+  ],
+  "answerability": 0.2250469731768962,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:05.611Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d052",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0,
+  "retrieval_score": 0.2768688144313431,
+  "sources_json": [
+   {
+    "id": "KB-0018",
+    "score": 0.2768688144313431
+   }
+  ],
+  "answerability": 0.2768688144313431,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:07.218Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d053",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.3698332054169703,
+  "sources_json": [
+   {
+    "id": "KB-0033",
+    "score": 0.3698332054169703
+   },
+   {
+    "id": "KB-0020",
+    "score": 0.3649349950096267
+   },
+   {
+    "id": "KB-0060",
+    "score": 0.33967178503143924
+   }
+  ],
+  "answerability": 0.3698332054169703,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:06.269Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d054",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.3545600912965421,
+  "sources_json": [
+   {
+    "id": "KB-0081",
+    "score": 0.3545600912965421
+   },
+   {
+    "id": "KB-0003",
+    "score": 0.32124195241442055
+   },
+   {
+    "id": "KB-0058",
+    "score": 0.3130744490396987
+   }
+  ],
+  "answerability": 0.3545600912965421,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:08.050Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d055",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The entries do not state whether biometric authentication is used for data centre entry. KB-0014 describes badge-based access with multi-factor authentication at sensitive areas such as server rooms, but it does not specify the factors used, so it cannot confirm or deny biometric authentication). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.4980207606132045,
+  "sources_json": [
+   {
+    "id": "KB-0014",
+    "score": 0.4980207606132045
+   }
+  ],
+  "answerability": 0.4980207606132045,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:12.682Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d056",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The knowledge base does not state a contractual uptime commitment (such as a specific availability percentage or SLA). KB-0090 describes availability design, redundancy across availability zones or regions, monitoring, and annual DR failover tests, but gives no contractual uptime figure or commitme…). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.46288592589630867,
+  "sources_json": [
+   {
+    "id": "KB-0090",
+    "score": 0.46288592589630867
+   }
+  ],
+  "answerability": 0.46288592589630867,
+  "verdict": "no",
+  "gate": "legal",
+  "gate_reason": "Rules matched: contract. Classifier: The question asks the company to state its contractual uptime commitment, which is a binding contractual term.",
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:11.450Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d057",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0,
+  "retrieval_score": 0.28013105355943996,
+  "sources_json": [
+   {
+    "id": "KB-0009",
+    "score": 0.28013105355943996
+   },
+   {
+    "id": "KB-0015",
+    "score": 0.2794316937265247
+   },
+   {
+    "id": "KB-0070",
+    "score": 0.2723551175687924
+   }
+  ],
+  "answerability": 0.28013105355943996,
+  "verdict": "no",
+  "gate": null,
+  "gate_reason": null,
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:10.074Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d058",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.39845087425766845,
+  "sources_json": [
+   {
+    "id": "KB-0014",
+    "score": 0.39845087425766845
+   }
+  ],
+  "answerability": 0.39845087425766845,
+  "verdict": "no",
+  "gate": "legal",
+  "gate_reason": "Classifier: Asks whether the company will grant audit rights to the customer's auditors, which is a contractual commitment about audit access rather than a description of operational practice.",
+  "language": "en",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:12.846Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d059",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (顧客が独自の暗号鍵(顧客管理鍵)を管理、持ち込み(BYOK)、または利用できるかどうかについての記載がありません。KB-0044は、当社の集中型鍵管理サービス(KMS)による鍵の生成、配布、ローテーション、破棄、およびHSMによるマスター鍵の保護のみを説明しています。). It needs an answer written by a person.",
+  "confidence": 0.63,
+  "retrieval_score": 0.5171938502515459,
+  "sources_json": [
+   {
+    "id": "KB-0044",
+    "score": 0.5171938502515459
+   }
+  ],
+  "answerability": 0.5171938502515459,
+  "verdict": "no",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:18.245Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d060",
+  "generated_answer": "No confident match in the knowledge base: the closest entries are listed under Sources, but they may not answer this question. It needs an answer written by a person.",
+  "confidence": 0.091,
+  "retrieval_score": 0.36093357364414225,
+  "sources_json": [
+   {
+    "id": "KB-0012",
+    "score": 0.36093357364414225
+   },
+   {
+    "id": "KB-0010",
+    "score": 0.3566384905207633
+   },
+   {
+    "id": "KB-0076",
+    "score": 0.35515770685615516
+   }
+  ],
+  "answerability": 0.36093357364414225,
+  "verdict": "no",
+  "gate": "legal",
+  "gate_reason": "Classifier: The question asks whether the company holds cyber insurance, which concerns insurance cover, a listed legal/contractual category.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": null,
+  "prompt_version": null,
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:14.899Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d061",
+  "generated_answer": "当社は、保存中のデータをすべて、ストレージシステム、データベース、バックアップメディアにわたってAES-256で暗号化しています。暗号化キーは専用のKMS（鍵管理サービス）で管理し、厳格なアクセス制御と定期的なローテーションのスケジュールを適用しています。ルートキーの保護にはHSM（Hardware Security Modules）を使用しています。暗号化の適用範囲は四半期ごとの監査で検証しています。\n\n[References: KB-0001]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.5608713425964943,
+  "sources_json": [
+   {
+    "id": "KB-0001",
+    "score": 0.5608713425964943
+   }
+  ],
+  "answerability": 2.5608713425964944,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:23.859Z",
+  "cited": [
+   "KB-0001"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "保存中のデータはすべて、ストレージシステム、データベース、バックアップメディアにわたってAES-256で暗号化されている。",
+    "supported": true
+   },
+   {
+    "claim": "暗号化キーは専用のKMS（鍵管理サービス）で管理されている。",
+    "supported": true
+   },
+   {
+    "claim": "KMSには厳格なアクセス制御と定期的なローテーションのスケジュールが適用されている。",
+    "supported": true
+   },
+   {
+    "claim": "ルートキーの保護にはHSM（Hardware Security Modules）が使用されている。",
+    "supported": true
+   },
+   {
+    "claim": "暗号化の適用範囲は四半期ごとの監査で検証されている。",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d062",
+  "generated_answer": "当社では、通信中のすべてのデータを TLS 1.2 以上で保護しています。新規の連携では TLS 1.3 を優先しています。脆弱な暗号スイートは明示的に無効化しています。証明書は文書化されたライフサイクルプロセスに従って管理し、自動更新アラートを設けています。さらに、ゼロトラストアーキテクチャ内のサービス間の内部通信は、相互 TLS（mTLS）で暗号化しています。\n\n[References: KB-0002]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.574584327026142,
+  "sources_json": [
+   {
+    "id": "KB-0002",
+    "score": 0.574584327026142
+   }
+  ],
+  "answerability": 2.574584327026142,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:24.723Z",
+  "cited": [
+   "KB-0002"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "当社では、通信中のすべてのデータを TLS 1.2 以上で保護している。",
+    "supported": true
+   },
+   {
+    "claim": "新規の連携では TLS 1.3 を優先している。",
+    "supported": true
+   },
+   {
+    "claim": "脆弱な暗号スイートは明示的に無効化している。",
+    "supported": true
+   },
+   {
+    "claim": "証明書は文書化されたライフサイクルプロセスに従って管理している。",
+    "supported": true
+   },
+   {
+    "claim": "証明書管理には自動更新アラートを設けている。",
+    "supported": true
+   },
+   {
+    "claim": "ゼロトラストアーキテクチャ内のサービス間の内部通信は、相互 TLS（mTLS）で暗号化している。",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d063",
+  "generated_answer": "当社では、全従業員、契約者、第三者ユーザーが社内システムにアクセスする際に多要素認証（MFA）を必須としています。対象はVPN、SSO、メール、クラウドプラットフォームです。フィッシング耐性のある方式（FIDO2ハードウェアトークン、認証アプリなど）を、SMSベースのOTPより優先しています。MFAの適用状況は一元的に監視しています。例外は CISO レベルの承認を必要とし、代替の統制を伴います。\n\n[References: KB-0004]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 0.63,
+  "retrieval_score": 0.49477352216423426,
+  "sources_json": [
+   {
+    "id": "KB-0004",
+    "score": 0.49477352216423426
+   }
+  ],
+  "answerability": 0.49477352216423426,
+  "verdict": "no",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:24.114Z",
+  "cited": [
+   "KB-0004"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "MFA is mandatory for all employees, contractors, and third-party users accessing corporate systems.",
+    "supported": true
+   },
+   {
+    "claim": "The MFA requirement covers VPN, SSO, email, and cloud platforms.",
+    "supported": true
+   },
+   {
+    "claim": "Phishing-resistant MFA methods such as FIDO2 hardware tokens and authenticator apps are preferred over SMS-based OTP.",
+    "supported": true
+   },
+   {
+    "claim": "MFA enforcement is monitored centrally.",
+    "supported": true
+   },
+   {
+    "claim": "Exceptions to MFA require CISO-level approval and are accompanied by compensating controls.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d064",
+  "generated_answer": "当社のインシデント対応プログラムは、NIST SP 800-61のフレームワークに従っており、準備、検知、封じ込め、根絶、復旧、事後レビューの各フェーズを定義しています。専任のSecurity Incident Response Team (SIRT)が24/7で待機しています。インシデントは重大度ごとに分類され、対応および通知についてSLA目標を設定しています。事後レビューは5営業日以内に実施し、指摘事項は完了まで追跡管理します。\n\n[References: KB-0006]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.5522987694464536,
+  "sources_json": [
+   {
+    "id": "KB-0006",
+    "score": 0.5522987694464536
+   }
+  ],
+  "answerability": 2.5522987694464536,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:29.231Z",
+  "cited": [
+   "KB-0006"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The incident response program follows the NIST SP 800-61 framework.",
+    "supported": true
+   },
+   {
+    "claim": "The program defines the phases of preparation, detection, containment, eradication, recovery, and post-incident review.",
+    "supported": true
+   },
+   {
+    "claim": "A dedicated Security Incident Response Team (SIRT) is on-call 24/7.",
+    "supported": true
+   },
+   {
+    "claim": "Incidents are categorized by severity, with SLA targets set for response and notification.",
+    "supported": true
+   },
+   {
+    "claim": "Post-incident reviews are conducted within 5 business days.",
+    "supported": true
+   },
+   {
+    "claim": "Post-incident review findings are tracked to closure.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d065",
+  "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (a draft was written but rejected because the draft contains figures not in its sources (6)). It needs an answer written by a person.",
+  "confidence": 1,
+  "retrieval_score": 0.5254557837185461,
+  "sources_json": [
+   {
+    "id": "KB-0017",
+    "score": 0.5254557837185461
+   }
+  ],
+  "answerability": 2.525455783718546,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "insufficient_evidence",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:29.698Z",
+  "cited": [],
+  "citesGold": false,
+  "claims": []
+ },
+ {
+  "id": "d066",
+  "generated_answer": "当社では特権アカウントを棚卸しし、Privileged Access Management (PAM) ソリューションを通じて管理しています。PAMでは、ジャストインタイムのアクセス制御、セッション記録、パスワードの保管と自動ローテーションを実施しています。常時の特権アクセスは可能な限り廃止し、承認を必要とする時間制限付きの権限昇格を採用しています。特権アカウントの操作は、SIEM内で強化された監視と異常検知アラートの対象としています。\n\n[References: KB-0031]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.5117175208670963,
+  "sources_json": [
+   {
+    "id": "KB-0031",
+    "score": 0.5117175208670963
+   }
+  ],
+  "answerability": 2.511717520867096,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:28.904Z",
+  "cited": [
+   "KB-0031"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "特権アカウントを棚卸ししている。",
+    "supported": true
+   },
+   {
+    "claim": "特権アカウントはPrivileged Access Management (PAM) ソリューションを通じて管理されている。",
+    "supported": true
+   },
+   {
+    "claim": "PAMではジャストインタイムのアクセス制御を実施している。",
+    "supported": true
+   },
+   {
+    "claim": "PAMではセッション記録を実施している。",
+    "supported": true
+   },
+   {
+    "claim": "PAMではパスワードの保管と自動ローテーションを実施している。",
+    "supported": true
+   },
+   {
+    "claim": "常時の特権アクセスは可能な限り廃止している。",
+    "supported": true
+   },
+   {
+    "claim": "承認を必要とする時間制限付きの権限昇格を採用している。",
+    "supported": true
+   },
+   {
+    "claim": "特権アカウントの操作はSIEM内で強化された監視と異常検知アラートの対象となっている。",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d067",
+  "generated_answer": "当社は、ファイアウォール、エンドポイント、ID基盤、クラウド基盤、アプリケーションなど、重要なシステムのログを中央集約型のSIEMプラットフォームに集約しています。ログの保存期間は、オンラインで12か月、アーカイブで24か月です。検知ルールは脅威インテリジェンスに基づいて調整し、MITRE ATT&CKのタクティクスおよびテクニックに対応付けています。セキュリティオペレーションセンター（SOC）が24/7でアラートを監視し、文書化されたエスカレーション手順に従って対応します。\n\n[References: KB-0021]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.4862469416092327,
+  "sources_json": [
+   {
+    "id": "KB-0021",
+    "score": 0.4862469416092327
+   }
+  ],
+  "answerability": 2.4862469416092328,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:35.311Z",
+  "cited": [
+   "KB-0021"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "ファイアウォール、エンドポイント、ID基盤、クラウド基盤、アプリケーションなど、重要なシステムのログを中央集約型のSIEMプラットフォームに集約している。",
+    "supported": true
+   },
+   {
+    "claim": "ログの保存期間は、オンラインで12か月、アーカイブで24か月である。",
+    "supported": true
+   },
+   {
+    "claim": "検知ルールは脅威インテリジェンスに基づいて調整されている。",
+    "supported": true
+   },
+   {
+    "claim": "検知ルールはMITRE ATT&CKのタクティクスおよびテクニックに対応付けられている。",
+    "supported": true
+   },
+   {
+    "claim": "セキュリティオペレーションセンター（SOC）が24/7でアラートを監視している。",
+    "supported": true
+   },
+   {
+    "claim": "SOCは文書化されたエスカレーション手順に従って対応する。",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d068",
+  "generated_answer": "当社のゼロトラストアーキテクチャは、NIST SP 800-207フレームワークに基づいています。ネットワーク上の位置に関係なく、ユーザー、デバイス、アプリケーションの継続的な検証を行います。主な機能は、アイデンティティ認識型プロキシ、リソースへのアクセス前のデバイスコンプライアンスチェック、マイクロセグメンテーション、ジャストインタイム型の特権アクセスです。ゼロトラストの成熟度は、公開されたロードマップに対して年次で評価しており、経営層に対して可視性を提供しています。\n\n[References: KB-0025]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.4410428578339995,
+  "sources_json": [
+   {
+    "id": "KB-0025",
+    "score": 0.4410428578339995
+   }
+  ],
+  "answerability": 2.4410428578339993,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:34.954Z",
+  "cited": [
+   "KB-0025"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The zero trust architecture is based on the NIST SP 800-207 framework.",
+    "supported": true
+   },
+   {
+    "claim": "The architecture enforces continuous verification of users, devices, and applications regardless of network location.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include identity-aware proxies.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include device compliance checks before resource access.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include microsegmentation.",
+    "supported": true
+   },
+   {
+    "claim": "Key capabilities include just-in-time privileged access.",
+    "supported": true
+   },
+   {
+    "claim": "Zero trust maturity is assessed annually against a published roadmap.",
+    "supported": true
+   },
+   {
+    "claim": "The annual maturity assessment provides visibility to executive management (board-level visibility).",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d069",
+  "generated_answer": "当社はメールプラットフォームを次の方法で保護しています。セキュアメールゲートウェイにより、フィッシング対策、マルウェア対策、スパムフィルタリングを実施しています。また、DMARC、DKIM、SPFのレコードを設定し、ドメインのなりすましを防止しています。高度な脅威対策では、添付ファイルとURLを隔離されたサンドボックス環境で検査し、不審なメールは隔離して確認します。さらに、セキュリティ意識向上トレーニングとしてフィッシング模擬訓練を実施し、利用者の注意力を高めています。\n\n[References: KB-0035]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.611477970987,
+  "sources_json": [
+   {
+    "id": "KB-0035",
+    "score": 0.611477970987
+   }
+  ],
+  "answerability": 2.611477970987,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:38.284Z",
+  "cited": [
+   "KB-0035"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "The company uses a secure email gateway that provides anti-phishing, anti-malware, and spam filtering.",
+    "supported": true
+   },
+   {
+    "claim": "The company configures DMARC, DKIM, and SPF records to prevent domain spoofing.",
+    "supported": true
+   },
+   {
+    "claim": "Advanced threat protection inspects attachments and URLs in isolated sandbox environments.",
+    "supported": true
+   },
+   {
+    "claim": "Suspicious emails are quarantined and reviewed.",
+    "supported": true
+   },
+   {
+    "claim": "Security awareness training includes phishing simulation exercises to increase user vigilance.",
+    "supported": true
+   }
+  ]
+ },
+ {
+  "id": "d070",
+  "generated_answer": "当社では、ソフトウェアサプライチェーンのセキュリティを次のように管理しています。CI/CDパイプラインにSoftware composition analysis (SCA)ツールを組み込み、デプロイ前にオープンソースおよびサードパーティのライブラリに含まれる既知の脆弱性を特定しています。すべての本番アプリケーションについてSoftware Bill of Materials (SBOM)を作成し、ソフトウェア資産インベントリで維持しています。ベンダーのソフトウェア評価では、ベンダー自身のSDLCセキュリティの慣行とSBOMの提供可否を確認しています。\n\n[References: KB-0048]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+  "confidence": 1,
+  "retrieval_score": 0.6356525739537111,
+  "sources_json": [
+   {
+    "id": "KB-0048",
+    "score": 0.6356525739537111
+   }
+  ],
+  "answerability": 2.635652573953711,
+  "verdict": "yes",
+  "gate": "translation",
+  "gate_reason": "Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.",
+  "language": "ja",
+  "embedding_model": "voyage-4",
+  "judge_model": "claude-haiku-5-5",
+  "draft_model": "claude-haiku-5-5",
+  "prompt_version": "draft-2026-10-23.1",
+  "calibration_set": "2026-10-22.3 (calibrate split)",
+  "draft_kind": "generated",
+  "processing_note": null,
+  "processed_at": "2026-10-23T05:07:41.502Z",
+  "cited": [
+   "KB-0048"
+  ],
+  "citesGold": true,
+  "claims": [
+   {
+    "claim": "SCAツールがCI/CDパイプラインに組み込まれている。",
+    "supported": true
+   },
+   {
+    "claim": "SCAツールは、デプロイ前にオープンソースおよびサードパーティのライブラリに含まれる既知の脆弱性を特定する。",
+    "supported": true
+   },
+   {
+    "claim": "すべての本番アプリケーションについてSBOMが作成されている。",
+    "supported": true
+   },
+   {
+    "claim": "SBOMはソフトウェア資産インベントリで維持されている。",
+    "supported": true
+   },
+   {
+    "claim": "ベンダーのソフトウェア評価では、ベンダー自身のSDLCセキュリティの慣行を確認している。",
+    "supported": true
+   },
+   {
+    "claim": "ベンダーのソフトウェア評価では、SBOMの提供可否を確認している。",
+    "supported": true
+   }
+  ]
+ }
+]
