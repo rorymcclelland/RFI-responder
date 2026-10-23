@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import Papa from 'papaparse';
 import type { KnowledgeEntry } from '../src/types';
 import { JUDGE_MAX_TOKENS, JUDGE_PROMPT_VERSION, UnreadableReplyError } from '../supabase/functions/_shared/answerability';
+import { GATE_MAX_TOKENS, GATE_PROMPT_VERSION } from '../supabase/functions/_shared/gates';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -114,3 +115,9 @@ export function stopReasonCounts(lists: string[][]): string {
   for (const r of lists.flat()) counts.set(r, (counts.get(r) ?? 0) + 1);
   return counts.size ? [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([r, n]) => `${r} ${n}`).join(', ') : 'none';
 }
+
+/** The gate classifier's cache follows its prompt version and reply limit too (Sprint 6 review). */
+export function gateCacheParts(model: string): string[] {
+  return [model, `${GATE_PROMPT_VERSION}-max${GATE_MAX_TOKENS}`];
+}
+

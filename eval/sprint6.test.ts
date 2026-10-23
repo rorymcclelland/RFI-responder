@@ -4,7 +4,7 @@
  */
 import { describe, expect, it, vi } from 'vitest';
 import { UnreadableReplyError } from '../supabase/functions/_shared/answerability';
-import { cachedCheck, judgeCacheParts, stopReasonCounts } from './lib';
+import { cachedCheck, gateCacheParts, judgeCacheParts, stopReasonCounts } from './lib';
 import { usableForCalibration } from './calibration-fit';
 
 const memory = <T>() => {
@@ -13,6 +13,10 @@ const memory = <T>() => {
 };
 
 describe('S6-1 test 7: evaluation caches', () => {
+  it('review finding 7: the gate cache path names the prompt version and the reply limit', () => {
+    expect(gateCacheParts('claude-haiku-5-5').join('/')).toMatch(/claude-haiku-5-5\/gate-2026-10-24\.1-max512/);
+  });
+
   it('the cache path names the judge prompt version and the reply limit', () => {
     const parts = judgeCacheParts('claude-haiku-5-5');
     expect(parts.join('/')).toMatch(/claude-haiku-5-5/);

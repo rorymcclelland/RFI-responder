@@ -16,7 +16,7 @@ import { join } from 'node:path';
 import { ROOT } from './lib';
 
 const MAX_WRONG = 0.02;
-interface Row { id: string; kind: string; language: string; method: string; topIsGold: boolean; verdict: string | null; similarity: number }
+interface Row { id: string; kind: string; language: string; method: string; topIsGold: boolean; verdict: string | null; similarity: number; unreadable?: boolean }
 
 const latest = (kind: string) => readdirSync(join(ROOT, 'docs/evals')).filter((f) => new RegExp(`^${kind}-.*\\.json$`).test(f)).sort().pop()!;
 const file = latest('answerability');
@@ -35,7 +35,8 @@ const lines = [
 const thresholds: Record<string, number> = {};
 
 for (const method of [...new Set(data.results.map((r) => r.method))]) {
-  const rows = data.results.filter((r) => r.method === method);
+  // An unreadable check never supersedes in the app (no verdict); left out rather than counted (Sprint 6 review).
+  const rows = data.results.filter((r) => r.method === method && !r.unreadable);
   const embedding = method.split(' + ')[0];
   const answerable = rows.filter((r) => r.kind === 'paraphrase' || r.kind === 'translation');
   const stats = (t: number, judge: boolean) => {

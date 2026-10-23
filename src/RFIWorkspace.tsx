@@ -232,11 +232,18 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       previous = q;
       return { ...q, ...patch };
     }));
-    saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).catch((err: Error) => {
-      if (previous) setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
+    saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).catch((err: Error & { partial?: boolean }) => {
       setUploadError(err.message);
+      // Part of the change is in the database (the answer, not the decision): show what was saved.
+      if (err.partial && sessionId) {
+        loadQuestions(supabase, sessionId).then(setQuestions).catch(() => {
+          if (previous) setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
+        });
+      } else if (previous) {
+        setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
+      }
     });
-  }, []);
+  }, [sessionId]);
 
   // The database records the approval (S3-2); show the same record at once rather than after a reload.
   const handleAccept   = useCallback((id: string, ans: string) => updateQuestion(id, {

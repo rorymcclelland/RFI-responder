@@ -18,9 +18,17 @@ export type CheckerVerdict = 'yes' | 'partly' | 'no';
 export function checkerSummary(
   checker: { verdict: CheckerVerdict | null; bestRef: string | null; reason: string | null },
   judgeModel: string | null,
+  confidence: number | null,
 ): { label: string; detail: string | null } | null {
-  if (!checker.verdict) return judgeModel ? { label: 'Not available', detail: null } : null;
+  if (!checker.verdict) {
+    // A reranker scores without a verdict; only a check that left no confidence has failed.
+    return judgeModel && confidence === null ? { label: 'Not available', detail: null } : null;
+  }
   const label = { yes: 'Yes', partly: 'Partly', no: 'No' }[checker.verdict];
+  if (checker.verdict === 'no' && !checker.reason) {
+    // Before Sprint 6 a reply that could not be read was stored as "no", with no reason.
+    return { label, detail: 'No reason recorded. Before 24 October 2026 a check that could not be read was recorded as No.' };
+  }
   const detail = [checker.bestRef, checker.reason].filter(Boolean).join(': ') || null;
   return { label, detail };
 }

@@ -424,7 +424,7 @@ export default function RFIQuestionCard({
 
           {/* The answerability checker's verdict and reason (Sprint 6, S6-3); plain text, never HTML. */}
           {(() => {
-            const checker = checkerSummary(question.checker, question.provenance.judgeModel);
+            const checker = checkerSummary(question.checker, question.provenance.judgeModel, question.confidence);
             if (!checker) return null;
             return (
               <div className="bg-ink-50 rounded-xl p-3 border border-ink-100">

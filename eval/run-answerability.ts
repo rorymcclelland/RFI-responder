@@ -82,12 +82,15 @@ async function main() {
         const cands = candidatesFor(kb, docVecs, q);
         const key = JSON.stringify([item.text, cands.map((e) => e.ref)]);
         const checked = await cachedCheck(cache, key, () => c.check(item.text, cands), { attempts: 4, waitMs: 5000 });
-        if (checked.ok && checked.fresh) calls++;
+        const topIsGold = Boolean(item.gold) && kb.find((e) => e.ref === cands[0]?.ref)?.question === item.gold;
+        // Every reply is a paid call, the judge's retry included (Sprint 6 review, finding 8).
+        if (checked.ok && checked.fresh) calls += checked.result.attempts ?? 1;
         if (!checked.ok) {
-          // An unreadable check leaves the question uncalibrated in the app: kept out of the fit, counted.
-          calls++;
+          // An unreadable check leaves the question uncalibrated in the app: kept out of the fit and
+          // the duplicates evaluation, counted here.
+          calls += checked.stopReasons.length;
           (unreadable[method] ??= []).push(checked.stopReasons);
-          results.push({ id: item.id, language: item.language, kind: item.kind, split: item.split, gold: item.gold, method, topScore: null, topIsGold: false, verdict: null, similarity: cands[0]?.similarity ?? 0, unreadable: true });
+          results.push({ id: item.id, language: item.language, kind: item.kind, split: item.split, gold: item.gold, method, topScore: null, topIsGold, verdict: null, similarity: cands[0]?.similarity ?? 0, unreadable: true });
           continue;
         }
         const r = checked.result;
@@ -95,7 +98,7 @@ async function main() {
         const score = r.verdict ? { no: 0, partly: 1, yes: 2 }[r.verdict] + Math.max(0, Math.min(1, cands[0]?.similarity ?? 0)) : r.score;
         results.push({
           id: item.id, language: item.language, kind: item.kind, split: item.split, gold: item.gold, method,
-          topScore: score, topIsGold: Boolean(item.gold) && kb.find((e) => e.ref === cands[0]?.ref)?.question === item.gold,
+          topScore: score, topIsGold,
           verdict: r.verdict ?? null, similarity: cands[0]?.similarity ?? 0,
         });
         process.stdout.write(`  ${method}: ${n + 1}/${set.items.length}\r`);

@@ -135,3 +135,23 @@ Order: S6-1, then S6-2 (needs S6-1; runs on Rory's PC); S6-3 to S6-7 are indepen
 | Q4 | Recompute on review, and check cited entries live at bulk approval |
 
 All seven stories are Ready.
+
+## Independent security review (24 October 2026)
+
+A reviewer given the code but not the reasoning found one serious issue and nine smaller ones; all are fixed with tests (`supabase/tests/db/sprint6.test.ts`, `supabase/functions/_shared/sprint6.test.ts`, `src/lib/sprint6.test.ts`, `eval/sprint6.test.ts`; migration `20261026120000_sprint6_review_fixes.sql`):
+
+1. **An owner could release other owners' held questions by exporting.** A question processed before its entry fell overdue had no gate, so exporting it confirmed the overdue entry, and the new release trigger then cleared holds in other responses. An owner's export now confirms an entry only if it is reviewed and current at that moment; otherwise only an admin's approval does.
+2. **Admins could write an entry's text and review date directly**, skipping `review_entry` and its log. Those column grants are removed for every signed-in user.
+3. **The card said "Not available" for a reranker's score**, which has no verdict but is calibrated; and old "no" verdicts, about a third of them cut-off replies, showed as plain "No". Now "Not available" means no confidence, and a "no" with no reason says it may predate the fix.
+4. **Trimming a reason could split an emoji**, leaving text the database rejects. Trimmed by character now.
+5. **An edit saved but not accepted was reported as "not saved"** and rolled back on screen. It now says the answer was saved but not accepted, and reloads.
+6. **The duplicates evaluation counted unreadable checks as wrong matches.** They are left out.
+7. **The gate evaluation cached the fail-safe and counted it as a catch.** The cache follows the reply limit, the fail-safe is not cached, and unreadable answers are counted separately.
+8. **The answerability cost line missed retries.** It counts every reply.
+9. **The release had no index and no lock order.** `cited_refs` is indexed, and the questions are locked in id order.
+10. **Repeated or blank cited refs read oddly.** Each is named once; a blank ref reads "an unknown entry" and still holds.
+
+Held, per the reviewer: no signed-in user can write `judge_reason` or a gate or call the private functions; the release only touches the two review gates, and only pending questions in open sessions; bulk approval only adds holds; the judge stops after two replies and never turns an unreadable reply into a verdict; links and the canary are withheld from reasons; model text is rendered as text.
+
+Residuals, recorded rather than fixed: if an admin reviews an entry while a question citing it is being processed, the question can be saved held and stays held until the entry is reviewed or confirmed again (fails safe). A reviewed entry that has since been replaced still counts as current for a draft that cites it (behaviour from Sprint 4; backlog item at the close).
+

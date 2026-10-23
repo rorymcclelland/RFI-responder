@@ -137,7 +137,8 @@ describe('6. access (role matrix, decision 0003)', () => {
   });
 
   it('a member cannot edit or delete entries; an admin can delete', async () => {
-    expect((await as(member, (q) => q(`UPDATE kb_entries SET answer = 'changed' WHERE id = $1`, [entryId]))).rowCount).toBe(0);
+    // Sprint 6 review: nobody edits the text or the review date directly; review_entry does (admin only).
+    await refused(as(member, (q) => q(`UPDATE kb_entries SET answer = 'changed' WHERE id = $1`, [entryId])));
     expect((await as(member, (q) => q('DELETE FROM kb_entries WHERE id = $1', [entryId]))).rowCount).toBe(0);
     expect((await as(admin, (q) => q('DELETE FROM kb_entries WHERE id = $1', [entryId]))).rowCount).toBe(1);
   });

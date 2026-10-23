@@ -7,6 +7,7 @@ import type { ClaudeClient, ClaudeResult } from './claude';
 import { claudeJudge, JUDGE_MAX_TOKENS, UnreadableReplyError, type CandidateEntry } from './answerability';
 import { classifierGate, GATE_MAX_TOKENS } from './gates';
 import { meteredClaude, type UsageRow } from './usage';
+import { safeNote } from './safe-text';
 import { processQuestions, type ProcessDeps } from './process-core';
 import type { MatchRow } from './sources';
 
@@ -141,5 +142,18 @@ describe('S6-1 in processing (test 2, end to end)', () => {
     expect(r.verdict).toBe('yes');
     expect(r.judge_reason).toBe('KB-0001 names it.');
     expect(r.confidence).not.toBeNull();
+  });
+});
+
+describe('Sprint 6 security review', () => {
+  it('finding 4: trimming never splits a character (no lone surrogates reach the database)', () => {
+    const t = safeNote('a'.repeat(298) + '😀😀');
+    expect(Array.from(t).length).toBeLessThanOrEqual(300);
+    expect(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(t)).toBe(false);
+  });
+
+  it('finding 7: the classifier says when its answer is the fail-safe', async () => {
+    expect(await classifierGate(scripted([cut, cut]), 'm', 'q')).toMatchObject({ category: 'legal', unreadable: true });
+    expect((await classifierGate(scripted([{ data: { category: 'legal', reason: 'liability' } }]), 'm', 'q')).unreadable).toBeUndefined();
   });
 });

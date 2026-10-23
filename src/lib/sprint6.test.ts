@@ -16,22 +16,32 @@ describe('S6-3 the checker on the card', () => {
   });
 
   it('summarises a verdict with its entry and reason', () => {
-    expect(checkerSummary({ verdict: 'partly', bestRef: 'KB-0012', reason: 'Covers monitoring, not regions.' }, 'claude-haiku-5-5'))
+    expect(checkerSummary({ verdict: 'partly', bestRef: 'KB-0012', reason: 'Covers monitoring, not regions.' }, 'claude-haiku-5-5', 0.7))
       .toEqual({ label: 'Partly', detail: 'KB-0012: Covers monitoring, not regions.' });
-    expect(checkerSummary({ verdict: 'no', bestRef: null, reason: null }, 'claude-haiku-5-5')).toEqual({ label: 'No', detail: null });
+    expect(checkerSummary({ verdict: 'no', bestRef: 'KB-0003', reason: 'Neither entry names a product.' }, 'claude-haiku-5-5', 0.2)).toEqual({ label: 'No', detail: 'KB-0003: Neither entry names a product.' });
   });
 
   it('3. a failed check reads "not available", never a verdict', () => {
-    expect(checkerSummary({ verdict: null, bestRef: null, reason: null }, 'claude-haiku-5-5')).toEqual({ label: 'Not available', detail: null });
+    expect(checkerSummary({ verdict: null, bestRef: null, reason: null }, 'claude-haiku-5-5', null)).toEqual({ label: 'Not available', detail: null });
   });
 
   it('4. no checker configured, or an old question with a verdict but no reason', () => {
-    expect(checkerSummary({ verdict: null, bestRef: null, reason: null }, null)).toBeNull();
-    expect(checkerSummary({ verdict: 'yes', bestRef: 'KB-0001', reason: null }, 'claude-haiku-5-5')).toEqual({ label: 'Yes', detail: 'KB-0001' });
+    expect(checkerSummary({ verdict: null, bestRef: null, reason: null }, null, 0.5)).toBeNull();
+    expect(checkerSummary({ verdict: 'yes', bestRef: 'KB-0001', reason: null }, 'claude-haiku-5-5', 0.9)).toEqual({ label: 'Yes', detail: 'KB-0001' });
+  });
+
+  it('review finding 3: a reranker gives a score but no verdict, which is not a failure', () => {
+    expect(checkerSummary({ verdict: null, bestRef: 'KB-0001', reason: null }, 'rerank-2.5', 0.84)).toBeNull();
+  });
+
+  it('review finding 3: a "no" with no reason may be a check recorded before the fix, and says so', () => {
+    const s = checkerSummary({ verdict: 'no', bestRef: null, reason: null }, 'claude-haiku-5-5', 0.75);
+    expect(s?.label).toBe('No');
+    expect(s?.detail).toMatch(/before 24 October 2026.*could not be read/i);
   });
 
   it('2. markup in a reason stays text (it is rendered by React, never as HTML)', () => {
-    const s = checkerSummary({ verdict: 'yes', bestRef: 'KB-0001', reason: '<img src=x onerror=alert(1)>' }, 'm');
+    const s = checkerSummary({ verdict: 'yes', bestRef: 'KB-0001', reason: '<img src=x onerror=alert(1)>' }, 'm', 0.9);
     expect(s?.detail).toBe('KB-0001: <img src=x onerror=alert(1)>');
   });
 });
@@ -48,6 +58,15 @@ describe('S6-5 a refused save is reported', () => {
   it('2. an error is reported as before', async () => {
     await expect(saveQuestionPatch(client(null, { message: 'boom' }).client, 'q1', { status: 'skipped' })).rejects.toThrow(/not saved: boom/);
   });
+  it('review finding 5: an answer saved but its approval refused says exactly that', async () => {
+    let call = 0;
+    const select = vi.fn(async () => (call++ === 0 ? { data: [{ id: 'q1' }], error: null } : { data: [], error: null }));
+    const c = { from: () => ({ update: () => ({ eq: () => ({ select }) }) }) } as never;
+    const err = await saveQuestionPatch(c, 'q1', { finalAnswer: 'x', status: 'accepted' }).catch((e) => e);
+    expect(err.message).toMatch(/edited answer was saved, but it was not accepted/);
+    expect(err.partial).toBe(true);
+  });
+
   it('3. one row updated: saved, and the updated row is asked for', async () => {
     const c = client([{ id: 'q1' }]);
     await expect(saveQuestionPatch(c.client, 'q1', { finalAnswer: 'x', status: 'accepted' })).resolves.toBeUndefined();

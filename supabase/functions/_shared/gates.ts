@@ -139,7 +139,7 @@ export async function classifierGate(
   client: ClaudeClient,
   model: string,
   question: string,
-): Promise<{ category: GateCategory | null; reason: string }> {
+): Promise<{ category: GateCategory | null; reason: string; unreadable?: true }> {
   // Sprint 6: one retry after an unreadable reply, then the existing fail-safe.
   for (let attempt = 1; attempt <= 2; attempt++) {
     const { data } = await client.json<{ category?: string; reason?: string }>({
@@ -154,7 +154,7 @@ export async function classifierGate(
     if (data?.category === 'none') return { category: null, reason };
     if (data?.category === 'legal') return { category: 'legal', reason };
   }
-  return { category: 'legal', reason: 'The classifier gave an unreadable answer, so the question is gated to be safe.' };
+  return { category: 'legal', reason: 'The classifier gave an unreadable answer, so the question is gated to be safe.', unreadable: true };
 }
 
 /** Both checks; gated if either fires. A classifier failure leaves the rules in charge and is reported. */

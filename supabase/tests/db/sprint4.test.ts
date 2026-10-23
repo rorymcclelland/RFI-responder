@@ -316,8 +316,11 @@ describe('S4-4 review dates, the overdue report and F-25', () => {
   });
 
   it('2. learning confirms only the entries the draft cited (F-25)', async () => {
-    const cited = await entry({ question: 'Cited entry (S4-4 t2)?', lastReviewedAt: '2025-01-01' });
-    const matched = await entry({ question: 'Matched only (S4-4 t2)?', lastReviewedAt: '2025-01-01' });
+    // Reviewed three months ago: current, so an owner's export may confirm it (an overdue entry
+    // needs an admin's approval, Sprint 6 security review finding 1).
+    const recent = new Date(Date.now() - 90 * 864e5).toISOString();
+    const cited = await entry({ question: 'Cited entry (S4-4 t2)?', lastReviewedAt: recent });
+    const matched = await entry({ question: 'Matched only (S4-4 t2)?', lastReviewedAt: recent });
     const s = await session(await response(owner.id));
     const id = await question(s, { sources: [cited.ref, matched.ref], cited: [cited.ref] });
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
