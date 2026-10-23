@@ -51,7 +51,7 @@ Refinement: `docs/refinement/sprint-0.md`
 | F-5 Split RFIWorkspace | Sprint 2 (drafting rewrite) |
 | F-6, F-7, F-11 | Sprint 3 (learning loop and readiness workflow); F-11 near-duplicates move there from Sprint 1, since supersession is where they matter |
 | F-3 Invite screen | Backlog (moved out of Sprint 4 at the Sprint 3 review; ranked 10th) |
-| F-8, F-10 | Backlog, ranked for Sprint 6 (publishing) at the Sprint 3 review |
+| F-8, F-10 | Backlog, ranked for Sprint 6 (publishing) at the Sprint 3 review; publishing moved to Sprint 7 at the Sprint 5 review |
 | F-4 Tailwind 4 | Backlog, low priority |
 
 ## Sprint 1: real retrieval and calibrated confidence (confirmed 22 October 2026)
@@ -253,7 +253,7 @@ An independent security review found seven issues, all fixed and tested (`202610
 |---|---|
 | Seven security review findings | Done in Sprint 4 (review) |
 | BUG-14 to BUG-16 | Done in Sprint 4 (review) |
-| F-27 No machine-readable AI marker on exported answers | Backlog; proposed for Sprint 6 (publishing, where the claims are made) |
+| F-27 No machine-readable AI marker on exported answers | Backlog; proposed for Sprint 6 (publishing, where the claims are made); publishing moved to Sprint 7 at the Sprint 5 review |
 | F-28 A review clears the gate only for questions processed afterwards | Backlog, from Sprint 4 build |
 | F-29 Reserved cost per question ($0.01) is about 20 times the measured cost ($0.0005), so the budget stops processing early | Proposed for Sprint 5 (quick win: set the default from measured usage) |
 | Judge scored the same question 99%+ (Sprint 3) and 75% (Sprint 4) | Evidence for F-22; F-22 proposed for Sprint 5 |
@@ -264,23 +264,68 @@ Refinement: `docs/refinement/sprint-5.md` (answers recorded 23 October). Each it
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S5-1 | Read a .docx safely in the browser: ordered text blocks (numbered paragraphs, headings, table cells), zip-bomb and size checks, no macros, nothing fetched | The brief's first ingestion format after spreadsheets; uploads are hostile (rule 6) | Ready, Sprint 5 |
-| S5-2 | Extract questions with Claude, keeping only those found verbatim in the document (multi-part questions split into parts, each checked), rules as fallback, inside the caps (20 documents a day) | Finding questions in prose needs AI; inventing or obeying must be impossible | Ready, Sprint 5 |
-| S5-3 | Preview to check and correct the found questions (edit, remove, add, merge parts) before saving | A person confirms the list before anything is processed | Ready, Sprint 5 |
-| S5-4 | Extraction evaluation (synthetic .docx in six layouts, about 250 questions) and red team; bars: recall and precision at least 95%, 100% traceable, no planted instruction changes the result | First time an LLM reads a whole untrusted document | Ready, Sprint 5 |
-| F-22 | Measure the checker's run-to-run variation (five runs on the calibration test split); mitigation refined at the close | The same question scored 99%+ and 75% in the Sprint 4 run | Ready, Sprint 5 |
-| F-26 | Close open assignments at export, kept for history | Small; workflow code open anyway | Ready, Sprint 5 |
-| F-29 | Reserve $0.002 per question and show the measured average | The budget otherwise stops processing about 20 times too early | Ready, Sprint 5 |
+| S5-1 | Read a .docx safely in the browser: ordered text blocks (numbered paragraphs, headings, table cells), zip-bomb and size checks, no macros, nothing fetched | The brief's first ingestion format after spreadsheets; uploads are hostile (rule 6) | Done, Sprint 5 (list starts capped, numbering read in one pass and inflation counted as it happens, after the security review) |
+| S5-2 | Extract questions with Claude, keeping only those found verbatim in the document (multi-part questions split into parts, each checked), rules as fallback, inside the caps (20 documents a day) | Finding questions in prose needs AI; inventing or obeying must be impossible | Done, Sprint 5 (the server uses the document's own numbers and reserves by size, after the security review) |
+| S5-3 | Preview to check and correct the found questions (edit, remove, add, merge parts) before saving | A person confirms the list before anything is processed | Done, Sprint 5 |
+| S5-4 | Extraction evaluation (synthetic .docx in six layouts, about 250 questions) and red team; bars: recall and precision at least 95%, 100% traceable, no planted instruction changes the result | First time an LLM reads a whole untrusted document | Done, Sprint 5 (recall and precision 100.0% on 237 questions; 0 of 4 red-team documents changed the result) |
+| F-22 | Measure the checker's run-to-run variation (five runs on the calibration test split); mitigation refined at the close | The same question scored 99%+ and 75% in the Sprint 4 run | Done, Sprint 5 (measured: the verdict changed for 23.2% of questions; the fix is folded into F-18 for Sprint 6) |
+| F-26 | Close open assignments at export, kept for history | Small; workflow code open anyway | Done, Sprint 5 (closed only by recording an export; closed assignments cannot be changed or deleted) |
+| F-29 | Reserve $0.002 per question and show the measured average | The budget otherwise stops processing about 20 times too early | Done, Sprint 5 |
 
 No spike: extraction quality is measured against agreed bars, and F-22 only measures.
 
-## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 4 review)
+All seven committed items closed as done; nothing returned to the backlog.
 
-(Sprint 5 is above.)
+### Sprint 5 review (23 October 2026)
 
-**Sprint 6: documentation and publish.** Architecture diagram, evaluation reports, governance pack refreshed, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match; F-27 (AI marker on exports), F-8 (leaked-password protection) and F-10 (narrow windows) before publishing.
+**Checks, with evidence.** CI green on `sprint-5`; 358 unit tests and 196 database tests at the close. Evaluation reports `docs/evals/extraction-2026-10-23.md` and `docs/evals/consistency-2026-10-23.md`, run on Rory's PC. End-to-end on Rory's PC with the synthetic `multipart-1.docx`, signed in as Sarah (admin):
 
-**Not yet in a sprint, ranked at the Sprint 4 review.** 1. F-18 judge says "no" to answerable questions (after F-22 measures how much is noise). 2. C-1 multilingual knowledge base. 3. F-28 recheck questions after an entry is reviewed. 4. F-16 calibration stability. 5. F-19 faithfulness judge on planted unfaithful drafts. 6. F-20 rerankers (needs a Voyage payment method). 7. F-2 generated database types. 8. F-3 invite screen. 9. F-14 and F-15 reviewed Japanese and near-miss items. 10. F-4 Tailwind 4.
+| Check (agreed at refinement) | Result | Held? |
+|---|---|---|
+| Extraction bars: recall and precision at least 95%, every question traceable, no planted instruction changes the result | Recall 100.0% and precision 100.0% on 237 known questions in 12 documents; nothing dropped as untraceable; customer numbers kept 100.0%; 0 of 4 red-team documents changed the result; no fallback to rules | Yes |
+| Preview: questions word for word, split into parts, joinable | 16 parts found with their numbers (1(a) to 10.) and the source text; joining 5(a) restored item 5 whole, numbered "5" | Yes |
+| Saved questions keep the customer's numbers through processing and export | 14 questions processed with their numbers on every card; the Word export lists them by the customer's numbers | Yes |
+| Assignments close at export and stay as history | Maya's assignment on 9(a) showed Closed after the export was recorded | Yes |
+| Reserve per question $0.002 with the measured average shown | Usage tab: measured $0.0001 per question over 68 processed, beside the $0.0020 reserve | Yes |
+| Extraction inside the caps | One `extract` call recorded and priced (£0.0005); the 20-a-day cap and size reservation tested in the database suite | Yes |
+| F-22 measured | Five runs on the test split (181 questions): verdict changed for 23.2%, 22.1% crossed the 80% bulk line, mean spread 7.1 points. Every change was on an answerable paraphrase or translation, between "yes" and "no"; no near miss changed and none crossed into bulk approval | Measured (see decision below) |
+
+An independent security review found five issues, all fixed and tested (`20261025130000_sprint5_review_fixes.sql`; the Sprint 5 refinement lists them). The serious one: a list format or customer number could carry markup into the Word export.
+
+**Bugs found and fixed in the sprint.** BUG-17: the Usage tab did not list the Word-document limits, so changing the 20-a-day cap needed SQL; both are now on the Limits list. BUG-18: the upload step strip said "CSV or Excel".
+
+**Decisions at the review.** F-22: run the checker three times per question and use the majority verdict, folded into F-18 (Rory, 23 October). Sprint 6 is checker reliability; documentation and publishing move to Sprint 7, so the published figures are stable.
+
+### Where every Sprint 5 review item now lives
+
+| Item | Now |
+|---|---|
+| Five security review findings | Done in Sprint 5 (review) |
+| BUG-17, BUG-18 | Done in Sprint 5 (review) |
+| F-22 mitigation (majority of three) | Folded into F-18; proposed for Sprint 6 |
+| F-30 After "All eligible", an accepted card reads "bulk at 0%" | Backlog, from Sprint 5 review; proposed for Sprint 6 |
+| F-31 The Sent list of assignments does not say who each question went to | Backlog, from Sprint 5 review; proposed for Sprint 6 |
+
+## Sprint 6: checker reliability (proposed at the Sprint 5 review, 23 October 2026)
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| F-18 | The checker runs three times per question and the majority verdict decides the draft and the confidence (F-22's fix); its prompt reviewed for answerable questions it refuses; the verdict shown on the card | 23.2% of verdicts changed between runs, all on answerable questions; the figures published in Sprint 7 should be stable | Proposed |
+| F-18 (evaluation) | Recalibrate on the majority verdict and rerun answerability, calibration and consistency; bars agreed at refinement | Confidence is calibrated on the checker's output, so changing it means recalibrating | Proposed |
+| F-28 | Recheck questions already processed when an entry they cite is reviewed | Same processing code; otherwise a reviewed entry leaves old questions held | Proposed |
+| F-9 | Single accept, edit and skip check for errors | A failed save is silent; review screen open anyway | Proposed |
+| F-30 | Bulk acceptance labelled by how it was done ("bulk, all eligible") | Small; same card | Proposed |
+| F-31 | The Sent list names the assignee | Small; workflow screens | Proposed |
+
+No spike.
+
+## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 5 review)
+
+(Sprint 6 is above.)
+
+**Sprint 7: documentation and publish.** Architecture diagram, evaluation reports, governance pack refreshed, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match; F-27 (AI marker on exports), F-8 (leaked-password protection) and F-10 (narrow windows) before publishing.
+
+**Not yet in a sprint, ranked at the Sprint 5 review.** 1. F-16 calibration stability (Sprint 6 recalibrates anyway; can join it if refinement finds it small). 2. C-1 multilingual knowledge base. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items. 5. F-20 rerankers (needs a Voyage payment method). 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -288,7 +333,7 @@ No spike: extraction quality is measured against agreed bars, and F-22 only meas
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 onwards from Sprint 4; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 onwards from Sprint 5; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -308,18 +353,20 @@ No spike: extraction quality is measured against agreed bars, and F-22 only meas
 | F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
 | F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
 | F-17 | High confidence is shown as "100%" | Done, Sprint 3. From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
-| F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | From the Sprint 2 review; judge prompt, and showing the verdict on the card |
+| F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | From the Sprint 2 review; judge prompt, and showing the verdict on the card. Sprint 5 review: F-22's fix (majority of three runs) folded in; proposed for Sprint 6 |
 | F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
 | F-20 | Voyage rerank-2.5 and rerank-3 not yet compared with the Claude judge | Returned from S2-1; needs a Voyage payment method for the rate limit. Cheaper and faster if as good |
 | F-21 | No per-user rate limit or cost cap on processing | Done, Sprint 4 (S4-1). From the Sprint 2 security review |
-| F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | From the Sprint 2 review; accepted residual of S2-5 (r028) |
+| F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | Done, Sprint 5 (measured: 23.2% of verdicts changed over five runs). From the Sprint 2 review; the fix is folded into F-18 |
 | F-23 | The review screen has no way to start a new upload | Done, Sprint 3. Found in the Sprint 2 end-to-end run |
 | F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | Done, Sprint 4. From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Sprint 4: Rory chose to fix it rather than accept it |
 | F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | Done, Sprint 4. From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
-| F-26 | Assignments stay open after a response is exported or archived | From the Sprint 3 end-to-end run; close them at export, or show them as closed |
+| F-26 | Assignments stay open after a response is exported or archived | Done, Sprint 5. From the Sprint 3 end-to-end run; close them at export, or show them as closed |
 | F-27 | Exported answers carry no machine-readable marker that a model drafted them (EU AI Act Article 50(2) may apply to the provider) | From Sprint 4's framework check (`docs/governance/FRAMEWORKS.md`) |
 | F-28 | Reviewing an entry clears the review gate only for questions processed afterwards; questions already processed keep it until reprocessed | From the Sprint 4 build |
-| F-29 | Each question reserves $0.01 against the budget; measured cost is about $0.0005, so with the defaults processing stops after about 1,000 questions a month while real spend is around 50p | From the Sprint 4 end-to-end run; set the default from measured usage |
+| F-29 | Each question reserves $0.01 against the budget; measured cost is about $0.0005, so with the defaults processing stops after about 1,000 questions a month while real spend is around 50p | Done, Sprint 5. From the Sprint 4 end-to-end run; set the default from measured usage |
+| F-30 | After "All eligible", an accepted card reads "bulk at 0%" | From the Sprint 5 end-to-end run; say how it was bulk-accepted |
+| F-31 | The Sent list of assignments does not say who each question went to | From the Sprint 5 end-to-end run |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked

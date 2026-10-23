@@ -10,8 +10,9 @@ RFI Respond drafts answers to procurement questionnaires (RFIs and RFQs) from an
 | Check whether the entries answer the question (judge) | claude-haiku-5-5 | claude-haiku-5-5 | `process-questions` | `judge_model` |
 | Flag pricing and legal questions (gate classifier, alongside rules) | claude-haiku-5-5 | claude-haiku-5-5 | `process-questions` | `gate_reason` |
 | Draft the answer from the entries | claude-haiku-5-5 | claude-haiku-5-5 | `process-questions` | `draft_model`, `prompt_version` |
+| Find the questions in an uploaded Word document | claude-haiku-5-5 (rules if it fails) | claude-haiku-5-5 (rules if it fails) | `extract-questions` | returned to the preview with the prompt version |
 
-Choices and reasons: decisions [0005](../decisions/0005-where-the-ai-runs.md), [0006](../decisions/0006-retrieval-defaults.md) and [0007](../decisions/0007-answerability-and-drafting-defaults.md). Prompts carry a version (`draft-2026-10-23.1`, `judge-2026-10-22.1`); every processed question stores the models, the prompt version and the calibration set behind its confidence.
+Choices and reasons: decisions [0005](../decisions/0005-where-the-ai-runs.md), [0006](../decisions/0006-retrieval-defaults.md) and [0007](../decisions/0007-answerability-and-drafting-defaults.md). Prompts carry a version (`draft-2026-10-23.1`, `judge-2026-10-22.1`, `extract-2026-10-23.2`); every processed question stores the models, the prompt version and the calibration set behind its confidence.
 
 ## What the output is
 
@@ -37,6 +38,11 @@ From the reports in `docs/evals/` (evaluation set 2026-10-22.3, synthetic; Japan
 | Near misses given no draft | 100.0% | `docs/evals/drafting-2026-10-23.md` |
 | Prompt injections that changed a decision | 1 of 35 | `docs/evals/redteam-2026-10-23.md` |
 | Wrong supersessions at the learning threshold (voyage-4) | 1.9% | `docs/evals/duplicates-2026-10-23.md` |
+| Word extraction recall, synthetic documents | 100.0% | `docs/evals/extraction-2026-10-23.md` |
+| Word extraction precision, synthetic documents | 100.0% | `docs/evals/extraction-2026-10-23.md` |
+| Red-team Word documents that changed the result | 0 of 4 | `docs/evals/extraction-2026-10-23.md` |
+| Checker verdict changed across five runs (test split) | 23.2% | `docs/evals/consistency-2026-10-23.md` |
+| Questions whose confidence crossed the 80% bulk line across five runs | 22.1% | `docs/evals/consistency-2026-10-23.md` |
 
 ## Known limits
 
@@ -45,7 +51,8 @@ From the reports in `docs/evals/` (evaluation set 2026-10-22.3, synthetic; Japan
 - **The judge sometimes says "no" to answerable questions** (F-18), so a question can show a middling confidence beside a refusal.
 - **Japanese** evaluation items are machine translations nobody has checked (F-14); Japanese drafts are labelled and always reviewed individually.
 - **The faithfulness judge** has only been checked on faithful drafts (F-19).
-- **The judge's consistency across repeated runs is unmeasured** (F-22).
+- **The judge is not consistent across repeated runs** (F-22): over five runs its verdict changed for 23.2% of test questions, every one an answerable question moving between "yes" and "no"; no near miss changed. Sprint 6 takes the majority of three runs (folded into F-18).
+- **Word extraction** is measured on 12 synthetic documents in six layouts and 4 red-team copies; real questionnaires are messier. A question split across non-adjacent paragraphs is missed, and can be added in the preview.
 
 ## Must not be used for
 

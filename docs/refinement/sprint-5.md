@@ -161,3 +161,7 @@ A reviewer given the code but not the reasoning found five issues, all reproduce
 5. **A closed assignment could be deleted and recreated open.** Closed assignments can no longer be deleted, except with their response.
 
 Also fixed: the prompt canary was added twice. Held, per the reviewer: the reservation order and the 20-a-day cap, the closed-assignment guard, `customer_ref` rights, every new `SECURITY DEFINER` function's checks, React escaping in the preview and card, formula neutralising in CSV and Excel, the reader's linear tokenizer and refusals.
+
+## Close (23 October 2026)
+
+All seven items done; nothing returned. The agreed bars held: extraction recall and precision 100.0% on 237 questions, every question traceable, 0 of 4 red-team documents changed the result (`docs/evals/extraction-2026-10-23.md`). F-22 measured the checker's run-to-run variation: the verdict changed for 23.2% of test questions over five runs, all answerable ones (`docs/evals/consistency-2026-10-23.md`). Rory chose to fix it by taking the majority of three runs, folded into F-18 for Sprint 6. The end-to-end run found two small gaps, fixed in the sprint (the Word-document limits missing from the Usage tab, and the upload step's wording), and two left for Sprint 6 (F-30, F-31). Details: `docs/BACKLOG.md`, Sprint 5 review.
