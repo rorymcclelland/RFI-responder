@@ -82,3 +82,8 @@ A fourth reviewer probed the Sprint 4 changes (usage caps, entry review, review 
 ## Independent review, Sprint 5 (23 October 2026)
 
 A fifth reviewer probed Word ingestion. Access rules held (customer numbers insert-only, closed assignments guarded, reservations service-role only); the findings were about hostile documents and one gap in the assignment guard (a closed assignment could be deleted and recreated). All five are fixed and listed in `docs/refinement/sprint-5.md`.
+
+## Sprint 6 (24 October 2026)
+
+- `rfi_questions.judge_reason` is written only by `process-questions` (service role); signed-in users have no grant on it and a length check limits it to 300 characters.
+- A question's review gate (`unreviewed_source`, `stale_source`) now also changes outside processing, but only in two places, both in the `private` schema signed-in users cannot reach: a trigger on `kb_entries` releases or updates the gate of pending questions in open responses when an entry is reviewed or confirmed, and `bulk_accept` applies the same check before approving. Accepted, skipped, exported and archived questions are never changed; every change is logged (`question.released`, `question.held`). Tested in `supabase/tests/db/sprint6.test.ts`.
