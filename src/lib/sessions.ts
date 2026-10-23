@@ -24,7 +24,7 @@ export async function bulkAcceptInDb(client: SupabaseClient, sessionId: string, 
 export function describeBulk(r: BulkResult, threshold: number): string {
   const parts = [`${r.accepted} accepted`];
   if (r.belowThreshold) parts.push(`${r.belowThreshold} below ${Math.round(threshold * 100)}%`);
-  if (r.heldGated) parts.push(`${r.heldGated} held back for individual review (pricing, legal, unchecked or translated)`);
+  if (r.heldGated) parts.push(`${r.heldGated} held back for individual review (pricing, legal, unchecked, translated, or citing an entry that is unreviewed or overdue for review)`);
   if (r.heldUncalibrated) parts.push(`${r.heldUncalibrated} without calibrated confidence`);
   if (r.heldNoDraft) parts.push(`${r.heldNoDraft} with no draft to approve`);
   return `${parts.join('; ')}.`;

@@ -265,3 +265,58 @@ describe('security review findings (Sprint 2)', () => {
     expect(r.language).toBe('ja');
   });
 });
+
+describe('Sprint 4: the entries a draft cites, and holding drafts on unreviewed or overdue entries (S4-3, S4-4)', () => {
+  const status = (m: Record<string, { reviewed: boolean; overdueSince?: string | null }>) =>
+    vi.fn(async (refs: string[]) => new Map(refs.filter((r) => m[r]).map((r) => [r, { reviewed: m[r].reviewed, overdueSince: m[r].overdueSince ?? null }])));
+
+  it('saves the entries a generated draft cited, not everything matched', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ sourceStatus: status({ 'KB-0001': { reviewed: true } }) }));
+    expect(r.cited_refs).toEqual(['KB-0001']);
+    expect(r.gate).toBeNull();
+  });
+
+  it('S4-3 test 2: a draft citing an unreviewed entry is gated, with the entry named', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ sourceStatus: status({ 'KB-0001': { reviewed: false } }) }));
+    expect(r.gate).toBe('unreviewed_source');
+    expect(r.gate_reason).toMatch(/KB-0001.*not reviewed/);
+    expect(r.draft_kind).toBe('generated');
+  });
+
+  it('S4-4 test 3: a draft citing an entry overdue for review is gated, with the date', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ sourceStatus: status({ 'KB-0001': { reviewed: true, overdueSince: '2026-09-01' } }) }));
+    expect(r.gate).toBe('stale_source');
+    expect(r.gate_reason).toMatch(/KB-0001.*overdue for review since 2026-09-01/);
+  });
+
+  it('an earlier gate (pricing, legal, translation) is kept; review status does not replace it', async () => {
+    const claude = fakeClaude({ gate: { category: 'legal', reason: 'liability' } });
+    const [r] = await processQuestions([q('Do you accept unlimited liability?')], deps({ claude, sourceStatus: status({ 'KB-0001': { reviewed: false } }) }));
+    expect(r.gate).toBe('legal');
+  });
+
+  it('assembled drafts cite the entries they were assembled from', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ drafter: null, sourceStatus: status({ 'KB-0001': { reviewed: true }, 'KB-0002': { reviewed: false } }) }));
+    expect(r.draft_kind).toBe('assembled');
+    expect(r.cited_refs.length).toBeGreaterThan(0);
+  });
+
+  it('no draft means nothing cited and no review gate', async () => {
+    const claude = fakeClaude({ gate: { category: 'pricing', reason: 'price' } });
+    const [r] = await processQuestions([q('What does it cost?')], deps({ claude, sourceStatus: status({}) }));
+    expect(r.cited_refs).toEqual([]);
+    expect(r.gate).toBe('pricing');
+  });
+
+  it('fails closed: if the review status cannot be read, the question is marked unchecked', async () => {
+    const sourceStatus = vi.fn(async () => { throw new Error('db down'); });
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ sourceStatus }));
+    expect(r.gate).toBe('unchecked');
+    expect(r.gate_reason).toMatch(/review status/);
+  });
+
+  it('a cited ref the status lookup does not know (deleted meanwhile) is treated as unreviewed', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ sourceStatus: status({}) }));
+    expect(r.gate).toBe('unreviewed_source');
+  });
+});

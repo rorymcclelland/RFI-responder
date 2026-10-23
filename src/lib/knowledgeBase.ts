@@ -22,7 +22,7 @@ export type NewEntry = Omit<KnowledgeEntry, 'id'>;
 export async function loadKnowledgeBase(): Promise<KnowledgeEntry[]> {
   const { data, error } = await supabase
     .from('kb_entries')
-    .select('ref, question, answer, tags, source')
+    .select('ref, question, answer, tags, source, reviewed_at')
     .is('superseded_by', null)
     .order('seq', { ascending: true });
   if (error) throw new Error(`Could not load the knowledge base: ${error.message}`);
@@ -32,6 +32,7 @@ export async function loadKnowledgeBase(): Promise<KnowledgeEntry[]> {
     answer: r.answer as string,
     tags: (r.tags as string[] | null) ?? [],
     source: (r.source as string) || undefined,
+    reviewed: r.reviewed_at !== null,
   }));
 }
 

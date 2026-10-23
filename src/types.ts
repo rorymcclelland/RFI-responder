@@ -6,6 +6,8 @@ export interface KnowledgeEntry {
   answer: string;
   tags: string[];
   source?: string;
+  /** Sprint 4: false until an admin has reviewed an entry a member added. */
+  reviewed?: boolean;
 }
 
 export interface RetrievedSource {
@@ -81,7 +83,7 @@ export interface RFIQuestion {
   learnOutcome: string | null;
 }
 
-export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation';
+export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source';
 export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
 
 export interface RFISession {

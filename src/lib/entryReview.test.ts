@@ -1,0 +1,75 @@
+// Sprint 4, S4-3: adding entries by hand and the admin review queue.
+import { describe, expect, it, vi } from 'vitest';
+import { addEntry, describeOrigin, loadEntriesToReview, parseTags, reviewEntry, validateEntry } from './entryReview';
+
+const entry = { question: 'Do you use MFA?', answer: 'Yes, for all staff.', tags: ['MFA'], source: 'Policy v2' };
+
+describe('validateEntry', () => {
+  it('accepts a normal entry', () => expect(validateEntry(entry)).toBeNull());
+  it.each([
+    [{ ...entry, question: '  ' }, /question/],
+    [{ ...entry, answer: '' }, /answer/],
+    [{ ...entry, answer: 'x'.repeat(20001) }, /too long/],
+    [{ ...entry, source: 'x'.repeat(501) }, /source/],
+  ])('refuses %#', (e, message) => expect(validateEntry(e)).toMatch(message));
+});
+
+describe('parseTags', () => {
+  it('splits on commas, trims and drops blanks and repeats', () => {
+    expect(parseTags(' MFA, identity,,MFA ')).toEqual(['MFA', 'identity']);
+  });
+});
+
+describe('addEntry', () => {
+  const client = (result: unknown) => {
+    const insert = vi.fn(() => ({ select: () => ({ single: () => Promise.resolve(result) }) }));
+    return { c: { from: () => ({ insert }) } as never, insert };
+  };
+  it('inserts as manual, trimmed, and reports whether it starts reviewed', async () => {
+    const { c, insert } = client({ data: { ref: 'KB-0200', reviewed_at: null }, error: null });
+    expect(await addEntry(c, { ...entry, question: ' Do you use MFA? ' })).toEqual({ ref: 'KB-0200', reviewed: false });
+    expect(insert).toHaveBeenCalledWith({ question: 'Do you use MFA?', answer: 'Yes, for all staff.', tags: ['MFA'], source: 'Policy v2', origin: 'manual' });
+  });
+  it('explains a duplicate question', async () => {
+    const { c } = client({ data: null, error: { code: '23505', message: 'duplicate key' } });
+    await expect(addEntry(c, entry)).rejects.toThrow(/already exists/);
+  });
+  it('does not send an invalid entry', async () => {
+    const { c, insert } = client({ data: null, error: null });
+    await expect(addEntry(c, { ...entry, answer: '' })).rejects.toThrow(/answer/);
+    expect(insert).not.toHaveBeenCalled();
+  });
+});
+
+describe('the review queue', () => {
+  it('loads unreviewed current entries with who added them', async () => {
+    const order = vi.fn().mockResolvedValue({
+      data: [{ id: 'e1', ref: 'KB-0201', question: 'Q', answer: 'A', tags: null, source: '', origin: 'import', origin_ref: 'answers.csv',
+        created_at: '2026-10-24T09:00:00Z', added_by: { display_name: 'Tom Richardson' } }],
+      error: null,
+    });
+    const is2 = vi.fn(() => ({ order }));
+    const is1 = vi.fn(() => ({ is: is2 }));
+    const c = { from: () => ({ select: () => ({ is: is1 }) }) } as never;
+    const [e] = await loadEntriesToReview(c);
+    expect(is1).toHaveBeenCalledWith('reviewed_at', null);
+    expect(is2).toHaveBeenCalledWith('superseded_by', null);
+    expect(e).toMatchObject({ ref: 'KB-0201', addedBy: 'Tom Richardson', tags: [] });
+    expect(describeOrigin(e)).toBe('Imported by Tom Richardson from answers.csv');
+  });
+
+  it('reviews through review_entry, with or without edits, and reports a refusal', async () => {
+    const rpc = vi.fn().mockResolvedValue({ error: null });
+    await reviewEntry({ rpc } as never, 'e1');
+    expect(rpc).toHaveBeenCalledWith('review_entry', { p_entry: 'e1', p_question: null, p_answer: null });
+    await reviewEntry({ rpc } as never, 'e1', { answer: 'Corrected.' });
+    expect(rpc).toHaveBeenLastCalledWith('review_entry', { p_entry: 'e1', p_question: null, p_answer: 'Corrected.' });
+    const refusing = vi.fn().mockResolvedValue({ error: { message: 'Only an admin can review knowledge-base entries' } });
+    await expect(reviewEntry({ rpc: refusing } as never, 'e1')).rejects.toThrow(/not saved: Only an admin/);
+  });
+
+  it('says plainly where a learned entry came from', () => {
+    expect(describeOrigin({ origin: 'response', originRef: 'response:x', addedBy: 'Maya Patel' }))
+      .toMatch(/approved by Maya Patel, who is not the response owner or an admin/);
+  });
+});

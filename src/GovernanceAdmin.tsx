@@ -4,14 +4,15 @@
  * lets an admin change the settings.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, BarChart3, RefreshCw, Save } from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle2, Pencil, RefreshCw, Save } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import {
   formatGbp, loadUsageAdmin, loadUsageStatus, saveSettings,
   type AiPrice, type AiSettings, type SettingsChange, type UsageReport, type UsageStatus,
 } from './lib/usage';
+import { describeOrigin, loadEntriesToReview, reviewEntry, type EntryForReview } from './lib/entryReview';
 
-type Tab = 'usage';
+type Tab = 'usage' | 'review';
 
 export default function GovernanceAdmin() {
   const [tab, setTab] = useState<Tab>('usage');
@@ -22,7 +23,7 @@ export default function GovernanceAdmin() {
         <p className="text-sm text-ink-500 mt-1">What the AI costs and what limits it, and the state of the knowledge base. Admins only.</p>
       </div>
       <div className="flex gap-2 border-b border-ink-100" role="tablist">
-        {([['usage', 'Usage and limits']] as [Tab, string][]).map(([key, label]) => (
+        {([['usage', 'Usage and limits'], ['review', 'Entries to review']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             role="tab"
@@ -35,6 +36,7 @@ export default function GovernanceAdmin() {
         ))}
       </div>
       {tab === 'usage' && <UsageTab />}
+      {tab === 'review' && <ReviewTab />}
     </div>
   );
 }
@@ -190,6 +192,86 @@ function UsageTab() {
           </tbody>
         </table>
         <p className="text-xs text-ink-400 mt-2">Local models (Ollama) cost nothing and are recorded at £0. Set spending limits in the providers' own consoles as well.</p>
+      </div>
+    </div>
+  );
+}
+
+/** S4-3: entries added by members (or learned from an assignee's answer) waiting for an admin. */
+function ReviewTab() {
+  const [entries, setEntries] = useState<EntryForReview[] | null>(null);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const load = useCallback(async () => {
+    setError('');
+    try {
+      setEntries(await loadEntriesToReview(supabase));
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const approve = async (e: EntryForReview, edits?: { question: string; answer: string }) => {
+    setError(''); setNotice('');
+    try {
+      await reviewEntry(supabase, e.id, edits);
+      setNotice(`${e.ref} reviewed${edits ? ' with corrections' : ''}. Questions processed from now on can cite it in bulk-approvable drafts.`);
+      await load();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  if (!entries) return error ? <p className="text-sm text-coral-600">{error}</p> : <p className="text-sm text-ink-400">Loading…</p>;
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-ink-500">
+        Entries added by team members go into the knowledge base at once, but drafts that cite them are never bulk-approved until an admin reviews them here.
+      </p>
+      {error && <p className="text-sm text-coral-600 flex items-center gap-2"><AlertTriangle size={14} /> {error}</p>}
+      {notice && <p className="text-sm text-emerald-700">{notice}</p>}
+      {entries.length === 0 ? (
+        <div className="card p-6 text-center text-sm text-ink-500"><CheckCircle2 size={16} className="inline mr-1 text-emerald-600" /> Nothing waiting for review.</div>
+      ) : entries.map((e) => <ReviewCard key={e.id} entry={e} onApprove={approve} />)}
+    </div>
+  );
+}
+
+function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e: EntryForReview, edits?: { question: string; answer: string }) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [question, setQuestion] = useState(entry.question);
+  const [answer, setAnswer] = useState(entry.answer);
+  return (
+    <div className="card p-5 space-y-2">
+      <div className="flex items-center gap-2 text-xs text-ink-500">
+        <span className="font-bold text-ink-700 bg-ink-50 border border-ink-100 px-2 py-0.5 rounded-full">{entry.ref}</span>
+        <span>{describeOrigin(entry)}, {new Date(entry.createdAt).toLocaleDateString()}</span>
+      </div>
+      {editing ? (
+        <div className="space-y-2">
+          <textarea className="input min-h-[60px]" value={question} onChange={(ev) => setQuestion(ev.target.value)} aria-label="Question" />
+          <textarea className="input min-h-[120px]" value={answer} onChange={(ev) => setAnswer(ev.target.value)} aria-label="Answer" />
+        </div>
+      ) : (
+        <>
+          <p className="text-sm font-bold text-ink-800">{entry.question}</p>
+          <p className="text-sm text-ink-600 whitespace-pre-wrap">{entry.answer}</p>
+        </>
+      )}
+      {entry.source && <p className="text-xs text-ink-400">Source: {entry.source}</p>}
+      <div className="flex justify-end gap-2 pt-1">
+        {editing ? (
+          <>
+            <button onClick={() => { setEditing(false); setQuestion(entry.question); setAnswer(entry.answer); }} className="btn-ghost text-sm">Cancel</button>
+            <button onClick={() => onApprove(entry, { question, answer })} className="btn-primary text-sm"><CheckCircle2 size={14} /> Save corrections and approve</button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setEditing(true)} className="btn-ghost text-sm"><Pencil size={13} /> Correct</button>
+            <button onClick={() => onApprove(entry)} className="btn-primary text-sm"><CheckCircle2 size={14} /> Approve</button>
+          </>
+        )}
       </div>
     </div>
   );

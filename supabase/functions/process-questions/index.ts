@@ -93,6 +93,13 @@ serve(async (req) => {
     classifier: claude ? { client: meteredClaude(claude, 'gate', usage), model: env.GATE_MODEL ?? 'claude-haiku-5-5' } : null,
     drafter: claude ? { client: meteredClaude(claude, 'draft', usage), model: env.DRAFT_MODEL ?? 'claude-haiku-5-5' } : null,
     tables: CALIBRATION_TABLES,
+    // Sprint 4 (S4-3, S4-4): drafts citing unreviewed or overdue entries are held from bulk approval.
+    async sourceStatus(refs) {
+      const { data, error } = await admin.rpc('entry_review_status', { p_refs: refs });
+      if (error) throw new Error('review status unavailable');
+      const rows = (data ?? []) as { ref: string; reviewed: boolean; overdue_since: string | null }[];
+      return new Map(rows.map((r) => [r.ref, { reviewed: r.reviewed, overdueSince: r.overdue_since }]));
+    },
   });
 
   await recordUsage(admin, user.id, 'process-questions', sessionId, usage);

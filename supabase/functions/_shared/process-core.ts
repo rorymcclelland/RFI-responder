@@ -18,7 +18,7 @@ import { HttpError } from './errors.ts';
 import { gateQuestion } from './gates.ts';
 import { selectDraftSources, type MatchRow, type Source } from './sources.ts';
 
-export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation';
+export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source';
 export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
 
 export interface QuestionIn {
@@ -46,6 +46,8 @@ export interface ProcessedQuestion {
   prompt_version: string | null;
   calibration_set: string | null;
   draft_kind: DraftKind;
+  /** The entries the draft actually cites (Sprint 4): what learning confirms and review gates check. */
+  cited_refs: string[];
   processing_note: string | null;
   processed_at: string;
 }
@@ -59,6 +61,11 @@ export interface ProcessDeps {
   classifier: { client: ClaudeClient; model: string } | null;
   drafter: { client: ClaudeClient; model: string } | null;
   tables: Record<string, CalibrationTable>;
+  /**
+   * Review state of the cited entries (Sprint 4, S4-3 and S4-4). A ref missing from the map is
+   * treated as unreviewed. Throwing marks the question unchecked. Omitted: no review gates.
+   */
+  sourceStatus?: (refs: string[]) => Promise<Map<string, { reviewed: boolean; overdueSince: string | null }>>;
   /** How many questions are worked on at once (provider rate limits). */
   concurrency?: number;
   now?: () => string;
@@ -80,6 +87,9 @@ export function validateProcessRequest(body: unknown): { sessionId: string; ques
 }
 
 /** Japanese if it contains kana or kanji, after folding half-width katakana (NFKC, security review). */
+/** The entries an assembled draft is built from (as draftAnswer uses them). */
+const assembledFrom = (sources: Source[]) => sources.filter((s) => s.score > 0).map((s) => s.entry.id);
+
 export const languageOf = (text: string): 'en' | 'ja' => (/[぀-ヿ一-鿿]/.test(text.normalize('NFKC')) ? 'ja' : 'en');
 
 /** Run `fn` over `items`, at most `limit` at a time, keeping order. */
@@ -161,6 +171,7 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
 
     let text: string;
     let kind: DraftKind;
+    let cited: string[] = [];
     let draftModel: string | null = null;
     let promptVersion: string | null = null;
     if (gateValue === 'pricing') {
@@ -177,6 +188,7 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
         const d = await draftGrounded({ client: deps.drafter.client, model: deps.drafter.model, question: q.question, language, sources });
         text = d.text;
         kind = d.kind;
+        cited = d.citations;
         draftModel = d.model;
         promptVersion = d.promptVersion;
         if (d.rejected) notes.push(`A draft was not offered: ${d.rejected}.`);
@@ -184,10 +196,32 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
         notes.push('Drafting was unavailable, so this draft is assembled from the entries, not generated.');
         text = draftAnswer(sources);
         kind = 'assembled';
+        cited = assembledFrom(sources);
       }
     } else {
       text = draftAnswer(sources);
       kind = 'assembled';
+      cited = assembledFrom(sources);
+    }
+
+    // Sprint 4: a draft resting on an entry nobody has reviewed, or one overdue for review, is
+    // never bulk-approved. An earlier gate (pricing, legal, translation, unchecked) is kept.
+    if (!gateValue && cited.length > 0 && deps.sourceStatus) {
+      try {
+        const states = await deps.sourceStatus(cited);
+        const unreviewed = cited.filter((r) => !states.get(r)?.reviewed);
+        const overdue = cited.filter((r) => states.get(r)?.reviewed && states.get(r)?.overdueSince);
+        if (unreviewed.length > 0) {
+          gateValue = 'unreviewed_source';
+          gateReason = `Cites ${unreviewed.join(', ')}, not reviewed by an admin yet, so it is reviewed individually.`;
+        } else if (overdue.length > 0) {
+          gateValue = 'stale_source';
+          gateReason = `Cites ${overdue.map((r) => `${r} (overdue for review since ${states.get(r)!.overdueSince})`).join(', ')}, so it is reviewed individually.`;
+        }
+      } catch {
+        gateValue = 'unchecked';
+        gateReason = 'The review status of the cited entries could not be read, so it is reviewed individually.';
+      }
     }
 
     return {
@@ -208,6 +242,7 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       prompt_version: promptVersion,
       calibration_set: calibrationSet,
       draft_kind: kind,
+      cited_refs: cited,
       processing_note: notes.length ? notes.join(' ') : null,
       processed_at: now(),
     };

@@ -14,6 +14,7 @@ import UserInbox from './UserInbox';
 import UserManagement from './UserManagement';
 import GovernanceAdmin from './GovernanceAdmin';
 import { loadUsageStatus, type UsageStatus } from './lib/usage';
+import { addEntry, parseTags } from './lib/entryReview';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -31,6 +32,11 @@ function KBEntry({ entry }: { entry: KnowledgeEntry }) {
           {entry.source && (
             <span className="text-2xs text-ink-400 flex items-center gap-1">
               <BookOpen size={9} />{entry.source}
+            </span>
+          )}
+          {entry.reviewed === false && (
+            <span className="text-2xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full" title="Added by a team member and not yet reviewed by an admin. Drafts citing it are not bulk-approved.">
+              Not yet reviewed
             </span>
           )}
           <span className={`ml-auto text-ink-400 transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}>
@@ -55,8 +61,47 @@ function KBEntry({ entry }: { entry: KnowledgeEntry }) {
   );
 }
 
-function KBModal({ entries, onClose, onBulkUpload }: { entries: KnowledgeEntry[]; onClose: () => void; onBulkUpload: () => void }) {
+function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void; onCancel: () => void }) {
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [tags, setTags] = useState('');
+  const [source, setSource] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    setError('');
+    setSaving(true);
+    try {
+      const r = await addEntry(supabase, { question, answer, tags: parseTags(tags), source });
+      const indexed = await indexNewEntries();
+      onDone(`${r.ref} added.${r.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}${indexed.ok ? '' : ` It could not be indexed yet (${indexed.reason}), so it is found by keywords only for now.`}`);
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <div className="space-y-3 border border-ink-100 rounded-2xl p-4 bg-ink-50">
+      <p className="text-sm font-bold text-ink-800">Add an entry</p>
+      <textarea className="input min-h-[60px]" placeholder="The question it answers" value={question} onChange={(e) => setQuestion(e.target.value)} aria-label="Question" />
+      <textarea className="input min-h-[100px]" placeholder="The answer" value={answer} onChange={(e) => setAnswer(e.target.value)} aria-label="Answer" />
+      <div className="grid sm:grid-cols-2 gap-2">
+        <input className="input" placeholder="Tags, separated by commas" value={tags} onChange={(e) => setTags(e.target.value)} aria-label="Tags" />
+        <input className="input" placeholder="Source (policy, document)" value={source} onChange={(e) => setSource(e.target.value)} aria-label="Source" />
+      </div>
+      {error && <p className="text-xs text-coral-600">{error}</p>}
+      <div className="flex justify-end gap-2">
+        <button onClick={onCancel} className="btn-ghost text-sm">Cancel</button>
+        <button onClick={save} disabled={saving} className="btn-primary text-sm">{saving ? 'Saving…' : 'Add entry'}</button>
+      </div>
+    </div>
+  );
+}
+
+function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: KnowledgeEntry[]; onClose: () => void; onBulkUpload: () => void; onAdded: (message: string) => void }) {
   const [search, setSearch] = useState('');
+  const [adding, setAdding] = useState(false);
   const filtered = search
     ? entries.filter(
         (e) =>
@@ -81,6 +126,12 @@ function KBModal({ entries, onClose, onBulkUpload }: { entries: KnowledgeEntry[]
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-ink-700 border border-ink-200 rounded-xl hover:bg-ink-50 transition-colors"
+            >
+              <Plus size={12} /> Add entry
+            </button>
+            <button
               onClick={onBulkUpload}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-ink-700 border border-ink-200 rounded-xl hover:bg-ink-50 transition-colors"
             >
@@ -102,6 +153,7 @@ function KBModal({ entries, onClose, onBulkUpload }: { entries: KnowledgeEntry[]
           </div>
         </div>
         <div className="overflow-y-auto flex-1 p-6 space-y-2.5">
+          {adding && <AddEntryForm onCancel={() => setAdding(false)} onDone={(m) => { setAdding(false); onAdded(m); }} />}
           {filtered.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-sm text-ink-400">No entries match your search.</p>
@@ -272,6 +324,7 @@ export default function App() {
           entries={kb}
           onClose={() => setShowKBModal(false)}
           onBulkUpload={() => { setShowKBModal(false); setShowBulkUpload(true); }}
+          onAdded={(m) => { showToast(m); refreshKB(); }}
         />
       )}
       {showBulkUpload && (
