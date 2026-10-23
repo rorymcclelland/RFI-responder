@@ -19,7 +19,7 @@ describe('loadUsageStatus', () => {
 
 describe('validateSettings', () => {
   it('accepts sensible values', () => {
-    expect(validateSettings({ daily_question_cap: 400, monthly_budget_gbp: 25, alert_share: 0.8, gbp_per_usd: 0.79, review_interval_months: 12 })).toBeNull();
+    expect(validateSettings({ daily_question_cap: 400, monthly_budget_gbp: 25, alert_share: 0.8, gbp_per_usd: 0.79, review_interval_months: 12, daily_extract_cap: 20, est_usd_per_extract_kchar: 0.0005 })).toBeNull();
   });
   it.each([
     [{ daily_question_cap: -1 }, /whole number/],
@@ -30,6 +30,9 @@ describe('validateSettings', () => {
     [{ gbp_per_usd: 0 }, /exchange rate/],
     [{ review_interval_months: 0 }, /review interval/],
     [{ est_usd_per_question: 0 }, /reserve per question/],
+    [{ daily_extract_cap: -1 }, /daily document limit/],
+    [{ daily_extract_cap: 2.5 }, /daily document limit/],
+    [{ est_usd_per_extract_kchar: 0 }, /reserve per 1,000 characters/],
   ])('refuses %o', (change, message) => {
     expect(validateSettings(change)).toMatch(message);
   });

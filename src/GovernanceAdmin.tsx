@@ -45,9 +45,11 @@ export default function GovernanceAdmin() {
 const SETTING_FIELDS: { key: keyof SettingsChange; label: string; help: string; step: number; percent?: boolean }[] = [
   { key: 'daily_question_cap', label: 'Questions per person per day', help: 'Processing stops for that person at this number until tomorrow (UTC).', step: 1 },
   { key: 'daily_embed_cap', label: 'Knowledge-base texts indexed per person per day', help: 'Covers imports and new entries.', step: 1 },
+  { key: 'daily_extract_cap', label: 'Word documents read by AI per person per day', help: 'Finding the questions in an uploaded Word document. Spreadsheets do not count.', step: 1 },
   { key: 'monthly_budget_gbp', label: 'Monthly budget (£)', help: 'Processing stops for everyone when this month\'s estimated spend reaches it.', step: 1 },
   { key: 'alert_share', label: 'Warn admins at (% of budget)', help: 'Admins see a warning from this point.', step: 5, percent: true },
   { key: 'est_usd_per_question', label: 'Reserve per question (US$)', help: 'Held against the budget while a question is processed, until its real cost is recorded. Compare it with the measured average above.', step: 0.001 },
+  { key: 'est_usd_per_extract_kchar', label: 'Reserve per 1,000 characters of a Word document (US$)', help: 'Held against the budget while the questions in a Word document are found, until the real cost is recorded.', step: 0.0001 },
   { key: 'gbp_per_usd', label: 'Pounds per US dollar', help: 'Providers price in dollars. 1.00 counts each dollar as a pound, which overstates spend; set the current rate for a truer figure.', step: 0.01 },
   { key: 'review_interval_months', label: 'Review knowledge-base entries every (months)', help: 'Entries past this are reported, and drafts citing them are held from bulk approval.', step: 1 },
 ];

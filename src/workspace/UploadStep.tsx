@@ -114,7 +114,7 @@ export default function UploadStep({ opportunityName, error, pastSessions, orpha
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { n: '1', icon: <Upload size={18} />, title: 'Upload', desc: 'CSV or Excel' },
+          { n: '1', icon: <Upload size={18} />, title: 'Upload', desc: 'CSV, Excel or Word' },
           { n: '2', icon: <Sparkles size={18} />, title: 'Match and draft', desc: 'From the knowledge base' },
           { n: '3', icon: <CheckCircle2 size={18} />, title: 'Review', desc: 'Accept, edit or skip' },
           { n: '4', icon: <FileDown size={18} />, title: 'Export', desc: 'Excel, CSV or Word' },
