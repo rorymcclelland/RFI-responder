@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
 import { formatConfidence } from './lib/format';
+import { answerSource, ANSWER_HEADING, ANSWER_TIP } from './lib/answerLabel';
 import { suggestExperts, type ExpertSuggestion } from './lib/responses';
 import { supabase } from './lib/supabase';
 
@@ -289,6 +290,7 @@ export default function RFIQuestionCard({
   const [editText, setEditText]   = useState(question.finalAnswer);
   const [kbArticle, setKbArticle] = useState<{ entry: KnowledgeEntry; score: number } | null>(null);
   const conf = confidenceLabel(question.confidence);
+  const source = answerSource(question);
   const pct  = question.confidence === null ? null : Math.round(question.confidence * 100);
 
   useEffect(() => { setEditText(question.finalAnswer); }, [question.finalAnswer]);
@@ -458,8 +460,10 @@ export default function RFIQuestionCard({
           <div className="border-t border-ink-100 pt-4">
             <div className="flex items-center justify-between mb-3">
               <p className="section-label flex items-center gap-1.5">
-                {editing ? 'Edit Response' : 'Proposed Response'}
-                {!editing && <InfoTip text={`${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'} Accept as it is, edit, or skip.`} />}
+                {editing ? 'Edit Response' : ANSWER_HEADING[source]}
+                {!editing && <InfoTip text={source === 'draft'
+                  ? `${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'} Accept as it is, edit, or skip.`
+                  : ANSWER_TIP[source]} />}
               </p>
               {!editing && canDecide && question.status !== 'skipped' && (
                 <button

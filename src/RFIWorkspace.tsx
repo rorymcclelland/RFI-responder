@@ -83,7 +83,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [listCollapsed, setListCollapsed] = useState(false);
   const rawRows                           = useRef<Row[]>([]);
 
-  const { assignments, handleAssign, handleUnassign } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers });
+  const { assignments, handleAssign, handleUnassign } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
   const openSession = useCallback(async (session: RFISession) => {
     try {
@@ -189,9 +189,13 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     });
   }, []);
 
-  const handleAccept   = useCallback((id: string, ans: string) => updateQuestion(id, { status: 'accepted', finalAnswer: ans }), [updateQuestion]);
-  const handleSkip     = useCallback((id: string) => updateQuestion(id, { status: 'skipped' }), [updateQuestion]);
-  const handleUndoSkip = useCallback((id: string) => updateQuestion(id, { status: 'pending' }), [updateQuestion]);
+  // The database records the approval (S3-2); show the same record at once rather than after a reload.
+  const handleAccept   = useCallback((id: string, ans: string) => updateQuestion(id, {
+    status: 'accepted', finalAnswer: ans,
+    approval: { by: currentUser.id, at: new Date().toISOString(), kind: 'individual', threshold: null },
+  }), [updateQuestion, currentUser.id]);
+  const handleSkip     = useCallback((id: string) => updateQuestion(id, { status: 'skipped', approval: null }), [updateQuestion]);
+  const handleUndoSkip = useCallback((id: string) => updateQuestion(id, { status: 'pending', approval: null }), [updateQuestion]);
 
   // The database decides what bulk approval includes; the screen then shows what was saved.
   const runBulkAccept = async (threshold: number) => {
@@ -311,9 +315,11 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           <BarChart3 size={16} className="text-ink-400 flex-shrink-0" />
           <p className="text-sm font-bold text-ink-700 truncate max-w-xs">{fileName}</p>
           {/* F-23: start another upload for this response without finishing this one. */}
-          <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
-            <Upload size={12} /> New upload
-          </button>
+          {!archived && (
+            <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
+              <Upload size={12} /> New upload
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap ml-auto">
           {[
@@ -483,7 +489,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           acceptedCount={acceptedCount}
           skippedCount={skippedCount}
           learning={learning}
-          onStartNew={startNew}
+          onStartNew={archived ? undefined : startNew}
         />
       )}
     </div>

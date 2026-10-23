@@ -3,12 +3,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { QuestionAssignment, RFIQuestion, UserProfile } from '../types';
 
-export function useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers }: {
+export function useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError }: {
   sessionId: string | null;
   opportunityId: string;
   questions: RFIQuestion[];
   currentUser: UserProfile;
   allUsers: UserProfile[];
+  /** Shown to the person; an assignment that fails must not fail silently. */
+  onError: (message: string) => void;
 }) {
   const [assignments, setAssignments] = useState<Record<string, QuestionAssignment[]>>({});
 
@@ -51,7 +53,7 @@ export function useAssignments({ sessionId, opportunityId, questions, currentUse
     if (!q || !sessionId) return;
     const existing = assignments[questionId] ?? [];
     if (existing.some((a) => a.assignedTo === userId)) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('question_assignments')
       .insert({
         question_id: questionId, session_id: sessionId, opportunity_id: opportunityId,
@@ -59,7 +61,11 @@ export function useAssignments({ sessionId, opportunityId, questions, currentUse
         question_text: q.question, answer_text: q.finalAnswer,
       })
       .select().maybeSingle();
-    if (data) {
+    if (error || !data) {
+      onError(`The question could not be assigned: ${error?.message ?? 'no response'}`);
+      return;
+    }
+    {
       const profile = allUsers.find((u) => u.id === userId);
       const newA: QuestionAssignment = {
         id: data.id, questionId: data.question_id, sessionId: data.session_id,
@@ -78,7 +84,11 @@ export function useAssignments({ sessionId, opportunityId, questions, currentUse
   }
 
   async function handleUnassign(questionId: string, assignmentId: string) {
-    await supabase.from('question_assignments').delete().eq('id', assignmentId);
+    const { error } = await supabase.from('question_assignments').delete().eq('id', assignmentId);
+    if (error) {
+      onError(`The assignment could not be removed: ${error.message}`);
+      return;
+    }
     setAssignments((prev) => {
       const remaining = (prev[questionId] ?? []).filter((a) => a.id !== assignmentId);
       if (remaining.length === 0) { const next = { ...prev }; delete next[questionId]; return next; }

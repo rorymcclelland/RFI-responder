@@ -10,7 +10,8 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
   skippedCount: number;
   /** What learning at export did (S3-4); empty for an export recorded earlier. */
   learning: string;
-  onStartNew: () => void;
+  /** Absent for an archived response, which takes no new uploads. */
+  onStartNew?: () => void;
 }) {
   return (
     <div className="card overflow-hidden">
@@ -56,9 +57,9 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
         </div>
 
         <div className="border-t border-ink-100 pt-4">
-          <button onClick={onStartNew} className="btn-ghost text-sm">
+          {onStartNew && <button onClick={onStartNew} className="btn-ghost text-sm">
             <Upload size={15} /> Start New RFI
-          </button>
+          </button>}
         </div>
       </div>
     </div>
