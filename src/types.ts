@@ -15,17 +15,32 @@ export interface RetrievedSource {
 
 // ─── Opportunities ────────────────────────────────────────────────────────────
 
-export type OpportunityStatus = 'new' | 'in_progress' | 'won' | 'lost';
+/** Where a response is in its life (computed by the database view response_overview, Sprint 3). */
+export type ResponseStage = 'new' | 'in_review' | 'ready' | 'exported' | 'archived';
+export type ResponseOutcome = 'won' | 'lost' | 'withdrawn';
 
 export interface Opportunity {
   id: string;
   name: string;
-  status: OpportunityStatus;
-  /** The response owner: may edit it and assign its questions (see docs/decisions/0003). */
+  /** The response owner: may edit it, assign and approve in bulk (see docs/decisions/0003). */
   ownerId: string | null;
+  ownerName: string | null;
+  dueDate: string | null;
   createdAt: string;
   updatedAt: string;
-  sessionCount?: number;
+  exportedAt: string | null;
+  archivedAt: string | null;
+  outcome: ResponseOutcome | null;
+  stage: ResponseStage;
+  total: number;
+  decided: number;
+  accepted: number;
+  skipped: number;
+  pending: number;
+  gatedPending: number;
+  openAssignments: number;
+  overdue: boolean;
+  atRisk: boolean;
 }
 
 // ─── RFI Workflow ─────────────────────────────────────────────────────────────
@@ -60,6 +75,10 @@ export interface RFIQuestion {
   provenance: { embeddingModel: string | null; judgeModel: string | null; draftModel: string | null; promptVersion: string | null; calibrationSet: string | null };
   /** False until the server has processed the question. */
   processed: boolean;
+  /** The latest recorded approval (Sprint 3, S3-2), if accepted. */
+  approval: { by: string | null; at: string; kind: 'individual' | 'bulk'; threshold: number | null } | null;
+  /** What learning at export did with this question (Sprint 3, S3-4). */
+  learnOutcome: string | null;
 }
 
 export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation';

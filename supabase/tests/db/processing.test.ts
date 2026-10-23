@@ -8,7 +8,6 @@ let owner: TestUser;
 let member: TestUser;
 let session: string;
 let orphanSession: string;
-let responseId: string;
 
 /** Sprint 3 (F-7): give `user` an assignment for question `id`, so they may decide it. */
 async function assign(user: TestUser, id: string): Promise<void> {
@@ -45,7 +44,6 @@ beforeAll(async () => {
   member = await createUser();
   const opp = (await one<{ id: string }>(
     `INSERT INTO opportunities (name, created_by, owner_id) VALUES ('R', $1, $1) RETURNING id`, [owner.id])).id;
-  responseId = opp;
   session = (await one<{ id: string }>(
     `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id) VALUES ('r.xlsx', 'in_progress', 0, $1) RETURNING id`, [opp])).id;
   orphanSession = (await one<{ id: string }>(

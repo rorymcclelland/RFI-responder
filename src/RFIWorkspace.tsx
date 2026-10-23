@@ -10,8 +10,10 @@ import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, RefreshCw, Search,
 import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
 import { detectQuestionColumn } from './lib/drafting';
 import { bulkAcceptInDb, describeBulk, insertQuestions, processInBatches, saveQuestionPatch } from './lib/sessions';
+import { indexNewEntries } from './lib/knowledgeBase';
+import { describeLearning, recordExport } from './lib/responses';
 import { supabase } from './lib/supabase';
-import type { KnowledgeEntry, RFIQuestion, RFISession, UserProfile } from './types';
+import type { RFIQuestion, RFISession, UserProfile } from './types';
 import RFIQuestionCard from './RFIQuestionCard';
 import BulkBar from './workspace/BulkBar';
 import ExportPanel from './workspace/ExportPanel';
@@ -23,8 +25,9 @@ import { bulkEligible, loadQuestions } from './workspace/questionRows';
 import { useAssignments } from './workspace/useAssignments';
 
 interface Props {
-  onAddToKB: (entries: Omit<KnowledgeEntry, 'id'>[], origin: 'response', originRef: string) => Promise<boolean>;
   opportunityId: string;
+  /** Archived responses are read-only (Sprint 3, S3-3). */
+  archived: boolean;
   opportunityName: string;
   currentUser: UserProfile;
   allUsers: UserProfile[];
@@ -59,7 +62,7 @@ const toSession = (r: Record<string, unknown>): RFISession => ({
   createdAt: r.created_at as string,
 });
 
-export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName, currentUser, allUsers, canAssign }: Props) {
+export default function RFIWorkspace({ opportunityId, archived, opportunityName, currentUser, allUsers, canAssign }: Props) {
   const [step, setStep]                   = useState<WorkflowStep>('idle');
   const [fileName, setFileName]           = useState('');
   const [headers, setHeaders]             = useState<string[]>([]);
@@ -74,7 +77,7 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
   const [sessionId, setSessionId]         = useState<string | null>(null);
   const [pastSessions, setPastSessions]   = useState<RFISession[]>([]);
   const [orphanSessions, setOrphanSessions] = useState<RFISession[]>([]);
-  const [kbAdded, setKbAdded]             = useState(false);
+  const [learning, setLearning]           = useState('');
   const [uploadError, setUploadError]     = useState('');
   const [notice, setNotice]               = useState('');
   const [listCollapsed, setListCollapsed] = useState(false);
@@ -91,7 +94,7 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
     setFileName(session.fileName);
     setSessionId(session.id);
     setStep(session.status === 'completed' ? 'export' : 'review');
-    setKbAdded(false);
+    setLearning('');
     setListCollapsed(session.status === 'completed');
     setFilter('all'); setSearch(''); setExpandedId(null); setNotice('');
   }, []);
@@ -209,31 +212,34 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
   // Pending questions the server has not processed (a failed batch, or a session from before Sprint 2).
   const unprocessed = questions.filter((q) => !q.processed && q.status === 'pending');
 
+  /**
+   * Record the export (S3-2): refused by the database while anything is pending, and the moment
+   * the knowledge base learns from this response (S3-4). New entries are then embedded.
+   */
   const finishSession = async () => {
-    if (sessionId) {
-      // accepted_count is kept by the database itself.
-      await supabase.from('rfi_sessions').update({ status: 'completed' }).eq('id', sessionId);
+    if (!sessionId) return;
+    setUploadError(''); setNotice('');
+    try {
+      const summary = await recordExport(supabase, sessionId);
+      setLearning(describeLearning(summary));
+      setQuestions(await loadQuestions(supabase, sessionId));
+      if (summary.added || summary.superseded) {
+        const indexed = await indexNewEntries();
+        if (!indexed.ok) setNotice(`The new entries are saved but not yet indexed for meaning-based search (${indexed.reason}); they will be indexed on the next sign-in.`);
+      }
+    } catch (err) {
+      setUploadError((err as Error).message);
+      return;
     }
     setListCollapsed(true);
     setStep('export');
     loadPastSessions();
   };
 
-  const handleAddToKB = async () => {
-    // Pricing answers are never added automatically (product rule).
-    const entries = accepted.filter((q) => q.gate !== 'pricing').map((q) => ({
-      question: q.question, answer: q.finalAnswer,
-      tags: q.sources.flatMap((s) => s.entry.tags).slice(0, 4),
-      source: `RFI: ${fileName}`,
-    }));
-    // Sprint 3 replaces this button with learning at export, with full provenance.
-    if (await onAddToKB(entries, 'response', fileName)) setKbAdded(true);
-  };
-
   const startNew = () => {
     setStep('idle'); setQuestions([]); setFileName(''); setHeaders([]);
     setQuestionCol(''); setProgress(0); setSessionId(null);
-    setKbAdded(false); setListCollapsed(false); setNotice('');
+    setLearning(''); setListCollapsed(false); setNotice('');
     setFilter('all'); setConfGroup('all'); setSearch(''); setExpandedId(null);
     loadPastSessions();
   };
@@ -323,14 +329,23 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
         </div>
       </div>
 
-      <BulkBar
-        canApprove={canAssign}
-        eligible={questions.filter(bulkEligible).length}
-        held={pending.filter((q) => !bulkEligible(q)).length}
-        showFinish={(allDone || acceptedCount > 0) && step === 'review'}
-        onBulk={runBulkAccept}
-        onFinish={finishSession}
-      />
+      {archived && (
+        <div role="status" className="flex items-center gap-2 text-sm text-ink-600 bg-ink-50 border border-ink-200 rounded-xl px-4 py-3 font-medium">
+          <AlertTriangle size={14} className="flex-shrink-0" /> This response is archived. It is kept as a record and can no longer be changed.
+        </div>
+      )}
+
+      {!archived && (
+        <BulkBar
+          canApprove={canAssign}
+          eligible={questions.filter(bulkEligible).length}
+          held={pending.filter((q) => !bulkEligible(q)).length}
+          showFinish={step === 'review' && canAssign}
+          finishBlockedBy={allDone ? null : `${pendingCount} question${pendingCount !== 1 ? 's are' : ' is'} still pending: accept or skip ${pendingCount !== 1 ? 'each' : 'it'} first`}
+          onBulk={runBulkAccept}
+          onFinish={finishSession}
+        />
+      )}
 
       {notice && (
         <div role="status" className="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 font-medium">
@@ -451,8 +466,9 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
                   onUndoSkip={() => handleUndoSkip(q.id)}
                   users={allUsers}
                   assignments={assignments[q.id] ?? []}
-                  onAssign={canAssign ? handleAssign : undefined}
-                  onUnassign={canAssign ? handleUnassign : undefined}
+                  canDecide={!archived && (canAssign || (assignments[q.id] ?? []).some((a) => a.assignedTo === currentUser.id))}
+                  onAssign={canAssign && !archived ? handleAssign : undefined}
+                  onUnassign={canAssign && !archived ? handleUnassign : undefined}
                 />
               </div>
             ))}
@@ -465,8 +481,8 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
           questions={questions}
           fileName={fileName}
           acceptedCount={acceptedCount}
-          kbAdded={kbAdded}
-          onAddToKB={handleAddToKB}
+          skippedCount={skippedCount}
+          learning={learning}
           onStartNew={startNew}
         />
       )}

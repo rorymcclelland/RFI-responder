@@ -422,8 +422,8 @@ export default function App() {
               <span className="font-semibold text-ink-800 truncate">{activeOpportunity.name}</span>
             </div>
             <RFIWorkspace
-              onAddToKB={addToKB}
               opportunityId={activeOpportunity.id}
+              archived={activeOpportunity.archivedAt !== null}
               opportunityName={activeOpportunity.name}
               currentUser={currentUser}
               allUsers={allUsers}

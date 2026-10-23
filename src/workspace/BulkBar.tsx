@@ -5,13 +5,15 @@
  */
 import { ArrowRight, Download } from 'lucide-react';
 
-export default function BulkBar({ canApprove, eligible, held, showFinish, onBulk, onFinish }: {
+export default function BulkBar({ canApprove, eligible, held, showFinish, finishBlockedBy, onBulk, onFinish }: {
   canApprove: boolean;
   /** Pending questions bulk approval could include. */
   eligible: number;
   /** Pending questions it never will (gated or uncalibrated). */
   held: number;
   showFinish: boolean;
+  /** Why the export cannot be recorded yet, or null when every question is decided (S3-2). */
+  finishBlockedBy: string | null;
   onBulk: (threshold: number) => void;
   onFinish: () => void;
 }) {
@@ -37,8 +39,9 @@ export default function BulkBar({ canApprove, eligible, held, showFinish, onBulk
         {button(0, 'All eligible', 'border border-ink-200 text-ink-600 hover:bg-ink-50')}
         <div className="ml-auto">
           {showFinish && (
-            <button onClick={onFinish} className="btn-primary text-xs py-2">
-              <Download size={14} /> Review Complete <ArrowRight size={13} />
+            <button onClick={onFinish} disabled={finishBlockedBy !== null} title={finishBlockedBy ?? 'Record the export: the knowledge base then learns from this response'}
+              className="btn-primary text-xs py-2 disabled:opacity-40 disabled:cursor-not-allowed">
+              <Download size={14} /> Record export <ArrowRight size={13} />
             </button>
           )}
         </div>

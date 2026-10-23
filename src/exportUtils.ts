@@ -19,13 +19,31 @@ function stripKbReferences(answer: string) {
   return answer.replace(/\[References?:.*?\]\s*/gi, '').trimEnd();
 }
 
+/** Shown for a question the owner chose to skip (Sprint 3, Q2). */
+export const NOT_ANSWERED = 'Not answered';
+
+/**
+ * The rows of the exported response: every decided question in the RFI's own order (not the
+ * review order), with skipped questions marked "Not answered" and references removed.
+ */
+export function exportRows(questions: RFIQuestion[]) {
+  return questions
+    .filter((q) => q.status === 'accepted' || q.status === 'skipped')
+    .sort((a, b) => a.position - b.position)
+    .map((q, i) => ({
+      number: String(i + 1),
+      question: q.question,
+      answer: q.status === 'accepted' ? stripKbReferences(q.finalAnswer) : NOT_ANSWERED,
+      edited: q.status === 'accepted' && q.finalAnswer !== q.generatedAnswer,
+    }));
+}
+
 // ─── CSV ──────────────────────────────────────────────────────────────────────
 
 export function exportCSV(questions: RFIQuestion[], sourceFileName = 'export') {
-  const accepted = questions.filter((q) => q.status === 'accepted');
   const csv = buildCsv(
     ['#', 'Question', 'Answer'],
-    accepted.map((q, i) => [String(i + 1), q.question, stripKbReferences(q.finalAnswer)]),
+    exportRows(questions).map((r) => [r.number, r.question, r.answer]),
   );
   triggerDownload('\ufeff' + csv, `${stem(sourceFileName)}.csv`, 'text/csv;charset=utf-8;');
 }
@@ -33,16 +51,10 @@ export function exportCSV(questions: RFIQuestion[], sourceFileName = 'export') {
 // ─── Excel ────────────────────────────────────────────────────────────────────
 
 export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'export') {
-  const accepted = questions.filter((q) => q.status === 'accepted');
   const bytes = await buildXlsx(
     'RFI Responses',
     ['#', 'Question', 'Answer', 'Was Edited'],
-    accepted.map((q, i) => [
-      String(i + 1),
-      q.question,
-      stripKbReferences(q.finalAnswer),
-      q.finalAnswer !== q.generatedAnswer ? 'Yes' : 'No',
-    ]),
+    exportRows(questions).map((r) => [r.number, r.question, r.answer, r.edited ? 'Yes' : 'No']),
     [5, 60, 80, 12],
   );
   triggerDownload(bytes, `${stem(sourceFileName)}.xlsx`,
@@ -52,20 +64,21 @@ export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'ex
 // ─── Word (HTML-based .doc — opens in Word/LibreOffice) ───────────────────────
 
 export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') {
-  const accepted = questions.filter((q) => q.status === 'accepted');
-  const date     = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const exported = exportRows(questions);
+  const answered = exported.filter((r) => r.answer !== NOT_ANSWERED).length;
+  const date     = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  const rows = accepted
+  const rows = exported
     .map(
-      (q, i) => `
+      (r) => `
       <tr>
         <td style="width:5%;padding:8px 6px;border:1px solid #e2e8f0;vertical-align:top;
-                   font-size:12px;color:#64748b;font-weight:bold;">${i + 1}</td>
+                   font-size:12px;color:#64748b;font-weight:bold;">${r.number}</td>
         <td style="width:40%;padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;
-                   font-size:13px;color:#1e293b;">${escapeHtml(q.question)}</td>
+                   font-size:13px;color:#1e293b;">${escapeHtml(r.question)}</td>
         <td style="padding:8px 10px;border:1px solid #e2e8f0;vertical-align:top;
                    font-size:13px;color:#334155;line-height:1.5;">
-          ${escapeHtml(stripKbReferences(q.finalAnswer)).replace(/\n/g, '<br>')}
+          ${escapeHtml(r.answer).replace(/\n/g, '<br>')}
         </td>
       </tr>`
     )
@@ -91,7 +104,7 @@ export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') 
     <body>
       <h1>RFI Response Document</h1>
       <p class="meta">Generated: ${date} &nbsp;·&nbsp; Source: ${escapeHtml(sourceFileName)}
-         &nbsp;·&nbsp; ${accepted.length} accepted response${accepted.length !== 1 ? 's' : ''}
+         &nbsp;·&nbsp; ${answered} of ${exported.length} question${exported.length !== 1 ? 's' : ''} answered
       </p>
       <table>
         <thead>

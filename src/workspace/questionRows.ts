@@ -27,11 +27,14 @@ export interface QuestionRow {
   prompt_version?: string | null;
   calibration_set?: string | null;
   processed_at?: string | null;
+  learn_outcome?: string | null;
 }
+
+export interface ApprovalRow { question_id: string; decided_by: string | null; decided_at: string; kind: 'individual' | 'bulk'; threshold: number | string | null }
 
 const num = (v: number | string | null | undefined) => (v === null || v === undefined ? null : Number(v));
 
-export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEntry>): RFIQuestion {
+export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEntry>, approval: ApprovalRow | null = null): RFIQuestion {
   const generated = r.generated_answer ?? '';
   return {
     id: r.id,
@@ -61,6 +64,10 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
     // Only the server sets processed_at. Questions scored in the browser before Sprint 2 have none,
     // are never bulk-approved (security review), and can be processed now.
     processed: Boolean(r.processed_at),
+    approval: approval && r.status === 'accepted'
+      ? { by: approval.decided_by, at: approval.decided_at, kind: approval.kind, threshold: num(approval.threshold) }
+      : null,
+    learnOutcome: r.learn_outcome ?? null,
   };
 }
 
@@ -77,7 +84,12 @@ export async function loadQuestions(client: SupabaseClient, sessionId: string): 
       entriesByRef.set(e.ref, { id: e.ref, question: e.question, answer: e.answer, tags: e.tags ?? [], source: e.source ?? undefined });
     }
   }
-  return rows.map((r) => toQuestion(r, entriesByRef)).sort((a, b) => (a.confidence ?? -1) - (b.confidence ?? -1));
+  // The latest recorded approval of each question (S3-2).
+  const { data: approvals } = await client.from('approvals').select('question_id, decided_by, decided_at, kind, threshold')
+    .eq('session_id', sessionId).order('decided_at', { ascending: true });
+  const latest = new Map<string, ApprovalRow>();
+  for (const a of (approvals ?? []) as ApprovalRow[]) latest.set(a.question_id, a);
+  return rows.map((r) => toQuestion(r, entriesByRef, latest.get(r.id) ?? null)).sort((a, b) => (a.confidence ?? -1) - (b.confidence ?? -1));
 }
 
 /** Pending questions an owner could approve in bulk: processed by the server, calibrated, drafted and not gated. */

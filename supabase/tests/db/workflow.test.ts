@@ -351,3 +351,33 @@ describe('found while building: bulk-approved drafts are confirmed, not treated 
     });
   });
 });
+
+describe('S3-6 expert suggestions', () => {
+  it('1 to 4. history outranks tags, tags alone still count, ties are stable, and no match gives none', async () => {
+    const tagged = await createUser({ name: 'Bea Tagged' });
+    const tagged2 = await createUser({ name: 'Al Tagged' });
+    await asSuperuser(`UPDATE user_profiles SET expertise_tags = '{Firewalls}' WHERE id = ANY ($1)`, [[tagged.id, tagged2.id]]);
+    const written = await entry('Firewall rules? (S3-6)', 'Reviewed quarterly.', ['firewalls'], expert.id);
+    const opp = await response();
+    const s = await session(opp);
+    const id = await question(s, { sources: [[written.ref, 0.8]] });
+    // The expert also approved an earlier answer drawn from the same entry.
+    const earlier = await question(s, { sources: [[written.ref, 0.7]] });
+    await asSuperuser(
+      `INSERT INTO approvals (question_id, session_id, opportunity_id, decided_by, kind) VALUES ($1, $2, $3, $4, 'individual')`,
+      [earlier, s, opp, expert.id]);
+    const r = await as(member, (q) => q<{ display_name: string; score: number; reasons: string[] }>(`SELECT * FROM suggest_experts($1)`, [id]));
+    expect(r.rows.map((x) => x.display_name)).toEqual(['Ada Expert', 'Al Tagged', 'Bea Tagged']);
+    expect(r.rows[0].reasons).toEqual([`wrote ${written.ref}`, 'approved 1 answer drawn from the same entries']);
+    expect(r.rows[1].reasons).toEqual(['expertise: firewalls']);
+
+    const unrelated = await question(s, { sources: [] });
+    expect((await as(member, (q) => q(`SELECT * FROM suggest_experts($1)`, [unrelated]))).rowCount).toBe(0);
+  });
+
+  it('5. only signed-in members can ask', async () => {
+    const opp = await response();
+    const id = await question(await session(opp));
+    await refused(as(null, (q) => q(`SELECT * FROM suggest_experts($1)`, [id])));
+  });
+});

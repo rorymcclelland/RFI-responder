@@ -65,7 +65,7 @@ function Select({ label, value, options, onChange, required }: {
       <div className="relative">
         <select value={value} onChange={(e) => onChange(e.target.value)}
           className="w-full appearance-none pl-3 pr-8 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-          <option value="">— not mapped —</option>
+          <option value="">Not mapped</option>
           {options.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
         <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -233,7 +233,7 @@ export default function BulkUploadModal({ onImport, onClose }: Props) {
             <div className="p-6 space-y-5">
               <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs text-teal-700">
                 <CheckCircle2 size={13} className="flex-shrink-0" />
-                <span><strong>{fileName}</strong> — {rawRef.current.length} rows, {headers.length} columns</span>
+                <span><strong>{fileName}</strong>: {rawRef.current.length} rows, {headers.length} columns</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Select label="Question column" value={colMap.question} options={headers}

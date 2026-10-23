@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
 import { formatConfidence } from './lib/format';
+import { suggestExperts, type ExpertSuggestion } from './lib/responses';
+import { supabase } from './lib/supabase';
 
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
@@ -141,22 +143,23 @@ function AssignmentPanel({
   onAssign: (userId: string) => void; onUnassign: (assignmentId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<ExpertSuggestion[]>([]);
   const assignedIds = new Set(assignments.map((a) => a.assignedTo));
-  const qLower = question.question.toLowerCase();
-  const qWords = qLower.split(/\W+/).filter((w) => w.length > 3);
 
+  // S3-6: suggestions from what people wrote and approved before, as well as stated expertise.
+  useEffect(() => {
+    let live = true;
+    suggestExperts(supabase, question.id).then((s) => { if (live) setSuggestions(s); });
+    return () => { live = false; };
+  }, [question.id]);
+
+  const reasonsFor = new Map(suggestions.map((s) => [s.userId, s]));
   const scored = users
     .filter((u) => !assignedIds.has(u.id))
-    .map((u) => {
-      const matchingTags = u.expertiseTags.filter((t) => {
-        const tl = t.toLowerCase();
-        return qLower.includes(tl) || qWords.some((w) => tl.includes(w));
-      });
-      return { user: u, matchingTags };
-    })
-    .sort((a, b) => b.matchingTags.length - a.matchingTags.length);
+    .map((u) => ({ user: u, matchingTags: reasonsFor.get(u.id)?.reasons ?? [], score: reasonsFor.get(u.id)?.score ?? 0 }))
+    .sort((a, b) => b.score - a.score || a.user.displayName.localeCompare(b.user.displayName));
 
-  const recommendedCount = scored.filter(({ matchingTags }) => matchingTags.length > 0).length;
+  const recommendedCount = scored.filter(({ score }) => score > 0).length;
 
   return (
     <div onClick={(e) => e.stopPropagation()} className="space-y-2.5">
@@ -239,7 +242,7 @@ function AssignmentPanel({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-2xs text-ink-300 italic font-medium">No specialism match</p>
+                      <p className="text-2xs text-ink-300 italic font-medium">No history or expertise match</p>
                     )}
                   </div>
                   <button
@@ -274,11 +277,13 @@ interface Props {
   assignments?: QuestionAssignment[];
   onAssign?: (questionId: string, userId: string) => void;
   onUnassign?: (questionId: string, assignmentId: string) => void;
+  /** Owner, admin or assignee (Sprint 3, F-7); others can read but not decide. */
+  canDecide?: boolean;
 }
 
 export default function RFIQuestionCard({
   question, index, isExpanded, onToggleExpand, onAccept, onSkip, onUndoSkip,
-  users = [], assignments = [], onAssign, onUnassign,
+  users = [], assignments = [], onAssign, onUnassign, canDecide = true,
 }: Props) {
   const [editing, setEditing]     = useState(false);
   const [editText, setEditText]   = useState(question.finalAnswer);
@@ -335,6 +340,13 @@ export default function RFIQuestionCard({
               <span className="flex items-center gap-1 text-2xs text-emerald-700 font-bold">
                 <CheckCircle2 size={11} />
                 {question.finalAnswer !== question.generatedAnswer ? 'Accepted (edited)' : 'Accepted'}
+                {question.approval && (
+                  <span className="font-medium text-emerald-600">
+                    {' '}by {users.find((u) => u.id === question.approval!.by)?.displayName ?? 'a team member'},{' '}
+                    {new Date(question.approval.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                    {question.approval.kind === 'bulk' && question.approval.threshold !== null ? `, bulk at ${Math.round(question.approval.threshold * 100)}%` : ''}
+                  </span>
+                )}
               </span>
             )}
             {question.status === 'skipped' && (
@@ -430,7 +442,7 @@ export default function RFIQuestionCard({
             <div className="border-t border-ink-100 pt-4">
               <p className="section-label mb-3 flex items-center gap-1.5">
                 <UserPlus size={11} /> Expert Assignment
-                <InfoTip text="Route this question to team members for specialist review. Users are ranked by expertise tag match." />
+                <InfoTip text="Route this question to team members for specialist review. Suggestions come from who wrote the cited entries, who approved similar answers before, and stated expertise; the reasons are shown." />
               </p>
               <AssignmentPanel
                 question={question}
@@ -449,7 +461,7 @@ export default function RFIQuestionCard({
                 {editing ? 'Edit Response' : 'Proposed Response'}
                 {!editing && <InfoTip text={`${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'} Accept as it is, edit, or skip.`} />}
               </p>
-              {!editing && question.status !== 'skipped' && (
+              {!editing && canDecide && question.status !== 'skipped' && (
                 <button
                   onClick={(e) => { e.stopPropagation(); handleStartEdit(); }}
                   className="flex items-center gap-1.5 text-xs text-ink-500 hover:text-ink-900 font-bold transition-colors"
@@ -499,8 +511,12 @@ export default function RFIQuestionCard({
             </p>
           )}
 
+          {!canDecide && question.status === 'pending' && (
+            <p className="text-xs text-ink-500 font-medium">Only the response owner, an admin, or someone this question is assigned to can decide it.</p>
+          )}
+
           {/* Action buttons */}
-          {!editing && (
+          {!editing && canDecide && (
             <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
               {question.status !== 'accepted' && question.status !== 'skipped' && (
                 <>

@@ -1,14 +1,15 @@
-/** Step 5: add accepted answers to the knowledge base and download the response. */
-import { CheckCircle2, Download, FileDown, FileText, Plus, Sheet, Upload } from 'lucide-react';
+/** Step 5: the export is recorded; download the response and see what the knowledge base learned. */
+import { CheckCircle2, Download, FileDown, FileText, Sheet, Upload } from 'lucide-react';
 import { exportCSV, exportExcel, exportWord } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
-export default function ExportPanel({ questions, fileName, acceptedCount, kbAdded, onAddToKB, onStartNew }: {
+export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, onStartNew }: {
   questions: RFIQuestion[];
   fileName: string;
   acceptedCount: number;
-  kbAdded: boolean;
-  onAddToKB: () => void;
+  skippedCount: number;
+  /** What learning at export did (S3-4); empty for an export recorded earlier. */
+  learning: string;
   onStartNew: () => void;
 }) {
   return (
@@ -18,28 +19,24 @@ export default function ExportPanel({ questions, fileName, acceptedCount, kbAdde
           <Download size={18} className="text-white" />
         </div>
         <div>
-          <h3 className="font-bold text-ink-900">Export & Finalise</h3>
-          <p className="text-xs text-ink-500 font-medium">{acceptedCount} accepted response{acceptedCount !== 1 ? 's' : ''} ready</p>
+          <h3 className="font-bold text-ink-900">Export recorded</h3>
+          <p className="text-xs text-ink-500 font-medium">
+            {acceptedCount} answered{skippedCount ? `, ${skippedCount} marked "Not answered"` : ''}
+          </p>
         </div>
       </div>
       <div className="p-6 space-y-6">
-        {/* Add to KB */}
         <div>
           <p className="section-label mb-3">Knowledge Base</p>
-          {kbAdded ? (
-            <div className="flex items-center gap-2.5 text-sm text-emerald-700 font-semibold">
-              <CheckCircle2 size={17} className="text-emerald-500" />
-              {acceptedCount} answer{acceptedCount !== 1 ? 's' : ''} added to Knowledge Base
-            </div>
-          ) : (
-            <button onClick={onAddToKB} className="btn-primary">
-              <Plus size={16} /> Add {acceptedCount} Answer{acceptedCount !== 1 ? 's' : ''} to KB
-            </button>
-          )}
-          <p className="text-xs text-ink-400 mt-2 font-medium">Accepted answers will be available for future RFI matching.</p>
+          <div className="flex items-start gap-2.5 text-sm text-ink-700 font-medium">
+            <CheckCircle2 size={17} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+            <span>{learning || 'The knowledge base learned from this response when its export was recorded.'}</span>
+          </div>
+          <p className="text-xs text-ink-400 mt-2 font-medium">
+            Edited and person-written answers become entries, with this response recorded as their source. Pricing answers are never learned.
+          </p>
         </div>
 
-        {/* Download buttons */}
         <div className="border-t border-ink-100 pt-5">
           <p className="section-label mb-4">Download as</p>
           <div className="flex flex-wrap gap-3">
