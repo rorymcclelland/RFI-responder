@@ -41,6 +41,8 @@ export async function addEntry(client: SupabaseClient, e: DraftEntry): Promise<{
 export interface EntryForReview {
   id: string; ref: string; question: string; answer: string; tags: string[]; source: string;
   origin: string; originRef: string | null; addedBy: string | null; createdAt: string;
+  /** Sprint 4 review: the entry this one would replace once an admin approves it. */
+  replaces?: { ref: string; answer: string } | null;
   /** S4-4: when the entry fell due for review, and how often drafts cited it in the last 90 days. */
   dueSince?: string;
   recentCitations?: number;
@@ -52,6 +54,7 @@ const toEntry = (r: Record<string, unknown>): EntryForReview => ({
   originRef: (r.origin_ref as string | null) ?? null,
   addedBy: typeof r.added_by === 'string' ? r.added_by : ((r.added_by as { display_name?: string } | null)?.display_name) ?? null,
   createdAt: r.created_at as string,
+  replaces: (r.replaces as { ref: string; answer: string } | null) ?? null,
   ...(r.review_due ? { dueSince: r.review_due as string, recentCitations: Number(r.recent_citations ?? 0) } : {}),
 });
 
@@ -66,7 +69,7 @@ export async function loadOverdueEntries(client: SupabaseClient): Promise<EntryF
 export async function loadEntriesToReview(client: SupabaseClient): Promise<EntryForReview[]> {
   const { data, error } = await client
     .from('kb_entries')
-    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, added_by:user_profiles!kb_entries_created_by_fkey(display_name)')
+    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:kb_entries!kb_entries_proposed_replacement_of_fkey(ref, answer)')
     .is('reviewed_at', null)
     .is('superseded_by', null)
     .order('created_at', { ascending: true });
@@ -89,7 +92,7 @@ export function describeOrigin(e: Pick<EntryForReview, 'origin' | 'originRef' | 
   switch (e.origin) {
     case 'manual': return `Added by hand by ${who}`;
     case 'import': return `Imported by ${who}${e.originRef ? ` from ${e.originRef}` : ''}`;
-    case 'response': return `Learned from a response; answer approved by ${who}, who is not the response owner or an admin`;
+    case 'response': return `Learned from a response; answer approved by ${who}, who is not an admin`;
     default: return `Seed data`;
   }
 }

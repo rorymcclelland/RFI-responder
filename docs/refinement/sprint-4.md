@@ -9,7 +9,7 @@ The knowledge base can be trusted as it grows, the AI spend has a ceiling, and a
 - No member can run up an unbounded bill: every AI call is recorded, and processing stops at a per-user daily cap and an organisation monthly budget.
 - An entry a member added without review is never the basis of a bulk approval, and an admin can review it.
 - Every entry has a review date; stale entries are reported, and drafts that rely on them are held back from bulk approval.
-- The bulk-approval and delete markers cannot be forged, even over a direct database connection (F-24).
+- The bulk-approval and delete markers cannot be forged through the API (F-24). (Corrected after the security review: a direct database connection controls its own identity claims, so that is outside what any rule built on `auth.uid()` can protect.)
 - A governance pack (model card, risk register, data handling and retention, provider terms, framework mapping) where every claim points at code, a test or an evaluation report.
 
 ## What refinement found
@@ -180,3 +180,17 @@ All five stories are Ready, Sprint 4.
 | An admin's review clears the gate only for questions processed afterwards | Questions already processed keep their gate; F-28 |
 | Voyage's training opt-out is a manual step in Voyage's dashboard, recorded as a planned control (R-11) | It is an account setting, not something the code can do |
 | The EU AI Act check found a gap: exported files carry no machine-readable marker that a model drafted the answer | F-27 |
+
+## Independent security review (23 October 2026)
+
+A reviewer given the code but not the reasoning found seven issues, all fixed in `20261024140000_sprint4_review_fixes.sql` and the Edge Functions, each with a test (`supabase/tests/db/sprint4.test.ts`, "Sprint 4 security review findings"; `supabase/functions/_shared/usage.test.ts`):
+
+1. Any member can own a response, so the rule "a learned entry is reviewed when the owner approved it" let any member replace an admin-reviewed entry with their own text. Learned entries now count as reviewed only when an admin approved the answer; anyone else's answer that would replace an entry becomes a **proposed replacement** beside it, unreviewed, until an admin reviews it (outcome `proposed`). This changes refinement finding 4 and S4-3 test 4.
+2. Exporting an unedited draft held for citing an overdue entry cleared the entry's review date. It now confirms only when an admin approved it (outcome `not_confirmed_source`); confirmations are in the audit log.
+3. The budget counted only recorded spend, and questions had no length limit. Questions are capped at 5,000 characters; each reservation holds an estimated cost ($0.01 per question, $0.0001 per indexed text, admin-editable) under one lock until its usage is recorded.
+4. `purge_old_usage()` checked `current_user`, which inside a `SECURITY DEFINER` function is always the owner, so any member could run it. Only the service role can now.
+5. `price_usage()` kept a supplied cost for the same reason, and costs could be negative. Fixed, with a check constraint.
+6. Usage was recorded only after all calls succeeded. It is now recorded in a `finally`, and a reservation whose usage cannot be written keeps counting against the budget.
+7. The claim that the markers hold "even over a direct database connection" was wrong: such a connection controls its own JWT claims and so `auth.uid()`. The governance pack and decision 0003 now say the controls assume access through the API.
+
+Held, per the reviewer: the private markers, `bulk_accept` as `SECURITY DEFINER` (no weaker than the policy it replaces), column rights on gates and cited entries, the review columns, usage visibility, and the review gates failing closed.

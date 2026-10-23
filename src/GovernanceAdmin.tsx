@@ -271,6 +271,12 @@ function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e
         </>
       )}
       {entry.source && <p className="text-xs text-ink-400">Source: {entry.source}</p>}
+      {entry.replaces && (
+        <div className="text-xs text-ink-600 bg-amber-50 border border-amber-200 rounded-xl p-3">
+          <p className="font-bold text-amber-800">Approving this replaces {entry.replaces.ref}, which currently says:</p>
+          <p className="mt-1 whitespace-pre-wrap">{entry.replaces.answer}</p>
+        </div>
+      )}
       <div className="flex justify-end gap-2 pt-1">
         {editing ? (
           <>

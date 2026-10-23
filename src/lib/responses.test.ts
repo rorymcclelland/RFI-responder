@@ -32,6 +32,10 @@ describe('responses', () => {
     expect(describeLearning({ accepted: 5, skipped: 0, added: 2, confirmed: 2, not_learned_pricing: 1 }))
       .toBe('Knowledge base: 2 added as new entries; 2 confirmed existing entries unchanged; 1 not learned (pricing).');
     expect(describeLearning({ accepted: 0, skipped: 3 })).toBe('Knowledge base: nothing new to learn from this export.');
+    // Sprint 4 security review: a non-admin's replacement is proposed, not applied.
+    expect(describeLearning({ accepted: 2, skipped: 0, proposed: 1, not_confirmed_source: 1 })).toBe(
+      "Knowledge base: 1 proposed as replacements for existing entries, waiting for an admin to review; 1 did not confirm their entries (the entries need an admin's review).",
+    );
   });
 
   it('expert suggestions map reasons; a failure gives none rather than an error', async () => {

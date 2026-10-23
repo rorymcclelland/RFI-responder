@@ -9,7 +9,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { EmbeddingError, providerFromEnv } from '../_shared/embeddings.ts';
 import { embedPendingEntries, type EntryStore } from '../_shared/embed-core.ts';
 import { HttpError, json, requireUser, serve } from '../_shared/http.ts';
-import { meteredEmbedder, quotaMessage, recordUsage, reserveQuota, type QuotaReason, type UsageRow } from '../_shared/usage.ts';
+import { finishUsage, meteredEmbedder, quotaMessage, reserveQuota, type QuotaReason, type UsageRow } from '../_shared/usage.ts';
 
 serve(async (req) => {
   const { user } = await requireUser(req);
@@ -35,10 +35,12 @@ serve(async (req) => {
   // Sprint 4 (S4-1): each batch is reserved against the caller's daily embedding cap and the budget.
   const usage: UsageRow[] = [];
   let reason: QuotaReason | null = null;
+  const reservations: (string | null)[] = [];
   const reserve = async (n: number) => {
     try {
       const r = await reserveQuota(admin, user.id, 'embed', n);
       reason = r.reason;
+      reservations.push(r.reservation);
       return r.allowed;
     } catch (err) {
       if (err instanceof HttpError && err.status === 429) {
@@ -48,8 +50,13 @@ serve(async (req) => {
       throw err;
     }
   };
-  const result = await embedPendingEntries({ db, provider: meteredEmbedder(providerFromEnv(Deno.env.toObject()), usage), reserve });
-  await recordUsage(admin, user.id, 'embed-entries', null, usage);
+  let result: Awaited<ReturnType<typeof embedPendingEntries>>;
+  try {
+    result = await embedPendingEntries({ db, provider: meteredEmbedder(providerFromEnv(Deno.env.toObject()), usage), reserve });
+  } finally {
+    // Batches embedded before a failure are recorded too (security review, finding 6).
+    await finishUsage(admin, user.id, 'embed-entries', null, usage, reservations);
+  }
   if (result.limited && result.embedded === 0) throw new HttpError(quotaMessage(reason ?? 'daily_embed'), 429);
   return json(req, 200, { ...result, limit: result.limited ? quotaMessage(reason ?? 'daily_embed') : null });
 });

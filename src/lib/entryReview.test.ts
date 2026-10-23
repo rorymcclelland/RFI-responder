@@ -70,7 +70,7 @@ describe('the review queue', () => {
 
   it('says plainly where a learned entry came from', () => {
     expect(describeOrigin({ origin: 'response', originRef: 'response:x', addedBy: 'Maya Patel' }))
-      .toMatch(/approved by Maya Patel, who is not the response owner or an admin/);
+      .toMatch(/approved by Maya Patel, who is not an admin/);
   });
 });
 

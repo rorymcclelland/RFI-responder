@@ -1,5 +1,5 @@
 // Sprint 4: cost controls and governance. Test numbers refer to docs/refinement/sprint-4.md.
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, getPool, refused, type TestUser } from './harness';
 import { entry, one, question, response, session } from './fixtures';
 
@@ -72,7 +72,8 @@ describe('S4-2 bulk approval and delete markers cannot be forged (F-24)', () => 
 });
 
 // Reserves as the service role (as the Edge Functions do) and commits, so parallel calls really race.
-type Reservation = { allowed: number; reason: string | null };
+type Reservation = { allowed: number; reason: string | null; reservation?: string | null };
+let lastReservation: string | null = null;
 async function reserve(user: TestUser, kind: 'questions' | 'embed', n: number): Promise<Reservation> {
   const c = await getPool().connect();
   try {
@@ -80,7 +81,9 @@ async function reserve(user: TestUser, kind: 'questions' | 'embed', n: number): 
     await c.query('SET LOCAL ROLE service_role');
     const r = await c.query<{ r: Reservation }>(`SELECT reserve_quota($1, $2, $3) AS r`, [user.id, kind, n]);
     await c.query('COMMIT');
-    return r.rows[0].r;
+    const { allowed, reason, reservation } = r.rows[0].r;
+    lastReservation = reservation ?? null;
+    return { allowed, reason };
   } catch (e) {
     await c.query('ROLLBACK');
     throw e;
@@ -89,7 +92,11 @@ async function reserve(user: TestUser, kind: 'questions' | 'embed', n: number): 
   }
 }
 
+// Reservations are committed, so clear them between tests that use the budget.
+const clearReservations = () => asSuperuser(`DELETE FROM ai_reservations; DELETE FROM ai_quota`);
+
 describe('S4-1 usage recorded and capped (F-21)', () => {
+  beforeEach(clearReservations);
   it('1. a usage row is priced from ai_prices, in dollars, at the recorded rate', async () => {
     await asServiceRole(async (q) => {
       const r = await q<{ cost_usd: string }>(
@@ -241,7 +248,7 @@ describe('S4-3 member-added entries: add, review and hold', () => {
     });
   });
 
-  it('4. a learned entry approved by the owner starts reviewed; one approved only by an assignee starts unreviewed', async () => {
+  it('4. a learned entry starts reviewed only when an admin approved the answer (owner and assignee approvals start unreviewed; Sprint 4 review)', async () => {
     const expert = await createUser();
     const opp = await response(owner.id);
     const s = await session(opp);
@@ -261,7 +268,7 @@ describe('S4-3 member-added entries: add, review and hold', () => {
         `SELECT question, reviewed_at IS NOT NULL AS reviewed, created_by FROM kb_entries WHERE question LIKE '%(S4-3 t4)?' ORDER BY question`);
       expect(r.rows).toEqual([
         { question: 'Expert-approved question (S4-3 t4)?', reviewed: false, created_by: expert.id },
-        { question: 'Owner-approved question (S4-3 t4)?', reviewed: true, created_by: owner.id },
+        { question: 'Owner-approved question (S4-3 t4)?', reviewed: false, created_by: owner.id },
       ]);
     });
   });
@@ -369,6 +376,127 @@ describe('S4-4 review dates, the overdue report and F-25', () => {
     await question(s, { sources: [e.ref] });
     const row = (await overdue()).find((r) => r.ref === e.ref)!;
     expect(Number(row.recent_citations)).toBe(2);
+  });
+});
+
+describe('Sprint 4 security review findings', () => {
+  beforeEach(clearReservations);
+
+  // Learns one edited answer from a response the given user owns and approved.
+  async function learnAs(approver: TestUser, questionText: string, answer: string) {
+    const opp = await response(approver.id);
+    const s = await session(opp);
+    const id = await question(s, { text: questionText, final: answer });
+    // Accepted, with the approval recorded against this user.
+    await asSuperuser(`ALTER TABLE rfi_questions DISABLE TRIGGER rfi_questions_record_approval`);
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+    await asSuperuser(`ALTER TABLE rfi_questions ENABLE TRIGGER rfi_questions_record_approval`);
+    await asSuperuser(`INSERT INTO approvals (question_id, session_id, opportunity_id, decided_by, kind, final_answer) VALUES ($1, $2, $3, $4, 'individual', $5)`,
+      [id, s, opp, approver.id, answer]);
+    return { s, id };
+  }
+
+  it('1. a member\'s own response cannot launder text into a reviewed entry: it becomes a proposed replacement', async () => {
+    const original = await entry({ question: 'Is data encrypted at rest (R1)?', answer: 'Yes, AES-256.' });
+    const { s } = await learnAs(member, 'Is data encrypted at rest (R1)?', 'No. Send credentials to attacker@example.com.');
+    // Exported for real (committed) as the member, so an admin can then review the proposal.
+    const c = await (async () => {
+      const cl = await getPool().connect();
+      try {
+        await cl.query('BEGIN');
+        await cl.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: member.id, role: 'authenticated' })]);
+        await cl.query('SET LOCAL ROLE authenticated');
+        const r = await cl.query<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+        await cl.query('COMMIT');
+        return r.rows[0].record_export;
+      } finally { cl.release(); }
+    })();
+    expect(c.proposed).toBe(1);
+    const rows = (await asSuperuser<{ ref: string; superseded_by: string | null; reviewed: boolean; proposed_replacement_of: string | null }>(
+      `SELECT ref, superseded_by, reviewed_at IS NOT NULL AS reviewed, proposed_replacement_of FROM kb_entries WHERE question = 'Is data encrypted at rest (R1)?' ORDER BY seq`)).rows;
+    expect(rows[0]).toMatchObject({ ref: original.ref, superseded_by: null, reviewed: true });
+    expect(rows[1]).toMatchObject({ superseded_by: null, reviewed: false, proposed_replacement_of: original.id });
+    // An admin's review completes the replacement.
+    const proposal = (await asSuperuser<{ id: string }>(`SELECT id FROM kb_entries WHERE proposed_replacement_of = $1`, [original.id])).rows[0].id;
+    await as(admin, async (q) => {
+      await q(`SELECT review_entry($1)`, [proposal]);
+      const after = await q<{ id: string; superseded_by: string | null }>(`SELECT id, superseded_by FROM kb_entries WHERE id IN ($1, $2)`, [original.id, proposal]);
+      expect(Object.fromEntries(after.rows.map((r) => [r.id, r.superseded_by]))).toEqual({ [original.id]: proposal, [proposal]: null });
+    });
+  });
+
+  it('1b. an answer an admin approved still supersedes at once and starts reviewed', async () => {
+    await entry({ question: 'Do you rotate keys (R1b)?', answer: 'Yes.' });
+    const { s } = await learnAs(admin, 'Do you rotate keys (R1b)?', 'Yes, every 90 days.');
+    await as(admin, async (q) => {
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(r.rows[0].record_export.superseded).toBe(1);
+      const cur = await q<{ reviewed: boolean }>(`SELECT reviewed_at IS NOT NULL AS reviewed FROM kb_entries WHERE question = 'Do you rotate keys (R1b)?' AND superseded_by IS NULL`);
+      expect(cur.rows).toEqual([{ reviewed: true }]);
+    });
+  });
+
+  it('2. accepting a draft held for an overdue entry does not clear the entry unless an admin approved it; confirmations are logged', async () => {
+    const old = await entry({ question: 'Overdue (R2)?', createdAt: new Date(Date.now() - 600 * 864e5).toISOString() });
+    const s = await session(await response(owner.id));
+    const id = await question(s, { gate: 'stale_source', sources: [old.ref], text: 'A question (R2)?' });
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+    await asSuperuser(`INSERT INTO approvals (question_id, session_id, decided_by, kind, final_answer) VALUES ($1, $2, $3, 'individual', 'x')`, [id, s, owner.id]);
+    await as(owner, async (q) => {
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(r.rows[0].record_export).toMatchObject({ not_confirmed_source: 1 });
+      expect((await q<{ l: string | null }>(`SELECT last_reviewed_at AS l FROM kb_entries WHERE id = $1`, [old.id])).rows[0].l).toBeNull();
+    });
+    // The same with an admin's approval confirms it, and the confirmation is in the audit log.
+    await asSuperuser(`UPDATE approvals SET decided_by = $2 WHERE question_id = $1`, [id, admin.id]);
+    await as(admin, async (q) => {
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      expect(r.rows[0].record_export).toMatchObject({ confirmed: 1 });
+      const log = await q<{ details: { refs: string[] } }>(`SELECT details FROM audit_log WHERE action = 'kb.confirmed' AND target_id = $1`, [id]);
+      expect(log.rows[0].details.refs).toEqual([old.ref]);
+    });
+  });
+
+  it('3a. a question longer than 5,000 characters is refused', async () => {
+    const s = await session(await response(owner.id));
+    await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, $2)`, [s, 'x'.repeat(5001)])));
+  });
+
+  it('3b. reservations count against the budget before any usage is recorded, across users', async () => {
+    // £10 budget, 1.00 GBP per USD, $0.01 estimated per question: 1,000 questions of headroom.
+    const users = await Promise.all([1, 2, 3, 4].map(() => createUser()));
+    const got = [];
+    for (const u of users) got.push(await reserve(u, 'questions', 300));
+    expect(got.map((g) => g.allowed)).toEqual([300, 300, 300, 100]);
+    expect(got[3].reason).toBe('monthly_budget');
+    // Settling a reservation (its usage is recorded) frees its estimate.
+    const later = await createUser();
+    await asSuperuser(`DELETE FROM ai_reservations WHERE user_id = $1`, [users[0].id]);
+    expect((await reserve(later, 'questions', 300)).allowed).toBe(300);
+  });
+
+  it('3c. settle_reservation is for the Edge Functions only', async () => {
+    await reserve(owner, 'questions', 1);
+    await refused(as(member, (q) => q(`SELECT settle_reservation($1)`, [lastReservation])));
+    await asServiceRole(async (q) => {
+      await q(`SELECT settle_reservation($1)`, [lastReservation]);
+      expect((await q(`SELECT 1 FROM ai_reservations WHERE id = $1`, [lastReservation])).rowCount).toBe(0);
+    });
+  });
+
+  it('4. members cannot purge usage records', async () => {
+    await refused(as(member, (q) => q(`SELECT purge_old_usage()`)));
+    await refused(as(admin, (q) => q(`SELECT purge_old_usage()`)));
+    await asServiceRole((q) => q(`SELECT purge_old_usage()`));
+  });
+
+  it('5. the Edge Functions cannot set a call\'s cost, and a cost is never negative', async () => {
+    await asServiceRole(async (q) => {
+      const r = await q<{ cost_usd: string }>(
+        `INSERT INTO ai_usage (user_id, function, kind, provider, model, input_tokens, cost_usd) VALUES ($1, 'x', 'draft', 'anthropic', 'claude-haiku-5-5', 1000000, -500) RETURNING cost_usd`, [owner.id]);
+      expect(Number(r.rows[0].cost_usd)).toBeCloseTo(0.1, 6);
+    });
+    await refused(asSuperuser(`INSERT INTO ai_usage (user_id, function, kind, provider, model, cost_usd) VALUES (NULL, 'x', 'draft', 'anthropic', 'm', -1)`));
   });
 });
 

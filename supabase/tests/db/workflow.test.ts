@@ -236,7 +236,9 @@ describe('S3-4 learning at export', () => {
   it('1. an edited answer becomes an entry with provenance, and supersedes its near-duplicate', async () => {
     const old = await entry('How do you encrypt data at rest? (S3-4 t1)', 'AES-128.');
     const { opp, s, id } = await exportOne({ final: 'We encrypt data at rest with AES-256 and rotate keys yearly.', sources: [[old.ref, 0.72]], verdict: 'yes' });
-    await as(owner, async (q) => {
+    // From the Sprint 4 security review only an admin's approval supersedes at once; an owner's
+    // becomes a proposed replacement (supabase/tests/db/sprint4.test.ts).
+    await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = 'We encrypt data at rest with AES-256 and rotate keys yearly.' WHERE id = $1`, [id]);
       await accept(q, id);
       const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
@@ -244,7 +246,7 @@ describe('S3-4 learning at export', () => {
       const learned = await q<Record<string, unknown>>(
         `SELECT k.origin, k.origin_ref, k.created_by, k.tags, k.answer FROM rfi_questions x JOIN kb_entries k ON k.id = x.learned_entry_id WHERE x.id = $1`, [id]);
       expect(learned.rows[0]).toMatchObject({
-        origin: 'response', origin_ref: `response:${opp}/session:${s}/question:${id}`, created_by: owner.id,
+        origin: 'response', origin_ref: `response:${opp}/session:${s}/question:${id}`, created_by: admin.id,
         tags: ['encryption'], answer: 'We encrypt data at rest with AES-256 and rotate keys yearly.',
       });
       const o = await q<{ superseded_by: string | null }>(`SELECT superseded_by FROM kb_entries WHERE id = $1`, [old.id]);
@@ -318,9 +320,14 @@ describe('S3-4 learning at export', () => {
   it('the same question asked again supersedes the old entry rather than failing', async () => {
     const old = await entry('Same question? (dup key)', 'Old answer.');
     const { s, id } = await exportOne({ text: 'same   QUESTION? (dup key)', final: 'New answer.', sources: [[old.ref, 0.1]], verdict: 'no' });
-    await as(owner, async (q) => {
+    await as(admin, async (q) => {
       await accept(q, id);
       expect((await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s])).rows[0].record_export.superseded).toBe(1);
+    });
+    // An owner's approval of the same question is proposed beside it instead (Sprint 4 review).
+    await as(owner, async (q) => {
+      await accept(q, id);
+      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s])).rows[0].record_export.proposed).toBe(1);
     });
   });
 });

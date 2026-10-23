@@ -1,8 +1,8 @@
 // Sprint 4, S4-1: metering AI calls and turning a quota reservation into an answer for the person.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ClaudeClient } from './claude.ts';
 import type { EmbeddingProvider } from './embeddings.ts';
-import { meteredClaude, meteredEmbedder, meteredFetch, quotaMessage, reserveQuota, type UsageRow } from './usage.ts';
+import { finishUsage, meteredClaude, meteredEmbedder, meteredFetch, quotaMessage, reserveQuota, type UsageRow } from './usage.ts';
 
 const fakeClaude: ClaudeClient = {
   async json<T>() {
@@ -59,7 +59,7 @@ describe('reserveQuota', () => {
   const rpc = (result: unknown, error: unknown = null) => ({ rpc: async () => ({ data: result, error }) });
 
   it('returns what was allowed', async () => {
-    expect(await reserveQuota(rpc({ allowed: 4, reason: 'daily_questions' }), 'u', 'questions', 10)).toEqual({ allowed: 4, reason: 'daily_questions' });
+    expect(await reserveQuota(rpc({ allowed: 4, reason: 'daily_questions', reservation: 'r1' }), 'u', 'questions', 10)).toEqual({ allowed: 4, reason: 'daily_questions', reservation: 'r1' });
   });
 
   it('refuses with 429 and a plain reason when nothing is allowed', async () => {
@@ -75,5 +75,36 @@ describe('reserveQuota', () => {
     expect(quotaMessage('daily_questions')).toMatch(/today's limit.*admin/i);
     expect(quotaMessage('daily_embed')).toMatch(/today's limit.*admin/i);
     expect(quotaMessage('monthly_budget')).toMatch(/budget.*admin/i);
+  });
+});
+
+describe('finishUsage (security review, finding 6)', () => {
+  const row: UsageRow = { kind: 'draft', provider: 'anthropic', model: 'claude-haiku-5-5', input_tokens: 10, output_tokens: 2 };
+  const db = (insertError: unknown) => {
+    const inserted: unknown[] = [];
+    const rpc = vi.fn().mockResolvedValue({ data: null, error: null });
+    return {
+      inserted, rpc,
+      client: { from: () => ({ insert: (rows: unknown[]) => { inserted.push(...rows); return Promise.resolve({ error: insertError }); } }), rpc },
+    };
+  };
+
+  it('records the calls, then releases the reservations', async () => {
+    const d = db(null);
+    expect(await finishUsage(d.client, 'u1', 'process-questions', 's1', [row], ['r1', null, 'r2'])).toBe(true);
+    expect(d.inserted).toEqual([{ ...row, user_id: 'u1', function: 'process-questions', session_id: 's1' }]);
+    expect(d.rpc.mock.calls).toEqual([['settle_reservation', { p_reservation: 'r1' }], ['settle_reservation', { p_reservation: 'r2' }]]);
+  });
+
+  it('keeps the reservations when the usage cannot be written, so the budget still counts them', async () => {
+    const d = db({ message: 'insert failed' });
+    expect(await finishUsage(d.client, 'u1', 'embed', null, [row], ['r1'])).toBe(false);
+    expect(d.rpc).not.toHaveBeenCalled();
+  });
+
+  it('releases a reservation when no call was made (nothing to record)', async () => {
+    const d = db(null);
+    expect(await finishUsage(d.client, 'u1', 'embed', null, [], ['r1'])).toBe(true);
+    expect(d.rpc).toHaveBeenCalledWith('settle_reservation', { p_reservation: 'r1' });
   });
 });

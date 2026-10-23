@@ -75,15 +75,18 @@ interface RpcClient {
   rpc(fn: string, args: Record<string, unknown>): PromiseLike<{ data: unknown; error: unknown }>;
 }
 
-/** Reserve work for a user; throws 429 when none is allowed and 503 when the check cannot run. */
-export async function reserveQuota(db: RpcClient, userId: string, kind: 'questions' | 'embed', n: number): Promise<{ allowed: number; reason: QuotaReason | null }> {
+/**
+ * Reserve work for a user; throws 429 when none is allowed and 503 when the check cannot run.
+ * The reservation also holds an estimated cost against the monthly budget until it is settled.
+ */
+export async function reserveQuota(db: RpcClient, userId: string, kind: 'questions' | 'embed', n: number): Promise<{ allowed: number; reason: QuotaReason | null; reservation: string | null }> {
   const { data, error } = await db.rpc('reserve_quota', { p_user: userId, p_kind: kind, p_n: n });
-  const r = data as { allowed?: number; reason?: QuotaReason | null } | null;
+  const r = data as { allowed?: number; reason?: QuotaReason | null; reservation?: string | null } | null;
   if (error || !r || typeof r.allowed !== 'number') {
     throw new HttpError('Usage could not be checked, so nothing was processed. Try again shortly.', 503);
   }
   if (r.allowed === 0 && n > 0) throw new HttpError(quotaMessage(r.reason ?? 'monthly_budget'), 429);
-  return { allowed: r.allowed, reason: r.reason ?? null };
+  return { allowed: r.allowed, reason: r.reason ?? null, reservation: r.reservation ?? null };
 }
 
 interface InsertClient {
@@ -96,4 +99,28 @@ export async function recordUsage(db: InsertClient, userId: string, fn: string, 
   const { error } = await db.from('ai_usage').insert(rows.map((r) => ({ ...r, user_id: userId, function: fn, session_id: sessionId })));
   if (error) console.error('ai_usage insert failed', error);
   return !error;
+}
+
+/**
+ * Record the calls made under some reservations, then release the reservations. Run it in a
+ * `finally`, so calls made before an error are recorded too (security review, finding 6). If the
+ * usage cannot be written, the reservations are kept: their estimates go on counting against the
+ * monthly budget, so unrecorded spend cannot slip past it.
+ */
+export async function finishUsage(
+  db: InsertClient & RpcClient, userId: string, fn: string, sessionId: string | null, rows: UsageRow[], reservations: (string | null)[],
+): Promise<boolean> {
+  let recorded = false;
+  try {
+    recorded = await recordUsage(db, userId, fn, sessionId, rows);
+  } catch (err) {
+    console.error('ai_usage insert threw', err);
+  }
+  if (!recorded) return false;
+  for (const id of reservations) {
+    if (!id) continue;
+    const { error } = await db.rpc('settle_reservation', { p_reservation: id });
+    if (error) console.error('settle_reservation failed', error);
+  }
+  return true;
 }
