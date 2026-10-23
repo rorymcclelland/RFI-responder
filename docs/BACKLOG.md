@@ -160,18 +160,19 @@ End-to-end on Rory's PC: 46 questions processed server-side; near misses refused
 
 ## Sprint 3: workflow and the learning loop (confirmed 23 October 2026)
 
-To be refined before building. Proposed contents, each with its reason:
+Refinement: `docs/refinement/sprint-3.md` (answers recorded 23 October). Each item with its reason:
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S3-1 | Overview of responses in flight: owner, due date, progress, overdue and at-risk flags | Rory's brief: several responses at once | Proposed |
-| S3-2 | Recorded approvals (who, individual or bulk, threshold, model and prompt versions) and a readiness gate before export | Rule 4 says bulk approval counts when recorded; the audit trail completes Sprint 2's controls | Proposed |
-| S3-3 | Archive with outcome (won or lost); admin-only hard delete for responses created in error, logged | Rory's brief: archive, never delete | Proposed |
-| S3-4 | Learning at export: accepted answers become entries with provenance, near-duplicates superseded (F-11), origin_ref set by the system (F-6), pricing never learned | The self-improving knowledge base; replaces the manual Add to KB button | Proposed |
-| S3-5 | Questions editable only by the owner, assignees and admins (F-7) | Same tables as S3-2 | Proposed |
-| S3-6 | Expert suggestions from answer history as well as stated expertise | Uses the provenance S3-4 records | Proposed |
-| F-17 | Show high confidence as "99% or more", never "100%" | Small, and the card changes anyway | Proposed |
-| F-23 | Start a new upload from the review screen | Small, and the workspace changes anyway | Proposed |
+| S3-1 | Overview of responses in flight: owner, due date, progress, overdue and at-risk flags | Rory's brief: several responses at once | Ready, Sprint 3 |
+| S3-2 | Recorded approvals (who, individual or bulk, threshold, model and prompt versions) and a readiness gate before export | Rule 4 says bulk approval counts when recorded; the audit trail completes Sprint 2's controls | Ready, Sprint 3 |
+| S3-3 | Archive with outcome (won or lost); admin-only hard delete for responses created in error, logged | Rory's brief: archive, never delete | Ready, Sprint 3 |
+| S3-4 | Learning at export: edited and person-written answers (including legal) become entries with provenance, near-duplicates superseded (F-11, threshold measured in S3-4b), origin_ref set by the system (F-6), pricing and Japanese never learned; unedited drafts confirm their entries | The self-improving knowledge base; replaces the manual Add to KB button | Ready, Sprint 3 |
+| S3-4b | Near-duplicate threshold measured on the Sprint 1 evaluation set | Supersession must not replace a different question's entry | Ready, Sprint 3 |
+| S3-5 | Questions editable only by the owner, assignees and admins (F-7) | Same tables as S3-2 | Ready, Sprint 3 |
+| S3-6 | Expert suggestions from answer history as well as stated expertise | Uses the provenance S3-4 records | Ready, Sprint 3 |
+| F-17 | Show high confidence as "99% or more", never "100%" | Small, and the card changes anyway | Ready, Sprint 3 |
+| F-23 | Start a new upload from the review screen | Small, and the workspace changes anyway | Ready, Sprint 3 |
 
 No spike: near-duplicate detection uses the vectors already stored, with a threshold measured on the evaluation set.
 
