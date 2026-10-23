@@ -99,11 +99,11 @@ export default function UploadStep({ opportunityName, error, pastSessions, orpha
         <p className="text-lg font-black text-ink-800 mb-1">{dragOver ? 'Drop to upload' : 'Drag & drop your questions file'}</p>
         <p className="text-sm text-ink-400 font-medium">or click to browse</p>
         <div className="flex justify-center gap-2 mt-5">
-          {['.csv', '.xlsx'].map((e) => (
+          {['.csv', '.xlsx', '.docx'].map((e) => (
             <span key={e} className="text-xs bg-white border border-ink-200 text-ink-500 px-3 py-1.5 rounded-full font-bold shadow-card">{e}</span>
           ))}
         </div>
-        <input ref={fileInput} type="file" accept=".csv,.xlsx" onChange={handleFileChange} className="hidden" />
+        <input ref={fileInput} type="file" accept=".csv,.xlsx,.docx" onChange={handleFileChange} className="hidden" />
       </div>
 
       {error && (

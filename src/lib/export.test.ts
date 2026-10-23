@@ -20,6 +20,11 @@ describe('exportRows', () => {
     expect(rows.map((r) => [r.question, r.answer])).toEqual([['Q1', 'Answer 1'], ['Q2', NOT_ANSWERED]]);
   });
 
+  it('Sprint 5: uses the customer\'s own numbers where the document had them', () => {
+    const rows = exportRows([{ ...q(1, 'accepted'), customerRef: '3(a)' }, q(2, 'accepted')]);
+    expect(rows.map((r) => r.number)).toEqual(['3(a)', '2']);
+  });
+
   it('removes references and marks edited answers', () => {
     const [row] = exportRows([q(1, 'accepted', 'We use AES-256.\n\n[References: KB-0001]', 'Old draft')]);
     expect(row.answer).toBe('We use AES-256.');

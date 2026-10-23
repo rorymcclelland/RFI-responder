@@ -115,3 +115,16 @@ describe('S5-2 extraction inside the caps', () => {
     await refused(as(member, (q) => q(`SELECT reserve_quota($1, 'extract', 1)`, [member.id])));
   });
 });
+
+describe('S5-3 the customer\'s own numbering is kept', () => {
+  it('the owner saves a question with its number; a long number is refused; nobody changes it afterwards', async () => {
+    const s = await session(await response(owner.id));
+    await as(owner, async (q) => {
+      const r = await q<{ customer_ref: string }>(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '3(a)') RETURNING customer_ref`, [s]);
+      expect(r.rows[0].customer_ref).toBe('3(a)');
+    });
+    await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', $2)`, [s, 'x'.repeat(21)])));
+    const id = await question(s);
+    await refused(as(owner, (q) => q(`UPDATE rfi_questions SET customer_ref = '9' WHERE id = $1`, [id])));
+  });
+});

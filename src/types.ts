@@ -53,6 +53,8 @@ export interface RFIQuestion {
   id: string;
   sessionId: string;
   position: number;
+  /** The customer's own number for the question ("3.2.", "4(a)"), when the document had one (Sprint 5). */
+  customerRef?: string | null;
   question: string;
   generatedAnswer: string;
   finalAnswer: string;

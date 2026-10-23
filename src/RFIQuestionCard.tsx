@@ -325,6 +325,11 @@ export default function RFIQuestionCard({
         <span className="text-xs font-black text-ink-300 flex-shrink-0 w-7 mt-0.5 font-feature-tnum">
           {String(index + 1).padStart(2, '0')}
         </span>
+        {question.customerRef && (
+          <span className="text-2xs font-bold text-ink-500 bg-ink-50 border border-ink-100 px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5" title="The customer's number for this question">
+            {question.customerRef}
+          </span>
+        )}
 
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-semibold leading-snug ${question.status === 'skipped' ? 'text-ink-400 line-through' : 'text-ink-800'}`}>

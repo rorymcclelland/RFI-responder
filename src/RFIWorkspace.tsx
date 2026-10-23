@@ -8,6 +8,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, RefreshCw, Search, Upload, X } from 'lucide-react';
 import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
+import { readWordDocument, WordDocumentError } from './lib/wordDocument';
+import { extractFromWord } from './lib/wordExtraction';
+import { describeExtraction, fromExtraction, toInsertRows, type Draft } from './lib/questionDrafts';
+import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
 import { bulkAcceptInDb, describeBulk, insertQuestions, processInBatches, saveQuestionPatch } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
@@ -35,7 +39,7 @@ interface Props {
   canAssign: boolean;
 }
 
-type WorkflowStep    = 'idle' | 'mapping' | 'processing' | 'review' | 'export';
+type WorkflowStep    = 'idle' | 'mapping' | 'preview' | 'processing' | 'review' | 'export';
 type FilterTab       = 'all' | 'pending' | 'accepted' | 'skipped';
 type ConfidenceGroup = 'all' | 'high' | 'medium' | 'low' | 'uncalibrated';
 
@@ -82,6 +86,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [notice, setNotice]               = useState('');
   const [listCollapsed, setListCollapsed] = useState(false);
   const rawRows                           = useRef<Row[]>([]);
+  // Sprint 5 (S5-3): questions found in a Word document, while the person checks them.
+  const [drafts, setDrafts]               = useState<Draft[]>([]);
+  const [extraction, setExtraction]       = useState<{ summary: string; ruleBased: boolean }>({ summary: '', ruleBased: false });
 
   const { assignments, handleAssign, handleUnassign } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
@@ -116,6 +123,24 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
 
   const processFile = useCallback(async (file: File) => {
     setUploadError('');
+    if (/\.(docx|docm|doc)$/i.test(file.name)) {
+      // Word: read in the browser, find the questions on the server, then let the person check them.
+      try {
+        const { blocks } = await readWordDocument(file);
+        setFileName(file.name);
+        setStep('processing');
+        setProgress(30);
+        setProcessMsg('Finding the questions in the document');
+        const result = await extractFromWord(supabase, blocks);
+        setDrafts(fromExtraction(result));
+        setExtraction({ summary: describeExtraction(result), ruleBased: result.method === 'rules' });
+        setStep('preview');
+      } catch (err) {
+        setStep('idle');
+        setUploadError(err instanceof WordDocumentError || err instanceof Error ? err.message : 'The file could not be read.');
+      }
+      return;
+    }
     try {
       const { headers: hdrs, rows } = await parseSpreadsheet(file);
       rawRows.current = rows;
@@ -172,6 +197,30 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     }
     await processAndReload(session.id, ids);
   }, [questionCol, fileName, opportunityId, processAndReload]);
+
+  /** S5-3: save the checked list from a Word document, then process it like a spreadsheet's. */
+  const saveDrafts = useCallback(async () => {
+    setUploadError(''); setNotice('');
+    const rows = toInsertRows(drafts);
+    const { data: session, error } = await supabase
+      .from('rfi_sessions')
+      .insert({ file_name: fileName, question_count: rows.length, opportunity_id: opportunityId })
+      .select().maybeSingle();
+    if (error || !session) {
+      setUploadError(`The session could not be created: ${error?.message ?? 'no response'}`);
+      return;
+    }
+    setSessionId(session.id);
+    let ids: string[];
+    try {
+      ids = await insertQuestions(supabase, session.id, rows);
+    } catch (err) {
+      setUploadError((err as Error).message);
+      return;
+    }
+    setDrafts([]);
+    await processAndReload(session.id, ids);
+  }, [drafts, fileName, opportunityId, processAndReload]);
 
   // ── Review actions ────────────────────────────────────────────────────────
 
@@ -285,6 +334,20 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     />
   );
 
+  if (step === 'preview') return (
+    <>
+      {uploadError && <p role="alert" className="max-w-3xl mx-auto px-6 pt-6 text-sm text-coral-600">{uploadError}</p>}
+      <PreviewStep
+        fileName={fileName}
+        summary={extraction.summary}
+        ruleBased={extraction.ruleBased}
+        drafts={drafts}
+        onChange={setDrafts}
+        onBack={() => { setStep('idle'); setDrafts([]); }}
+        onSave={saveDrafts}
+      />
+    </>
+  );
   if (step === 'processing') return <ProcessingStep message={processMsg} progress={progress} />;
 
   const pendingCount  = pending.length;

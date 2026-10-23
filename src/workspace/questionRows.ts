@@ -10,6 +10,7 @@ export interface QuestionRow {
   session_id: string;
   position: number;
   question: string;
+  customer_ref?: string | null;
   generated_answer: string | null;
   final_answer: string | null;
   confidence: number | string | null;
@@ -40,6 +41,7 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
     id: r.id,
     sessionId: r.session_id,
     position: r.position,
+    customerRef: r.customer_ref ?? null,
     question: r.question,
     generatedAnswer: generated,
     finalAnswer: r.final_answer ?? generated,

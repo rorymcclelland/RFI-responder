@@ -18,7 +18,7 @@
  * column). Tracked deletions are left out, as the reader of the document sees it. Numbering that
  * comes only from a paragraph style is not resolved (any number typed into the text is kept).
  */
-import JSZip from 'jszip';
+import type JSZip from 'jszip';
 
 export const WORD_LIMITS = {
   /** Same as spreadsheets: 5 MB. */
@@ -80,9 +80,11 @@ export async function readWordDocument(file: UploadLike): Promise<WordDocument> 
   const notWord = () => new WordDocumentError('This file is not a Word document (.docx).');
   if (bytes.length < 4 || bytes[0] !== 0x50 || bytes[1] !== 0x4b || bytes[2] !== 0x03 || bytes[3] !== 0x04) throw notWord();
 
+  // Loaded on demand, like ExcelJS for spreadsheets, so the main bundle stays small.
+  const { default: Zip } = await import('jszip');
   let zip: JSZip;
   try {
-    zip = await JSZip.loadAsync(bytes, { checkCRC32: false, createFolders: false });
+    zip = await Zip.loadAsync(bytes, { checkCRC32: false, createFolders: false });
   } catch {
     throw notWord();
   }

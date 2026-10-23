@@ -54,12 +54,14 @@ export async function saveQuestionPatch(
 export async function insertQuestions(
   client: SupabaseClient,
   sessionId: string,
-  questions: { position: number; question: string }[],
+  questions: { position: number; question: string; customerRef?: string | null }[],
   batch = 25,
 ): Promise<string[]> {
   const ids: string[] = [];
   for (let i = 0; i < questions.length; i += batch) {
-    const rows = questions.slice(i, i + batch).map((q) => ({ session_id: sessionId, position: q.position, question: q.question }));
+    const rows = questions.slice(i, i + batch).map((q) => ({
+      session_id: sessionId, position: q.position, question: q.question, ...(q.customerRef ? { customer_ref: q.customerRef } : {}),
+    }));
     const { data, error } = await client.from('rfi_questions').insert(rows).select('id');
     if (error || !data) throw new Error(`Only ${i} of ${questions.length} questions were saved: ${error?.message ?? 'no response'}`);
     ids.push(...data.map((d: { id: string }) => d.id));

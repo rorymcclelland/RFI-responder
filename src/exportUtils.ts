@@ -24,14 +24,15 @@ export const NOT_ANSWERED = 'Not answered';
 
 /**
  * The rows of the exported response: every decided question in the RFI's own order (not the
- * review order), with skipped questions marked "Not answered" and references removed.
+ * review order), with skipped questions marked "Not answered" and references removed. The number is
+ * the customer's own when the question came from a document that had one (Sprint 5).
  */
 export function exportRows(questions: RFIQuestion[]) {
   return questions
     .filter((q) => q.status === 'accepted' || q.status === 'skipped')
     .sort((a, b) => a.position - b.position)
     .map((q, i) => ({
-      number: String(i + 1),
+      number: q.customerRef || String(i + 1),
       question: q.question,
       answer: q.status === 'accepted' ? stripKbReferences(q.finalAnswer) : NOT_ANSWERED,
       edited: q.status === 'accepted' && q.finalAnswer !== q.generatedAnswer,
