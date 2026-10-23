@@ -306,18 +306,22 @@ An independent security review found five issues, all fixed and tested (`2026102
 | F-30 After "All eligible", an accepted card reads "bulk at 0%" | Backlog, from Sprint 5 review; proposed for Sprint 6 |
 | F-31 The Sent list of assignments does not say who each question went to | Backlog, from Sprint 5 review; proposed for Sprint 6 |
 
-## Sprint 6: checker reliability (proposed at the Sprint 5 review, 23 October 2026)
+## Sprint 6: checker reliability (confirmed at the Sprint 5 review; refined 23 October 2026)
+
+Refinement: `docs/refinement/sprint-6.md` (answers recorded 23 October). Refinement found that about 30% of the checker's replies were cut off by its 300-token limit and counted as "no"; set aside, 2 of 181 questions changed verdict across five runs, not 42. Rory chose to fix the cause and measure, with majority of three only as a fallback (this replaces the Sprint 5 review's decision).
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| F-18 | The checker runs three times per question and the majority verdict decides the draft and the confidence (F-22's fix); its prompt reviewed for answerable questions it refuses; the verdict shown on the card | 23.2% of verdicts changed between runs, all on answerable questions; the figures published in Sprint 7 should be stable | Proposed |
-| F-18 (evaluation) | Recalibrate on the majority verdict and rerun answerability, calibration and consistency; bars agreed at refinement | Confidence is calibrated on the checker's output, so changing it means recalibrating | Proposed |
-| F-28 | Recheck questions already processed when an entry they cite is reviewed | Same processing code; otherwise a reviewed entry leaves old questions held | Proposed |
-| F-9 | Single accept, edit and skip check for errors | A failed save is silent; review screen open anyway | Proposed |
-| F-30 | Bulk acceptance labelled by how it was done ("bulk, all eligible") | Small; same card | Proposed |
-| F-31 | The Sent list names the assignee | Small; workflow screens | Proposed |
+| S6-1 | The checker's replies are never cut off and never silently become "no": higher limits, one-sentence reasons, stop reason recorded, one retry, then a failed check (held from bulk); evaluation caches keyed by prompt version (F-22, F-18) | The cause of most of F-22's variation and probably of F-18 | Ready, Sprint 6 |
+| S6-2 | Recalibrate and re-measure answerability, calibration, consistency, drafting, gates and red team; bars: 0 unreadable replies, at most 5% verdict changes and 5% bulk-line crossings, near misses at the bulk line still 0 of 33 (at most 1), gates 100 of 100, injections at most 1 of 35 | Confidence is calibrated on the checker's output; Sprint 7 publishes these figures | Ready, Sprint 6 |
+| S6-3 | The card shows the checker's verdict, chosen entry and one-sentence reason (new server-written `judge_reason`) (F-18) | A reviewer sees why the confidence is what it is | Ready, Sprint 6 |
+| S6-4 | Reviewing an entry releases pending questions held for it; bulk approval checks cited entries live (F-28) | Same code area; also catches entries falling overdue after processing | Ready, Sprint 6 |
+| S6-5 | A save refused by row-level security is reported (F-9 remainder) | Looks saved when it was not | Ready, Sprint 6 |
+| S6-6 | "All eligible" approvals read "bulk, all eligible" (F-30) | Small; same card | Ready, Sprint 6 |
+| S6-7 | The Sent list names the assignee (F-31) | Small | Ready, Sprint 6 |
+| F-22 fallback | Majority of three checker runs | Only if S6-2 misses the consistency bar | Planned, Sprint 7 only if needed (refined at the Sprint 6 close) |
 
-No spike.
+No spike: S6-2 measures against agreed bars, and the one story that depends on it is held out of the sprint.
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 5 review)
 
@@ -345,7 +349,7 @@ No spike.
 | F-6 | Validate `kb_entries.origin_ref` server-side | Done, Sprint 3. Free text until Sprint 3's learning at export sets it |
 | F-7 | Make questions within a session editable only by the owner, assignees and admins | Done, Sprint 3. Team-editable until Sprint 3's readiness workflow |
 | F-8 | Turn on leaked-password protection in the hosted project | The Bolt migration claiming to do this was a no-op (decision 0003) |
-| F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Found in the end-to-end run; a failed save is silent |
+| F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Done, Sprint 1 (`85b39b4`, found at the Sprint 6 refinement). Found in the end-to-end run; a failed save is silent. Remainder (a refused save affecting no rows) is S6-5 |
 | F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Found in the end-to-end run |
 | F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Done, Sprint 3. Found in the end-to-end run; Sprint 3, with supersession |
 | F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | Done, Sprint 2. From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
