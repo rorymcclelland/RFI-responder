@@ -42,8 +42,10 @@ export async function saveQuestionPatch(
   if (patch.finalAnswer !== undefined) steps.push({ final_answer: patch.finalAnswer });
   if (patch.status !== undefined) steps.push({ status: patch.status });
   for (const db of steps) {
-    const { error } = await client.from('rfi_questions').update(db).eq('id', id);
+    // Row-level security refuses by updating nothing, without an error (Sprint 6, S6-5).
+    const { data, error } = await client.from('rfi_questions').update(db).eq('id', id).select('id');
     if (error) throw new Error(`Your change was not saved: ${error.message}`);
+    if (!data || data.length === 0) throw new Error('Your change was not saved: you cannot change this question.');
   }
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
-import { formatConfidence } from './lib/format';
+import { approvalLabel, checkerSummary, formatConfidence } from './lib/format';
 import { answerSource, ANSWER_HEADING, ANSWER_TIP } from './lib/answerLabel';
 import { suggestExperts, type ExpertSuggestion } from './lib/responses';
 import { supabase } from './lib/supabase';
@@ -353,7 +353,7 @@ export default function RFIQuestionCard({
                   <span className="font-medium text-emerald-600">
                     {' '}by {users.find((u) => u.id === question.approval!.by)?.displayName ?? 'a team member'},{' '}
                     {new Date(question.approval.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                    {question.approval.kind === 'bulk' && question.approval.threshold !== null ? `, bulk at ${Math.round(question.approval.threshold * 100)}%` : ''}
+                    {approvalLabel(question.approval) && `, ${approvalLabel(question.approval)}`}
                   </span>
                 )}
               </span>
@@ -421,6 +421,21 @@ export default function RFIQuestionCard({
               );
             })}
           </div>
+
+          {/* The answerability checker's verdict and reason (Sprint 6, S6-3); plain text, never HTML. */}
+          {(() => {
+            const checker = checkerSummary(question.checker, question.provenance.judgeModel);
+            if (!checker) return null;
+            return (
+              <div className="bg-ink-50 rounded-xl p-3 border border-ink-100">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-2xs font-black uppercase tracking-wider text-ink-500">Checker</span>
+                  <InfoTip text="Whether the matched entries actually answer this question, as judged by the model shown in the details. Its verdict feeds the confidence above. Not available means the check failed, so the question is not calibrated and is never bulk-approved." />
+                </div>
+                <p className="text-sm text-ink-700"><span className="font-black">{checker.label}</span>{checker.detail && <span>{'. '}{checker.detail}</span>}</p>
+              </div>
+            );
+          })()}
 
           {/* KB sources */}
           {question.sources.length > 0 && (

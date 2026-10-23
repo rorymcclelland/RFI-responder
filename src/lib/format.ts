@@ -7,3 +7,38 @@ export function formatConfidence(c: number | null): string | null {
   if (c >= 0.99) return '99%+';
   return `${Math.min(98, Math.round(c * 100))}%`;
 }
+
+export type CheckerVerdict = 'yes' | 'partly' | 'no';
+
+/**
+ * The answerability checker as shown on the card (Sprint 6, S6-3). Null when no checker ran;
+ * "Not available" when it ran and failed (never shown as a "no"). The detail is plain text and is
+ * rendered by React, never as HTML.
+ */
+export function checkerSummary(
+  checker: { verdict: CheckerVerdict | null; bestRef: string | null; reason: string | null },
+  judgeModel: string | null,
+): { label: string; detail: string | null } | null {
+  if (!checker.verdict) return judgeModel ? { label: 'Not available', detail: null } : null;
+  const label = { yes: 'Yes', partly: 'Partly', no: 'No' }[checker.verdict];
+  const detail = [checker.bestRef, checker.reason].filter(Boolean).join(': ') || null;
+  return { label, detail };
+}
+
+/** How an approval was made, for the card (Sprint 6, F-30). "All eligible" bulk approval has threshold 0. */
+export function approvalLabel(a: { kind: 'individual' | 'bulk'; threshold: number | null }): string {
+  if (a.kind !== 'bulk') return '';
+  if (a.threshold === null) return 'bulk';
+  if (a.threshold <= 0) return 'bulk, all eligible';
+  return `bulk at ${Math.round(a.threshold * 100)}%`;
+}
+
+type Named = { displayName: string } | null | undefined;
+
+/** Who an assignment is from and to, depending on the list (Sprint 6, F-31). */
+export function assignmentPeople(tab: 'mine' | 'sent' | 'all', a: { assignedByProfile?: Named; assignedToProfile?: Named }): string {
+  const by = `by ${a.assignedByProfile?.displayName ?? 'a colleague'}`;
+  const to = `to ${a.assignedToProfile?.displayName ?? 'a colleague'}`;
+  return tab === 'mine' ? by : tab === 'sent' ? to : `${by}, ${to}`;
+}
+

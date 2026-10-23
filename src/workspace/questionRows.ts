@@ -24,6 +24,9 @@ export interface QuestionRow {
   processing_note?: string | null;
   embedding_model?: string | null;
   judge_model?: string | null;
+  verdict?: string | null;
+  judge_best_ref?: string | null;
+  judge_reason?: string | null;
   draft_model?: string | null;
   prompt_version?: string | null;
   calibration_set?: string | null;
@@ -70,6 +73,11 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
       ? { by: approval.decided_by, at: approval.decided_at, kind: approval.kind, threshold: num(approval.threshold) }
       : null,
     learnOutcome: r.learn_outcome ?? null,
+    checker: {
+      verdict: r.verdict === 'yes' || r.verdict === 'partly' || r.verdict === 'no' ? r.verdict : null,
+      bestRef: r.judge_best_ref ?? null,
+      reason: r.judge_reason ?? null,
+    },
   };
 }
 

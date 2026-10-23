@@ -7,7 +7,7 @@ const q = (position: number, status: RFIQuestion['status'], final = `Answer ${po
   id: String(position), sessionId: 's', position, question: `Q${position}`, generatedAnswer: generated, finalAnswer: final,
   confidence: 0.9, retrievalScore: 0.5, sources: [], status, gate: null, gateReason: null, draftKind: 'generated',
   language: 'en', processingNote: null, provenance: { embeddingModel: null, judgeModel: null, draftModel: null, promptVersion: null, calibrationSet: null },
-  processed: true, approval: null, learnOutcome: null,
+  processed: true, approval: null, learnOutcome: null, checker: { verdict: null, bestRef: null, reason: null },
 });
 
 describe('exportRows', () => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Inbox, Clock, TrendingUp, CheckCircle2, CheckCheck, ChevronDown, RefreshCw, MessageSquare, X, ArrowRight, Lock } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import { assignmentPeople } from './lib/format';
 import { QuestionAssignment, AssignmentStatus } from './types';
 
 // ─── Status config ─────────────────────────────────────────────────────────────
@@ -70,7 +71,8 @@ function NotesModal({ assignment, onClose, onSave }: {
 
 // ─── Assignment card ──────────────────────────────────────────────────────────
 
-function AssignmentCard({ assignment, isOwn, onStatusChange, onNotesUpdate }: {
+function AssignmentCard({ assignment, isOwn, tab, onStatusChange, onNotesUpdate }: {
+  tab: 'mine' | 'sent' | 'all';
   assignment: QuestionAssignment; isOwn: boolean;
   onStatusChange: (id: string, status: AssignmentStatus) => void;
   onNotesUpdate: (id: string, notes: string) => void;
@@ -114,7 +116,7 @@ function AssignmentCard({ assignment, isOwn, onStatusChange, onNotesUpdate }: {
             <p className="text-sm font-semibold text-ink-800 leading-snug line-clamp-2">{assignment.questionText}</p>
             <p className="text-xs text-ink-400 mt-1.5 font-medium">
               {new Date(assignment.createdAt).toLocaleDateString()}
-              {assignment.assignedByProfile && ` · by ${assignment.assignedByProfile.displayName}`}
+              {` · ${assignmentPeople(tab, assignment)}`}
             </p>
           </div>
 
@@ -371,6 +373,7 @@ export default function UserInbox({ userId, isAdmin }: Props) {
               key={a.id}
               assignment={a}
               isOwn={a.assignedTo === userId}
+              tab={tab}
               onStatusChange={handleStatusChange}
               onNotesUpdate={handleNotesUpdate}
             />

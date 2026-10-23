@@ -83,6 +83,8 @@ export interface RFIQuestion {
   approval: { by: string | null; at: string; kind: 'individual' | 'bulk'; threshold: number | null } | null;
   /** What learning at export did with this question (Sprint 3, S3-4). */
   learnOutcome: string | null;
+  /** The answerability checker's verdict, chosen entry and one-sentence reason (Sprint 6, S6-3). */
+  checker: { verdict: 'yes' | 'partly' | 'no' | null; bestRef: string | null; reason: string | null };
 }
 
 export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source';
