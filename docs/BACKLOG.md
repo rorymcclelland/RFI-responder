@@ -258,14 +258,25 @@ An independent security review found seven issues, all fixed and tested (`202610
 | F-29 Reserved cost per question ($0.01) is about 20 times the measured cost ($0.0005), so the budget stops processing early | Proposed for Sprint 5 (quick win: set the default from measured usage) |
 | Judge scored the same question 99%+ (Sprint 3) and 75% (Sprint 4) | Evidence for F-22; F-22 proposed for Sprint 5 |
 
+## Sprint 5: Word ingestion and judge consistency (confirmed 23 October 2026)
+
+Refinement: `docs/refinement/sprint-5.md` (answers recorded 23 October). Each item with its reason:
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| S5-1 | Read a .docx safely in the browser: ordered text blocks (numbered paragraphs, headings, table cells), zip-bomb and size checks, no macros, nothing fetched | The brief's first ingestion format after spreadsheets; uploads are hostile (rule 6) | Ready, Sprint 5 |
+| S5-2 | Extract questions with Claude, keeping only those found verbatim in the document (multi-part questions split into parts, each checked), rules as fallback, inside the caps (20 documents a day) | Finding questions in prose needs AI; inventing or obeying must be impossible | Ready, Sprint 5 |
+| S5-3 | Preview to check and correct the found questions (edit, remove, add, merge parts) before saving | A person confirms the list before anything is processed | Ready, Sprint 5 |
+| S5-4 | Extraction evaluation (synthetic .docx in six layouts, about 250 questions) and red team; bars: recall and precision at least 95%, 100% traceable, no planted instruction changes the result | First time an LLM reads a whole untrusted document | Ready, Sprint 5 |
+| F-22 | Measure the checker's run-to-run variation (five runs on the calibration test split); mitigation refined at the close | The same question scored 99%+ and 75% in the Sprint 4 run | Ready, Sprint 5 |
+| F-26 | Close open assignments at export, kept for history | Small; workflow code open anyway | Ready, Sprint 5 |
+| F-29 | Reserve $0.002 per question and show the measured average | The budget otherwise stops processing about 20 times too early | Ready, Sprint 5 |
+
+No spike: extraction quality is measured against agreed bars, and F-22 only measures.
+
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 4 review)
 
-**Sprint 5 (confirmed 23 October 2026): Word ingestion and judge consistency.**
-- Word documents (.docx) ingested with AI-assisted question extraction alongside spreadsheets, through the same hostile-input rules, inside the usage caps, with a preview to correct the list before saving. Why: the brief's first ingestion format after spreadsheets.
-- An extraction evaluation set and red-team cases (instructions planted in a document). Why: the first time an LLM reads a whole untrusted document.
-- F-22 judge consistency across repeated runs. Why: the judge now decides confidence, gates and supersession, and the Sprint 4 run showed the same question at 99%+ and 75%.
-- F-26 close assignments at export. Why: small, and the workflow code is open anyway.
-- F-29 reserve a cost per question from measured usage. Why: a one-line default change that stops the budget biting about 20 times too early.
+(Sprint 5 is above.)
 
 **Sprint 6: documentation and publish.** Architecture diagram, evaluation reports, governance pack refreshed, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match; F-27 (AI marker on exports), F-8 (leaked-password protection) and F-10 (narrow windows) before publishing.
 
