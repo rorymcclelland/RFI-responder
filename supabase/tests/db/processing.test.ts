@@ -15,8 +15,8 @@ const one = async <T>(sql: string, params: unknown[] = []) => (await asSuperuser
 async function question(s: string, opts: { confidence?: number | null; gate?: string | null } = {}): Promise<string> {
   const conf = opts.confidence === undefined ? 0.9 : opts.confidence;
   return (await one<{ id: string }>(
-    `INSERT INTO rfi_questions (session_id, position, question, confidence, gate, processed_at)
-     VALUES ($1, 0, 'Q', $2, $3, now()) RETURNING id`, [s, conf, opts.gate ?? null])).id;
+    `INSERT INTO rfi_questions (session_id, position, question, confidence, gate, processed_at, draft_kind)
+     VALUES ($1, 0, 'Q', $2, $3, now(), 'generated') RETURNING id`, [s, conf, opts.gate ?? null])).id;
 }
 
 beforeAll(async () => {
@@ -242,5 +242,23 @@ describe('security review findings (Sprint 2)', () => {
       await c.query('ROLLBACK').catch(() => undefined);
       c.release();
     }
+  });
+});
+
+describe('found in the end-to-end run: bulk approval requires a draft', () => {
+  it.each(['insufficient_evidence', 'person_required', null])('a calibrated, ungated question with draft kind %s is held back', async (kind) => {
+    const fresh = (await one<{ id: string }>(
+      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
+       SELECT 'd.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    const drafted = await question(fresh, { confidence: 0.95 });
+    const empty = await question(fresh, { confidence: 1 });
+    await asSuperuser(`UPDATE rfi_questions SET draft_kind = 'generated' WHERE id = $1`, [drafted]);
+    await asSuperuser(`UPDATE rfi_questions SET draft_kind = $2 WHERE id = $1`, [empty, kind]);
+    await as(owner, async (q) => {
+      const r = await q<{ bulk_accept: { accepted: number; heldNoDraft: number } }>(`SELECT bulk_accept($1, 0.8)`, [fresh]);
+      expect(r.rows[0].bulk_accept.accepted).toBe(1);
+      expect(r.rows[0].bulk_accept.heldNoDraft).toBe(1);
+    });
+    await refused(as(owner, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [drafted, empty])));
   });
 });

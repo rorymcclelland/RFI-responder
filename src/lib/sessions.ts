@@ -5,6 +5,8 @@ export interface BulkResult {
   accepted: number;
   heldGated: number;
   heldUncalibrated: number;
+  /** Processed and calibrated, but with no draft to approve ("insufficient evidence"). */
+  heldNoDraft?: number;
   belowThreshold: number;
 }
 
@@ -24,6 +26,7 @@ export function describeBulk(r: BulkResult, threshold: number): string {
   if (r.belowThreshold) parts.push(`${r.belowThreshold} below ${Math.round(threshold * 100)}%`);
   if (r.heldGated) parts.push(`${r.heldGated} held back for individual review (pricing, legal, unchecked or translated)`);
   if (r.heldUncalibrated) parts.push(`${r.heldUncalibrated} without calibrated confidence`);
+  if (r.heldNoDraft) parts.push(`${r.heldNoDraft} with no draft to approve`);
   return `${parts.join('; ')}.`;
 }
 

@@ -18,7 +18,7 @@ export default function BulkBar({ canApprove, eligible, held, showFinish, onBulk
   const disabledWhy = !canApprove
     ? 'Only the response owner or an admin can approve questions in bulk'
     : eligible === 0
-      ? 'No pending question has calibrated confidence and no gate'
+      ? 'No pending question is drafted, calibrated and free of gates'
       : null;
   const button = (threshold: number, label: string, cls: string) => (
     <button
@@ -45,8 +45,8 @@ export default function BulkBar({ canApprove, eligible, held, showFinish, onBulk
       </div>
       {held > 0 && (
         <p className="text-xs text-ink-500 font-medium">
-          {held} pending question{held !== 1 ? 's are' : ' is'} never included in bulk approval (pricing, legal, translated, not fully checked, or without
-          calibrated confidence) and must be accepted individually.
+          {held} pending question{held !== 1 ? 's are' : ' is'} never included in bulk approval (pricing, legal, translated, not fully checked, without
+          calibrated confidence, or with no draft) and must be accepted individually.
         </p>
       )}
     </div>

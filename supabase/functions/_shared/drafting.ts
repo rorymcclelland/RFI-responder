@@ -124,7 +124,7 @@ export async function draftGrounded(opts: {
   sources: Source[];
 }): Promise<DraftResult> {
   const base = { model: opts.model, promptVersion: DRAFT_PROMPT_VERSION };
-  const { data, model } = await opts.client.json<{ status?: string; answer?: string; citations?: unknown; missing?: string }>({
+  const { data, model, stopReason } = await opts.client.json<{ status?: string; answer?: string; citations?: unknown; missing?: string }>({
     model: opts.model,
     system: SYSTEM,
     user: JSON.stringify({
@@ -132,11 +132,12 @@ export async function draftGrounded(opts: {
       entries: opts.sources.map((s) => ({ ref: s.entry.id, question: s.entry.question, answer: s.entry.answer })),
     }),
     schema: SCHEMA,
-    maxTokens: 800,
+    // Japanese answers use more tokens per word; 800 cut some answers off (end-to-end run, 23 October).
+    maxTokens: 2000,
   });
   const result = { ...base, model };
   if (!data || (data.status !== 'drafted' && data.status !== 'insufficient_evidence')) {
-    return { ...result, kind: 'insufficient_evidence', text: insufficientText('the drafting service gave an unreadable answer'), citations: [], rejected: 'unreadable output' };
+    return { ...result, kind: 'insufficient_evidence', text: insufficientText('the drafting service gave an unreadable answer'), citations: [], rejected: `unreadable output (${stopReason ?? 'no stop reason'})` };
   }
   if (data.status === 'insufficient_evidence') {
     return { ...result, kind: 'insufficient_evidence', text: insufficientText(typeof data.missing === 'string' ? safeNote(data.missing) : ''), citations: [] };

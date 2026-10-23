@@ -177,6 +177,7 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
         kind = d.kind;
         draftModel = d.model;
         promptVersion = d.promptVersion;
+        if (d.rejected) notes.push(`A draft was not offered: ${d.rejected}.`);
       } catch {
         notes.push('Drafting was unavailable, so this draft is assembled from the entries, not generated.');
         text = draftAnswer(sources);

@@ -31,6 +31,8 @@ export interface ClaudeRequest {
 
 export interface ClaudeResult<T> {
   data: T | null;
+  /** Why the model stopped (end_turn, max_tokens, refusal...), so callers can say why data is null. */
+  stopReason?: string;
   model: string;
   usage: { inputTokens: number; outputTokens: number };
 }
@@ -84,13 +86,14 @@ export function claudeClient(opts: { apiKey: string; fetch?: Fetch; retry?: Retr
       const usage = { inputTokens: json.usage?.input_tokens ?? 0, outputTokens: json.usage?.output_tokens ?? 0 };
       const model = json.model ?? req.model;
       // A refusal or a cut-off answer is treated as no answer; callers decide the safe default.
-      if (json.stop_reason !== 'end_turn' && json.stop_reason !== 'stop_sequence') return { data: null, model, usage };
+      const stopReason = json.stop_reason;
+      if (stopReason !== 'end_turn' && stopReason !== 'stop_sequence') return { data: null, model, usage, stopReason };
       const text = json.content?.find((b) => b.type === 'text')?.text;
-      if (!text) return { data: null, model, usage };
+      if (!text) return { data: null, model, usage, stopReason };
       try {
-        return { data: JSON.parse(text) as T, model, usage };
+        return { data: JSON.parse(text) as T, model, usage, stopReason };
       } catch {
-        return { data: null, model, usage };
+        return { data: null, model, usage, stopReason: `${stopReason ?? 'unknown'} (text was not JSON)` };
       }
     },
   };

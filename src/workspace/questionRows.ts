@@ -80,5 +80,7 @@ export async function loadQuestions(client: SupabaseClient, sessionId: string): 
   return rows.map((r) => toQuestion(r, entriesByRef)).sort((a, b) => (a.confidence ?? -1) - (b.confidence ?? -1));
 }
 
-/** Pending questions an owner could approve in bulk: processed by the server, calibrated and not gated. */
-export const bulkEligible = (q: RFIQuestion) => q.status === 'pending' && q.processed && q.gate === null && q.confidence !== null;
+/** Pending questions an owner could approve in bulk: processed by the server, calibrated, drafted and not gated. */
+export const bulkEligible = (q: RFIQuestion) =>
+  q.status === 'pending' && q.processed && q.gate === null && q.confidence !== null &&
+  (q.draftKind === 'generated' || q.draftKind === 'assembled');
