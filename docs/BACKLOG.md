@@ -197,7 +197,7 @@ An independent security review found five gaps, all fixed and tested (`202610231
 
 **Bugs found and fixed in the sprint.** BUG-10: an edited or person-written answer sat under "Proposed Response", whose tooltip says every citation and figure was checked (rule 1); it is now labelled as a person's answer. BUG-11: the approval line appeared only after a reload. BUG-12: an archived response still offered New upload and Start New RFI (the database refused both). BUG-13: assigning or unassigning ignored errors.
 
-**Decisions at the review.** Proposed for Rory: accept F-24 as a residual (below); confirm the next sprint.
+**Decisions at the review.** F-24 is not accepted as a residual: Rory chose to fix it in Sprint 4. Sprint 4 confirmed as proposed (cost controls and governance), with Word ingestion moved to its own Sprint 5 and publishing to Sprint 6.
 
 ### Where every Sprint 3 review item now lives
 
@@ -205,7 +205,7 @@ An independent security review found five gaps, all fixed and tested (`202610231
 |---|---|
 | Five security review findings | Done in Sprint 3 (review), decision 0003 |
 | BUG-10 to BUG-13 | Done in Sprint 3 (review) |
-| F-24 `app.*` transaction settings can be forged over a direct SQL connection | Proposed as an accepted residual (members only reach the API, which cannot set them) |
+| F-24 `app.*` transaction settings can be forged over a direct SQL connection | Sprint 4 (Rory chose a fix over accepting the residual) |
 | F-25 Learning confirms every matched entry, not only the ones the draft cited | Backlog, from Sprint 3 review |
 | F-26 Assignments stay open after a response is exported or archived ("1 with experts" on an archived response) | Backlog, from Sprint 3 review |
 | MFA draft at 75% with a "no" verdict | Folded into F-18 (judge says "no" to answerable questions) |
@@ -213,7 +213,7 @@ An independent security review found five gaps, all fixed and tested (`202610231
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 3 review)
 
-**Sprint 4 (proposed at the Sprint 3 review): cost controls and governance pack.** Per-user rate limits and cost caps on processing (F-21); review of member-added knowledge-base entries, which the draft checks trust; knowledge-base review dates and a stale-entry report (uses `last_reviewed_at`, which Sprint 3 now sets); confirm only cited entries (F-25); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); light mapping to NIST AI RMF and the EU AI Act transparency duties.
+**Sprint 4 (confirmed 23 October 2026): cost controls and governance pack.** Per-user rate limits and cost caps on processing (F-21); settings that cannot be forged for bulk approval and delete (F-24); review of member-added knowledge-base entries, which the draft checks trust; knowledge-base review dates and a stale-entry report (uses `last_reviewed_at`, which Sprint 3 now sets); confirm only cited entries (F-25); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); light mapping to NIST AI RMF and the EU AI Act transparency duties.
 
 **Sprint 5: ingestion.** Word documents ingested with AI-assisted question extraction alongside spreadsheets, with its own evaluation set and red-team cases (an LLM reading a whole untrusted document); close assignments at export (F-26). PDF and pasted text stay in the backlog.
 
@@ -253,7 +253,7 @@ An independent security review found five gaps, all fixed and tested (`202610231
 | F-21 | No per-user rate limit or cost cap on processing | From the Sprint 2 security review; folded into Sprint 4 |
 | F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | From the Sprint 2 review; accepted residual of S2-5 (r028) |
 | F-23 | The review screen has no way to start a new upload | Done, Sprint 3. Found in the Sprint 2 end-to-end run |
-| F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Proposed as an accepted residual |
+| F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Sprint 4: Rory chose to fix it rather than accept it |
 | F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
 | F-26 | Assignments stay open after a response is exported or archived | From the Sprint 3 end-to-end run; close them at export, or show them as closed |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
