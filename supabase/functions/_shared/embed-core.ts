@@ -48,12 +48,23 @@ export async function embedPendingEntries(opts: {
   provider: EmbeddingProvider;
   batchSize?: number;
   maxBatches?: number;
-}): Promise<{ embedded: number; model: string }> {
-  const { db, provider, batchSize = 64, maxBatches = 40 } = opts;
+  /** Sprint 4 (S4-1): how many of `n` texts may be embedded now; fewer stops the run after them. */
+  reserve?: (n: number) => Promise<number>;
+}): Promise<{ embedded: number; model: string; limited: boolean }> {
+  const { db, provider, batchSize = 64, maxBatches = 40, reserve } = opts;
   let embedded = 0;
+  let limited = false;
   for (let batch = 0; batch < maxBatches; batch++) {
-    const pending = await db.fetchPending(provider.model, batchSize);
+    let pending = await db.fetchPending(provider.model, batchSize);
     if (pending.length === 0) break;
+    if (reserve) {
+      const allowed = await reserve(pending.length);
+      if (allowed < pending.length) {
+        limited = true;
+        pending = pending.slice(0, allowed);
+        if (pending.length === 0) break;
+      }
+    }
     try {
       const { vectors, model } = await provider.embed(pending.map(documentText), 'document');
       await db.save(pending.map((e, i) => ({ id: e.id, embedding: vectors[i], model })));
@@ -63,7 +74,7 @@ export async function embedPendingEntries(opts: {
       throw new EmbeddingError(`${reason}. ${embedded} entries were embedded before the failure; run again to continue.`, status);
     }
     embedded += pending.length;
-    if (pending.length < batchSize) break;
+    if (limited || pending.length < batchSize) break;
   }
-  return { embedded, model: provider.model };
+  return { embedded, model: provider.model, limited };
 }

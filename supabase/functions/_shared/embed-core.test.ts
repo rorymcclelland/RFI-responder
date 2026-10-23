@@ -57,8 +57,31 @@ describe('embedPendingEntries (S1-3)', () => {
     ]);
     const p = fakeProvider();
     const r = await embedPendingEntries({ db, provider: p, batchSize: 10 });
-    expect(r).toEqual({ embedded: 1, model: 'voyage-4' });
+    expect(r).toEqual({ embedded: 1, model: 'voyage-4', limited: false });
     expect(p.calls).toEqual([['Q1\nA1']]);
+  });
+
+  it('S4-1: a cap reached part-way embeds only what was allowed and stops', async () => {
+    const rows = Array.from({ length: 25 }, (_, i) => ({ id: `e${i}`, question: `q${i}`, answer: 'a', embedding_model: null }));
+    const db = fakeDb(rows);
+    const p = fakeProvider();
+    let left = 15;
+    const reserve = async (n: number) => {
+      const allowed = Math.min(n, left);
+      left -= allowed;
+      return allowed;
+    };
+    const r = await embedPendingEntries({ db, provider: p, batchSize: 10, reserve });
+    expect(r).toEqual({ embedded: 15, model: 'voyage-4', limited: true });
+    expect(p.calls.map((c) => c.length)).toEqual([10, 5]);
+  });
+
+  it('S4-1: nothing allowed means no provider call', async () => {
+    const db = fakeDb([{ id: 'e1', question: 'q', answer: 'a', embedding_model: null }]);
+    const p = fakeProvider();
+    const r = await embedPendingEntries({ db, provider: p, reserve: async () => 0 });
+    expect(r).toEqual({ embedded: 0, model: 'voyage-4', limited: true });
+    expect(p.calls).toEqual([]);
   });
 
   it('3. after a model change every entry is re-embedded, in batches', async () => {

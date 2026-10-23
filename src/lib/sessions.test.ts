@@ -60,3 +60,39 @@ describe('processInBatches', () => {
     expect(r.reasons).toEqual(['Edge Function returned a non-2xx status code']);
   });
 });
+
+describe('processInBatches at the usage caps (Sprint 4, S4-1)', () => {
+  const refusal = (status: number, error: string) => {
+    const e = Object.assign(new Error('Edge Function returned a non-2xx status code'), {
+      context: new Response(JSON.stringify({ error }), { status }),
+    });
+    return { data: null, error: e };
+  };
+
+  it('shows the server\'s reason and stops sending batches once the cap refuses', async () => {
+    const invoke = vi.fn()
+      .mockResolvedValueOnce({ data: { processed: Array.from({ length: 10 }, (_, i) => ({ id: `q${i}`, saved: true })) }, error: null })
+      .mockResolvedValueOnce(refusal(429, "You have reached today's limit on processing questions. An admin can raise it on the Usage page."));
+    const ids = Array.from({ length: 30 }, (_, i) => `q${i}`);
+    const r = await processInBatches({ functions: { invoke } } as never, 's1', ids, () => undefined);
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(r.failed).toEqual(ids.slice(10));
+    expect(r.reasons).toEqual(["You have reached today's limit on processing questions. An admin can raise it on the Usage page."]);
+  });
+
+  it('reports questions held back part-way through a batch, with the limit', async () => {
+    const invoke = vi.fn().mockResolvedValueOnce({
+      data: { processed: [{ id: 'a', saved: true }, { id: 'b', saved: false, note: 'limit' }], limit: "This month's AI budget has been reached" },
+      error: null,
+    });
+    const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a', 'b'], () => undefined);
+    expect(r.failed).toEqual(['b']);
+    expect(r.reasons).toEqual(["This month's AI budget has been reached"]);
+  });
+
+  it('falls back to the generic message when the reply has no reason', async () => {
+    const invoke = vi.fn().mockResolvedValueOnce({ data: null, error: new Error('Failed to send a request') });
+    const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a'], () => undefined);
+    expect(r.reasons).toEqual(['Failed to send a request']);
+  });
+});

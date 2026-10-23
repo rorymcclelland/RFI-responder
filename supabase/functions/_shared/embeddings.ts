@@ -18,6 +18,8 @@ export interface EmbedResult {
   /** The model that produced the vectors, recorded with each stored vector. */
   model: string;
   vectors: number[][];
+  /** Tokens the provider counted, when it reports them (Voyage does; Ollama does not). */
+  tokens?: number;
 }
 
 export interface EmbeddingProvider {
@@ -98,9 +100,9 @@ export function voyageProvider(opts: { apiKey: string; model: string; fetch?: Fe
         throw new EmbeddingError('Voyage could not be reached', 503);
       }), opts.retry ?? DEFAULT_RETRY);
       if (!res.ok) throw providerFailure('Voyage', res.status);
-      const body = (await res.json()) as { data?: { index: number; embedding: number[] }[] };
+      const body = (await res.json()) as { data?: { index: number; embedding: number[] }[]; usage?: { total_tokens?: number } };
       const ordered = [...(body.data ?? [])].sort((a, b) => a.index - b.index).map((d) => d.embedding);
-      return { model: opts.model, vectors: checkVectors(ordered, texts.length, opts.model) };
+      return { model: opts.model, vectors: checkVectors(ordered, texts.length, opts.model), tokens: body.usage?.total_tokens };
     },
   };
 }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Database, X, BookOpen, Tag, CheckCircle2,
   Plus, ChevronLeft, Briefcase,
-  Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle,
+  Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale,
 } from 'lucide-react';
 import { loadKnowledgeBase, importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
@@ -12,6 +12,8 @@ import OpportunitiesDashboard from './OpportunitiesDashboard';
 import AuthPage from './AuthPage';
 import UserInbox from './UserInbox';
 import UserManagement from './UserManagement';
+import GovernanceAdmin from './GovernanceAdmin';
+import { loadUsageStatus, type UsageStatus } from './lib/usage';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -115,7 +117,7 @@ function KBModal({ entries, onClose, onBulkUpload }: { entries: KnowledgeEntry[]
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
-type AppView = 'opportunities' | 'inbox' | 'users';
+type AppView = 'opportunities' | 'inbox' | 'users' | 'governance';
 
 export default function App() {
   const [session, setSession]                     = useState<Session | null>(null);
@@ -128,6 +130,8 @@ export default function App() {
   const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
   const [view, setView]                           = useState<AppView>('opportunities');
+  // S4-1: admins are warned past the budget's warning point; everyone is told when it is reached.
+  const [usage, setUsage]                         = useState<UsageStatus | null>(null);
   const [navOpen, setNavOpen]                     = useState(false);
 
   useEffect(() => {
@@ -152,6 +156,12 @@ export default function App() {
     // so the first render's copy never goes stale.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Refresh the usage position when the signed-in user or the page changes (S4-1).
+  useEffect(() => {
+    if (!currentUser) return;
+    loadUsageStatus(supabase).then(setUsage).catch(() => setUsage(null));
+  }, [currentUser, view, activeOpportunity]);
 
   async function loadUserProfile(userId: string) {
     setAuthLoading(true);
@@ -252,6 +262,7 @@ export default function App() {
     { key: 'opportunities', icon: <Briefcase size={18} />, label: 'Opportunities' },
     { key: 'inbox',         icon: <Inbox size={18} />,     label: 'Assignments' },
     { key: 'users',         icon: <Users size={18} />,     label: 'Team' },
+    ...(currentUser.isAdmin ? [{ key: 'governance' as AppView, icon: <Scale size={18} />, label: 'Governance' }] : []),
   ];
 
   return (
@@ -408,6 +419,14 @@ export default function App() {
 
       {/* Main */}
       <main className="flex-1">
+        {usage && (usage.exhausted || (usage.alert && currentUser.isAdmin)) && (
+          <div className={`px-4 py-2 text-sm font-medium flex items-center gap-2 ${usage.exhausted ? 'bg-coral-50 text-coral-700' : 'bg-amber-50 text-amber-800'}`} role="status">
+            <AlertTriangle size={14} className="flex-shrink-0" />
+            {usage.exhausted
+              ? "This month's AI budget has been reached, so new questions cannot be processed. An admin can raise it under Governance."
+              : `AI spend this month has passed the warning point${usage.spentGbp !== null ? ` (£${usage.spentGbp.toFixed(2)} of £${usage.budgetGbp})` : ''}. See Governance.`}
+          </div>
+        )}
         {activeOpportunity ? (
           <>
             {/* Mobile breadcrumb */}
@@ -434,6 +453,8 @@ export default function App() {
           <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : view === 'users' ? (
           <UserManagement currentUserId={currentUser.id} isAdmin={currentUser.isAdmin} />
+        ) : view === 'governance' && currentUser.isAdmin ? (
+          <GovernanceAdmin />
         ) : (
           <OpportunitiesDashboard
             currentUserId={currentUser.id}

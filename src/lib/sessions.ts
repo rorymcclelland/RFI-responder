@@ -67,7 +67,25 @@ export async function insertQuestions(
   return ids;
 }
 
-/** Ask the server to process questions in batches of ten; returns ids it could not process. */
+/**
+ * The reason an Edge Function gave for refusing, from its JSON reply ({ error }), or the client's
+ * own message. supabase-js puts the reply in `error.context` and only says "non-2xx" itself.
+ */
+export async function functionErrorMessage(error: unknown): Promise<{ message: string; status: number | null }> {
+  const e = error as { message?: string; context?: unknown } | null;
+  const ctx = e?.context;
+  if (ctx instanceof Response) {
+    const body = (await ctx.clone().json().catch(() => null)) as { error?: unknown } | null;
+    if (body && typeof body.error === 'string') return { message: body.error, status: ctx.status };
+    return { message: e?.message ?? 'no response', status: ctx.status };
+  }
+  return { message: e?.message ?? 'no response', status: null };
+}
+
+/**
+ * Ask the server to process questions in batches of ten; returns ids it could not process.
+ * At a usage cap (429) it stops: later batches would be refused too (Sprint 4, S4-1).
+ */
 export async function processInBatches(
   client: SupabaseClient,
   sessionId: string,
@@ -81,10 +99,17 @@ export async function processInBatches(
     const ids = questionIds.slice(i, i + batch);
     const { data, error } = await client.functions.invoke('process-questions', { body: { sessionId, questionIds: ids } });
     if (error || !data) {
+      const { message, status } = await functionErrorMessage(error);
+      reasons.push(message);
+      if (status === 429) {
+        failed.push(...questionIds.slice(i));
+        onProgress(questionIds.length, questionIds.length);
+        break;
+      }
       failed.push(...ids);
-      reasons.push(error?.message ?? 'no response');
     } else {
       for (const p of data.processed as { id: string; saved: boolean }[]) if (!p.saved) failed.push(p.id);
+      if (typeof data.limit === 'string' && data.limit) reasons.push(data.limit);
     }
     onProgress(Math.min(i + batch, questionIds.length), questionIds.length);
   }

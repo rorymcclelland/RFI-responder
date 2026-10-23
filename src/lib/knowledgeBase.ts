@@ -5,6 +5,7 @@
  * who may do what.
  */
 import { supabase } from './supabase';
+import { functionErrorMessage } from './sessions';
 import type { KnowledgeEntry } from '../types';
 
 export type KbOrigin = 'manual' | 'import' | 'response';
@@ -60,6 +61,9 @@ export function describeImport(r: ImportResult): string {
  */
 export async function indexNewEntries(): Promise<{ ok: true; embedded: number } | { ok: false; reason: string }> {
   const { data, error } = await supabase.functions.invoke('embed-entries', { body: {} });
-  if (error || !data) return { ok: false, reason: error?.message ?? 'no response' };
-  return { ok: true, embedded: (data as { embedded: number }).embedded };
+  if (error || !data) return { ok: false, reason: (await functionErrorMessage(error)).message };
+  const d = data as { embedded: number; limit?: string | null };
+  // Part-indexed at a usage cap (Sprint 4): the rest are picked up by a later call.
+  if (d.limit) return { ok: false, reason: `${d.embedded} indexed; ${d.limit}` };
+  return { ok: true, embedded: d.embedded };
 }
