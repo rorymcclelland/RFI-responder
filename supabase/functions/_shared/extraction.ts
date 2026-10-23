@@ -18,7 +18,8 @@
 import type { ClaudeClient } from './claude.ts';
 import { HttpError } from './errors.ts';
 
-export const EXTRACT_PROMPT_VERSION = 'extract-2026-10-23.1';
+/** Bumped when the prompt or the checks change, so cached evaluation results are not reused. */
+export const EXTRACT_PROMPT_VERSION = 'extract-2026-10-23.2';
 export const MAX_CHARS = 200_000;
 const MAX_BLOCKS = 20_000;
 const KINDS = new Set(['paragraph', 'heading', 'cell']);
