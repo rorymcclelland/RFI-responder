@@ -15,3 +15,22 @@ describe('readConfig', () => {
     });
   });
 });
+
+describe('project rule 3: no secret key in the browser (Sprint 2 end-to-end run)', () => {
+  const jwt = (role: string) => `x.${btoa(JSON.stringify({ iss: 'supabase-demo', role })).replace(/=+$/, '')}.y`;
+
+  it('refuses a service-role key, with a message saying which key to use', () => {
+    const r = readConfig({ VITE_SUPABASE_URL: 'http://localhost:54321', VITE_SUPABASE_ANON_KEY: jwt('service_role') });
+    expect(r.ok).toBe(false);
+    expect(r.ok === false && r.problem).toMatch(/service-role/);
+  });
+
+  it('refuses a new-style secret key', () => {
+    expect(readConfig({ VITE_SUPABASE_URL: 'u', VITE_SUPABASE_ANON_KEY: 'sb_secret_abc' }).ok).toBe(false);
+  });
+
+  it('accepts the anon key and a new-style publishable key', () => {
+    expect(readConfig({ VITE_SUPABASE_URL: 'u', VITE_SUPABASE_ANON_KEY: jwt('anon') }).ok).toBe(true);
+    expect(readConfig({ VITE_SUPABASE_URL: 'u', VITE_SUPABASE_ANON_KEY: 'sb_publishable_abc' }).ok).toBe(true);
+  });
+});
