@@ -10,7 +10,9 @@ export default defineConfig({
     // Claude desktop app's browser pane) block a page from calling another local port;
     // ordinary browsers do not need this. Development server only.
     proxy: {
-      '/supabase': {
+      // Only Supabase's own API paths: the browser also loads shared code from the
+      // supabase/functions folder (Sprint 2), which must not be sent to the database server.
+      '^/supabase/(auth|rest|functions|storage|realtime)/v1': {
         target: 'http://127.0.0.1:54321',
         changeOrigin: true,
         ws: true,
