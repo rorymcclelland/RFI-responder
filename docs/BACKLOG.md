@@ -50,8 +50,8 @@ Refinement: `docs/refinement/sprint-0.md`
 | F-2 Generated database types | Backlog, from Sprint 0 review; now possible on Rory's PC |
 | F-5 Split RFIWorkspace | Sprint 2 (drafting rewrite) |
 | F-6, F-7, F-11 | Sprint 3 (learning loop and readiness workflow); F-11 near-duplicates move there from Sprint 1, since supersession is where they matter |
-| F-3 Invite screen | Sprint 4 |
-| F-8, F-10 | Sprint 5 (hosted demo, layout polish) |
+| F-3 Invite screen | Backlog (moved out of Sprint 4 at the Sprint 3 review; ranked 10th) |
+| F-8, F-10 | Backlog, ranked for Sprint 6 (publishing) at the Sprint 3 review |
 | F-4 Tailwind 4 | Backlog, low priority |
 
 ## Sprint 1: real retrieval and calibrated confidence (confirmed 22 October 2026)
