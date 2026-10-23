@@ -185,7 +185,8 @@ export async function extractQuestions(
     return { questions: rulesExtract(blocks), dropped: 0, method: 'rules', model: null, promptVersion: null };
   }
   found.sort((a, b) => a.order - b.order);
-  return { questions: found.map(({ order: _o, ...q }) => q), dropped, method: 'ai', model, promptVersion: EXTRACT_PROMPT_VERSION };
+  const questions: FoundQuestion[] = found.map((f) => ({ question: f.question, number: f.number, blockIds: f.blockIds, part: f.part, fromBlock: f.fromBlock }));
+  return { questions, dropped, method: 'ai', model, promptVersion: EXTRACT_PROMPT_VERSION };
 }
 
 function checkItem(item: Item, inChunk: Set<string>, byId: Map<string, { block: Block; index: number }>): FoundQuestion | null {
