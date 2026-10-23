@@ -21,7 +21,8 @@
     "eval:answerability": "tsx eval/run-answerability.ts",
     "eval:gates": "tsx eval/run-gates.ts",
     "eval:drafting": "tsx eval/run-drafting.ts",
-    "eval:redteam": "tsx eval/run-redteam.ts"
+    "eval:redteam": "tsx eval/run-redteam.ts",
+    "eval:duplicates": "tsx eval/run-duplicates.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
