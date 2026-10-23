@@ -12,7 +12,7 @@ import type { EmbeddingProvider } from './embeddings.ts';
 import { HttpError } from './errors.ts';
 
 export interface UsageRow {
-  kind: 'judge' | 'gate' | 'draft' | 'embed' | 'rerank';
+  kind: 'judge' | 'gate' | 'draft' | 'embed' | 'rerank' | 'extract';
   provider: string;
   model: string;
   input_tokens: number;
@@ -58,7 +58,7 @@ export function meteredFetch(base: Fetch, tag: Omit<UsageRow, 'input_tokens' | '
   };
 }
 
-export type QuotaReason = 'daily_questions' | 'daily_embed' | 'monthly_budget';
+export type QuotaReason = 'daily_questions' | 'daily_embed' | 'daily_extract' | 'monthly_budget';
 
 export function quotaMessage(reason: QuotaReason): string {
   switch (reason) {
@@ -66,6 +66,8 @@ export function quotaMessage(reason: QuotaReason): string {
       return "You have reached today's limit on processing questions. An admin can raise it on the Usage page.";
     case 'daily_embed':
       return "You have reached today's limit on indexing knowledge-base text. An admin can raise it on the Usage page.";
+    case 'daily_extract':
+      return "You have reached today's limit on reading Word documents. An admin can raise it on the Usage page.";
     case 'monthly_budget':
       return "This month's AI budget has been reached, so nothing more can be processed. An admin can raise it on the Usage page.";
   }
@@ -79,7 +81,7 @@ interface RpcClient {
  * Reserve work for a user; throws 429 when none is allowed and 503 when the check cannot run.
  * The reservation also holds an estimated cost against the monthly budget until it is settled.
  */
-export async function reserveQuota(db: RpcClient, userId: string, kind: 'questions' | 'embed', n: number): Promise<{ allowed: number; reason: QuotaReason | null; reservation: string | null }> {
+export async function reserveQuota(db: RpcClient, userId: string, kind: 'questions' | 'embed' | 'extract', n: number): Promise<{ allowed: number; reason: QuotaReason | null; reservation: string | null }> {
   const { data, error } = await db.rpc('reserve_quota', { p_user: userId, p_kind: kind, p_n: n });
   const r = data as { allowed?: number; reason?: QuotaReason | null; reservation?: string | null } | null;
   if (error || !r || typeof r.allowed !== 'number') {

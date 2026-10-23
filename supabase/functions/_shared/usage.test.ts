@@ -74,6 +74,7 @@ describe('reserveQuota', () => {
   it('messages say what happened and who can change it', () => {
     expect(quotaMessage('daily_questions')).toMatch(/today's limit.*admin/i);
     expect(quotaMessage('daily_embed')).toMatch(/today's limit.*admin/i);
+    expect(quotaMessage('daily_extract')).toMatch(/today's limit on reading Word documents.*admin/i);
     expect(quotaMessage('monthly_budget')).toMatch(/budget.*admin/i);
   });
 });

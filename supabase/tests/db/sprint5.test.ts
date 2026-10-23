@@ -83,3 +83,35 @@ describe('F-26 close assignments at export', () => {
     void s;
   });
 });
+
+describe('S5-2 extraction inside the caps', () => {
+  const reserve = (user: TestUser, n: number) =>
+    asServiceRole((q) => q<{ r: { allowed: number; reason: string | null; reservation: string | null } }>(`SELECT reserve_quota($1, 'extract', $2) AS r`, [user.id, n]))
+      .then((r) => r.rows[0].r);
+
+  it('6. twenty documents a day per person; the twenty-first is refused', async () => {
+    const u = await createUser();
+    await asSuperuser(`INSERT INTO ai_quota (user_id, day, extract_docs) VALUES ($1, current_date, 20)`, [u.id]);
+    expect(await reserve(u, 1)).toMatchObject({ allowed: 0, reason: 'daily_extract' });
+    const fresh = await createUser();
+    const ok = await reserve(fresh, 1);
+    expect(ok.allowed).toBe(1);
+  });
+
+  it('a document reserves an estimated cost against the budget', async () => {
+    const u = await createUser();
+    await asServiceRole(async (q) => {
+      const r = await q<{ r: { reservation: string } }>(`SELECT reserve_quota($1, 'extract', 1) AS r`, [u.id]);
+      const est = await q<{ kind: string; est_usd: string }>(`SELECT kind, est_usd FROM ai_reservations WHERE id = $1`, [r.rows[0].r.reservation]);
+      expect(est.rows[0].kind).toBe('extract');
+      expect(Number(est.rows[0].est_usd)).toBeCloseTo(0.02, 6);
+      await q(`INSERT INTO ai_usage (user_id, function, kind, provider, model, input_tokens) VALUES ($1, 'extract-questions', 'extract', 'anthropic', 'claude-haiku-5-5', 10)`, [u.id]);
+    });
+  });
+
+  it('members see their own extraction allowance', async () => {
+    const r = await as(member, (q) => q<{ usage_status: { extractToday: number; extractCap: number } }>(`SELECT usage_status()`));
+    expect(r.rows[0].usage_status).toMatchObject({ extractToday: 0, extractCap: 20 });
+    await refused(as(member, (q) => q(`SELECT reserve_quota($1, 'extract', 1)`, [member.id])));
+  });
+});
