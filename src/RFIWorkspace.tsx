@@ -6,7 +6,7 @@
  * crosses steps and the review list.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, RefreshCw, Search, X } from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, RefreshCw, Search, Upload, X } from 'lucide-react';
 import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
 import { detectQuestionColumn } from './lib/drafting';
 import { bulkAcceptInDb, describeBulk, insertQuestions, processInBatches, saveQuestionPatch } from './lib/sessions';
@@ -304,6 +304,10 @@ export default function RFIWorkspace({ onAddToKB, opportunityId, opportunityName
         <div className="flex items-center gap-2 min-w-0">
           <BarChart3 size={16} className="text-ink-400 flex-shrink-0" />
           <p className="text-sm font-bold text-ink-700 truncate max-w-xs">{fileName}</p>
+          {/* F-23: start another upload for this response without finishing this one. */}
+          <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
+            <Upload size={12} /> New upload
+          </button>
         </div>
         <div className="flex items-center gap-2 flex-wrap ml-auto">
           {[

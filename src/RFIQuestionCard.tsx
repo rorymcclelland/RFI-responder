@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
+import { formatConfidence } from './lib/format';
 
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
@@ -322,7 +323,7 @@ export default function RFIQuestionCard({
           </p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className={`text-2xs font-black uppercase tracking-wide ${conf.text}`}>
-              {pct === null ? conf.label : `${conf.label}: ${pct}%`}
+              {pct === null ? conf.label : `${conf.label}: ${formatConfidence(question.confidence)}`}
             </span>
             {question.gate && (
               <span title={question.gateReason ?? undefined} className={`status-pill text-2xs ${GATE_BADGE[question.gate].cls}`}>
@@ -353,7 +354,7 @@ export default function RFIQuestionCard({
           <div className="flex-1 h-1.5 bg-ink-100 rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${conf.bar}`} style={{ width: `${pct ?? 0}%` }} />
           </div>
-          <span className={`text-xs font-black w-9 text-right ${conf.text}`} title={pct === null ? 'Not calibrated' : undefined}>{pct === null ? 'n/c' : `${pct}%`}</span>
+          <span className={`text-xs font-black w-9 text-right ${conf.text}`} title={pct === null ? 'Not calibrated' : undefined}>{pct === null ? 'n/c' : formatConfidence(question.confidence)}</span>
         </div>
 
         <ChevronDown size={16} className={`flex-shrink-0 text-ink-300 transition-transform mt-0.5 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -368,7 +369,7 @@ export default function RFIQuestionCard({
             {[
               { label: 'Confidence', value: question.confidence, tip: question.confidence === null
                   ? 'Not calibrated: matching was keyword-only, the answerability check was unavailable, or there is no calibration table for the models in use. Bulk approval is not available for this question.'
-                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals).` },
+                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals). The set is small, so the top is shown as 99%+, never as certainty.` },
               { label: 'Similarity', value: question.retrievalScore, tip: 'Cosine similarity between the question and the best-matching entry (or the keyword score when matching was keyword-only). Not a probability.' },
             ].map((m) => {
               if (m.value === null) {
@@ -394,7 +395,7 @@ export default function RFIQuestionCard({
                   <div className="h-1 bg-ink-200 rounded-full overflow-hidden mb-1.5">
                     <div className={`h-full rounded-full ${bar}`} style={{ width: `${mp}%` }} />
                   </div>
-                  <span className={`text-sm font-black ${mc}`}>{mp}%</span>
+                  <span className={`text-sm font-black ${mc}`}>{m.label === 'Confidence' ? formatConfidence(m.value) : `${mp}%`}</span>
                 </div>
               );
             })}
