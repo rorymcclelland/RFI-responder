@@ -211,9 +211,23 @@ An independent security review found five gaps, all fixed and tested (`202610231
 | MFA draft at 75% with a "no" verdict | Folded into F-18 (judge says "no" to answerable questions) |
 | F-6, F-7, F-11 | Done in Sprint 3 (S3-4, S3-5, S3-4 with S3-4b) |
 
+## Sprint 4: cost controls and governance pack (confirmed 23 October 2026)
+
+Refinement: `docs/refinement/sprint-4.md` (answers recorded 23 October). Each item with its reason:
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| S4-1 | Usage recorded and capped (F-21): every AI call recorded with tokens and estimated cost; 300 questions per user per day and a £10 monthly budget, admin-editable; usage screen | Nothing stops a mistake or a bad actor running up a bill; required before any hosted demo | Ready, Sprint 4 |
+| S4-2 | Bulk approval and delete markers that cannot be forged (F-24) | Open finding from the Sprint 3 security review; Rory chose a fix | Ready, Sprint 4 |
+| S4-3 | Member-added entries: an "Add an entry" form, admin review queue, drafts citing unreviewed entries held from bulk; drafts store the entries they cited | The brief names a poisoned knowledge base as the main governance risk | Ready, Sprint 4 |
+| S4-4 | Review dates (12 months), stale-entry report, drafts citing overdue entries held from bulk; confirm only cited entries (F-25) | Stale facts are the brief's other named knowledge-base risk | Ready, Sprint 4 |
+| S4-5 | Governance pack: model card, risk register tested against the code, data handling and retention, provider terms checked, NIST AI RMF and EU AI Act mapping | Describes the controls the other stories build; needed before publishing | Ready, Sprint 4 |
+
+No spike: prices and provider terms are lookups inside S4-5.
+
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 3 review)
 
-**Sprint 4 (confirmed 23 October 2026): cost controls and governance pack.** Per-user rate limits and cost caps on processing (F-21); settings that cannot be forged for bulk approval and delete (F-24); review of member-added knowledge-base entries, which the draft checks trust; knowledge-base review dates and a stale-entry report (uses `last_reviewed_at`, which Sprint 3 now sets); confirm only cited entries (F-25); model card, risk register, data-handling and retention rules; provider terms checked (no training on customer data); light mapping to NIST AI RMF and the EU AI Act transparency duties.
+(Sprint 4 is above.)
 
 **Sprint 5: ingestion.** Word documents ingested with AI-assisted question extraction alongside spreadsheets, with its own evaluation set and red-team cases (an LLM reading a whole untrusted document); close assignments at export (F-26). PDF and pasted text stay in the backlog.
 

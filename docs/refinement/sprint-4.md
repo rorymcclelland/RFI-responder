@@ -156,3 +156,15 @@ The knowledge base can be trusted as it grows, the AI spend has a ceiling, and a
 | Q3 | Who reviews entries? | (a) Admins only. (b) A new "knowledge reviewer" flag an admin can give to members | (a) for now; a reviewer flag is a small later story if one or two admins become a bottleneck |
 | Q4 | Review interval and what staleness does | (a) 12 months; drafts citing an overdue entry are held from bulk. (b) 12 months; flagged only. (c) 6 months; held | (a): stale facts are the brief's named risk, and bulk approval is where they would slip through |
 | Q5 | Retention | (a) Responses kept until an admin deletes them (as now); usage records kept 13 months; audit log kept indefinitely; all documented. (b) Archived responses deleted automatically after a fixed period | (a): the brief says archive, never delete; a fixed period is a policy choice for a real organisation, noted in the pack |
+
+## Answers (23 October 2026)
+
+| # | Answer |
+|---|---|
+| Q1 | 300 questions per user per day and a £10 monthly organisation budget, with a warning to admins at 80%; admins can raise both |
+| Q2 | Unreviewed member entries are used straight away, but drafts citing them are never bulk-approved and say why |
+| Q3 | Admins review entries; a reviewer flag can be a later story if admins become a bottleneck |
+| Q4 | Review interval 12 months; drafts citing an overdue entry are held from bulk approval |
+| Q5 | Responses kept until an admin deletes one created in error; usage records kept 13 months; audit log kept indefinitely; all documented in the pack |
+
+All five stories are Ready, Sprint 4.
