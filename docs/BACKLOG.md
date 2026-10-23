@@ -217,23 +217,59 @@ Refinement: `docs/refinement/sprint-4.md` (answers recorded 23 October). Each it
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S4-1 | Usage recorded and capped (F-21): every AI call recorded with tokens and estimated cost; 300 questions per user per day and a £10 monthly budget, admin-editable; usage screen | Nothing stops a mistake or a bad actor running up a bill; required before any hosted demo | Ready, Sprint 4 |
-| S4-2 | Bulk approval and delete markers that cannot be forged (F-24) | Open finding from the Sprint 3 security review; Rory chose a fix | Ready, Sprint 4 |
-| S4-3 | Member-added entries: an "Add an entry" form, admin review queue, drafts citing unreviewed entries held from bulk; drafts store the entries they cited | The brief names a poisoned knowledge base as the main governance risk | Ready, Sprint 4 |
-| S4-4 | Review dates (12 months), stale-entry report, drafts citing overdue entries held from bulk; confirm only cited entries (F-25) | Stale facts are the brief's other named knowledge-base risk | Ready, Sprint 4 |
-| S4-5 | Governance pack: model card, risk register tested against the code, data handling and retention, provider terms checked, NIST AI RMF and EU AI Act mapping | Describes the controls the other stories build; needed before publishing | Ready, Sprint 4 |
+| S4-1 | Usage recorded and capped (F-21): every AI call recorded with tokens and estimated cost; 300 questions per user per day and a £10 monthly budget, admin-editable; usage screen | Nothing stops a mistake or a bad actor running up a bill; required before any hosted demo | Done, Sprint 4 (budget reservations and fail-closed recording added after the security review) |
+| S4-2 | Bulk approval and delete markers that cannot be forged (F-24) | Open finding from the Sprint 3 security review; Rory chose a fix | Done, Sprint 4 (holds through the API; the review showed a direct database connection is outside any `auth.uid()` rule, now stated in decision 0003) |
+| S4-3 | Member-added entries: an "Add an entry" form, admin review queue, drafts citing unreviewed entries held from bulk; drafts store the entries they cited | The brief names a poisoned knowledge base as the main governance risk | Done, Sprint 4 (learned entries reviewed only on an admin's approval; other replacements wait as proposals, after the security review) |
+| S4-4 | Review dates (12 months), stale-entry report, drafts citing overdue entries held from bulk; confirm only cited entries (F-25) | Stale facts are the brief's other named knowledge-base risk | Done, Sprint 4 (a held draft confirms its entries only with an admin's approval, after the security review) |
+| S4-5 | Governance pack: model card, risk register tested against the code, data handling and retention, provider terms checked, NIST AI RMF and EU AI Act mapping | Describes the controls the other stories build; needed before publishing | Done, Sprint 4 (Rory read it at the review: nothing marked) |
 
 No spike: prices and provider terms are lookups inside S4-5.
 
-## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 3 review)
+All five committed items closed as done; nothing returned to the backlog.
 
-(Sprint 4 is above.)
+### Sprint 4 review (23 October 2026)
 
-**Sprint 5: ingestion.** Word documents ingested with AI-assisted question extraction alongside spreadsheets, with its own evaluation set and red-team cases (an LLM reading a whole untrusted document); close assignments at export (F-26). PDF and pasted text stay in the backlog.
+**Checks, with evidence.** CI green on all three jobs (273 unit tests, including the governance pack's 39; 185 database tests). End-to-end on Rory's PC, on a new synthetic response:
 
-**Sprint 6: documentation and publish.** Architecture diagram, evaluation reports, governance pack, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match.
+| Check (agreed at refinement) | Result | Held? |
+|---|---|---|
+| Every AI call recorded and priced | 8 calls for two questions and one indexed entry, with the providers' token counts: £0.0010; shown to the admin by person and by model, members see only their own position | Yes |
+| Caps and budget | Reservations made before every call; refusals and the 429 path tested in the database and unit suites (the live run stayed far under the caps) | Yes |
+| A member's entry is usable at once but held from bulk | Tom's KB-0110 matched a new question at 99%+, which was gated "Cites KB-0110, not reviewed by an admin yet"; bulk approval at 80% held it back | Yes |
+| Admin review | Sarah approved KB-0110; it left the queue, reviewed by her, logged | Yes |
+| Learned entries from non-admins wait for review | Maya's Sprint 3 entry (KB-0109) is in the queue, labelled approved by a non-admin | Yes |
+| Overdue report | Loads; empty, as every entry is under a year old (overdue cases covered by database tests) | Yes |
+| Governance pack matches the code | Pack tests pass; a broken figure and a broken path both fail them; Rory read the pack and marked nothing | Yes |
 
-**Not yet in a sprint, ranked at the Sprint 3 review.** 1. F-18 judge says "no" to answerable questions (it now also decides supersession; candidate for Sprint 5 with the new evaluation work). 2. C-1 multilingual knowledge base (after ingestion; the strongest demonstration still unbuilt). 3. F-16 calibration stability (larger set, intervals). 4. F-19 faithfulness judge on planted unfaithful drafts. 5. F-22 judge consistency across runs. 6. F-20 rerankers (needs a Voyage payment method). 7. F-10 narrow windows (before the Sprint 6 screenshots). 8. F-8 leaked-password protection (hosted project only; before publishing). 9. F-2 generated database types. 10. F-3 invite screen. 11. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and a second reviewer). 12. F-4 Tailwind 4.
+An independent security review found seven issues, all fixed and tested (`20261024140000_sprint4_review_fixes.sql`; the Sprint 4 refinement and decision 0003 list them). The two serious ones: any member, as owner of their own response, could turn their text into a reviewed entry that replaced an admin-reviewed one; and could clear an entry's review date by exporting.
+
+**Bugs found and fixed in the sprint.** BUG-14: the review queue did not load (PostgREST resolves a link to the same table by column name, not constraint name). BUG-15: with the functions server down the app said only "non-2xx status code"; it now says the AI service is not running and how to start it. BUG-16: the exchange-rate wording on the Usage tab.
+
+**Decisions at the review.** The governance pack accepted as written. Sprint 5 to be confirmed (below).
+
+### Where every Sprint 4 review item now lives
+
+| Item | Now |
+|---|---|
+| Seven security review findings | Done in Sprint 4 (review) |
+| BUG-14 to BUG-16 | Done in Sprint 4 (review) |
+| F-27 No machine-readable AI marker on exported answers | Backlog; proposed for Sprint 6 (publishing, where the claims are made) |
+| F-28 A review clears the gate only for questions processed afterwards | Backlog, from Sprint 4 build |
+| F-29 Reserved cost per question ($0.01) is about 20 times the measured cost ($0.0005), so the budget stops processing early | Proposed for Sprint 5 (quick win: set the default from measured usage) |
+| Judge scored the same question 99%+ (Sprint 3) and 75% (Sprint 4) | Evidence for F-22; F-22 proposed for Sprint 5 |
+
+## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 4 review)
+
+**Sprint 5 (proposed at the Sprint 4 review): Word ingestion and judge consistency.**
+- Word documents (.docx) ingested with AI-assisted question extraction alongside spreadsheets, through the same hostile-input rules, inside the usage caps, with a preview to correct the list before saving. Why: the brief's first ingestion format after spreadsheets.
+- An extraction evaluation set and red-team cases (instructions planted in a document). Why: the first time an LLM reads a whole untrusted document.
+- F-22 judge consistency across repeated runs. Why: the judge now decides confidence, gates and supersession, and the Sprint 4 run showed the same question at 99%+ and 75%.
+- F-26 close assignments at export. Why: small, and the workflow code is open anyway.
+- F-29 reserve a cost per question from measured usage. Why: a one-line default change that stops the budget biting about 20 times too early.
+
+**Sprint 6: documentation and publish.** Architecture diagram, evaluation reports, governance pack refreshed, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match; F-27 (AI marker on exports), F-8 (leaked-password protection) and F-10 (narrow windows) before publishing.
+
+**Not yet in a sprint, ranked at the Sprint 4 review.** 1. F-18 judge says "no" to answerable questions (after F-22 measures how much is noise). 2. C-1 multilingual knowledge base. 3. F-28 recheck questions after an entry is reviewed. 4. F-16 calibration stability. 5. F-19 faithfulness judge on planted unfaithful drafts. 6. F-20 rerankers (needs a Voyage payment method). 7. F-2 generated database types. 8. F-3 invite screen. 9. F-14 and F-15 reviewed Japanese and near-miss items. 10. F-4 Tailwind 4.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -241,7 +277,7 @@ No spike: prices and provider terms are lookups inside S4-5.
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 onwards from Sprint 3; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 onwards from Sprint 4; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -264,14 +300,15 @@ No spike: prices and provider terms are lookups inside S4-5.
 | F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | From the Sprint 2 review; judge prompt, and showing the verdict on the card |
 | F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
 | F-20 | Voyage rerank-2.5 and rerank-3 not yet compared with the Claude judge | Returned from S2-1; needs a Voyage payment method for the rate limit. Cheaper and faster if as good |
-| F-21 | No per-user rate limit or cost cap on processing | From the Sprint 2 security review; folded into Sprint 4 |
+| F-21 | No per-user rate limit or cost cap on processing | Done, Sprint 4 (S4-1). From the Sprint 2 security review |
 | F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | From the Sprint 2 review; accepted residual of S2-5 (r028) |
 | F-23 | The review screen has no way to start a new upload | Done, Sprint 3. Found in the Sprint 2 end-to-end run |
-| F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Sprint 4: Rory chose to fix it rather than accept it |
-| F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
+| F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | Done, Sprint 4. From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Sprint 4: Rory chose to fix it rather than accept it |
+| F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | Done, Sprint 4. From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
 | F-26 | Assignments stay open after a response is exported or archived | From the Sprint 3 end-to-end run; close them at export, or show them as closed |
 | F-27 | Exported answers carry no machine-readable marker that a model drafted them (EU AI Act Article 50(2) may apply to the provider) | From Sprint 4's framework check (`docs/governance/FRAMEWORKS.md`) |
 | F-28 | Reviewing an entry clears the review gate only for questions processed afterwards; questions already processed keep it until reprocessed | From the Sprint 4 build |
+| F-29 | Each question reserves $0.01 against the budget; measured cost is about $0.0005, so with the defaults processing stops after about 1,000 questions a month while real spend is around 50p | From the Sprint 4 end-to-end run; set the default from measured usage |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
