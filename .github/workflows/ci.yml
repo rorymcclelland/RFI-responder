@@ -37,8 +37,10 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ci-placeholder
       - name: No provider details in the browser bundle (S1-2, project rule 3)
         run: |
-          if grep -rlE 'voyageai|VOYAGE_API_KEY|:11434|service_role' dist; then
-            echo "::error::The browser bundle mentions an embedding provider or the service role"; exit 1
+          # Provider details, or an actual secret: a JWT whose payload says service_role (base64
+          # "c2VydmljZV9yb2xl") or a new-style secret key. The config guard's own wording is allowed.
+          if grep -rlE 'voyageai|VOYAGE_API_KEY|:11434|anthropic\.com|c2VydmljZV9yb2xl|sb_secret_[A-Za-z0-9_-]{8,}' dist; then
+            echo "::error::The browser bundle contains an embedding or model provider detail, or a secret key"; exit 1
           fi
 
   database:
