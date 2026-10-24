@@ -363,25 +363,28 @@ export default function App() {
             <div className="w-8 h-8 bg-ink-900 rounded-xl flex items-center justify-center">
               <Sparkles size={16} className="text-white" />
             </div>
-            <span className="font-black text-ink-900 text-base tracking-tight hidden sm:block">RFI Respond</span>
+            <span className="font-black text-ink-900 text-base tracking-tight hidden lg:block">RFI Respond</span>
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden sm:flex items-center gap-1 ml-4">
+          <nav className="hidden sm:flex items-center gap-1 lg:ml-4">
             {navItems.map((n) => {
               const active = view === n.key && !activeOpportunity;
               return (
                 <button
                   key={n.key}
                   onClick={() => navigate(n.key)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  title={n.label}
+                  aria-label={n.label}
+                  className={`flex items-center gap-2 px-3 lg:px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
                     active
                       ? 'bg-ink-900 text-white'
                       : 'text-ink-500 hover:text-ink-900 hover:bg-ink-50'
                   }`}
                 >
                   {n.icon}
-                  {n.label}
+                  {/* Sprint 7 (F-10): icons only below 1024 px, so the header fits a 768 px window. */}
+                  <span className="hidden lg:inline">{n.label}</span>
                 </button>
               );
             })}
@@ -389,7 +392,7 @@ export default function App() {
 
           {/* Breadcrumb when in workspace */}
           {activeOpportunity && (
-            <div className="hidden sm:flex items-center gap-2 ml-2 text-sm">
+            <div className="hidden lg:flex items-center gap-2 ml-2 text-sm min-w-0">
               <button
                 onClick={() => { setActiveOpportunity(null); setView('opportunities'); }}
                 className="flex items-center gap-1.5 text-ink-400 hover:text-ink-700 transition-colors font-medium"
@@ -417,7 +420,7 @@ export default function App() {
               <div className="w-8 h-8 rounded-full bg-ink-900 text-white flex items-center justify-center text-xs font-black flex-shrink-0">
                 {currentUser.displayName.charAt(0).toUpperCase()}
               </div>
-              <div className="hidden md:block">
+              <div className="hidden lg:block">
                 <p className="text-xs font-bold text-ink-800 leading-none">{currentUser.displayName}</p>
                 {currentUser.isAdmin && <p className="text-2xs text-ink-400 font-medium mt-0.5">Admin</p>}
               </div>
