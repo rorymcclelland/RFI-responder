@@ -26,7 +26,8 @@
     "eval:extraction": "tsx eval/run-extraction.ts",
     "eval:consistency": "tsx eval/run-consistency.ts",
     "demo:seed": "tsx eval/run-demo-seed.ts",
-    "demo:record": "tsx eval/record-demo.ts"
+    "demo:record": "tsx eval/record-demo.ts",
+    "screenshots": "tsx scripts/screenshots.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -52,6 +53,7 @@
     "eslint-plugin-react-refresh": "^0.4.11",
     "globals": "^15.9.0",
     "pg": "^8.23.1",
+    "playwright": "1.63.0",
     "postcss": "^8.4.35",
     "supabase": "^2.121.0",
     "tailwindcss": "^3.4.1",
