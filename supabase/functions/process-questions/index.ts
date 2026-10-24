@@ -100,8 +100,8 @@ serve(async (req) => {
       async sourceStatus(refs) {
         const { data, error } = await admin.rpc('entry_review_status', { p_refs: refs });
         if (error) throw new Error('review status unavailable');
-        const rows = (data ?? []) as { ref: string; reviewed: boolean; overdue_since: string | null }[];
-        return new Map(rows.map((r) => [r.ref, { reviewed: r.reviewed, overdueSince: r.overdue_since }]));
+        const rows = (data ?? []) as { ref: string; reviewed: boolean; overdue_since: string | null; replaced_by: string | null }[];
+        return new Map(rows.map((r) => [r.ref, { reviewed: r.reviewed, overdueSince: r.overdue_since, replacedBy: r.replaced_by }]));
       },
     });
 

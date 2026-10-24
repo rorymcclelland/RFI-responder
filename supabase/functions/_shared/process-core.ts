@@ -67,7 +67,7 @@ export interface ProcessDeps {
    * Review state of the cited entries (Sprint 4, S4-3 and S4-4). A ref missing from the map is
    * treated as unreviewed. Throwing marks the question unchecked. Omitted: no review gates.
    */
-  sourceStatus?: (refs: string[]) => Promise<Map<string, { reviewed: boolean; overdueSince: string | null }>>;
+  sourceStatus?: (refs: string[]) => Promise<Map<string, { reviewed: boolean; overdueSince: string | null; replacedBy?: string | null }>>;
   /** How many questions are worked on at once (provider rate limits). */
   concurrency?: number;
   now?: () => string;
@@ -213,13 +213,14 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       try {
         const states = await deps.sourceStatus(cited);
         const unreviewed = cited.filter((r) => !states.get(r)?.reviewed);
-        const overdue = cited.filter((r) => states.get(r)?.reviewed && states.get(r)?.overdueSince);
+        // Sprint 7 (F-32): a replaced entry is out of date like an overdue one.
+        const overdue = cited.filter((r) => states.get(r)?.reviewed && (states.get(r)?.replacedBy || states.get(r)?.overdueSince));
         if (unreviewed.length > 0) {
           gateValue = 'unreviewed_source';
           gateReason = `Cites ${unreviewed.join(', ')}, not reviewed by an admin yet, so it is reviewed individually.`;
         } else if (overdue.length > 0) {
           gateValue = 'stale_source';
-          gateReason = `Cites ${overdue.map((r) => `${r} (overdue for review since ${states.get(r)!.overdueSince})`).join(', ')}, so it is reviewed individually.`;
+          gateReason = `Cites ${overdue.map((r) => (states.get(r)!.replacedBy ? `${r} (replaced by ${states.get(r)!.replacedBy})` : `${r} (overdue for review since ${states.get(r)!.overdueSince})`)).join(', ')}, so it is reviewed individually.`;
         }
       } catch {
         gateValue = 'unchecked';

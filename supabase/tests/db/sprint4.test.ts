@@ -211,8 +211,8 @@ describe('S4-3 member-added entries: add, review and hold', () => {
     const unreviewed = await entry({ origin: 'manual', createdBy: member.id, reviewed: false, answer: planted });
     const reviewed = await entry({ origin: 'manual', createdBy: admin.id });
     expect(await reviewStatus([unreviewed.ref, reviewed.ref])).toEqual(expect.arrayContaining([
-      { ref: unreviewed.ref, reviewed: false, overdue_since: null },
-      { ref: reviewed.ref, reviewed: true, overdue_since: null },
+      { ref: unreviewed.ref, reviewed: false, overdue_since: null, replaced_by: null },
+      { ref: reviewed.ref, reviewed: true, overdue_since: null, replaced_by: null },
     ]));
   });
 

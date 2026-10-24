@@ -105,4 +105,6 @@ export async function loadQuestions(client: SupabaseClient, sessionId: string): 
 /** Pending questions an owner could approve in bulk: processed by the server, calibrated, drafted and not gated. */
 export const bulkEligible = (q: RFIQuestion) =>
   q.status === 'pending' && q.processed && q.gate === null && q.confidence !== null &&
-  (q.draftKind === 'generated' || q.draftKind === 'assembled');
+  (q.draftKind === 'generated' || q.draftKind === 'assembled') &&
+  // Sprint 7 (F-33): the checker must have said "yes"; similarity-only calibration has no verdict.
+  (q.checker.verdict === 'yes' || q.checker.verdict === null);
