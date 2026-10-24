@@ -26,7 +26,7 @@ Anonymous visitors can read nothing. Accounts are invite-only.
 | Voyage AI (hosted mode) | Question text; knowledge-base question and answer text | Processing a question; indexing an entry | `EMBEDDING_PROVIDER=voyage` |
 | Ollama on the organisation's own machine (local mode) | The same | The same | `EMBEDDING_PROVIDER=ollama` |
 | Anthropic (Claude API) | Question text and up to three matched entries (judge, drafter); question text (gate classifier) | Processing a question | `ANTHROPIC_API_KEY` |
-| The user's own computer | The exported answers (Excel, CSV, Word) | When the owner downloads them | |
+| The user's own computer | The exported answers (Excel, CSV, Word), and since Sprint 7 a provenance record per answer: how it was produced, the model and prompt version, and the approver's name and time | When the owner downloads them | The approver's name goes to whoever receives the file; the owner decides what to send |
 
 Provider keys are Edge Function secrets and never reach the browser. What each provider does with the data is in [Providers](PROVIDERS.md). Nothing is sent to customers by the tool: the owner exports and sends.
 
