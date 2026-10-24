@@ -45,7 +45,7 @@ flowchart LR
 
 **Trust boundaries.**
 
-- **The browser holds only the public anon key and the user's session.** Every rule on who may read or change what is enforced in the database (row-level security, column grants, and functions that check the caller), so the rules hold even if someone calls the API directly with the anon key ([decision 0003](decisions/0003-access-control.md)). The app refuses to start with a service-role or secret key, and CI searches the built bundle for keys ([R-06](governance/RISK-REGISTER.md)).
+- **The browser holds only the public anon key and the user's session.** Every rule on who may read or change what is enforced in the database (row-level security, column grants, and functions that check the caller), so the rules hold even if someone calls the API directly with the anon key ([decision 0003](decisions/0003-access-control.md)). The app refuses to start with a service-role or secret key, and CI searches the built bundle for keys (risk R-06 in the [risk register](governance/RISK-REGISTER.md)).
 - **Provider keys exist only in the Edge Functions** ([decision 0005](decisions/0005-where-the-ai-runs.md)). The browser never calls a model.
 - **Uploads, knowledge-base text and model output are all untrusted.** Files are read with size and decompression limits; text sent to a model is passed as data, never as instructions; model output is checked in code before anyone sees it.
 - **What is assumed:** members reach the database only through the API. A direct database connection would let its holder set their own identity, so direct connections are for administrators only (decision 0003).
@@ -58,19 +58,24 @@ sequenceDiagram
   actor Owner as Response owner
   participant App as Browser
   participant DB as Postgres
-  participant Fn as process-questions
+  participant Fn as Edge Functions
   participant AI as Providers
 
   Owner->>App: Upload a spreadsheet or Word file
-  App->>App: Read it (limits; Word questions found by extract-questions and kept only if found word for word)
+  App->>App: Open the file (size and decompression limits)
+  App->>Fn: Word only: send the text; extract-questions finds the questions, keeping only those found word for word
   Owner->>App: Check the list in the preview
   App->>DB: Save the questions (text only)
   App->>Fn: Process in batches of ten
   Fn->>DB: Reserve against the daily cap and monthly budget
   Fn->>AI: Embed the question, match the knowledge base
   Fn->>AI: Do the entries answer it? (checker), Is it pricing or legal? (classifier)
-  Fn->>AI: Draft from the matched entries only
-  Fn->>Fn: Reject a draft citing an entry it was not given, or a figure, link or email not in its sources
+  alt Pricing, or nothing answers it
+    Fn->>Fn: No draft: held for a person
+  else
+    Fn->>AI: Draft from the matched entries only
+    Fn->>Fn: Reject a draft citing an entry it was not given, or a figure, link or email not in its sources (no draft, with a note)
+  end
   Fn->>DB: Save draft, calibrated confidence, gate, verdict and reason, models and prompt versions; record usage
   Owner->>App: Review, lowest confidence first
   Owner->>DB: Bulk-approve above a threshold (bulk_accept: never gated, uncalibrated or "partly" questions)
@@ -80,7 +85,7 @@ sequenceDiagram
   Owner->>App: Download Excel, CSV or Word, each with a provenance record per answer
 ```
 
-**What decides whether a question can be approved in bulk.** All of these, checked by the database at the moment of approval: processed on the server; calibrated confidence at or above the threshold; a draft to approve; the checker's verdict "yes" (or no checker configured); no gate (pricing, legal, translation, unchecked, or citing an entry that is unreviewed, overdue for review or replaced). Everything else is decided by a person, one question at a time, and every decision is recorded with who, when and how.
+**What decides whether a question can be approved in bulk.** All of these, checked by the database at the moment of approval: processed on the server; calibrated confidence at or above the threshold; a draft to approve; the checker's verdict "yes" (or no checker configured); no gate (pricing; legal; translation; unchecked, meaning the classifier or the review check could not run; or citing an entry that is unreviewed, overdue for review or replaced). Everything else is decided by a person, one question at a time, and every decision is recorded with who, when and how.
 
 ## Where things are
 
