@@ -1,4 +1,4 @@
-# RFI Respond — Job Stories
+# RFI Respond: Job Stories
 
 Job stories follow the format: **When** [situation], **I want to** [motivation], **so I can** [outcome].
 
@@ -50,7 +50,7 @@ Job stories follow the format: **When** [situation], **I want to** [motivation],
 
 ---
 
-## 4. RFI Session — Upload
+## 4. RFI Session: Upload
 
 **4.1** When I receive a spreadsheet of RFI questions from a prospect, I want to drag and drop the file onto the workspace, so I can start processing without navigating a complex file dialog.
 
@@ -62,7 +62,7 @@ Job stories follow the format: **When** [situation], **I want to** [motivation],
 
 ---
 
-## 5. RFI Session — Processing
+## 5. RFI Session: Processing
 
 **5.1** When I trigger a KB lookup run, I want to see a progress bar and per-question status message, so I know the system is working and roughly how long it will take.
 
@@ -70,7 +70,7 @@ Job stories follow the format: **When** [situation], **I want to** [motivation],
 
 ---
 
-## 6. RFI Session — Review
+## 6. RFI Session: Review
 
 **6.1** When I reach the review step, I want to see all questions sorted from lowest to highest AI confidence, so the items most in need of my attention are at the top.
 
@@ -96,7 +96,7 @@ Job stories follow the format: **When** [situation], **I want to** [motivation],
 
 ---
 
-## 7. RFI Session — Expert Assignment
+## 7. RFI Session: Expert Assignment
 
 **7.1** When a question requires specialist knowledge I do not have, I want to assign it to a specific team member from a user picker, so the right expert provides or approves the answer.
 
