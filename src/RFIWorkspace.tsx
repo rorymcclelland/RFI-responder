@@ -559,6 +559,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           acceptedCount={acceptedCount}
           skippedCount={skippedCount}
           learning={learning}
+          names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
           onStartNew={archived ? undefined : startNew}
         />
       )}

@@ -3,8 +3,10 @@ import { CheckCircle2, Download, FileDown, FileText, Sheet, Upload } from 'lucid
 import { exportCSV, exportExcel, exportWord } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
-export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, onStartNew }: {
+export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, names, onStartNew }: {
   questions: RFIQuestion[];
+  /** Approvers' names for the provenance record (Sprint 7, F-27). */
+  names: Map<string, string>;
   fileName: string;
   acceptedCount: number;
   skippedCount: number;
@@ -39,17 +41,18 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
         </div>
 
         <div className="border-t border-ink-100 pt-5">
-          <p className="section-label mb-4">Download as</p>
+          <p className="section-label mb-1">Download as</p>
+          <p className="text-xs text-ink-500 mb-4">Each file records how every answer was produced (drafted by a model, edited or written by a person) and who approved it: on a Provenance sheet in Excel, at the end of the Word file, and in a column in CSV.</p>
           <div className="flex flex-wrap gap-3">
-            <button onClick={() => exportExcel(questions, fileName)}
+            <button onClick={() => exportExcel(questions, fileName, names)}
               className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-emerald-300 text-emerald-700 rounded-2xl hover:bg-emerald-50 transition-colors shadow-card">
               <Sheet size={18} /> Excel (.xlsx)
             </button>
-            <button onClick={() => exportCSV(questions, fileName)}
+            <button onClick={() => exportCSV(questions, fileName, names)}
               className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-ink-200 text-ink-700 rounded-2xl hover:bg-ink-50 transition-colors shadow-card">
               <FileText size={18} /> CSV (.csv)
             </button>
-            <button onClick={() => exportWord(questions, fileName)}
+            <button onClick={() => exportWord(questions, fileName, names)}
               className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-sky-300 text-sky-700 rounded-2xl hover:bg-sky-50 transition-colors shadow-card">
               <FileDown size={18} /> Word (.doc)
             </button>

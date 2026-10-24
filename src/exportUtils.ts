@@ -1,4 +1,5 @@
-import { buildCsv, buildXlsx, escapeHtml } from './lib/spreadsheet';
+import { approvalLabel } from './lib/format';
+import { buildCsv, buildWorkbook, escapeHtml } from './lib/spreadsheet';
 import { RFIQuestion } from './types';
 
 function triggerDownload(content: BlobPart, filename: string, type: string) {
@@ -39,34 +40,107 @@ export function exportRows(questions: RFIQuestion[]) {
     }));
 }
 
+// ─── Provenance (Sprint 7, F-27) ──────────────────────────────────────────────
+//
+// Every exported file records, in a machine-readable form, how each answer was produced: drafted
+// by a model, assembled from entries, or written by a person; edited or not; and who approved it.
+// The answers themselves are unchanged (Rory, refinement Q2). This is a step towards marking under
+// EU AI Act Article 50(2), not a claim of compliance (docs/governance/FRAMEWORKS.md).
+
+export type AnswerOrigin =
+  | 'model-drafted, approved unedited' | 'model-drafted, edited by a person'
+  | 'assembled from knowledge-base entries, approved unedited' | 'assembled from knowledge-base entries, edited by a person'
+  | 'written by a person' | 'not answered' | 'not recorded (processed before provenance was kept)';
+
+/** How one answer was produced, from what the database recorded. */
+export function answerOrigin(q: RFIQuestion): AnswerOrigin {
+  if (q.status !== 'accepted') return 'not answered';
+  const edited = q.finalAnswer !== q.generatedAnswer;
+  if (q.draftKind === 'generated') return edited ? 'model-drafted, edited by a person' : 'model-drafted, approved unedited';
+  if (q.draftKind === 'assembled') return edited ? 'assembled from knowledge-base entries, edited by a person' : 'assembled from knowledge-base entries, approved unedited';
+  if (q.draftKind === 'insufficient_evidence' || q.draftKind === 'person_required') return 'written by a person';
+  return 'not recorded (processed before provenance was kept)';
+}
+
+const modelDrafted = (o: AnswerOrigin) => o.startsWith('model-drafted');
+
+export interface ProvenanceRow { number: string; origin: AnswerOrigin; model: string; promptVersion: string; approvedBy: string; approvedAt: string; approval: string }
+
+/** One row per exported question, in the RFI's order. */
+export function provenanceRows(questions: RFIQuestion[], names: Map<string, string> = new Map()): ProvenanceRow[] {
+  const decided = questions.filter((q) => q.status === 'accepted' || q.status === 'skipped').sort((a, b) => a.position - b.position);
+  return decided.map((q, i) => {
+    const origin = answerOrigin(q);
+    const drafted = modelDrafted(origin);
+    return {
+      number: q.customerRef || String(i + 1),
+      origin,
+      model: drafted ? q.provenance.draftModel ?? '' : '',
+      promptVersion: drafted ? q.provenance.promptVersion ?? '' : '',
+      approvedBy: q.status === 'accepted' && q.approval ? (q.approval.by ? names.get(q.approval.by) ?? 'a team member' : 'a team member') : '',
+      approvedAt: q.status === 'accepted' && q.approval ? q.approval.at : '',
+      approval: q.status === 'accepted' && q.approval ? approvalLabel(q.approval) || 'individual' : '',
+    };
+  });
+}
+
+/** "yes" when every answer was model-drafted unedited, "no" when none was model-drafted, else "partially". */
+function aiGenerated(rows: ProvenanceRow[]): 'yes' | 'partially' | 'no' {
+  const answered = rows.filter((r) => r.origin !== 'not answered');
+  const drafted = answered.filter((r) => modelDrafted(r.origin));
+  if (drafted.length === 0) return 'no';
+  return drafted.length === answered.length && drafted.every((r) => r.origin === 'model-drafted, approved unedited') ? 'yes' : 'partially';
+}
+const modelsUsed = (rows: ProvenanceRow[]) => [...new Set(rows.map((r) => r.model).filter(Boolean))];
+
 // ─── CSV ──────────────────────────────────────────────────────────────────────
 
-export function exportCSV(questions: RFIQuestion[], sourceFileName = 'export') {
-  const csv = buildCsv(
-    ['#', 'Question', 'Answer'],
-    exportRows(questions).map((r) => [r.number, r.question, r.answer]),
+/** CSV has no file properties, so the origin is a column (Sprint 7, F-27). */
+export function buildCsvExport(questions: RFIQuestion[], names: Map<string, string> = new Map()): string {
+  const prov = provenanceRows(questions, names);
+  return buildCsv(
+    ['#', 'Question', 'Answer', 'answer_origin'],
+    exportRows(questions).map((r, i) => [r.number, r.question, r.answer, prov[i].origin]),
   );
-  triggerDownload('\ufeff' + csv, `${stem(sourceFileName)}.csv`, 'text/csv;charset=utf-8;');
+}
+
+export function exportCSV(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()) {
+  triggerDownload('\ufeff' + buildCsvExport(questions, names), `${stem(sourceFileName)}.csv`, 'text/csv;charset=utf-8;');
 }
 
 // ─── Excel ────────────────────────────────────────────────────────────────────
 
-export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'export') {
-  const bytes = await buildXlsx(
-    'RFI Responses',
-    ['#', 'Question', 'Answer', 'Was Edited'],
-    exportRows(questions).map((r) => [r.number, r.question, r.answer, r.edited ? 'Yes' : 'No']),
-    [5, 60, 80, 12],
-  );
-  triggerDownload(bytes, `${stem(sourceFileName)}.xlsx`,
+/** The answers, a Provenance sheet, and document properties saying how they were produced. */
+export async function buildExcelExport(questions: RFIQuestion[], names: Map<string, string> = new Map()) {
+  const prov = provenanceRows(questions, names);
+  const answered = prov.filter((r) => r.origin !== 'not answered');
+  const drafted = answered.filter((r) => modelDrafted(r.origin));
+  const models = modelsUsed(prov);
+  return buildWorkbook([
+    { name: 'RFI Responses', headers: ['#', 'Question', 'Answer', 'Was Edited'],
+      rows: exportRows(questions).map((r) => [r.number, r.question, r.answer, r.edited ? 'Yes' : 'No']), columnWidths: [5, 60, 80, 12] },
+    { name: 'Provenance', headers: ['#', 'Answer origin', 'Model', 'Prompt version', 'Approved by', 'Approved at', 'Approval'],
+      rows: prov.map((r) => [r.number, r.origin, r.model, r.promptVersion, r.approvedBy, r.approvedAt, r.approval]), columnWidths: [8, 48, 20, 22, 22, 26, 20] },
+  ], {
+    creator: 'RFI Respond',
+    keywords: `ai-generated: ${aiGenerated(prov)}; generator: RFI Respond`,
+    subject: 'RFI response',
+    description: `${drafted.length} of ${answered.length} answered questions were drafted by a model${models.length ? ` (${models.join(', ')})` : ''}; every answer was approved by a person. Details per answer on the Provenance sheet.`,
+  });
+}
+
+export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()) {
+  triggerDownload(await buildExcelExport(questions, names), `${stem(sourceFileName)}.xlsx`,
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
 
 // ─── Word (HTML-based .doc — opens in Word/LibreOffice) ───────────────────────
 
 /** The Word export's HTML. Every value from a document or a person is escaped (Sprint 5 security review). */
-export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export'): string {
+export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()): string {
   const exported = exportRows(questions);
+  const prov = provenanceRows(questions, names);
+  const provRows = prov.map((r) => `<tr><td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.model)}</td><td>${escapeHtml(r.approvedBy)}</td><td>${escapeHtml(r.approval)}</td></tr>`).join('');
   const answered = exported.filter((r) => r.answer !== NOT_ANSWERED).length;
   const date     = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -92,6 +166,9 @@ export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export'): s
           xmlns='http://www.w3.org/TR/REC-html40'>
     <head>
       <meta charset='utf-8'>
+      <meta name="generator" content="RFI Respond">
+      <meta name="ai-generated" content="${aiGenerated(prov)}">
+      <meta name="ai-models" content="${escapeHtml(modelsUsed(prov).join(', '))}">
       <title>RFI Response</title>
       <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]-->
       <style>
@@ -116,11 +193,16 @@ export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export'): s
         </thead>
         <tbody>${rows}</tbody>
       </table>
+      <h2 style="font-size:14px;color:#0f172a;margin:32px 0 8px;">How each answer was produced</h2>
+      <table class="provenance">
+        <thead><tr><th>#</th><th>Origin</th><th>Model</th><th>Approved by</th><th>Approval</th></tr></thead>
+        <tbody>${provRows}</tbody>
+      </table>
     </body>
     </html>`;
   return html;
 }
 
-export function exportWord(questions: RFIQuestion[], sourceFileName = 'export') {
-  triggerDownload('\ufeff' + wordHtml(questions, sourceFileName), `${stem(sourceFileName)}.doc`, 'application/msword');
+export function exportWord(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()) {
+  triggerDownload('\ufeff' + wordHtml(questions, sourceFileName, names), `${stem(sourceFileName)}.doc`, 'application/msword');
 }

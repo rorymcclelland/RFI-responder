@@ -199,15 +199,30 @@ export async function buildXlsx(
   rows: string[][],
   columnWidths: number[] = [],
 ): Promise<Uint8Array<ArrayBuffer>> {
+  return buildWorkbook([{ name: sheetName, headers, rows, columnWidths }]);
+}
+
+export interface SheetSpec { name: string; headers: string[]; rows: string[][]; columnWidths?: number[] }
+/** Document properties written into the file (Sprint 7, F-27: how the content was produced). */
+export interface WorkbookProperties { creator?: string; keywords?: string; description?: string; subject?: string }
+
+/** An .xlsx with several sheets and document properties. Every cell is text, never a formula. */
+export async function buildWorkbook(sheets: SheetSpec[], props: WorkbookProperties = {}): Promise<Uint8Array<ArrayBuffer>> {
   const { default: ExcelJS } = await import('exceljs');
   const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet(sheetName);
-  ws.addRow(headers).font = { bold: true };
-  for (const r of rows) {
-    // Plain strings become string cells; ExcelJS only writes a formula when given { formula }.
-    ws.addRow(r).alignment = { wrapText: true, vertical: 'top' };
+  if (props.creator) { wb.creator = props.creator; wb.lastModifiedBy = props.creator; }
+  if (props.keywords) wb.keywords = props.keywords;
+  if (props.description) wb.description = props.description;
+  if (props.subject) wb.subject = props.subject;
+  for (const sheet of sheets) {
+    const ws = wb.addWorksheet(sheet.name);
+    ws.addRow(sheet.headers).font = { bold: true };
+    for (const r of sheet.rows) {
+      // Plain strings become string cells; ExcelJS only writes a formula when given { formula }.
+      ws.addRow(r).alignment = { wrapText: true, vertical: 'top' };
+    }
+    (sheet.columnWidths ?? []).forEach((w, i) => (ws.getColumn(i + 1).width = w));
   }
-  columnWidths.forEach((w, i) => (ws.getColumn(i + 1).width = w));
   return Uint8Array.from(new Uint8Array(await wb.xlsx.writeBuffer()));
 }
 
