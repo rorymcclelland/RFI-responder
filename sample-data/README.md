@@ -6,3 +6,4 @@ Everything in this folder is **synthetic demo data**, generated for the prototyp
 |---|---|---|
 | `security-qa.csv` | 100 security questions with answers, tags and an invented policy name as the source | Import into the knowledge base (Knowledge base > Bulk upload) |
 | `sample-questions.csv` | 40 security questions without answers, as a customer might send them | Upload into a response to see drafting and review |
+| `demo-plan.json` | Four fictional responses, one per stage (new, in review, exported, archived), with their questions and what happens to them | `npm run demo:record` processes them with the real pipeline into `supabase/demo-recording.json`; `npm run demo:seed` writes them and `security-qa.csv` into `supabase/seed.sql` |

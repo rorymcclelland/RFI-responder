@@ -24,7 +24,9 @@
     "eval:redteam": "tsx eval/run-redteam.ts",
     "eval:duplicates": "tsx eval/run-duplicates.ts",
     "eval:extraction": "tsx eval/run-extraction.ts",
-    "eval:consistency": "tsx eval/run-consistency.ts"
+    "eval:consistency": "tsx eval/run-consistency.ts",
+    "demo:seed": "tsx eval/run-demo-seed.ts",
+    "demo:record": "tsx eval/record-demo.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

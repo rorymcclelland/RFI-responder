@@ -1,4 +1,5 @@
 // Sprint 0, story S0-6: the development seed loads on top of the migrations.
+import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { asSuperuser, buildDatabase, closePool } from './harness';
 
@@ -22,27 +23,37 @@ describe('dev seed (supabase/seed.sql)', () => {
     expect(r.rows.map((x) => x.display_name)).toEqual(['Sarah Chen']);
   });
 
-  it('adds the eight starter knowledge-base entries, owned by the admin, origin seed', async () => {
-    const r = await asSuperuser<{ n: string; origins: string[]; owners: string }>(
-      `SELECT count(*) AS n, array_agg(DISTINCT origin::text) AS origins, count(DISTINCT created_by) AS owners FROM kb_entries`,
+  // Sprint 7 (S7-5): the 100 synthetic entries the evaluations use, in file order, so refs match.
+  it('adds the 100 synthetic knowledge-base entries, reviewed, owned by the admin, numbered as in the CSV', async () => {
+    const r = await asSuperuser<{ n: string; origins: string[]; owners: string; unreviewed: string; first: string }>(
+      `SELECT count(*) AS n, array_agg(DISTINCT origin::text) AS origins, count(DISTINCT created_by) AS owners,
+              count(*) FILTER (WHERE reviewed_at IS NULL) AS unreviewed,
+              (SELECT question FROM kb_entries WHERE ref = 'KB-0001') AS first
+         FROM kb_entries WHERE origin = 'seed'`,
     );
-    expect(r.rows[0]).toEqual({ n: '8', origins: ['seed'], owners: '1' });
+    expect(r.rows[0]).toEqual({ n: '100', origins: ['seed'], owners: '1', unreviewed: '0', first: 'How does your organization encrypt data at rest?' });
   });
 
-  it('adds two sample responses, each owned by its creator', async () => {
+  it('adds the demo responses in seed.sql, each owned by its creator', async () => {
+    const seeded = (readFileSync(new URL('../../seed.sql', import.meta.url), 'utf8').match(/^DO \$demo\$/gm) ?? []).length;
+    expect(seeded).toBeGreaterThanOrEqual(1);
     const r = await asSuperuser<{ n: string }>(
       `SELECT count(*) AS n FROM opportunities WHERE owner_id = created_by AND owner_id IS NOT NULL`,
     );
-    expect(r.rows[0].n).toBe('2');
+    expect(Number(r.rows[0].n)).toBe(seeded);
   });
 
   it('can be loaded twice without duplicating anything', async () => {
-    const { readFileSync } = await import('node:fs');
-    await asSuperuser(readFileSync(new URL('../../seed.sql', import.meta.url), 'utf8'));
-    const r = await asSuperuser<{ users: string; kb: string; opps: string }>(
+    const before = await asSuperuser<{ users: string; kb: string; opps: string }>(
       `SELECT (SELECT count(*) FROM auth.users) AS users, (SELECT count(*) FROM kb_entries) AS kb,
               (SELECT count(*) FROM opportunities) AS opps`,
     );
-    expect(r.rows[0]).toEqual({ users: '8', kb: '8', opps: '2' });
+    await asSuperuser(readFileSync(new URL('../../seed.sql', import.meta.url), 'utf8'));
+    const after = await asSuperuser<{ users: string; kb: string; opps: string }>(
+      `SELECT (SELECT count(*) FROM auth.users) AS users, (SELECT count(*) FROM kb_entries) AS kb,
+              (SELECT count(*) FROM opportunities) AS opps`,
+    );
+    expect(after.rows[0]).toEqual(before.rows[0]);
+    expect(after.rows[0].users).toBe('8');
   });
 });
