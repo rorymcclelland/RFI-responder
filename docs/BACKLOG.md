@@ -312,24 +312,79 @@ Refinement: `docs/refinement/sprint-6.md` (answers recorded 23 October). Refinem
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S6-1 | The checker's replies are never cut off and never silently become "no": higher limits, one-sentence reasons, stop reason recorded, one retry, then a failed check (held from bulk); evaluation caches keyed by prompt version (F-22, F-18) | The cause of most of F-22's variation and probably of F-18 | Ready, Sprint 6 |
-| S6-2 | Recalibrate and re-measure answerability, calibration, consistency, drafting, gates and red team; bars: 0 unreadable replies, at most 5% verdict changes and 5% bulk-line crossings, near misses at the bulk line still 0 of 33 (at most 1), gates 100 of 100, injections at most 1 of 35 | Confidence is calibrated on the checker's output; Sprint 7 publishes these figures | Ready, Sprint 6 |
-| S6-3 | The card shows the checker's verdict, chosen entry and one-sentence reason (new server-written `judge_reason`) (F-18) | A reviewer sees why the confidence is what it is | Ready, Sprint 6 |
-| S6-4 | Reviewing an entry releases pending questions held for it; bulk approval checks cited entries live (F-28) | Same code area; also catches entries falling overdue after processing | Ready, Sprint 6 |
-| S6-5 | A save refused by row-level security is reported (F-9 remainder) | Looks saved when it was not | Ready, Sprint 6 |
-| S6-6 | "All eligible" approvals read "bulk, all eligible" (F-30) | Small; same card | Ready, Sprint 6 |
-| S6-7 | The Sent list names the assignee (F-31) | Small | Ready, Sprint 6 |
-| F-22 fallback | Majority of three checker runs | Only if S6-2 misses the consistency bar | Planned, Sprint 7 only if needed (refined at the Sprint 6 close) |
+| S6-1 | The checker's replies are never cut off and never silently become "no": higher limits, one-sentence reasons, stop reason recorded, one retry, then a failed check (held from bulk); evaluation caches keyed by prompt version (F-22, F-18) | The cause of most of F-22's variation and probably of F-18 | Done, Sprint 6 (0 unreadable replies in every re-measure run) |
+| S6-2 | Recalibrate and re-measure answerability, calibration, consistency, drafting, gates and red team; bars: 0 unreadable replies, at most 5% verdict changes and 5% bulk-line crossings, near misses at the bulk line still 0 of 33 (at most 1), gates 100 of 100, injections at most 1 of 35 | Confidence is calibrated on the checker's output; Sprint 7 publishes these figures | Done, Sprint 6 (two bars missed and decided at the close: see the review) |
+| S6-3 | The card shows the checker's verdict, chosen entry and one-sentence reason (new server-written `judge_reason`) (F-18) | A reviewer sees why the confidence is what it is | Done, Sprint 6 |
+| S6-4 | Reviewing an entry releases pending questions held for it; bulk approval checks cited entries live (F-28) | Same code area; also catches entries falling overdue after processing | Done, Sprint 6 (an owner's export no longer confirms an entry that fell overdue, after the security review) |
+| S6-5 | A save refused by row-level security is reported (F-9 remainder) | Looks saved when it was not | Done, Sprint 6 (tested in code; not provoked in the browser) |
+| S6-6 | "All eligible" approvals read "bulk, all eligible" (F-30) | Small; same card | Done, Sprint 6 |
+| S6-7 | The Sent list names the assignee (F-31) | Small | Done, Sprint 6 |
+| F-22 fallback | Majority of three checker runs | Only if S6-2 misses the consistency bar | Not needed (Sprint 6 close): the bar was missed narrowly and the variation left is mostly between two drafted verdicts; recorded as a residual |
 
 No spike: S6-2 measures against agreed bars, and the one story that depends on it is held out of the sprint.
 
-## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 5 review)
+All seven committed items closed as done; nothing returned to the backlog. The majority-of-three fallback was not needed.
 
-(Sprint 6 is above.)
+### Sprint 6 review (24 October 2026)
 
-**Sprint 7: documentation and publish.** Architecture diagram, evaluation reports, governance pack refreshed, synthetic demo data covering several responses at different stages, screenshots or short demo video, licence decision, repo made public, CV and website wording updated to match; F-27 (AI marker on exports), F-8 (leaked-password protection) and F-10 (narrow windows) before publishing.
+**Checks, with evidence.** CI green on `sprint-6` (all three jobs); 400 unit tests and 211 database tests at the close. Re-measure run on Rory's PC (`docs/evals/*-2026-10-23*`, Sprint 6 runs marked `-sprint6` where a Sprint 5 report shared the date). End-to-end on Rory's PC as Tom (member) and Sarah (admin):
 
-**Not yet in a sprint, ranked at the Sprint 5 review.** 1. F-16 calibration stability (Sprint 6 recalibrates anyway; can join it if refinement finds it small). 2. C-1 multilingual knowledge base. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items. 5. F-20 rerankers (needs a Voyage payment method). 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
+| Check (agreed at refinement) | Result | Held? |
+|---|---|---|
+| No unreadable checker replies | 0 in every run (726 answerability, 905 consistency, 70 drafting, 74 red team; 0 of 170 gate answers) | Yes |
+| Verdict changes across five runs at most 5% | 7.2% (23.2% before the fix): 11 of 13 between "yes" and "partly", 2 near misses between "no" and "partly" | No; accepted as a residual (below) |
+| Bulk-line crossings at most 5% | 1.7% | Yes |
+| Near misses at or above 80% | 0 of 33 | Yes |
+| Pricing and legal gated | 100 of 100; lookalikes 7 of 70 (was 9) | Yes |
+| Injections at most 1 of 37 | 2 as scored; 1 under the narrowed rule (below) | Yes, after the rule change |
+| Reported | AUROC 0.942 to 0.997; calibration error 0.041 to 0.014; right entry cited 89.8% to 93.9%; faithfulness 100% of 305 claims | |
+| A member's entry holds questions citing it; reviewing it releases them without reprocessing | Tom's KB-0111 held his question; Sarah's review released it; bulk approval at 80% accepted both questions | Yes |
+| Checker verdict and reason on the card | Shown, as plain text | Yes |
+| Bulk and Sent labels | "bulk, all eligible"; "to Maya Patel" | Yes |
+
+An independent security review found one serious issue and nine smaller ones, all fixed and tested (`20261026120000_sprint6_review_fixes.sql`; the Sprint 6 refinement lists them). The serious one: an owner exporting a question whose entry had fallen overdue after processing confirmed that entry, and the new release trigger then cleared holds in other owners' responses.
+
+**Bugs found and fixed in the sprint.** BUG-19: the re-measure overwrote Sprint 5's same-day reports (restored; scripts now never overwrite a report). BUG-20: CI's coverage step timed out on two Sprint 5 tests under instrumentation. BUG-21: the review confirmation still said processed questions keep their hold. BUG-22: the checker line repeated the entry number.
+
+**Also changed by the re-measure.** The learning thresholds rose (voyage-4 0.30 to 0.55, qwen3 0.47 to 0.59) to keep wrong supersessions at 1.9% now that the checker says "yes" or "partly" more often; real duplicates caught fell from 66.7% to 53.0% (F-35).
+
+**Decisions at the review (Rory, 24 October).**
+- The consistency bar was missed (7.2% against 5%). Recorded as a residual rather than adding majority of three: the variation left is mostly between "yes" and "partly", which both draft, and bulk-line crossings were 1.7%.
+- The red team's forbidden-content check counts invented claims only in drafts that could be sent; the canary still counts anywhere (`eval/redteam-rules.ts`). Changed after seeing r013, where the drafter refused to claim ISO 27701 and its refusal note named the standard; recorded as a change made after the result. Under it, 1 of 37 succeeded (r015: a near miss raised from "no" to "partly", no draft).
+- Sprint 7 proposed below.
+
+### Where every Sprint 6 review item now lives
+
+| Item | Now |
+|---|---|
+| Ten security review findings | Done in Sprint 6 (review) |
+| BUG-19 to BUG-22 | Done in Sprint 6 |
+| Consistency 7.2% (bar 5%) | Accepted residual; model card and risk register R-12 |
+| r013 scored as an injection | Rule narrowed at the close (above); r015 remains, risk register R-05 |
+| F-32 A draft citing a replaced (superseded) entry still counts as current | Backlog, from Sprint 6 review; proposed for Sprint 7 |
+| F-33 A "partly" verdict on a near miss can reach the 80% bulk line, held back only by the drafter's refusal | Backlog, from Sprint 6 review; proposed for Sprint 7 |
+| F-34 An entry reviewed while a question citing it is being processed leaves that question held until the entry is reviewed or confirmed again | Backlog, from Sprint 6 review (fails safe) |
+| F-35 The higher learning threshold catches fewer real duplicates (53.0%, was 66.7%), so more near-duplicate entries are added | Backlog, from Sprint 6 re-measure |
+
+## Sprint 7: documentation and publish (proposed at the Sprint 6 review, 24 October 2026)
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| Docs | Architecture diagram, evaluation summary, governance pack refreshed, README for a first-time reader | The repository is about to be read by people who were not here | Proposed |
+| Demo data | Synthetic responses at several stages (new, in review, exported, archived) | Screenshots and a first run should show the workflow, not an empty screen | Proposed |
+| Show | Screenshots or a short demo video | The quickest way for a reader to see what it does | Proposed |
+| Publish | Licence decision, repository made public, CV and website wording checked against what the code does | The goal of the upgrade; rule 1 applies to every claim | Proposed |
+| F-27 | A machine-readable marker that a model drafted an exported answer | Publishing is where the claims are made | Proposed |
+| F-8 | Leaked-password protection on any hosted project | Before anything is hosted | Proposed |
+| F-10 | Layout fits narrower windows | Screenshots and first impressions | Proposed |
+| F-33 | Bulk approval needs a "yes" verdict, or the bulk line excludes "partly" on a near miss | A safety claim the published figures rest on | Proposed |
+| F-32 | A draft citing a replaced entry is held from bulk | Small; same rule as S6-4 | Proposed |
+
+## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 6 review)
+
+(Sprint 7 is above.)
+
+**Not yet in a sprint, ranked at the Sprint 6 review.** 1. F-16 calibration stability (intervals rather than single figures; small sets). 2. C-1 multilingual knowledge base. 3. F-35 duplicate catch rate after the threshold rise. 4. F-19 faithfulness judge on planted unfaithful drafts. 5. F-14 and F-15 reviewed Japanese and near-miss items. 6. F-20 rerankers (needs a Voyage payment method). 7. F-34 review during processing (fails safe). 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -337,7 +392,7 @@ No spike: S6-2 measures against agreed bars, and the one story that depends on i
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 onwards from Sprint 5; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 onwards from Sprint 6; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -357,7 +412,7 @@ No spike: S6-2 measures against agreed bars, and the one story that depends on i
 | F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
 | F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
 | F-17 | High confidence is shown as "100%" | Done, Sprint 3. From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
-| F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | From the Sprint 2 review; judge prompt, and showing the verdict on the card. Sprint 5 review: F-22's fix (majority of three runs) folded in; proposed for Sprint 6 |
+| F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | Done, Sprint 6 (S6-1, S6-3: the "no"s were mostly cut-off replies; verdict and reason now on the card). From the Sprint 2 review |
 | F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
 | F-20 | Voyage rerank-2.5 and rerank-3 not yet compared with the Claude judge | Returned from S2-1; needs a Voyage payment method for the rate limit. Cheaper and faster if as good |
 | F-21 | No per-user rate limit or cost cap on processing | Done, Sprint 4 (S4-1). From the Sprint 2 security review |
@@ -367,10 +422,14 @@ No spike: S6-2 measures against agreed bars, and the one story that depends on i
 | F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | Done, Sprint 4. From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
 | F-26 | Assignments stay open after a response is exported or archived | Done, Sprint 5. From the Sprint 3 end-to-end run; close them at export, or show them as closed |
 | F-27 | Exported answers carry no machine-readable marker that a model drafted them (EU AI Act Article 50(2) may apply to the provider) | From Sprint 4's framework check (`docs/governance/FRAMEWORKS.md`) |
-| F-28 | Reviewing an entry clears the review gate only for questions processed afterwards; questions already processed keep it until reprocessed | From the Sprint 4 build |
+| F-28 | Reviewing an entry clears the review gate only for questions processed afterwards; questions already processed keep it until reprocessed | Done, Sprint 6 (S6-4). From the Sprint 4 build |
 | F-29 | Each question reserves $0.01 against the budget; measured cost is about $0.0005, so with the defaults processing stops after about 1,000 questions a month while real spend is around 50p | Done, Sprint 5. From the Sprint 4 end-to-end run; set the default from measured usage |
-| F-30 | After "All eligible", an accepted card reads "bulk at 0%" | From the Sprint 5 end-to-end run; say how it was bulk-accepted |
-| F-31 | The Sent list of assignments does not say who each question went to | From the Sprint 5 end-to-end run |
+| F-30 | After "All eligible", an accepted card reads "bulk at 0%" | Done, Sprint 6 (S6-6). From the Sprint 5 end-to-end run |
+| F-31 | The Sent list of assignments does not say who each question went to | Done, Sprint 6 (S6-7). From the Sprint 5 end-to-end run |
+| F-32 | A draft citing a replaced (superseded) entry still counts as current for bulk approval | From the Sprint 6 security review (behaviour since Sprint 4) |
+| F-33 | A "partly" verdict on a near miss can reach the 80% bulk line; only the drafter's refusal keeps it out of bulk approval | From the Sprint 6 re-measure (n016 at 80.0% in one run; r015 at 81.7%) |
+| F-34 | An entry reviewed while a question citing it is being processed leaves that question held until the entry is reviewed or confirmed again | From the Sprint 6 security review; fails safe |
+| F-35 | After the learning threshold rose to 0.55, 53.0% of real duplicates are caught (was 66.7%), so more near-duplicate entries are added | From the Sprint 6 re-measure; related to F-11 |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked

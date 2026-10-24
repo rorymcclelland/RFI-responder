@@ -6,7 +6,7 @@ Product brief: [`docs/PRODUCT.md`](docs/PRODUCT.md). Backlog: [`docs/BACKLOG.md`
 
 ## Status
 
-Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 to 5 are complete** (clean-up; retrieval and confidence; grounded drafting and safety gates; workflow and the learning loop; cost controls and governance; Word questionnaires). What the code does today, stated plainly:
+Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 to 6 are complete** (clean-up; retrieval and confidence; grounded drafting and safety gates; workflow and the learning loop; cost controls and governance; Word questionnaires; checker reliability). What the code does today, stated plainly:
 
 - **Processing happens on the server.** Each uploaded question goes to a Supabase Edge Function, which matches it against the knowledge base by meaning (voyage-4, or a local model through Ollama), asks Claude whether the matched entries actually answer it, checks it for pricing and legal or contractual terms, and drafts an answer. Provider keys never reach the browser.
 - **Drafts are grounded and checked.** Claude writes only from the matched entries and cites them; code then rejects a draft that cites an entry it was not given, or contains a figure or link not in its sources. When the entries do not answer the question, there is no draft. Pricing questions are never drafted. Japanese questions get Japanese drafts, labelled as translations.

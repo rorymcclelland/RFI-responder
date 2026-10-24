@@ -185,3 +185,7 @@ Per the refinement, missing the consistency bar means majority of three is plann
 | The Sent list names the assignee (S6-7) | "to Maya Patel"; All shows "by Sarah Chen, to Maya Patel" | Yes |
 
 Fixed from the run: the review confirmation still said questions already processed keep their gate (now: questions waiting on the entry are released unless another cited entry awaits review), and the checker line repeated the entry number when the reason began with it. A refused save (S6-5) was not provoked in the browser; it is covered by unit tests.
+
+## Close (24 October 2026)
+
+All seven stories done; nothing returned. Rory accepted the 7.2% consistency result as a residual instead of adding majority of three, and the red team's forbidden-content check was narrowed to drafts that could be sent (changed after seeing r013, and recorded as such), which leaves 1 of 37 within the bar. New backlog rows F-32 to F-35; Sprint 7 (documentation and publish) proposed with F-32 and F-33 added. Details: `docs/BACKLOG.md`, Sprint 6 review.
