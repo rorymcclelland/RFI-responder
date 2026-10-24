@@ -366,19 +366,23 @@ An independent security review found one serious issue and nine smaller ones, al
 | F-34 An entry reviewed while a question citing it is being processed leaves that question held until the entry is reviewed or confirmed again | Backlog, from Sprint 6 review (fails safe) |
 | F-35 The higher learning threshold catches fewer real duplicates (53.0%, was 66.7%), so more near-duplicate entries are added | Backlog, from Sprint 6 re-measure |
 
-## Sprint 7: documentation and publish (proposed at the Sprint 6 review, 24 October 2026)
+## Sprint 7: documentation and publish (confirmed at the Sprint 6 review; refined 24 October 2026)
+
+Refinement: `docs/refinement/sprint-7.md` (answers recorded 24 October). Repository only, run locally (no hosted demo this sprint); no licence granted; full history kept.
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| Docs | Architecture diagram, evaluation summary, governance pack refreshed, README for a first-time reader | The repository is about to be read by people who were not here | Proposed |
-| Demo data | Synthetic responses at several stages (new, in review, exported, archived) | Screenshots and a first run should show the workflow, not an empty screen | Proposed |
-| Show | Screenshots or a short demo video | The quickest way for a reader to see what it does | Proposed |
-| Publish | Licence decision, repository made public, CV and website wording checked against what the code does | The goal of the upgrade; rule 1 applies to every claim | Proposed |
-| F-27 | A machine-readable marker that a model drafted an exported answer | Publishing is where the claims are made | Proposed |
-| F-8 | Leaked-password protection on any hosted project | Before anything is hosted | Proposed |
-| F-10 | Layout fits narrower windows | Screenshots and first impressions | Proposed |
-| F-33 | Bulk approval needs a "yes" verdict, or the bulk line excludes "partly" on a near miss | A safety claim the published figures rest on | Proposed |
-| F-32 | A draft citing a replaced entry is held from bulk | Small; same rule as S6-4 | Proposed |
+| S7-1 | Bulk approval needs a "yes" verdict (F-33) | "Partly" at 80% or more had the wrong top entry twice as often as "yes" (15% against 7%) | Ready, Sprint 7 |
+| S7-2 | A draft citing a replaced entry is held from bulk (F-32) | Small; same rule as S6-4 | Ready, Sprint 7 |
+| S7-3 | Exported answers carry a machine-readable record of how they were produced (F-27) | Publishing is where the claims are made | Ready, Sprint 7 |
+| S7-4 | Every screen fits a 768 px window (F-10) | Screenshots and first impressions | Ready, Sprint 7 |
+| S7-5 | Demo data at four stages, recorded from a real run on synthetic questions | A fresh install should show the workflow | Ready, Sprint 7 |
+| S7-6 | README, architecture, evaluation summary and governance pack for a first-time reader | The repository is about to be read by people who were not here | Ready, Sprint 7 |
+| S7-7 | Screenshots captured by a Playwright script on Rory's PC | Repeatable when the screens change | Ready, Sprint 7 |
+| S7-8 | Publish: `main` brought up to date, history rescanned, no licence (all rights reserved), deploying guide (F-8 documented); Rory makes it public | The goal of the upgrade | Ready, Sprint 7 |
+| S7-9 | CV and website claims checked against the code; Rory edits | The code and the claims go public together | Ready, Sprint 7 |
+
+No spike.
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 6 review)
 
