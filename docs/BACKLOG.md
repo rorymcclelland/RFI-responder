@@ -483,7 +483,7 @@ No spike.
 | F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | Done, Sprint 8 (S8-2). From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
 | F-17 | High confidence is shown as "100%" | Done, Sprint 3. From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
 | F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | Done, Sprint 6 (S6-1, S6-3: the "no"s were mostly cut-off replies; verdict and reason now on the card). From the Sprint 2 review |
-| F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
+| F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | Done, Sprint 9 (S9-3): 95 of 95 planted claims caught, no false alarm on 37 unchanged drafts. From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
 | F-20 | Voyage rerank-2.5 and rerank-3 not yet compared with the Claude judge | Returned from S2-1; needs a Voyage payment method for the rate limit. Cheaper and faster if as good |
 | F-21 | No per-user rate limit or cost cap on processing | Done, Sprint 4 (S4-1). From the Sprint 2 security review |
 | F-22 | How consistent is the judge across repeated runs (the API no longer accepts a temperature setting)? | Done, Sprint 5 (measured: 23.2% of verdicts changed over five runs). From the Sprint 2 review; the fix is folded into F-18 |

@@ -152,6 +152,14 @@ const proportion = (measure: string, figure: string, k: number, n: number, basis
   proportion('Red-team Word documents that changed the result', figure, k, n, `${n} documents`, newest('extraction', 'md'));
 }
 
+// Planted claims (Sprint 9, S9-3): the report's own count.
+{
+  const report = newest('faithfulness-plants', 'md');
+  const figure = tableCell(read(report), 'Planted claims caught', 'Result');
+  const { k, n } = parseCount(figure);
+  proportion('Planted unsupported claims caught by the faithfulness judge', figure, k, n, `${n} planted claims in 37 drafts, four rules`, report);
+}
+
 const date = new Date().toISOString().slice(0, 10);
 const base = reportBase('intervals', date);
 const lines = [

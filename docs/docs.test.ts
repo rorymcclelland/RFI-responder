@@ -60,6 +60,7 @@ const WHERE: Record<string, { row: string[]; column: string }> = {
   'Word extraction recall, synthetic documents': { row: ['Recall (clean documents)'], column: 'Result' },
   'Word extraction precision, synthetic documents': { row: ['Precision (clean documents)'], column: 'Result' },
   'Red-team Word documents that changed the result': { row: ['Red-team documents that changed the result'], column: 'Result' },
+  'Planted unsupported claims caught by the faithfulness judge': { row: ['Planted claims caught'], column: 'Result' },
 };
 
 describe('evaluations summary', () => {

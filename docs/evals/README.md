@@ -2,7 +2,7 @@
 
 What has been measured, on what, and the latest figure for each measure. A test (`docs/docs.test.ts`) checks that every figure below is the figure in its own row and column of the report it cites, so a figure cannot be changed here without the report agreeing.
 
-**Read every figure as an estimate on small synthetic sets.** Each has a 95% interval ([`intervals-2026-10-25.md`](intervals-2026-10-25.md), `npm run eval:intervals`, no new model calls): the range it could plausibly take with another sample of questions like these. An interval covers sample size only, not whether real questionnaires look like these. The evaluation set (version 2026-10-22.3) has 363 questions written by Claude from the synthetic knowledge base: paraphrases, machine translations into Japanese, unanswerable questions and near misses (questions on a topic the knowledge base covers that ask for something it does not hold). Nobody outside the project has reviewed them, and calibration moved noticeably when one item was removed (backlog F-16). The scripts are in [`eval/`](../../eval/), with instructions in [`eval/README.md`](../../eval/README.md).
+**Read every figure as an estimate on small synthetic sets.** Each has a 95% interval ([`intervals-2026-10-25-2.md`](intervals-2026-10-25-2.md), `npm run eval:intervals`, no new model calls): the range it could plausibly take with another sample of questions like these. An interval covers sample size only, not whether real questionnaires look like these. The evaluation set (version 2026-10-22.3) has 363 questions written by Claude from the synthetic knowledge base: paraphrases, machine translations into Japanese, unanswerable questions and near misses (questions on a topic the knowledge base covers that ask for something it does not hold). Nobody outside the project has reviewed them, and calibration moved noticeably when one item was removed (backlog F-16). The scripts are in [`eval/`](../../eval/), with instructions in [`eval/README.md`](../../eval/README.md).
 
 | Measure | Figure | 95% interval | Report |
 |---|---|---|---|
@@ -17,6 +17,7 @@ What has been measured, on what, and the latest figure for each measure. A test 
 | Pricing and legal questions gated (rules and classifier) | 100 of 100 (100.0%) | 96.3 to 100.0% | `docs/evals/gates-2026-10-23.md` |
 | Lookalike questions wrongly gated | 7 of 70 (10.0%) | 4.9 to 19.2% | `docs/evals/gates-2026-10-23.md` |
 | Faithfulness of drafts (claims supported by the cited entries) | 100.0% of 305 claims | 92.3 to 100.0% | `docs/evals/drafting-2026-10-23-sprint6.md` |
+| Planted unsupported claims caught by the faithfulness judge | 95 of 95 (100.0%) | 96.1 to 100.0% | `docs/evals/faithfulness-plants-2026-10-25.md` |
 | Right entry cited | 93.9% | 83.5 to 97.9% | `docs/evals/drafting-2026-10-23-sprint6.md` |
 | Near misses given no draft | 100.0% | 84.5 to 100.0% | `docs/evals/drafting-2026-10-23-sprint6.md` |
 | Wrong supersessions at the learning threshold (voyage-4, 0.55) | 1.9% | 0.9 to 3.9% | `docs/evals/duplicates-2026-10-23-2.md` |
