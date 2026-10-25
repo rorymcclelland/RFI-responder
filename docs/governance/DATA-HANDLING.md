@@ -36,7 +36,7 @@ Provider keys are Edge Function secrets and never reach the browser. What each p
 |---|---|---|
 | Responses, questions, drafts, approvals | Until an admin deletes a response created in error (archived responses are kept as the record of what was sent) | `delete_response()`, admin only, with a reason, logged |
 | Knowledge-base entries | While current; superseded entries are kept for history | Admin delete |
-| AI usage records | 13 months | `purge_old_usage()`, callable only by the service role: a hosted deployment schedules it (for example with pg_cron); locally it is run from the database console |
+| AI usage records | 13 months | `purge_old_usage()`, callable only by the service role, runs after every recorded call (Sprint 11), so no scheduler is needed; it also clears daily counters older than a week and reservations older than last month |
 | Daily quota counters and old budget reservations | 7 days; reservations from before last month | The same function |
 | Audit log | Indefinitely | Not deleted |
 

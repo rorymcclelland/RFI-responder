@@ -124,5 +124,14 @@ export async function finishUsage(
     const { error } = await db.rpc('settle_reservation', { p_reservation: id });
     if (error) console.error('settle_reservation failed', error);
   }
+  // Sprint 11 (S11-5, F-47): the retention the data handling page states (13 months of usage) is
+  // applied here, as no scheduler is available everywhere the app runs. An indexed delete that
+  // finds nothing on most days; a failure is logged and changes nothing above.
+  try {
+    const { error } = await db.rpc('purge_old_usage', {});
+    if (error) console.error('purge_old_usage failed', error);
+  } catch (err) {
+    console.error('purge_old_usage threw', err);
+  }
   return true;
 }

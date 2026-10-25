@@ -100,13 +100,22 @@ describe('finishUsage (security review, finding 6)', () => {
     const d = db(null);
     expect(await finishUsage(d.client, 'u1', 'process-questions', 's1', [row], ['r1', null, 'r2'])).toBe(true);
     expect(d.inserted).toEqual([{ ...row, user_id: 'u1', function: 'process-questions', session_id: 's1' }]);
-    expect(d.rpc.mock.calls).toEqual([['settle_reservation', { p_reservation: 'r1' }], ['settle_reservation', { p_reservation: 'r2' }]]);
+    expect(d.rpc.mock.calls).toEqual([['settle_reservation', { p_reservation: 'r1' }], ['settle_reservation', { p_reservation: 'r2' }], ['purge_old_usage', {}]]);
   });
 
   it('keeps the reservations when the usage cannot be written, so the budget still counts them', async () => {
     const d = db({ message: 'insert failed' });
     expect(await finishUsage(d.client, 'u1', 'embed', null, [row], ['r1'])).toBe(false);
     expect(d.rpc).not.toHaveBeenCalled();
+  });
+
+  it('applies the retention after recording, and a failed purge changes nothing (S11-5)', async () => {
+    const d = db(null);
+    d.rpc.mockImplementation((fn: string) => Promise.resolve(fn === 'purge_old_usage' ? { data: null, error: { message: 'boom' } } : { data: null, error: null }));
+    expect(await finishUsage(d.client, 'u1', 'embed', null, [row], [])).toBe(true);
+    expect(d.inserted).toHaveLength(1);
+    d.rpc.mockImplementation((fn: string) => (fn === 'purge_old_usage' ? Promise.reject(new Error('down')) : Promise.resolve({ data: null, error: null })));
+    expect(await finishUsage(d.client, 'u1', 'embed', null, [row], [])).toBe(true);
   });
 
   it('releases a reservation when no call was made (nothing to record)', async () => {
