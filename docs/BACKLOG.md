@@ -392,7 +392,7 @@ An independent security review found no high issues and seven smaller ones (two 
 
 **Bugs found and fixed in the sprint.** BUG-23 to BUG-26 (demo-seed test collision, two screenshot script faults, the new demo response showing "In review" and zero usage), and BUG-27 after publishing (the architecture page's sequence diagram did not render on GitHub: semicolons in Mermaid messages; a docs test now catches it).
 
-**Checked after the close.** Rory confirmed the "Write an answer" behaviour on screen (25 October). Making the repository public and checking that the README renders are Rory's steps.
+**Checked after the close.** Rory confirmed the "Write an answer" behaviour on screen, made the repository public, and confirmed the README and both architecture diagrams render on GitHub (25 October). Sprint 7 closed.
 
 ### Where every Sprint 7 review item now lives
 
@@ -408,11 +408,19 @@ An independent security review found no high issues and seven smaller ones (two 
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 6 review)
 
-**Sprint 8, proposed at the Sprint 7 review (for Rory to confirm): honest figures.** The repository is now public-ready, so the next most valuable thing is how far a reader can trust the published figures.
-- F-16 Calibration intervals: show a range, not a single figure, and fit with cross-validation, since one item moved the near-miss result. The figures are what a reader of the public repository judges.
-- F-37 A pending "partly" question in the demo data, so the bulk hold is visible on a fresh install. Small; touches the demo plan the screenshots use.
-- F-38 Find the two embedding calls and record embedding usage in the demo, so the governance screenshot matches the seed exactly. Small.
-- F-36 and F-39 Excel title property; screenshot script checks the Supabase address too. Small, in code the sprint touches anyway.
+## Sprint 8: honest figures (confirmed 25 October 2026; refinement awaiting Rory's answers)
+
+Refinement: `docs/refinement/sprint-8.md`. No API spend except Rory's demo recording (a few pence).
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| S8-1 | Every published figure carries a 95% interval | The repository is public; "0 of 33" should not read as "never" | Refined, awaiting answers |
+| S8-2 | Calibration fitted and checked by cross-validation (F-16) | The bulk-line safety figure swung when one item was removed | Refined, awaiting answers |
+| S8-3 | The confidence tooltip gives the range | The card's figure says how precise it is | Refined, awaiting answers |
+| S8-4 | Demo data shows the "partly" hold, and its usage is complete (F-37, F-38) | A fresh install should show every hold; F-38's cause is found (first sign-in indexes the knowledge base) | Refined, awaiting answers |
+| S8-5 | Excel title property (F-36); screenshot script checks the Supabase address (F-39) | Small, in code the sprint touches | Refined, awaiting answers |
+
+No spike.
 
 **Not yet in a sprint, ranked at the Sprint 7 review.** 1. C-1 multilingual knowledge base. 2. F-35 duplicate catch rate after the threshold rise. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 5. F-20 rerankers (needs a Voyage payment method; the bulk rule for a reranker is now set). 6. F-34 review during processing (fails safe). 7. F-8 leaked-password protection, with a hosted sprint. 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
 
