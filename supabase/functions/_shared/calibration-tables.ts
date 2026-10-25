@@ -8,71 +8,103 @@ import type { CalibrationTable } from './calibration.ts';
 export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
   "voyage-4": {
     "model": "voyage-4",
-    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (all 363 questions; checked by 5-fold cross-validation)",
     "points": [
       {
-        "score": 0.1838,
+        "score": 0.177,
         "probability": 0
       },
       {
-        "score": 0.3395,
+        "score": 0.2855,
         "probability": 0
+      },
+      {
+        "score": 0.2983,
+        "probability": 0.1
+      },
+      {
+        "score": 0.3429,
+        "probability": 0.1
       },
       {
         "score": 0.3431,
-        "probability": 0.125
+        "probability": 0.2308
       },
       {
-        "score": 0.3797,
-        "probability": 0.125
+        "score": 0.38,
+        "probability": 0.2308
       },
       {
         "score": 0.3805,
-        "probability": 0.5
+        "probability": 0.3333
       },
       {
-        "score": 0.382,
-        "probability": 0.5
+        "score": 0.3855,
+        "probability": 0.3333
       },
       {
         "score": 0.3883,
-        "probability": 0.6
+        "probability": 0.4444
       },
       {
         "score": 0.4062,
-        "probability": 0.6
+        "probability": 0.4444
       },
       {
-        "score": 0.4099,
-        "probability": 0.6667
+        "score": 0.4068,
+        "probability": 0.619
       },
       {
         "score": 0.4319,
+        "probability": 0.619
+      },
+      {
+        "score": 0.433,
         "probability": 0.6667
       },
       {
-        "score": 0.4367,
-        "probability": 0.75
-      },
-      {
         "score": 0.4489,
-        "probability": 0.75
+        "probability": 0.6667
       },
       {
         "score": 0.4499,
-        "probability": 0.8
+        "probability": 0.7273
       },
       {
-        "score": 0.551,
-        "probability": 0.8
+        "score": 0.4848,
+        "probability": 0.7273
       },
       {
-        "score": 0.5523,
-        "probability": 0.9286
+        "score": 0.4849,
+        "probability": 0.8305
+      },
+      {
+        "score": 0.5341,
+        "probability": 0.8305
+      },
+      {
+        "score": 0.5344,
+        "probability": 0.8696
+      },
+      {
+        "score": 0.5528,
+        "probability": 0.8696
+      },
+      {
+        "score": 0.553,
+        "probability": 0.9444
+      },
+      {
+        "score": 0.6062,
+        "probability": 0.9444
+      },
+      {
+        "score": 0.6063,
+        "probability": 0.963
       },
       {
         "score": 0.6259,
-        "probability": 0.9286
+        "probability": 0.963
       },
       {
         "score": 0.6282,
@@ -82,76 +114,234 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
         "score": 0.7102,
         "probability": 1
       }
+    ],
+    "bands": [
+      {
+        "probability": 0,
+        "n": 25,
+        "low": 0,
+        "high": 0.1332
+      },
+      {
+        "probability": 0.1,
+        "n": 10,
+        "low": 0.0179,
+        "high": 0.4042
+      },
+      {
+        "probability": 0.2308,
+        "n": 13,
+        "low": 0.0818,
+        "high": 0.5026
+      },
+      {
+        "probability": 0.3333,
+        "n": 3,
+        "low": 0.0615,
+        "high": 0.7923
+      },
+      {
+        "probability": 0.4444,
+        "n": 9,
+        "low": 0.1888,
+        "high": 0.7333
+      },
+      {
+        "probability": 0.619,
+        "n": 21,
+        "low": 0.4088,
+        "high": 0.7925
+      },
+      {
+        "probability": 0.6667,
+        "n": 6,
+        "low": 0.3,
+        "high": 0.9032
+      },
+      {
+        "probability": 0.7273,
+        "n": 33,
+        "low": 0.5578,
+        "high": 0.8493
+      },
+      {
+        "probability": 0.8305,
+        "n": 59,
+        "low": 0.7154,
+        "high": 0.9052
+      },
+      {
+        "probability": 0.8696,
+        "n": 23,
+        "low": 0.6787,
+        "high": 0.9546
+      },
+      {
+        "probability": 0.9444,
+        "n": 90,
+        "low": 0.8765,
+        "high": 0.976
+      },
+      {
+        "probability": 0.963,
+        "n": 27,
+        "low": 0.8172,
+        "high": 0.9934
+      },
+      {
+        "probability": 1,
+        "n": 44,
+        "low": 0.9197,
+        "high": 1
+      }
     ]
   },
   "bge-m3": {
     "model": "bge-m3",
-    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (all 363 questions; checked by 5-fold cross-validation)",
     "points": [
       {
         "score": 0.344,
         "probability": 0
       },
       {
-        "score": 0.4781,
+        "score": 0.4917,
         "probability": 0
       },
       {
         "score": 0.4938,
-        "probability": 0.1
+        "probability": 0.1667
       },
       {
-        "score": 0.5276,
-        "probability": 0.1
+        "score": 0.507,
+        "probability": 0.1667
       },
       {
-        "score": 0.5288,
-        "probability": 0.2
+        "score": 0.5084,
+        "probability": 0.1875
       },
       {
-        "score": 0.5679,
-        "probability": 0.2
+        "score": 0.5542,
+        "probability": 0.1875
+      },
+      {
+        "score": 0.5552,
+        "probability": 0.2308
+      },
+      {
+        "score": 0.5685,
+        "probability": 0.2308
       },
       {
         "score": 0.5691,
-        "probability": 0.6897
+        "probability": 0.6667
       },
       {
-        "score": 0.633,
-        "probability": 0.6897
+        "score": 0.5783,
+        "probability": 0.6667
       },
       {
-        "score": 0.6346,
-        "probability": 0.7
+        "score": 0.5788,
+        "probability": 0.681
       },
       {
         "score": 0.6399,
-        "probability": 0.7
+        "probability": 0.681
       },
       {
-        "score": 0.6406,
-        "probability": 0.8846
+        "score": 0.6403,
+        "probability": 0.8462
       },
       {
-        "score": 0.6695,
-        "probability": 0.8846
+        "score": 0.6613,
+        "probability": 0.8462
       },
       {
-        "score": 0.6722,
+        "score": 0.6738,
+        "probability": 0.9231
+      },
+      {
+        "score": 0.6747,
+        "probability": 0.9655
+      },
+      {
+        "score": 0.6925,
+        "probability": 0.9655
+      },
+      {
+        "score": 0.7742,
         "probability": 1
+      }
+    ],
+    "bands": [
+      {
+        "probability": 0,
+        "n": 31,
+        "low": 0,
+        "high": 0.1103
       },
       {
-        "score": 0.7483,
-        "probability": 1
+        "probability": 0.1667,
+        "n": 6,
+        "low": 0.0301,
+        "high": 0.5635
+      },
+      {
+        "probability": 0.1875,
+        "n": 32,
+        "low": 0.0889,
+        "high": 0.3531
+      },
+      {
+        "probability": 0.2308,
+        "n": 13,
+        "low": 0.0818,
+        "high": 0.5026
+      },
+      {
+        "probability": 0.6667,
+        "n": 18,
+        "low": 0.4375,
+        "high": 0.8372
+      },
+      {
+        "probability": 0.681,
+        "n": 116,
+        "low": 0.5916,
+        "high": 0.7589
+      },
+      {
+        "probability": 0.8462,
+        "n": 39,
+        "low": 0.7027,
+        "high": 0.9275
+      },
+      {
+        "probability": 0.9231,
+        "n": 26,
+        "low": 0.7586,
+        "high": 0.9786
+      },
+      {
+        "probability": 0.9655,
+        "n": 29,
+        "low": 0.8282,
+        "high": 0.9939
+      },
+      {
+        "probability": 1,
+        "n": 53,
+        "low": 0.9324,
+        "high": 1
       }
     ]
   },
   "qwen3-embedding:0.6b": {
     "model": "qwen3-embedding:0.6b",
-    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (all 363 questions; checked by 5-fold cross-validation)",
     "points": [
       {
-        "score": 0.2718,
+        "score": 0.2431,
         "probability": 0
       },
       {
@@ -160,76 +350,118 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
       },
       {
         "score": 0.424,
-        "probability": 0.2857
+        "probability": 0.1667
+      },
+      {
+        "score": 0.4593,
+        "probability": 0.1667
+      },
+      {
+        "score": 0.4603,
+        "probability": 0.4545
       },
       {
         "score": 0.4752,
-        "probability": 0.2857
+        "probability": 0.4545
       },
       {
-        "score": 0.4793,
-        "probability": 0.5
+        "score": 0.4778,
+        "probability": 0.5789
       },
       {
-        "score": 0.5051,
-        "probability": 0.5
-      },
-      {
-        "score": 0.5128,
-        "probability": 0.5556
-      },
-      {
-        "score": 0.5234,
-        "probability": 0.5556
+        "score": 0.5273,
+        "probability": 0.5789
       },
       {
         "score": 0.5281,
-        "probability": 0.5926
+        "probability": 0.7
       },
       {
-        "score": 0.5649,
-        "probability": 0.5926
+        "score": 0.5657,
+        "probability": 0.7
       },
       {
-        "score": 0.565,
-        "probability": 0.8
-      },
-      {
-        "score": 0.5697,
-        "probability": 0.8
-      },
-      {
-        "score": 0.5712,
-        "probability": 0.8696
+        "score": 0.5666,
+        "probability": 0.8246
       },
       {
         "score": 0.6004,
-        "probability": 0.8696
+        "probability": 0.8246
       },
       {
         "score": 0.6005,
-        "probability": 0.9737
+        "probability": 0.9437
       },
       {
         "score": 0.6533,
-        "probability": 0.9737
+        "probability": 0.9437
       },
       {
-        "score": 0.6539,
+        "score": 0.6538,
         "probability": 1
       },
       {
-        "score": 0.7206,
+        "score": 0.8199,
         "probability": 1
+      }
+    ],
+    "bands": [
+      {
+        "probability": 0,
+        "n": 44,
+        "low": 0,
+        "high": 0.0803
+      },
+      {
+        "probability": 0.1667,
+        "n": 12,
+        "low": 0.047,
+        "high": 0.448
+      },
+      {
+        "probability": 0.4545,
+        "n": 11,
+        "low": 0.2127,
+        "high": 0.7199
+      },
+      {
+        "probability": 0.5789,
+        "n": 38,
+        "low": 0.4219,
+        "high": 0.7215
+      },
+      {
+        "probability": 0.7,
+        "n": 60,
+        "low": 0.5749,
+        "high": 0.801
+      },
+      {
+        "probability": 0.8246,
+        "n": 57,
+        "low": 0.7063,
+        "high": 0.9018
+      },
+      {
+        "probability": 0.9437,
+        "n": 71,
+        "low": 0.8639,
+        "high": 0.9779
+      },
+      {
+        "probability": 1,
+        "n": 70,
+        "low": 0.948,
+        "high": 1
       }
     ]
   },
   "voyage-4 + claude-haiku-5-5": {
     "model": "voyage-4 + claude-haiku-5-5",
-    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (all 363 questions; checked by 5-fold cross-validation)",
     "points": [
       {
-        "score": 0.1838,
+        "score": 0.177,
         "probability": 0
       },
       {
@@ -237,44 +469,68 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
         "probability": 0
       },
       {
-        "score": 1.3883,
-        "probability": 0.5
+        "score": 1.3483,
+        "probability": 0.4
       },
       {
         "score": 1.4195,
-        "probability": 0.5
+        "probability": 0.4
       },
       {
-        "score": 1.4377,
-        "probability": 0.8
+        "score": 1.4294,
+        "probability": 0.75
+      },
+      {
+        "score": 1.471,
+        "probability": 0.75
+      },
+      {
+        "score": 1.4717,
+        "probability": 0.8125
       },
       {
         "score": 1.5341,
-        "probability": 0.8
+        "probability": 0.8125
       },
       {
-        "score": 1.561,
-        "probability": 0.875
+        "score": 1.541,
+        "probability": 0.8529
+      },
+      {
+        "score": 2.4489,
+        "probability": 0.8529
+      },
+      {
+        "score": 2.4499,
+        "probability": 0.8571
       },
       {
         "score": 2.4594,
-        "probability": 0.875
+        "probability": 0.8571
       },
       {
         "score": 2.4599,
-        "probability": 0.8919
+        "probability": 0.9114
       },
       {
-        "score": 2.551,
-        "probability": 0.8919
+        "score": 2.5528,
+        "probability": 0.9114
       },
       {
-        "score": 2.5523,
-        "probability": 0.9423
+        "score": 2.553,
+        "probability": 0.9529
+      },
+      {
+        "score": 2.6061,
+        "probability": 0.9529
+      },
+      {
+        "score": 2.6063,
+        "probability": 0.96
       },
       {
         "score": 2.6259,
-        "probability": 0.9423
+        "probability": 0.96
       },
       {
         "score": 2.6282,
@@ -284,27 +540,89 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
         "score": 2.7102,
         "probability": 1
       }
+    ],
+    "bands": [
+      {
+        "probability": 0,
+        "n": 64,
+        "low": 0,
+        "high": 0.0566
+      },
+      {
+        "probability": 0.4,
+        "n": 5,
+        "low": 0.1176,
+        "high": 0.7693
+      },
+      {
+        "probability": 0.75,
+        "n": 4,
+        "low": 0.3006,
+        "high": 0.9544
+      },
+      {
+        "probability": 0.8125,
+        "n": 16,
+        "low": 0.5699,
+        "high": 0.9341
+      },
+      {
+        "probability": 0.8529,
+        "n": 34,
+        "low": 0.6987,
+        "high": 0.9355
+      },
+      {
+        "probability": 0.8571,
+        "n": 7,
+        "low": 0.4869,
+        "high": 0.9743
+      },
+      {
+        "probability": 0.9114,
+        "n": 79,
+        "low": 0.8282,
+        "high": 0.9564
+      },
+      {
+        "probability": 0.9529,
+        "n": 85,
+        "low": 0.8852,
+        "high": 0.9815
+      },
+      {
+        "probability": 0.96,
+        "n": 25,
+        "low": 0.8046,
+        "high": 0.9929
+      },
+      {
+        "probability": 1,
+        "n": 44,
+        "low": 0.9197,
+        "high": 1
+      }
     ]
   },
   "qwen3-embedding:0.6b + claude-haiku-5-5": {
     "model": "qwen3-embedding:0.6b + claude-haiku-5-5",
-    "evaluationSet": "2026-10-22.3 (calibrate split)",
+    "evaluationSet": "2026-10-22.3 (all 363 questions; checked by 5-fold cross-validation)",
     "points": [
       {
-        "score": 0.2718,
+        "score": 0.2431,
         "probability": 0
       },
       {
-        "score": 1.4665,
+        "score": 1.4574,
         "probability": 0
       },
       {
-        "score": 1.4793,
-        "probability": 0.25
+        "score": 1.4657,
+        "probability": 0.4
       },
       {
         "score": 1.551,
-        "probability": 0.25
+        "probability": 0.4
       },
       {
         "score": 1.5518,
@@ -316,27 +634,93 @@ export const CALIBRATION_TABLES: Record<string, CalibrationTable> = {
       },
       {
         "score": 1.5584,
-        "probability": 0.7111
+        "probability": 0.7321
       },
       {
-        "score": 2.5627,
-        "probability": 0.7111
+        "score": 2.5273,
+        "probability": 0.7321
       },
       {
-        "score": 2.5629,
-        "probability": 0.9
+        "score": 2.5281,
+        "probability": 0.8372
+      },
+      {
+        "score": 2.5657,
+        "probability": 0.8372
+      },
+      {
+        "score": 2.5666,
+        "probability": 0.8857
       },
       {
         "score": 2.5943,
-        "probability": 0.9
+        "probability": 0.8857
       },
       {
-        "score": 2.5955,
+        "score": 2.5948,
+        "probability": 0.9756
+      },
+      {
+        "score": 2.6291,
+        "probability": 0.9756
+      },
+      {
+        "score": 2.6307,
         "probability": 1
       },
       {
-        "score": 2.7206,
+        "score": 2.8199,
         "probability": 1
+      }
+    ],
+    "bands": [
+      {
+        "probability": 0,
+        "n": 71,
+        "low": 0,
+        "high": 0.0513
+      },
+      {
+        "probability": 0.4,
+        "n": 15,
+        "low": 0.1982,
+        "high": 0.6425
+      },
+      {
+        "probability": 0.6667,
+        "n": 3,
+        "low": 0.2077,
+        "high": 0.9385
+      },
+      {
+        "probability": 0.7321,
+        "n": 56,
+        "low": 0.6041,
+        "high": 0.8304
+      },
+      {
+        "probability": 0.8372,
+        "n": 43,
+        "low": 0.7003,
+        "high": 0.9188
+      },
+      {
+        "probability": 0.8857,
+        "n": 35,
+        "low": 0.7405,
+        "high": 0.9546
+      },
+      {
+        "probability": 0.9756,
+        "n": 41,
+        "low": 0.874,
+        "high": 0.9957
+      },
+      {
+        "probability": 1,
+        "n": 99,
+        "low": 0.9626,
+        "high": 1
       }
     ]
   }

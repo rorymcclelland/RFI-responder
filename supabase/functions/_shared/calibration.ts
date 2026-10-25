@@ -14,6 +14,11 @@ export interface CalibrationTable {
   evaluationSet: string;
   /** Increasing scores with non-decreasing probabilities. */
   points: { score: number; probability: number }[];
+  /**
+   * Sprint 8 (S8-3): each step of the fit, with how many evaluation questions it rests on and a 95%
+   * interval for the share that had the right entry. Shown in the confidence tooltip.
+   */
+  bands?: { probability: number; n: number; low: number; high: number }[];
 }
 
 /**

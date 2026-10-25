@@ -1,4 +1,6 @@
 /** Calibration maths for S1-6 (pure functions, unit-tested). */
+import { calibratedConfidence } from '../supabase/functions/_shared/calibration';
+import { wilson } from './intervals';
 
 export interface XY { x: number; y: number }
 
@@ -72,3 +74,112 @@ export function usableForCalibration<T extends { topScore: number | null; unread
   const usable = rows.filter((r) => !r.unreadable && typeof r.topScore === 'number' && Number.isFinite(r.topScore)) as (T & { topScore: number })[];
   return { usable, dropped: rows.length - usable.length };
 }
+
+// ─── Sprint 8 (S8-2, F-16): cross-validation, leave-one-out, and bands for the tooltip ────────────
+
+
+export interface CalRow { id: string; kind: string; topScore: number; topIsGold: boolean }
+
+/** Shuffle with a seed (mulberry32 then Fisher-Yates), so folds repeat. */
+function seededShuffle<T>(xs: T[], seed: number): T[] {
+  let a = seed >>> 0;
+  const next = () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * k folds, stratified: each stratum (for example question kind and split) is shuffled and dealt
+ * round the folds in turn, so every fold holds near misses, which are few (33 of 363).
+ */
+export function stratifiedFolds<T>(rows: T[], k: number, stratum: (r: T) => string, seed: number): T[][] {
+  const folds: T[][] = Array.from({ length: k }, () => []);
+  const groups = new Map<string, T[]>();
+  for (const r of rows) groups.set(stratum(r), [...(groups.get(stratum(r)) ?? []), r]);
+  let turn = 0;
+  for (const key of [...groups.keys()].sort()) {
+    for (const r of seededShuffle(groups.get(key)!, seed)) folds[turn++ % k].push(r);
+  }
+  return folds;
+}
+
+/** Fit breakpoints on some rows. */
+export function fitTable(rows: CalRow[], model: string, evaluationSet: string) {
+  return { model, evaluationSet, points: toBreakpoints(isotonicFit(rows.map((r) => ({ x: r.topScore, y: r.topIsGold ? 1 : 0 })))) };
+}
+
+const confidenceUnder = (table: ReturnType<typeof fitTable>) => (r: CalRow) =>
+  calibratedConfidence(r.topScore, table.model, { [table.model]: table }) ?? 0;
+
+export interface FoldResult { n: number; ece: number; nearMisses: number; nearAtBulk: number }
+
+/**
+ * Each question predicted by a table fitted without its fold. Returns every out-of-fold prediction
+ * and, per fold, its calibration error and near misses at or above the bulk line.
+ */
+export function crossValidate<T extends CalRow>(rows: T[], k: number, stratum: (r: T) => string, seed: number, bulkLine = 0.8) {
+  const folds = stratifiedFolds(rows, k, stratum, seed);
+  const predictions: { row: T; p: number }[] = [];
+  const results: FoldResult[] = folds.map((held, i) => {
+    const train = folds.filter((_, j) => j !== i).flat();
+    const conf = confidenceUnder(fitTable(train, 'cv', 'cv'));
+    const preds = held.map((row) => ({ row, p: conf(row) }));
+    predictions.push(...preds);
+    const near = preds.filter((x) => x.row.kind === 'near-miss');
+    return {
+      n: held.length,
+      ece: expectedCalibrationError(preds.map((x) => ({ p: x.p, correct: x.row.topIsGold }))),
+      nearMisses: near.length,
+      nearAtBulk: near.filter((x) => x.p >= bulkLine).length,
+    };
+  });
+  return { predictions, folds: results };
+}
+
+/**
+ * The fit on every question, then again without each question in turn: how many near misses
+ * reach the bulk line, and the largest change a single question makes (the F-16 symptom).
+ */
+export function leaveOneOut(rows: CalRow[], bulkLine = 0.8): { full: number; largestChange: number; mostInfluential: string | null } {
+  const count = (rs: CalRow[]) => {
+    const conf = confidenceUnder(fitTable(rs, 'loo', 'loo'));
+    return rs.filter((r) => r.kind === 'near-miss' && conf(r) >= bulkLine).length;
+  };
+  const full = count(rows);
+  let largestChange = 0;
+  let mostInfluential: string | null = null;
+  for (const r of rows) {
+    const change = Math.abs(count(rows.filter((x) => x !== r)) - full);
+    if (change > largestChange) { largestChange = change; mostInfluential = r.id; }
+  }
+  return { full, largestChange, mostInfluential };
+}
+
+export interface CalibrationBand { probability: number; n: number; low: number; high: number }
+
+/**
+ * The steps of the fit, with how many evaluation questions each rests on and a 95% Wilson interval
+ * for the share that had the right entry (S8-3: shown in the confidence tooltip).
+ */
+export function calibrationBands(points: XY[]): CalibrationBand[] {
+  const fit = isotonicFit(points);
+  const sorted = [...points].sort((a, b) => a.x - b.x);
+  const bands: { probability: number; n: number; k: number }[] = [];
+  fit.forEach((f, i) => {
+    const last = bands[bands.length - 1];
+    if (last && Math.abs(last.probability - f.y) < 1e-12) { last.n += 1; last.k += sorted[i].y; }
+    else bands.push({ probability: f.y, n: 1, k: sorted[i].y });
+  });
+  return bands.map((b) => ({ probability: round(b.probability), n: b.n, ...roundInterval(wilson(Math.round(b.k), b.n)) }));
+}
+const roundInterval = (i: { low: number; high: number }) => ({ low: round(i.low), high: round(i.high) });
