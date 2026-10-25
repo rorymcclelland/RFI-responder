@@ -510,6 +510,24 @@ An independent security review found no high or medium issues and four low ones 
 
 **Ranked at the Sprint 7 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-35 duplicate catch rate after the threshold rise. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 5. F-20 rerankers (needs a Voyage payment method; the bulk rule for a reranker is now set). 6. F-34 review during processing (fails safe). 7. F-8 leaked-password protection, with a hosted sprint. 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
 
+## Sprint 11: what reading the code turned up (confirmed by Rory 25 October 2026; refined and answered the same day)
+
+Refinement: `docs/refinement/sprint-11.md`.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S11-1 | A change after an export is recorded, and the export recorded again (Rory, Q1) | F-42 | Ready, Sprint 11 |
+| S11-2 | No question is matched against an incomplete index without saying so; such questions are held from bulk approval | F-43 | Ready, Sprint 11 |
+| S11-3 | Local mode is calibrated: the Ollama default follows decision 0006 | F-55 | Ready, Sprint 11 |
+| S11-4 | Edge Function limits and errors say what happened | F-44, F-45, F-46 | Ready, Sprint 11 |
+| S11-5 | Old usage is deleted as stated | F-47 | Ready, Sprint 11 |
+| S11-6 | Unpriced usage is visible; rerankers priced from the published page | F-48 | Ready, Sprint 11 |
+| S11-7 | Admin changes all audited; assignments created as intended; empty search path | F-49, F-50, F-51 | Ready, Sprint 11 |
+| S11-8 | Configuration rows allowed in migrations, dated and sourced; sample data stays out | F-52 | Ready, Sprint 11 |
+| S11-9 | An audit-log screen for admins | F-53 | Ready, Sprint 11 |
+| S11-10 | Every setting on the governance page; who skipped a question is recorded | F-54 | Ready, Sprint 11 |
+| S11-11 | The development server on 127.0.0.1; a readable breadcrumb | F-56, BUG-33 | Ready, Sprint 11 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
