@@ -13,6 +13,7 @@
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { chooseThreshold, duplicateStats, SWEEP } from './duplicates-sweep';
 import { newestReport, reportBase, ROOT } from './lib';
 
 const MAX_WRONG = 0.02;
@@ -34,32 +35,30 @@ const lines = [
   '|---|---|---|---|---|',
 ];
 const thresholds: Record<string, number> = {};
+const sweep: string[] = [];
 
 for (const method of [...new Set(data.results.map((r) => r.method))]) {
   // An unreadable check never supersedes in the app (no verdict); left out rather than counted (Sprint 6 review).
   const rows = data.results.filter((r) => r.method === method && !r.unreadable);
   const embedding = method.split(' + ')[0];
-  const answerable = rows.filter((r) => r.kind === 'paraphrase' || r.kind === 'translation');
-  const stats = (t: number, judge: boolean) => {
-    const sup = (r: Row) => r.similarity >= t && (!judge || r.verdict === 'yes' || r.verdict === 'partly');
-    return {
-      wrong: rows.filter((r) => sup(r) && !r.topIsGold).length / rows.length,
-      caught: answerable.filter((r) => sup(r) && r.topIsGold).length / answerable.length,
-    };
-  };
-  let chosen = 1;
-  for (let t = 0.3; t <= 0.95; t = Math.round((t + 0.01) * 100) / 100) {
-    if (stats(t, true).wrong <= MAX_WRONG) {
-      chosen = t;
-      break;
-    }
-  }
+  const chosen = chooseThreshold(rows, MAX_WRONG, ['yes', 'partly']);
   thresholds[embedding] = chosen;
-  const withJudge = stats(chosen, true);
-  const without = stats(chosen, false);
-  lines.push(`| ${embedding} | ${chosen.toFixed(2)} | ${pct(withJudge.wrong)} | ${pct(withJudge.caught)} | ${pct(without.wrong)}, ${pct(without.caught)} |`);
+  const withJudge = duplicateStats(rows, chosen, ['yes', 'partly']);
+  const without = duplicateStats(rows, chosen, null);
+  // Sprint 9 (S9-2, F-35): what a different threshold, or "yes" alone, would trade.
+  for (const t of SWEEP) {
+    const a = duplicateStats(rows, t, ['yes', 'partly']);
+    const y = duplicateStats(rows, t, ['yes']);
+    sweep.push(`| ${embedding} | ${t.toFixed(2)} | ${pct(a.wrongRate)} | ${pct(a.caughtRate)} | ${pct(y.wrongRate)} | ${pct(y.caughtRate)} |`);
+  }
+  lines.push(`| ${embedding} | ${chosen.toFixed(2)} | ${pct(withJudge.wrongRate)} | ${pct(withJudge.caughtRate)} | ${pct(without.wrongRate)}, ${pct(without.caughtRate)} |`);
 }
-lines.push('', 'A question whose similarity is below the threshold is learned as a new entry beside the existing ones, so a missed duplicate costs a duplicate entry, not lost knowledge.', '');
+lines.push('', 'A question whose similarity is below the threshold is learned as a new entry beside the existing ones, so a missed duplicate costs a duplicate entry, not lost knowledge.', '',
+  '## Other thresholds (Sprint 9, F-35)', '',
+  'Every threshold that catches more real duplicates also makes more wrong supersessions, past the bar; requiring "yes" alone does not change that. The 53% catch rate is accepted as a residual (product owner, Sprint 9).', '',
+  '| Embedding | Threshold | Yes or partly: wrong | Yes or partly: caught | Yes only: wrong | Yes only: caught |',
+  '|---|---|---|---|---|---|',
+  ...sweep, '');
 
 writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
 writeFileSync(join(ROOT, 'supabase/functions/_shared/duplicate-thresholds.json'), JSON.stringify({ evaluationSet: data.setVersion, maxWrong: MAX_WRONG, thresholds }, null, 2) + '\n');
