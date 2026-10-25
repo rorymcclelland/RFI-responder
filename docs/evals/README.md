@@ -31,7 +31,7 @@ What has been measured, on what, and the latest figure for each measure. A test 
 ## What each evaluation answers
 
 | Evaluation | Question | Command |
-|---|---|---|---|
+|---|---|---|
 | Retrieval | Does the right entry come back in the top five? | `npm run eval:retrieval` |
 | Answerability | Can the checker tell "the entries answer this" from "the entries are only on the same topic"? | `npm run eval:answerability` |
 | Calibration | When the app says 80%, is it right about 80% of the time? Do near misses ever reach the bulk line? | `npm run eval:calibrate` |

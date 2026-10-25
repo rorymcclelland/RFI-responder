@@ -81,21 +81,23 @@ export function bulkHoldReason(q: {
   return why && `Not included in bulk approval: ${why}. Accept it on its own if the draft is right.`;
 }
 
-interface BandedTable { bands?: { probability: number; n: number; low: number; high: number }[] }
+interface BandedTable { evaluationSet: string; bands?: { probability: number; n: number; low: number; high: number }[] }
 
 /**
  * Sprint 8 (S8-3): how precise a calibrated confidence is. The step of the calibration fit nearest
- * the confidence, with how many evaluation questions it rests on and a 95% interval for the share
- * that had the right entry. Null when there is no confidence, or no banded table for the models.
+ * the confidence: how many evaluation questions it rests on, how many of those had the right entry,
+ * and a 95% interval for that rate. Null when there is no confidence or no banded table for the
+ * models, or when the question was scored with a different table (security review, Sprint 8: its
+ * figure would sit next to another table's range).
  */
 export function confidenceRange(
-  confidence: number | null, embeddingModel: string | null, judgeModel: string | null,
+  confidence: number | null, embeddingModel: string | null, judgeModel: string | null, calibrationSet: string | null,
   tables: Record<string, BandedTable>,
 ): string | null {
   if (confidence === null || !embeddingModel) return null;
-  const bands = tables[judgeModel ? `${embeddingModel} + ${judgeModel}` : embeddingModel]?.bands;
-  if (!bands?.length) return null;
-  const band = bands.reduce((best, b) => (Math.abs(b.probability - confidence) < Math.abs(best.probability - confidence) ? b : best));
-  const p = (x: number) => `${Math.round(x * 100)}%`;
-  return `Of evaluation questions scored like this, between ${p(band.low)} and ${p(band.high)} had the right entry (95% interval, ${band.n} question${band.n === 1 ? '' : 's'}).`;
+  const table = tables[judgeModel ? `${embeddingModel} + ${judgeModel}` : embeddingModel];
+  if (!table?.bands?.length || table.evaluationSet !== calibrationSet) return null;
+  const band = table.bands.reduce((best, b) => (Math.abs(b.probability - confidence) < Math.abs(best.probability - confidence) ? b : best));
+  const p = (x: number) => Math.round(x * 100);
+  return `${Math.round(band.probability * band.n)} of ${band.n} evaluation question${band.n === 1 ? '' : 's'} scored like this had the right entry (95% interval ${p(band.low)} to ${p(band.high)}%).`;
 }

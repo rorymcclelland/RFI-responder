@@ -4,7 +4,7 @@ A 95% interval for each figure in the evaluation summary: the range the figure c
 
 **What an interval does not cover.** The questions are synthetic, written by Claude and unreviewed by anyone outside the project. An interval measures the uncertainty from the sample size only; it says nothing about whether real questionnaires look like these.
 
-**Methods** (agreed with the product owner, Sprint 8). Wilson score intervals for proportions. A percentile bootstrap (2,000 resamples, seed 20261025) for calibration error and AUROC. Where items come in clusters (claims within a draft, questions within a document), resampling is by cluster; when there is no failure to resample, the Wilson interval over clusters is given instead, which is wider and so does not overstate certainty. Questions are treated as independent, although some are paraphrases or translations of the same knowledge-base entry.
+**Methods** (agreed with the product owner, Sprint 8). Wilson score intervals for proportions. A percentile bootstrap (2,000 resamples, seed 20261025) for calibration error and AUROC. Where items come in clusters (claims within a draft, questions within a document), resampling is by cluster; when there is no failure to resample, or failures in fewer than five clusters, the Wilson interval over clusters is given instead (or the wider of the two), so a single failure never narrows an interval. Questions are treated as independent, although some are paraphrases or translations of the same knowledge-base entry.
 
 | Measure | Figure | 95% interval | Method | Based on | Report |
 |---|---|---|---|---|---|
@@ -18,10 +18,10 @@ A 95% interval for each figure in the evaluation summary: the range the figure c
 | Questions whose confidence crossed the 80% bulk line across five runs | 1.7% | 0.6 to 4.8% | Wilson | 3 of 181 questions | `consistency-2026-10-23-sprint6.md` |
 | Pricing and legal questions gated (rules and classifier) | 100 of 100 (100.0%) | 96.3 to 100.0% | Wilson | 100 questions | `gates-2026-10-23.md` |
 | Lookalike questions wrongly gated | 7 of 70 (10.0%) | 4.9 to 19.2% | Wilson | 70 questions | `gates-2026-10-23.md` |
-| Faithfulness of drafts (claims supported by the cited entries) | 100.0% of 305 claims | 92.3 to 100.0% | Wilson over drafts (no unsupported claim to resample) | 305 claims in 46 drafts | `drafting-2026-10-23-sprint6.json` |
+| Faithfulness of drafts (claims supported by the cited entries) | 100.0% of 305 claims | 92.3 to 100.0% | Wilson over drafts (no failures to resample) | 305 claims in 46 drafts | `drafting-2026-10-23-sprint6.json` |
 | Right entry cited | 93.9% | 83.5 to 97.9% | Wilson | 46 of 49 answerable questions | `drafting-2026-10-23-sprint6.json` |
 | Near misses given no draft | 100.0% | 84.5 to 100.0% | Wilson | 21 of 21 near misses | `drafting-2026-10-23-sprint6.json` |
 | Wrong supersessions at the learning threshold (voyage-4, 0.55) | 1.9% | 0.9 to 3.9% | Wilson | 7 of 363 questions | `duplicates-2026-10-23-2.md` |
-| Word extraction recall, synthetic documents | 100.0% | 75.8 to 100.0% | Wilson over documents (no miss to resample) | 237 questions in 12 documents | `extraction-2026-10-23.json` |
-| Word extraction precision, synthetic documents | 100.0% | 75.8 to 100.0% | Wilson over documents (no miss to resample) | 237 questions in 12 documents | `extraction-2026-10-23.json` |
+| Word extraction recall, synthetic documents | 100.0% | 75.8 to 100.0% | Wilson over documents (no failures to resample) | 237 questions in 12 documents | `extraction-2026-10-23.json` |
+| Word extraction precision, synthetic documents | 100.0% | 75.8 to 100.0% | Wilson over documents (no failures to resample) | 237 questions in 12 documents | `extraction-2026-10-23.json` |
 | Red-team Word documents that changed the result | 0 of 4 | 0.0 to 49.0% | Wilson | 4 documents | `extraction-2026-10-23.md` |

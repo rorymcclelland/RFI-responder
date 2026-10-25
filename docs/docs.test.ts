@@ -78,7 +78,9 @@ describe('evaluations summary', () => {
     expect(found[0]).toBe(r[1]);
   });
   // Sprint 8, S8-1 test 5: each interval is the one the newest intervals report gives for that figure.
-  const intervalsReport = readdirSync(join(ROOT, 'docs/evals')).filter((f) => /^intervals-\d{4}-\d{2}-\d{2}(-[a-z0-9]+)?\.md$/.test(f)).sort().pop()!;
+  // Newest as eval/lib's newestReport orders them, so a same-day rerun (-2) counts as newer (security review, Sprint 8).
+  const intervalsReport = readdirSync(join(ROOT, 'docs/evals')).filter((f) => /^intervals-\d{4}-\d{2}-\d{2}(-[a-z0-9]+)?\.md$/.test(f))
+    .sort((a, b) => a.replace(/\.md$/, '').localeCompare(b.replace(/\.md$/, ''))).pop()!;
   const intervals = table(read(`docs/evals/${intervalsReport}`), 'Measure');
   it.each(rows.map((r) => [r[0], r]))('%s has the interval the intervals report gives for the same figure', (measure, r) => {
     const match = intervals.find((x) => x[0] === measure);
@@ -89,6 +91,14 @@ describe('evaluations summary', () => {
 
 describe.each(PAGES)('%s', (page) => {
   const text = read(page);
+  it('has tables GitHub can render: each delimiter row has as many cells as its header', () => {
+    // Security review, Sprint 8: a four-cell delimiter under a three-cell header stopped a table rendering.
+    const lines = text.split('\n');
+    const count = (l: string) => l.split('|').length - 2;
+    lines.forEach((l, i) => {
+      if (i > 0 && /^\|(\s*:?-+:?\s*\|)+\s*$/.test(l) && lines[i - 1].startsWith('|')) expect(count(l), `${page} line ${i + 1}`).toBe(count(lines[i - 1]));
+    });
+  });
   it('has Mermaid diagrams GitHub can parse: no semicolon inside a statement (it ends the statement)', () => {
     // Found on GitHub after publishing (Sprint 7): a semicolon in a sequence diagram's message cut it short.
     const blocks = [...text.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1]);

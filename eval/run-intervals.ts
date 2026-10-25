@@ -112,7 +112,7 @@ const proportion = (measure: string, figure: string, k: number, n: number, basis
   const n = drafts.reduce((a, c) => a + c.n, 0);
   const faith = clusteredProportion(drafts, { seed: SEED });
   rows.push({ measure: 'Faithfulness of drafts (claims supported by the cited entries)', figure: `${pct(k, n)} of ${n} claims`, interval: formatInterval(faith, 'percent'),
-    method: faith.method === 'bootstrap by cluster' ? 'Bootstrap by draft' : 'Wilson over drafts (no unsupported claim to resample)', basis: `${n} claims in ${drafts.length} drafts`, report });
+    method: faith.method.replace(/cluster(s?)/g, 'draft$1'), basis: `${n} claims in ${drafts.length} drafts`, report });
   const answerable = results.filter((r) => kind.get(r.id) !== 'near-miss');
   const cited = answerable.filter((r) => r.citesGold).length;
   proportion('Right entry cited', pct(cited, answerable.length), cited, answerable.length, `${cited} of ${answerable.length} answerable questions`, report);
@@ -128,7 +128,8 @@ const proportion = (measure: string, figure: string, k: number, n: number, basis
   const figure = tableCell(text, ['voyage-4', '0.55'], 'Wrong supersessions');
   const source = text.match(/From `([^`]+\.json)`/)?.[1];
   if (!source) throw new Error(`${report} does not name its source`);
-  const n = json<{ results: { method: string }[] }>(source).results.filter((r) => r.method === METHOD).length;
+  // The same questions run-duplicates counts: readable checks only (security review, Sprint 8).
+  const n = json<{ results: { method: string; unreadable?: boolean }[] }>(source).results.filter((r) => r.method === METHOD && !r.unreadable).length;
   const k = countFromPercent(figure, n);
   proportion('Wrong supersessions at the learning threshold (voyage-4, 0.55)', figure, k, n, `${k} of ${n} questions`, report);
 }
@@ -143,7 +144,7 @@ const proportion = (measure: string, figure: string, k: number, n: number, basis
     const n = clusters.reduce((a, c) => a + c.n, 0);
     const i = clusteredProportion(clusters, { seed: SEED });
     rows.push({ measure, figure: pct(k, n), interval: formatInterval(i, 'percent'),
-      method: i.method === 'bootstrap by cluster' ? 'Bootstrap by document' : 'Wilson over documents (no miss to resample)', basis: `${n} questions in ${docs.length} documents`, report });
+      method: i.method.replace(/cluster(s?)/g, 'document$1'), basis: `${n} questions in ${docs.length} documents`, report });
   }
   const md = read(newest('extraction', 'md'));
   const figure = tableCell(md, 'Red-team documents that changed the result', 'Result');
@@ -160,7 +161,7 @@ const lines = [
   '',
   '**What an interval does not cover.** The questions are synthetic, written by Claude and unreviewed by anyone outside the project. An interval measures the uncertainty from the sample size only; it says nothing about whether real questionnaires look like these.',
   '',
-  '**Methods** (agreed with the product owner, Sprint 8). Wilson score intervals for proportions. A percentile bootstrap (2,000 resamples, seed 20261025) for calibration error and AUROC. Where items come in clusters (claims within a draft, questions within a document), resampling is by cluster; when there is no failure to resample, the Wilson interval over clusters is given instead, which is wider and so does not overstate certainty. Questions are treated as independent, although some are paraphrases or translations of the same knowledge-base entry.',
+  '**Methods** (agreed with the product owner, Sprint 8). Wilson score intervals for proportions. A percentile bootstrap (2,000 resamples, seed 20261025) for calibration error and AUROC. Where items come in clusters (claims within a draft, questions within a document), resampling is by cluster; when there is no failure to resample, or failures in fewer than five clusters, the Wilson interval over clusters is given instead (or the wider of the two), so a single failure never narrows an interval. Questions are treated as independent, although some are paraphrases or translations of the same knowledge-base entry.',
   '',
   '| Measure | Figure | 95% interval | Method | Based on | Report |',
   '|---|---|---|---|---|---|',

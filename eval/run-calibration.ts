@@ -152,7 +152,7 @@ lines.push(
   '',
   'One table per model, fitted on both languages; checked separately. "Right answers at or above 80%" shows whether a correctly matched question in that language can ever reach the bulk-approval line.',
   '',
-  '| Model | Language | Test questions | Calibration error | Right answers at or above 80% (all) |',
+  '| Model | Language | Questions (out of fold) | Calibration error | Right answers at or above 80% (all) |',
   '|---|---|---|---|---|',
   ...perLanguage,
 );

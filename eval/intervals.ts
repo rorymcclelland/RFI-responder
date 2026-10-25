@@ -57,6 +57,7 @@ export function bootstrap<T>(items: T[], stat: (sample: T[]) => number, opts: Bo
  * together are not treated as independent. When no cluster has a failure (or none a success), every
  * resample gives the same figure and the interval would have no width, which is not true; the Wilson
  * interval over clusters is given instead, counting a cluster as a success only if all its items are.
+ * With failures in fewer than five clusters, the wider of the two is given (security review, Sprint 8).
  */
 export function clusteredProportion(clusters: { k: number; n: number }[], opts: BootstrapOptions = {}): MethodInterval {
   const allGood = clusters.every((c) => c.k === c.n);
@@ -65,7 +66,17 @@ export function clusteredProportion(clusters: { k: number; n: number }[], opts: 
     return { ...wilson(allGood ? clusters.length : 0, clusters.length), method: 'Wilson over clusters (no failures to resample)' };
   }
   const ratio = (s: { k: number; n: number }[]) => s.reduce((a, c) => a + c.k, 0) / s.reduce((a, c) => a + c.n, 0);
-  return { ...bootstrap(clusters, ratio, opts), method: 'bootstrap by cluster' };
+  const boot = bootstrap(clusters, ratio, opts);
+  // Security review, Sprint 8: with failures in only a few clusters, resampling rarely draws them and
+  // the interval would be narrower than with no failure at all. Below five, take the wider of the
+  // bootstrap and the Wilson interval over clusters, and always include the figure itself.
+  const failing = clusters.filter((c) => c.k < c.n).length;
+  if (failing < 5) {
+    const w = wilson(clusters.length - failing, clusters.length);
+    const point = ratio(clusters);
+    return { low: Math.min(boot.low, w.low, point), high: Math.max(boot.high, w.high, point), method: 'wider of bootstrap by cluster and Wilson over clusters (failures in fewer than 5 clusters)' };
+  }
+  return { ...boot, method: 'bootstrap by cluster' };
 }
 
 /** "0.0 to 10.4%" for proportions, "0.991 to 1.000" for statistics such as AUROC. */

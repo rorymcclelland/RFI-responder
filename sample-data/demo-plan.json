@@ -1,6 +1,6 @@
 {
   "version": "2026-10-25.1",
-  "note": "Synthetic demo responses (Sprint 7, S7-5; Sprint 8, S8-4 added A13 and A14, which the checker judged only \"partly\" answered at 85% in the Sprint 6 evaluation run, so the demo shows that hold). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
+  "note": "Synthetic demo responses (Sprint 7, S7-5; Sprint 8, S8-4 added A13 and A14, which the checker judged only \"partly\" answered in the Sprint 6 evaluation run (at 88% and 82% with the table of the time; 85% with the Sprint 8 table), so the demo shows that hold). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
   "responses": [
     {
       "key": "juniper",

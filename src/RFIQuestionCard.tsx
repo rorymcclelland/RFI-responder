@@ -393,7 +393,7 @@ export default function RFIQuestionCard({
             {[
               { label: 'Confidence', value: question.confidence, tip: question.confidence === null
                   ? 'Not calibrated: matching was keyword-only, the answerability check was unavailable, or there is no calibration table for the models in use. Bulk approval is not available for this question.'
-                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals). The set is small, so the top is shown as 99%+, never as certainty.${(() => { const r = confidenceRange(question.confidence, question.provenance.embeddingModel, question.provenance.judgeModel, CALIBRATION_TABLES); return r ? ` ${r}` : ''; })()}` },
+                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals). The set is small, so the top is shown as 99%+, never as certainty.${(() => { const r = confidenceRange(question.confidence, question.provenance.embeddingModel, question.provenance.judgeModel, question.provenance.calibrationSet, CALIBRATION_TABLES); return r ? ` ${r}` : ''; })()}` },
               { label: 'Similarity', value: question.retrievalScore, tip: 'Cosine similarity between the question and the best-matching entry (or the keyword score when matching was keyword-only). Not a probability.' },
             ].map((m) => {
               if (m.value === null) {

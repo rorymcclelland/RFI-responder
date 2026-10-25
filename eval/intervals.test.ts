@@ -36,12 +36,21 @@ describe('S8-1 test 2: the bootstrap repeats with a seed and contains the estima
 
 describe('S8-1 test 3: clustered figures', () => {
   it('give a wider interval than treating every item as independent', () => {
-    // 10 drafts of 10 claims; two drafts wholly wrong: failures come in clusters.
-    const clusters = Array.from({ length: 10 }, (_, i) => ({ k: i < 2 ? 0 : 10, n: 10 }));
+    // 30 drafts of 10 claims; six drafts wholly wrong: failures come in clusters.
+    const clusters = Array.from({ length: 30 }, (_, i) => ({ k: i < 6 ? 0 : 10, n: 10 }));
     const c = clusteredProportion(clusters, { seed: 3 });
-    const flat = wilson(80, 100);
+    const flat = wilson(240, 300);
     expect(c.method).toBe('bootstrap by cluster');
     expect(c.high - c.low).toBeGreaterThan(flat.high - flat.low);
+  });
+  it('security review, Sprint 8: one failure never gives a narrower interval than none', () => {
+    const none = clusteredProportion(Array.from({ length: 46 }, () => ({ k: 5, n: 5 })), { seed: 3 });
+    const one = clusteredProportion(Array.from({ length: 46 }, (_, i) => ({ k: i === 0 ? 4 : 5, n: 5 })), { seed: 3 });
+    expect(one.high - one.low).toBeGreaterThanOrEqual(none.high - none.low - 1e-9);
+    expect(one.method).toBe('wider of bootstrap by cluster and Wilson over clusters (failures in fewer than 5 clusters)');
+    const point = 229 / 230; // 46 drafts of 5 claims, one claim unsupported
+    expect(one.low).toBeLessThanOrEqual(point);
+    expect(one.high).toBeGreaterThanOrEqual(point);
   });
   it('with no failures, fall back to Wilson over clusters, since resampling would give no width', () => {
     const c = clusteredProportion(Array.from({ length: 46 }, () => ({ k: 5, n: 5 })), { seed: 3 });

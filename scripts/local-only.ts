@@ -11,11 +11,32 @@ export function isLocalUrl(url: string): boolean {
   return (u.protocol === 'http:' || u.protocol === 'https:') && LOCAL_HOSTS.has(u.hostname) && !u.username && !u.password;
 }
 
-/** VITE_SUPABASE_URL from the text of a .env file, or null. */
+/** Every VITE_SUPABASE_URL in the text of a .env file, in order (a later one wins in Vite). */
+export function supabaseUrlsFromEnv(envText: string): string[] {
+  return envText.split(/\r?\n/)
+    .map((raw) => raw.trim().match(/^VITE_SUPABASE_URL\s*=\s*(.*)$/))
+    .filter((m): m is RegExpMatchArray => !!m)
+    .map((m) => m[1].trim().replace(/^(['"])(.*)\1$/, '$2'));
+}
+
+/** The first VITE_SUPABASE_URL in the text of a .env file, or null. */
 export function supabaseUrlFromEnv(envText: string): string | null {
-  for (const raw of envText.split(/\r?\n/)) {
-    const m = raw.trim().match(/^VITE_SUPABASE_URL\s*=\s*(.*)$/);
-    if (m) return m[1].trim().replace(/^(['"])(.*)\1$/, '$2');
-  }
-  return null;
+  return supabaseUrlsFromEnv(envText)[0] ?? null;
+}
+
+/** Hosts the app loads that carry no credentials: the Inter font (src/index.css). */
+const FONT_HOSTS = new Set(['fonts.googleapis.com', 'fonts.gstatic.com']);
+
+/**
+ * Whether the screenshot browser may make a request (security review, Sprint 8): only to this
+ * machine, inline data, or the font hosts. Anything else is refused by the browser itself, so a
+ * hosted Supabase address from any source (.env, .env.local, the shell) never receives the password.
+ */
+export function allowedRequest(url: string): boolean {
+  if (url.startsWith('data:') || url.startsWith('blob:')) return true;
+  if (isLocalUrl(url)) return true;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' && FONT_HOSTS.has(u.hostname);
+  } catch { return false; }
 }

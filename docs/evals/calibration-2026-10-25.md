@@ -32,7 +32,7 @@ Calibration error; near misses at or above 80% of near misses in the fold.
 
 One table per model, fitted on both languages; checked separately. "Right answers at or above 80%" shows whether a correctly matched question in that language can ever reach the bulk-approval line.
 
-| Model | Language | Test questions | Calibration error | Right answers at or above 80% (all) |
+| Model | Language | Questions (out of fold) | Calibration error | Right answers at or above 80% (all) |
 |---|---|---|---|---|
 | voyage-4 | en | 254 | 0.068 | 130 of 174 |
 | voyage-4 | ja | 109 | 0.062 | 94 of 100 |

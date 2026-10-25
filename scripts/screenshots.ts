@@ -12,7 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium, type Browser, type Page } from 'playwright';
-import { isLocalUrl, supabaseUrlFromEnv } from './local-only';
+import { allowedRequest, isLocalUrl, supabaseUrlsFromEnv } from './local-only';
 
 const BASE = process.env.APP_URL ?? 'http://localhost:5173';
 if (!isLocalUrl(BASE)) {
@@ -20,10 +20,15 @@ if (!isLocalUrl(BASE)) {
   process.exit(1);
 }
 // Sprint 8 (F-39): the app could be local but pointed at a hosted Supabase; refuse that too.
-const ENV = join(process.cwd(), '.env');
-const SUPABASE = existsSync(ENV) ? supabaseUrlFromEnv(readFileSync(ENV, 'utf8')) : null;
-if (!SUPABASE || !isLocalUrl(SUPABASE)) {
-  console.error(`Refusing to sign in: .env points the app at ${SUPABASE ?? 'no Supabase address'}, not a local Supabase.`);
+// Every place Vite reads the address from (security review, Sprint 8), and the browser below refuses
+// any request that is not local in any case.
+const SUPABASE = [
+  ...['.env', '.env.local'].flatMap((f) => (existsSync(join(process.cwd(), f)) ? supabaseUrlsFromEnv(readFileSync(join(process.cwd(), f), 'utf8')) : [])),
+  ...(process.env.VITE_SUPABASE_URL ? [process.env.VITE_SUPABASE_URL] : []),
+];
+const notLocal = SUPABASE.filter((u) => !isLocalUrl(u));
+if (SUPABASE.length === 0 || notLocal.length) {
+  console.error(`Refusing to sign in: the app's Supabase address is ${notLocal[0] ?? 'not set'}, not a local Supabase.`);
   process.exit(1);
 }
 const PASSWORD = process.env.SEED_PASSWORD ?? 'LocalDev2026pw';
@@ -35,7 +40,9 @@ const layout: { view: string; scrollWidth: number; clientWidth: number; fits: bo
 
 /** A fresh browser session for each user, so no sign-out is needed between them. */
 async function signIn(browser: Browser, email: string): Promise<Page> {
-  const page = await (await browser.newContext({ viewport: WIDE })).newPage();
+  const context = await browser.newContext({ viewport: WIDE });
+  await context.route('**/*', (route) => (allowedRequest(route.request().url()) ? route.continue() : route.abort('blockedbyclient')));
+  const page = await context.newPage();
   await page.goto(BASE);
   await page.locator('input[type=email]').fill(email);
   await page.locator('input[type=password]').fill(PASSWORD);
