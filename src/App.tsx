@@ -447,7 +447,8 @@ export default function App() {
                 <ChevronLeft size={14} /> Opportunities
               </button>
               <span className="text-ink-200">/</span>
-              <span className="font-semibold text-ink-800 truncate max-w-[180px]">{activeOpportunity.name}</span>
+              {/* BUG-33: never squeezed to a letter beside Help; the full name on hover. */}
+              <span className="font-semibold text-ink-800 truncate min-w-[7rem] max-w-[180px]" title={activeOpportunity.name}>{activeOpportunity.name}</span>
             </div>
           )}
 

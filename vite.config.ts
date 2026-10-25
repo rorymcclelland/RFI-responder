@@ -5,8 +5,11 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Sprint 11 (F-56): the address the README, Supabase's site_url and the screenshot script use.
+    // Vite's default, localhost, can resolve to ::1 and not answer on 127.0.0.1.
+    host: '127.0.0.1',
     // Optional same-origin route to the local Supabase API. Point VITE_SUPABASE_URL at
-    // http://localhost:5173/supabase to use it. Some embedded browsers (such as the
+    // http://127.0.0.1:5173/supabase to use it. Some embedded browsers (such as the
     // Claude desktop app's browser pane) block a page from calling another local port;
     // ordinary browsers do not need this. Development server only.
     proxy: {

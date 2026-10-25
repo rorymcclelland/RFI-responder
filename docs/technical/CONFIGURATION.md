@@ -10,7 +10,7 @@ Copied from [`.env.example`](../../.env.example). Vite builds these into the Jav
 
 | Variable | Default | Read by | Notes |
 |---|---|---|---|
-| `VITE_SUPABASE_URL` | None (required) | [`src/lib/config.ts`](../../src/lib/config.ts) | The Supabase API. Locally `http://127.0.0.1:54321`, or `http://localhost:5173/supabase` through the development server's proxy for browsers that block another local port ([`vite.config.ts`](../../vite.config.ts)). Also read by the screenshot script, which allows requests only to it and to the app |
+| `VITE_SUPABASE_URL` | None (required) | [`src/lib/config.ts`](../../src/lib/config.ts) | The Supabase API. Locally `http://127.0.0.1:54321`, or `http://127.0.0.1:5173/supabase` through the development server's proxy for browsers that block another local port ([`vite.config.ts`](../../vite.config.ts)). Also read by the screenshot script, which allows requests only to it and to the app |
 | `VITE_SUPABASE_ANON_KEY` | None (required) | [`src/lib/config.ts`](../../src/lib/config.ts) | The public "anon" key. It is public by design; row-level security decides what each signed-in person can do with it ([Data model and access](DATA-MODEL.md)) |
 
 The app shows which is missing, instead of starting, if either is empty. It also refuses to start if `VITE_SUPABASE_ANON_KEY` holds the service-role key, which would bypass every access rule.
@@ -47,7 +47,7 @@ Read from the shell, and by the evaluation scripts also from `.env` in `supabase
 | `VOYAGE_API_KEY` | None | The retrieval, calibration and demo evaluations | As above |
 | `DRAFT_MODEL` | `claude-haiku-5-5` | [`eval/pipeline.ts`](../../eval/pipeline.ts) | As above |
 | `OLLAMA_URL_HOST` | `http://localhost:11434` | [`eval/run-retrieval.ts`](../../eval/run-retrieval.ts) | Ollama as seen from your PC rather than from Docker |
-| `APP_URL` | `http://localhost:5173` | [`scripts/screenshots.ts`](../../scripts/screenshots.ts) | The running app to photograph. Must be a local address |
+| `APP_URL` | `http://127.0.0.1:5173` | [`scripts/screenshots.ts`](../../scripts/screenshots.ts) | The running app to photograph. Must be a local address |
 | `SEED_PASSWORD` | The seed users' local password | [`scripts/screenshots.ts`](../../scripts/screenshots.ts) | The password of the seed users in [`supabase/seed.sql`](../../supabase/seed.sql); for local use only |
 | `DB_TEST_URL` | `postgres://postgres@localhost:5432/postgres` | [`supabase/tests/db/harness.ts`](../../supabase/tests/db/harness.ts) | A Postgres 16 superuser connection for `npm run test:db`. The tests drop and recreate a database called `rfi_test` on that server |
 

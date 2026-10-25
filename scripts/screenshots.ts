@@ -15,7 +15,7 @@ import { join } from 'node:path';
 import { chromium, type Browser, type Page } from 'playwright';
 import { allowedRequest, isLocalUrl, supabaseUrlsFromEnv } from './local-only';
 
-const BASE = process.env.APP_URL ?? 'http://localhost:5173';
+const BASE = process.env.APP_URL ?? 'http://127.0.0.1:5173';
 if (!isLocalUrl(BASE)) {
   console.error(`Refusing to sign in to ${BASE}: the seed users and their password exist only on a local install.`);
   process.exit(1);
