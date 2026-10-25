@@ -81,8 +81,9 @@ interface RpcClient {
  * Reserve work for a user; throws 429 when none is allowed and 503 when the check cannot run.
  * The reservation also holds an estimated cost against the monthly budget until it is settled.
  */
-export async function reserveQuota(db: RpcClient, userId: string, kind: 'questions' | 'embed' | 'extract', n: number, size?: number): Promise<{ allowed: number; reason: QuotaReason | null; reservation: string | null }> {
-  const { data, error } = await db.rpc('reserve_quota', { p_user: userId, p_kind: kind, p_n: n, ...(size === undefined ? {} : { p_size: size }) });
+export async function reserveQuota(db: RpcClient, userId: string, kind: 'questions' | 'embed' | 'extract', n: number, size?: number, opts: { all?: boolean } = {}): Promise<{ allowed: number; reason: QuotaReason | null; reservation: string | null }> {
+  // Sprint 11 (S11-4, F-44): `all` reserves all n or nothing, so a refused request uses none of the day.
+  const { data, error } = await db.rpc('reserve_quota', { p_user: userId, p_kind: kind, p_n: n, ...(size === undefined ? {} : { p_size: size }), ...(opts.all ? { p_all: true } : {}) });
   const r = data as { allowed?: number; reason?: QuotaReason | null; reservation?: string | null } | null;
   if (error || !r || typeof r.allowed !== 'number') {
     throw new HttpError('Usage could not be checked, so nothing was processed. Try again shortly.', 503);

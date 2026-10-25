@@ -1,6 +1,6 @@
 // Sprint 11. Test numbers refer to docs/refinement/sprint-11.md. Role matrix: decision 0003.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
+import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
 import { one, question, response, session } from './fixtures';
 
 let owner: TestUser;
@@ -250,5 +250,25 @@ describe('S11-2 a question matched against an incomplete index (F-43)', () => {
       await q(`SELECT record_export($1)`, [s]);
       expect((await q(`SELECT learn_outcome FROM rfi_questions WHERE id = $1`, [id])).rows[0].learn_outcome).toBe('added');
     });
+  });
+});
+
+describe('S11-4 a refused embedding request uses none of the day (F-44)', () => {
+  it('1. all or nothing: over the remaining cap, nothing is reserved and the count is unchanged', async () => {
+    const u = await createUser();
+    await asSuperuser(`UPDATE ai_settings SET daily_embed_cap = 5`);
+    try {
+      await asServiceRole(async (q) => {
+        const r = (await q(`SELECT reserve_quota($1, 'embed', 8, NULL, true) AS r`, [u.id])).rows[0].r as { allowed: number; reason: string; reservation: string | null };
+        expect(r).toMatchObject({ allowed: 0, reason: 'daily_embed', reservation: null });
+        const used = (await q(`SELECT embed_texts FROM ai_quota WHERE user_id = $1 AND day = current_date`, [u.id])).rows[0];
+        expect(used.embed_texts).toBe(0);
+        // The partial behaviour stays the default for batches.
+        const partial = (await q(`SELECT reserve_quota($1, 'embed', 8) AS r`, [u.id])).rows[0].r as { allowed: number };
+        expect(partial.allowed).toBe(5);
+      });
+    } finally {
+      await asSuperuser(`UPDATE ai_settings SET daily_embed_cap = 5000`);
+    }
   });
 });

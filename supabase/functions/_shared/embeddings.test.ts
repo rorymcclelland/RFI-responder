@@ -1,6 +1,6 @@
 // Sprint 1, story S1-2: embedding providers (test numbers from docs/refinement/sprint-1.md).
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_CHECKER, DEFAULT_EMBEDDING_MODEL, EMBEDDING_DIMENSION, EmbeddingError, providerFromEnv, voyageProvider, ollamaProvider } from './embeddings';
+import { DEFAULT_CHECKER, DEFAULT_EMBEDDING_MODEL, EMBEDDING_DIMENSION, EmbeddingError, providerForRequest, providerFromEnv, voyageProvider, ollamaProvider } from './embeddings';
 import { CALIBRATION_TABLES } from './calibration-tables';
 
 const vec = (seed: number) => Array.from({ length: EMBEDDING_DIMENSION }, (_, i) => (i === seed ? 1 : 0));
@@ -104,6 +104,23 @@ describe('rate limits (found in the first comparison run, 22 Oct)', () => {
     const p = voyageProvider({ apiKey: 'k', model: 'voyage-4', fetch: fetchMock, retry: { attempts: 3, baseDelayMs: 1, sleep: async () => {} } });
     await expect(p.embed(['a'], 'query')).rejects.toMatchObject({ status: 502 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('providerForRequest (Sprint 11, S11-4, F-46)', () => {
+  it('answers a set-up problem with 503 and a plain message, never the detail', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    for (const env of [{ EMBEDDING_PROVIDER: 'voyage' }, { EMBEDDING_PROVIDER: 'other' }]) {
+      try {
+        providerForRequest(env);
+        throw new Error('expected a refusal');
+      } catch (err) {
+        expect(err).toBeInstanceOf(EmbeddingError);
+        expect((err as EmbeddingError).status).toBe(503);
+        expect((err as Error).message).toBe('The embedding service is not configured.');
+      }
+    }
+    expect(providerForRequest({ EMBEDDING_PROVIDER: 'ollama' }).model).toBe('qwen3-embedding:0.6b');
   });
 });
 

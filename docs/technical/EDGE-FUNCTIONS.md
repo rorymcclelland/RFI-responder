@@ -167,7 +167,7 @@ Provider failures and unreadable model replies do not produce an error status: e
 
 ## embed
 
-**Purpose.** Returns embedding vectors for a list of texts, keeping the provider key server-side. Nothing in the app calls it at present; question embedding happens inside `process-questions`, and entry embedding in `embed-entries`.
+**Purpose.** Returns embedding vectors for a list of texts, keeping the provider key server-side. Nothing in the app calls it; question embedding happens inside `process-questions`, and entry embedding in `embed-entries`. It stays because CI uses it to test the function boundary: sign-in, limits and provider failures.
 
 **Request.** `POST` with `{ "texts": string[], "kind": "query" | "document" }`, checked by `validateEmbedRequest` in [`_shared/embed-core.ts`](../../supabase/functions/_shared/embed-core.ts). Every failure is `400`.
 
@@ -187,12 +187,12 @@ Provider failures and unreadable model replies do not produce an error status: e
 |---|---|
 | `400` | Validation |
 | `401` | No signed-in user |
-| `429` | The daily embedding cap or the budget allowed fewer texts than were sent (the allowed units are still added to today's count); or the provider rate-limiting (Voyage after its retries) |
+| `429` | The daily embedding cap or the budget would not allow all the texts. The reservation is all or nothing (Sprint 11), so a refused request uses none of the day's allowance. Or the provider rate-limiting (Voyage after its retries) |
 | `502` | The provider rejected the credentials, returned another HTTP error, or returned the wrong number or length of vectors |
-| `503` | The provider could not be reached; or usage could not be checked |
-| `500` | `Unexpected error`, including `EMBEDDING_PROVIDER=voyage` with no `VOYAGE_API_KEY`, or an unknown `EMBEDDING_PROVIDER` (`providerFromEnv` throws a plain `Error`) |
+| `503` | The provider could not be reached; usage could not be checked; or `The embedding service is not configured.` (no `VOYAGE_API_KEY`, or an unknown `EMBEDDING_PROVIDER`; the detail is logged, Sprint 11) |
+| `500` | `Unexpected error` |
 
-**Steps.** Authenticate, validate, reserve `texts.length` (kind `embed`), refuse with `429` if fewer were allowed, embed with the configured provider, and in `finally` record usage under `embed` and settle the reservation.
+**Steps.** Authenticate, validate, build the provider (`providerForRequest`), reserve all of `texts.length` or nothing (kind `embed`, `p_all`), refusing with `429` when nothing is allowed, embed with the configured provider, and in `finally` record usage under `embed` and settle the reservation.
 
 ## embed-entries
 
@@ -214,10 +214,10 @@ Provider failures and unreadable model replies do not produce an error status: e
 | Status | When |
 |---|---|
 | `401` | No signed-in user |
-| `429` | The cap or budget was reached before any entry was embedded. The message is the one for the reason `reserve_quota` gave; but when the very first reservation is refused outright, the reason is not available and the daily embedding message is used, even if the budget was the cause |
-| `503` | Usage could not be checked |
+| `429` | The cap or budget was reached before any entry was embedded, with the message for the limit actually reached, the budget or the daily cap (Sprint 11) |
+| `503` | Usage could not be checked; or `The embedding service is not configured.` |
 | `429`, `502`, `503` | A provider failure in any batch (rate-limited, rejected or unreachable): the provider's status, with its message followed by how many entries were embedded before it and `run again to continue` |
-| `500` | Reading or saving entries failed (`Could not read entries: ...` or `Could not save a vector: ...`, with the database's message); or `Unexpected error`, including a missing `VOYAGE_API_KEY` or unknown `EMBEDDING_PROVIDER` |
+| `500` | Reading or saving entries failed: `The knowledge base could not be read for indexing.` or `An index entry could not be saved.` The database's message is logged, not returned (Sprint 11, `serviceEntryStore` in [`_shared/entry-store.ts`](../../supabase/functions/_shared/entry-store.ts)); or `Unexpected error` |
 
 **Steps.** `embedPendingEntries` in [`_shared/embed-core.ts`](../../supabase/functions/_shared/embed-core.ts) repeats, up to 40 batches of 64 (at most 2,560 entries per call):
 

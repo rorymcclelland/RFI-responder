@@ -56,6 +56,14 @@ describe('meteredFetch (Voyage rerank)', () => {
 });
 
 describe('reserveQuota', () => {
+  it('asks for all or nothing when told to (Sprint 11, S11-4)', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: { allowed: 3, reason: null, reservation: 'r1' }, error: null });
+    await reserveQuota({ rpc }, 'u', 'embed', 3, undefined, { all: true });
+    expect(rpc).toHaveBeenCalledWith('reserve_quota', { p_user: 'u', p_kind: 'embed', p_n: 3, p_all: true });
+    await reserveQuota({ rpc }, 'u', 'embed', 3);
+    expect(rpc).toHaveBeenLastCalledWith('reserve_quota', { p_user: 'u', p_kind: 'embed', p_n: 3 });
+  });
+
   const rpc = (result: unknown, error: unknown = null) => ({ rpc: async () => ({ data: result, error }) });
 
   it('returns what was allowed', async () => {

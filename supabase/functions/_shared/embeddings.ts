@@ -165,3 +165,17 @@ export function providerFromEnv(env: Record<string, string | undefined>, fetchIm
   }
   throw new Error(`EMBEDDING_PROVIDER must be "voyage" or "ollama", not "${provider}"`);
 }
+
+/**
+ * Sprint 11 (S11-4, F-46): the provider for an Edge Function request. A missing key or an unknown
+ * provider is a set-up problem the caller cannot fix: it is logged with the detail and answered
+ * with 503 and a plain message, not "500 Unexpected error".
+ */
+export function providerForRequest(env: Record<string, string | undefined>, fetchImpl?: Fetch): EmbeddingProvider {
+  try {
+    return providerFromEnv(env, fetchImpl);
+  } catch (err) {
+    console.error('embedding provider not configured:', err instanceof Error ? err.message : err);
+    throw new EmbeddingError('The embedding service is not configured.', 503);
+  }
+}
