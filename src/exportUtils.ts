@@ -82,7 +82,9 @@ export function provenanceRows(questions: RFIQuestion[], names: Map<string, stri
       promptVersion: drafted ? q.provenance.promptVersion ?? '' : '',
       approvedBy: q.status === 'accepted' && q.approval ? (q.approval.by ? names.get(q.approval.by) ?? 'a team member' : 'a team member') : '',
       approvedAt: q.status === 'accepted' && q.approval ? q.approval.at : '',
-      approval: q.status === 'accepted' && q.approval ? approvalLabel(q.approval) || 'individual' : '',
+      // Sprint 11 (S11-10): a skip is a decision too; say who made it and when.
+      approval: q.status === 'accepted' && q.approval ? approvalLabel(q.approval) || 'individual'
+        : q.status === 'skipped' && q.skip ? `skipped by ${q.skip.by ? names.get(q.skip.by) ?? 'a team member' : 'a team member'}, ${q.skip.at}` : '',
     };
   });
 }

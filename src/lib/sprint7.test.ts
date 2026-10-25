@@ -123,3 +123,13 @@ describe('Security review, Sprint 7 (finding 7): the card says why a drafted que
     expect(bulkHoldReason(q({ checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
   });
 });
+
+describe('Sprint 11 (S11-10): a skip is recorded in the provenance', () => {
+  it('says who skipped and when', () => {
+    const names = new Map([['u3', 'Priya Sharma']]);
+    const [r] = provenanceRows([q({ status: 'skipped', approval: null, skip: { by: 'u3', at: '2026-10-25T12:00:00Z' } })], names);
+    expect(r.origin).toBe('not answered');
+    expect(r.approvedBy).toBe('');
+    expect(r.approval).toBe('skipped by Priya Sharma, 2026-10-25T12:00:00Z');
+  });
+});

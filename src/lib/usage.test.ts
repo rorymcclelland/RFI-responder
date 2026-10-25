@@ -18,6 +18,11 @@ describe('loadUsageStatus', () => {
 });
 
 describe('validateSettings', () => {
+  it('checks the reserve per knowledge-base text (Sprint 11, F-54)', () => {
+    expect(validateSettings({ est_usd_per_embed_text: 0.0001 })).toBeNull();
+    expect(validateSettings({ est_usd_per_embed_text: 0 })).toMatch(/knowledge-base text/);
+  });
+
   it('accepts sensible values', () => {
     expect(validateSettings({ daily_question_cap: 400, monthly_budget_gbp: 25, alert_share: 0.8, gbp_per_usd: 0.79, review_interval_months: 12, daily_extract_cap: 20, est_usd_per_extract_kchar: 0.0005 })).toBeNull();
   });

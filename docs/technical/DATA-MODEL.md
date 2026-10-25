@@ -125,6 +125,7 @@ Created in [`20260430145610_create_rfi_workflow_tables.sql`](../../supabase/migr
 | `sources_json`, `cited_refs` | Service role | The matched entries with scores, and the entry refs the draft cites |
 | `embedding_model`, `judge_model`, `draft_model`, `prompt_version` | Service role | Provenance of the draft |
 | `processing_note`, `processed_at` | Service role | A note for the reviewer, and when the server processed the question (bulk approval requires it) |
+| `skipped_by`, `skipped_at` | The `record_skip` trigger, from the status change | Who skipped the question and when; cleared on restore (Sprint 11) |
 | `learned_at`, `learn_outcome`, `learned_entry_id` | `record_export` | What the knowledge base learned: `added`, `superseded`, `proposed`, `confirmed`, `not_confirmed_source`, `not_learned_pricing`, `not_learned_japanese`, `not_learned_empty`, `not_learned_unchecked` |
 
 - **Member:** read all; no insert, update or delete unless owner, admin or assignee.
@@ -407,6 +408,7 @@ Run only by the triggers named in the table sections; they cannot be called dire
 | Function | Trigger | Defined in |
 |---|---|---|
 | `note_change_after_export` | `rfi_questions_change_after_export`, before a change of `status` or `final_answer`: in an exported session, marks it changed since export, audits `question.changed_after_export` (who, from and to, whether the answer changed) and clears the question's learning record | [`20261030100000`](../../supabase/migrations/20261030100000_changes_after_export.sql) |
+| `record_skip` | `rfi_questions_record_skip`, before insert or update: sets `skipped_by` and `skipped_at` when a question is skipped, clears them on restore, and ignores any value sent | [`20261030120000`](../../supabase/migrations/20261030120000_who_skipped.sql) |
 | `audit_price_change` | `ai_prices_audit`: audits every change of a price | [`20261030110000`](../../supabase/migrations/20261030110000_sprint11_access.sql) |
 | `normalise_new_assignment` | `question_assignments_normalise`, before insert by a signed-in user | [`20261030110000`](../../supabase/migrations/20261030110000_sprint11_access.sql) |
 | `handle_new_user` | `on_auth_user_created` on `auth.users`: creates the profile (empty `search_path` since Sprint 11) | [`20260430160006`](../../supabase/migrations/20260430160006_user_profiles_and_assignments.sql) |

@@ -363,7 +363,15 @@ export default function RFIQuestionCard({
               </span>
             )}
             {question.status === 'skipped' && (
-              <span className="text-2xs text-ink-400 font-bold">Skipped</span>
+              <span className="text-2xs text-ink-400 font-bold">
+                Skipped
+                {question.skip && (
+                  <span className="font-medium">
+                    {' '}by {users.find((u) => u.id === question.skip!.by)?.displayName ?? 'a team member'},{' '}
+                    {new Date(question.skip.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                  </span>
+                )}
+              </span>
             )}
             {assignments.length > 0 && (
               <span className="flex items-center gap-1 text-2xs text-ink-600 font-bold">

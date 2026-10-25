@@ -61,7 +61,7 @@ Choose a question to open its card: the checker's verdict and reason, the entrie
 - **Skip** leaves it unanswered (it is exported as "Not answered"); **Restore** brings it back.
 - **Revise Answer** changes an accepted answer; **Save & Accept** records the revised answer as a new acceptance.
 
-Every acceptance records who made it, when, and how (one at a time or in bulk).
+Every acceptance records who made it, when, and how (one at a time or in bulk), and every skip who made it and when; the export carries both.
 
 ### Approving in bulk
 

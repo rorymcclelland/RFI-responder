@@ -81,6 +81,8 @@ export interface RFIQuestion {
   processed: boolean;
   /** The latest recorded approval (Sprint 3, S3-2), if accepted. */
   approval: { by: string | null; at: string; kind: 'individual' | 'bulk'; threshold: number | null } | null;
+  /** Who skipped it and when (Sprint 11, S11-10), if skipped. Optional for questions built before it. */
+  skip?: { by: string | null; at: string } | null;
   /** What learning at export did with this question (Sprint 3, S3-4). */
   learnOutcome: string | null;
   /** The answerability checker's verdict, chosen entry and one-sentence reason (Sprint 6, S6-3). */

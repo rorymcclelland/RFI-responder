@@ -7,7 +7,7 @@ Every question in a response has a card. This page explains each thing on it. Ch
 - The dot and the bar show the confidence: green for **High** (80% or more), amber for **Medium** (40% to 80%), red for **Low** (under 40%), grey for **Not calibrated**. The bar reads `n/c` when there is no calibrated confidence.
 - The number is the question's place in the upload (the list itself is in review order); a small grey label beside it is the customer's own number for the question, kept in the export.
 - Badges say why the question is reviewed one at a time (below), and **Not processed yet** if matching and drafting have not run.
-- **Accepted**, **Accepted (edited)** or **Accepted (written by a person)**, with who accepted it and when, and "bulk at 80%" or similar if it was approved in bulk. **Skipped** if it was skipped.
+- **Accepted**, **Accepted (edited)** or **Accepted (written by a person)**, with who accepted it and when, and "bulk at 80%" or similar if it was approved in bulk. **Skipped**, with who skipped it and when, if it was skipped.
 - **Assigned** (or how many are assigned) if colleagues have been asked to look at it.
 
 ## Confidence and similarity

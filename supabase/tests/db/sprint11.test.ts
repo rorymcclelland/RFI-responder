@@ -211,3 +211,30 @@ describe('S11-7 admin changes all audited, assignments created as intended (F-49
     expect(bad).toEqual([]);
   });
 });
+
+describe('S11-10 who skipped a question is recorded (F-54)', () => {
+  it('1 and 2. skipping records who and when; restoring clears them; neither can be set through the API', async () => {
+    const s = await session(await response(owner.id));
+    const id = await question(s);
+    await as(owner, async (q) => {
+      await q(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [id]);
+      let r = (await q(`SELECT skipped_by, skipped_at FROM rfi_questions WHERE id = $1`, [id])).rows[0];
+      expect(r.skipped_by).toBe(owner.id);
+      expect(r.skipped_at).not.toBeNull();
+      await q(`UPDATE rfi_questions SET status = 'pending' WHERE id = $1`, [id]);
+      r = (await q(`SELECT skipped_by, skipped_at FROM rfi_questions WHERE id = $1`, [id])).rows[0];
+      expect(r).toEqual({ skipped_by: null, skipped_at: null });
+    });
+    await refused(as(owner, (q) => q(`UPDATE rfi_questions SET skipped_by = $1 WHERE id = $2`, [admin.id, id])));
+  });
+
+  it('a skipped question keeps who skipped it when its answer is changed', async () => {
+    const s = await session(await response(owner.id));
+    const id = await question(s);
+    await as(owner, async (q) => {
+      await q(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [id]);
+      await q(`UPDATE rfi_questions SET final_answer = 'Note.' WHERE id = $1`, [id]);
+      expect((await q(`SELECT skipped_by FROM rfi_questions WHERE id = $1`, [id])).rows[0].skipped_by).toBe(owner.id);
+    });
+  });
+});

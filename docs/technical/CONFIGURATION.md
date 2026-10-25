@@ -53,7 +53,7 @@ Read from the shell, and by the evaluation scripts also from `.env` in `supabase
 
 ## Settings in the database
 
-Changed by admins under **Governance**, **Usage and limits** (all but one, noted below), and read by the database functions that enforce them. Every change is recorded in the audit log. [Data model and access](DATA-MODEL.md) has the access rules.
+Changed by admins under **Governance**, **Usage and limits**, and read by the database functions that enforce them. Every change is recorded in the audit log. [Data model and access](DATA-MODEL.md) has the access rules.
 
 `public.ai_settings` (one row):
 
@@ -66,7 +66,7 @@ Changed by admins under **Governance**, **Usage and limits** (all but one, noted
 | `alert_share` | 0.8 | The share of the budget at which admins are warned |
 | `gbp_per_usd` | 1.00 | The exchange rate used to price usage, which providers bill in dollars |
 | `est_usd_per_question` | 0.002 | Reserved against the budget for each question while it is processed, then settled at the measured cost |
-| `est_usd_per_embed_text` | 0.0001 | Reserved for each knowledge-base text indexed. Not on the governance page; change it in the database |
+| `est_usd_per_embed_text` | 0.0001 | Reserved for each knowledge-base text indexed |
 | `est_usd_per_extract_kchar` | 0.0005 | Reserved for each 1,000 characters of a Word document read by AI |
 | `review_interval_months` | 12 | How often knowledge-base entries fall due for review (1 to 60) |
 

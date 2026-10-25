@@ -39,7 +39,7 @@ Entries are also learned from responses when their export is recorded ([Running 
 - **Limits**: the caps the database enforces. Change them and choose **Save limits**; every change is recorded in the audit log.
   - Questions per person per day; knowledge-base texts indexed per person per day; Word documents read by AI per person per day. Each person's count resets at midnight UTC.
   - The monthly budget, and the share of it at which admins are warned. When the month's estimated spend reaches the budget, processing stops for everyone until the next month or until the budget is raised.
-  - How much each question, and each 1,000 characters of a Word document, reserves against the budget while it is processed (compare it with the measured average shown above).
+  - How much each question, each knowledge-base text indexed, and each 1,000 characters of a Word document, reserves against the budget while it is processed (compare it with the measured average shown above).
   - The exchange rate from US dollars, which providers price in.
   - How often knowledge-base entries fall due for review (in months).
 - **Prices**: the price per million tokens for each model, with the date it was checked. Local models cost nothing. Set spending limits in the providers' own consoles as well.

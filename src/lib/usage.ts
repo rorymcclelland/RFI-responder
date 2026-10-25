@@ -21,7 +21,7 @@ export interface UsageReport {
 export interface AiSettings {
   daily_question_cap: number; daily_embed_cap: number; monthly_budget_gbp: number;
   alert_share: number; gbp_per_usd: number; review_interval_months: number;
-  est_usd_per_question: number;
+  est_usd_per_question: number; est_usd_per_embed_text: number;
   daily_extract_cap: number; est_usd_per_extract_kchar: number;
   updated_at: string;
 }
@@ -63,7 +63,7 @@ export async function loadUsageAdmin(client: SupabaseClient): Promise<{ report: 
   };
 }
 
-export type SettingsChange = Partial<Pick<AiSettings, 'daily_question_cap' | 'daily_embed_cap' | 'monthly_budget_gbp' | 'alert_share' | 'gbp_per_usd' | 'review_interval_months' | 'est_usd_per_question' | 'daily_extract_cap' | 'est_usd_per_extract_kchar'>>;
+export type SettingsChange = Partial<Pick<AiSettings, 'daily_question_cap' | 'daily_embed_cap' | 'monthly_budget_gbp' | 'alert_share' | 'gbp_per_usd' | 'review_interval_months' | 'est_usd_per_question' | 'est_usd_per_embed_text' | 'daily_extract_cap' | 'est_usd_per_extract_kchar'>>;
 
 /** Checks the values before sending them; the database checks them again. */
 export function validateSettings(change: SettingsChange): string | null {
@@ -75,6 +75,7 @@ export function validateSettings(change: SettingsChange): string | null {
   if (change.alert_share !== undefined && !(change.alert_share > 0 && change.alert_share <= 1)) return 'The warning point must be between 1% and 100%.';
   if (change.gbp_per_usd !== undefined && !(change.gbp_per_usd > 0)) return 'The exchange rate must be more than 0.';
   if (change.est_usd_per_question !== undefined && !(change.est_usd_per_question > 0)) return 'The reserve per question must be more than 0.';
+  if (change.est_usd_per_embed_text !== undefined && !(change.est_usd_per_embed_text > 0)) return 'The reserve per knowledge-base text must be more than 0.';
   if (change.est_usd_per_extract_kchar !== undefined && !(change.est_usd_per_extract_kchar > 0)) return 'The reserve per 1,000 characters must be more than 0.';
   if (change.review_interval_months !== undefined && !(Number.isInteger(change.review_interval_months) && change.review_interval_months >= 1 && change.review_interval_months <= 60)) {
     return 'The review interval must be between 1 and 60 months.';

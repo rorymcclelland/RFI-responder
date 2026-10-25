@@ -49,6 +49,8 @@ const SETTING_FIELDS: { key: keyof SettingsChange; label: string; help: string; 
   { key: 'monthly_budget_gbp', label: 'Monthly budget (£)', help: 'Processing stops for everyone when this month\'s estimated spend reaches it.', step: 1 },
   { key: 'alert_share', label: 'Warn admins at (% of budget)', help: 'Admins see a warning from this point.', step: 5, percent: true },
   { key: 'est_usd_per_question', label: 'Reserve per question (US$)', help: 'Held against the budget while a question is processed, until its real cost is recorded. Compare it with the measured average above.', step: 0.001 },
+  // Sprint 11 (F-54): the last setting that was only reachable through the database.
+  { key: 'est_usd_per_embed_text', label: 'Reserve per knowledge-base text indexed (US$)', help: 'Held against the budget while knowledge-base entries are indexed, until the real cost is recorded.', step: 0.0001 },
   { key: 'est_usd_per_extract_kchar', label: 'Reserve per 1,000 characters of a Word document (US$)', help: 'Held against the budget while the questions in a Word document are found, until the real cost is recorded.', step: 0.0001 },
   { key: 'gbp_per_usd', label: 'Pounds per US dollar', help: 'Providers price in dollars. 1.00 counts each dollar as a pound, which overstates spend; set the current rate for a truer figure.', step: 0.01 },
   { key: 'review_interval_months', label: 'Review knowledge-base entries every (months)', help: 'Entries past this are reported, and drafts citing them are held from bulk approval.', step: 1 },

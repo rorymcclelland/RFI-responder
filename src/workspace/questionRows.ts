@@ -32,6 +32,8 @@ export interface QuestionRow {
   calibration_set?: string | null;
   processed_at?: string | null;
   learn_outcome?: string | null;
+  skipped_by?: string | null;
+  skipped_at?: string | null;
 }
 
 export interface ApprovalRow { question_id: string; decided_by: string | null; decided_at: string; kind: 'individual' | 'bulk'; threshold: number | string | null }
@@ -69,6 +71,7 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
     // Only the server sets processed_at. Questions scored in the browser before Sprint 2 have none,
     // are never bulk-approved (security review), and can be processed now.
     processed: Boolean(r.processed_at),
+    skip: r.status === 'skipped' && r.skipped_at ? { by: r.skipped_by ?? null, at: r.skipped_at } : null,
     approval: approval && r.status === 'accepted'
       ? { by: approval.decided_by, at: approval.decided_at, kind: approval.kind, threshold: num(approval.threshold) }
       : null,
