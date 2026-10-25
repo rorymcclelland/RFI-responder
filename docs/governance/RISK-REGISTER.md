@@ -1,6 +1,6 @@
 # Risk register
 
-Owner of every risk: Rory McClelland (product owner). Reviewed at each sprint close. Last check: 25 October 2026, Sprint 8 close (evidence: CI on `sprint-8`, 614 unit and 227 database tests, the cross-validated calibration and intervals reports, the independent security review of Sprint 8 with all ten findings fixed, and the end-to-end check on the local PC).
+Owner of every risk: Rory McClelland (product owner). Reviewed at each sprint close. Last check: 25 October 2026, Sprint 9 close (evidence: CI on `sprint-9`, 643 unit and 231 database tests, the planted-claims report, the independent security review of Sprint 9 with all eight findings fixed, and the check on the local PC).
 
 Likelihood and impact are judged for a real organisation using the tool as designed (low, medium, high). **Residual** is what is left after the controls. A control marked **planned** is not built yet. The "Tests" column lists the files that prove each control; `docs/governance/governance.test.ts` fails if any of them is missing.
 

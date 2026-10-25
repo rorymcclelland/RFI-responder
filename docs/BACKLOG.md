@@ -446,13 +446,32 @@ Refinement: `docs/refinement/sprint-9.md`. Refinement found that F-41's premise 
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S9-1 | Questions calibrated on similarity alone are never bulk-approved (F-40) | No threshold gets similarity-only confidence to zero near misses | Ready, Sprint 9 |
-| S9-2 | F-41 and F-35 decided on the evidence | The data answers both; the backlog and register should say so | Ready, Sprint 9 |
-| S9-3 | The faithfulness checker tested on unfaithful drafts (F-19) | The published figure least tested against failure | Ready, Sprint 9 |
+| S9-1 | Questions calibrated on similarity alone are never bulk-approved (F-40) | No threshold gets similarity-only confidence to zero near misses | Done, Sprint 9 |
+| S9-2 | F-41 and F-35 decided on the evidence | The data answers both; the backlog and register should say so | Done, Sprint 9 |
+| S9-3 | The faithfulness checker tested on unfaithful drafts (F-19) | The published figure least tested against failure | Done, Sprint 9 |
 
 No spike.
 
-**Not yet in a sprint, ranked at the Sprint 8 review.** 1. C-1 multilingual knowledge base. 2. F-19 faithfulness judge on planted unfaithful drafts. 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 4. F-20 rerankers (needs a Voyage payment method). 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
+### Sprint 9 review (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-9`; 643 unit and 231 database tests. Bulk approval needs the checker's "yes" in every configuration; F-41 closed and F-35 accepted on the evidence; the faithfulness judge caught 95 of 95 planted claims with no false alarm on 37 unchanged drafts. Rory checked the migration and the bulk bar on his PC. Details in `docs/refinement/sprint-9.md` (Close).
+
+An independent security review found one high issue (plants misplaced in the Japanese drafts) and seven smaller ones, all fixed before the run.
+
+### Where every Sprint 9 review item now lives
+
+| Item | Now |
+|---|---|
+| Eight security review findings | Done in Sprint 9 (review) |
+| F-19, F-40 | Done in Sprint 9 |
+| F-35, F-41 | Closed in Sprint 9 on the evidence (Rory, Q2 and Q3) |
+| The planted-claims bar applied per rule as well as overall | Recorded in the refinement; stricter than agreed, and met either way |
+
+**What remains.** Every item left needs something the project does not have yet: C-1 is a large feature; F-14 and F-15 need a native Japanese reader and an outside reviewer; F-20 needs a Voyage payment method; F-8 needs a hosted deployment. The smaller ones (F-34, F-2, F-3, F-4) are housekeeping. Proposed at the Sprint 9 review: pause here, with the repository public and every published figure tested, or take C-1 as its own refined sprint.
+
+**Not yet in a sprint, ranked at the Sprint 9 review.** 1. C-1 multilingual knowledge base. 2. F-14 and F-15 reviewed Japanese and near-miss items. 3. F-20 rerankers. 4. F-34 review during processing (fails safe). 5. F-8 leaked-password protection, with a hosted sprint. 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
+
+**Ranked at the Sprint 8 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-19 faithfulness judge on planted unfaithful drafts. 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 4. F-20 rerankers (needs a Voyage payment method). 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
 
 **Ranked at the Sprint 7 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-35 duplicate catch rate after the threshold rise. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 5. F-20 rerankers (needs a Voyage payment method; the bulk rule for a reranker is now set). 6. F-34 review during processing (fails safe). 7. F-8 leaked-password protection, with a hosted sprint. 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
 

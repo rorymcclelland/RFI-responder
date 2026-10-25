@@ -94,3 +94,19 @@ All three stories are Ready.
 - **Japanese drafts are not planted in**: the plants are English sentences, and a plant after the translation note would be skipped by the judge (security review, finding 1).
 - **The unchanged drafts are judged again** in the run's own cache, so false alarms are measured rather than 0 by construction (finding 2).
 - **The bar is checked for each rule as well as overall**, and each rule has its own interval (finding 3): two rules are the same sentence added to every draft, so the overall figure alone would say more than was tested. This is stricter than Q5's "at least 90% of planted claims"; Rory can return it to overall only.
+
+## Close (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-9` (all three jobs). 643 unit tests and 231 database tests; typecheck and lint clean.
+
+| Check | Result | Held? |
+|---|---|---|
+| S9-1: bulk approval needs the checker's "yes" in every configuration | Database tests 1 to 3 and threshold 0; unit tests 4 and 5; Rory reset his local database with the new migration and confirmed Bluefin and the bulk bar's wording on screen | Yes |
+| S9-2: F-41 and F-35 decided, the sweep reproducible | The sweep reproduces the published 0.55 row (1.9% wrong, 53.0% caught) from a tested module | Yes |
+| S9-3: planted claims caught, at least 90% overall and for each rule | Run on Rory's PC: 95 of 95 (96.1 to 100.0%); frequency 17 of 17, figure 4 of 4, certification 37 of 37, absolute claim 37 of 37; no false alarm on 37 unchanged drafts, judged fresh; no unreadable reply | Yes |
+
+**Independent security review.** One high finding, two medium and five low, all fixed before the planted-claims run (commit `adc36e1`). The high one: the planted claim in the 9 Japanese drafts landed after the translation note, which the judge is told to ignore, so about 16% of plants would have counted as misses whatever the judge did. Also from the review: a test that a drafted "yes" never processed by the server is not bulk-approved (a gap from earlier sprints), and the F-41 evidence reworded more exactly.
+
+**Bugs found and fixed in the sprint.** None beyond the review's findings.
+
+Sprint 9 closed 25 October 2026.
