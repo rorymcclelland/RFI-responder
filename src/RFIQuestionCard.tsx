@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
-import { approvalLabel, bulkHoldReason, checkerSummary, formatConfidence, needsWrittenAnswer } from './lib/format';
+import { approvalLabel, bulkHoldReason, checkerSummary, confidenceRange, formatConfidence, needsWrittenAnswer } from './lib/format';
+import { CALIBRATION_TABLES } from '../supabase/functions/_shared/calibration-tables.ts';
 import { answerSource, ANSWER_HEADING, ANSWER_TIP } from './lib/answerLabel';
 import { suggestExperts, type ExpertSuggestion } from './lib/responses';
 import { supabase } from './lib/supabase';
@@ -392,7 +393,7 @@ export default function RFIQuestionCard({
             {[
               { label: 'Confidence', value: question.confidence, tip: question.confidence === null
                   ? 'Not calibrated: matching was keyword-only, the answerability check was unavailable, or there is no calibration table for the models in use. Bulk approval is not available for this question.'
-                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals). The set is small, so the top is shown as 99%+, never as certainty.` },
+                  : `The measured chance that the knowledge base answers this question with the top entry, from the matching and a check of whether the entry actually answers it, calibrated on ${question.provenance.calibrationSet ?? 'the evaluation set'} (docs/evals). The set is small, so the top is shown as 99%+, never as certainty.${(() => { const r = confidenceRange(question.confidence, question.provenance.embeddingModel, question.provenance.judgeModel, CALIBRATION_TABLES); return r ? ` ${r}` : ''; })()}` },
               { label: 'Similarity', value: question.retrievalScore, tip: 'Cosine similarity between the question and the best-matching entry (or the keyword score when matching was keyword-only). Not a probability.' },
             ].map((m) => {
               if (m.value === null) {

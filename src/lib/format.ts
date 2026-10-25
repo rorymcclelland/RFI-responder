@@ -80,3 +80,22 @@ export function bulkHoldReason(q: {
     : null;
   return why && `Not included in bulk approval: ${why}. Accept it on its own if the draft is right.`;
 }
+
+interface BandedTable { bands?: { probability: number; n: number; low: number; high: number }[] }
+
+/**
+ * Sprint 8 (S8-3): how precise a calibrated confidence is. The step of the calibration fit nearest
+ * the confidence, with how many evaluation questions it rests on and a 95% interval for the share
+ * that had the right entry. Null when there is no confidence, or no banded table for the models.
+ */
+export function confidenceRange(
+  confidence: number | null, embeddingModel: string | null, judgeModel: string | null,
+  tables: Record<string, BandedTable>,
+): string | null {
+  if (confidence === null || !embeddingModel) return null;
+  const bands = tables[judgeModel ? `${embeddingModel} + ${judgeModel}` : embeddingModel]?.bands;
+  if (!bands?.length) return null;
+  const band = bands.reduce((best, b) => (Math.abs(b.probability - confidence) < Math.abs(best.probability - confidence) ? b : best));
+  const p = (x: number) => `${Math.round(x * 100)}%`;
+  return `Of evaluation questions scored like this, between ${p(band.low)} and ${p(band.high)} had the right entry (95% interval, ${band.n} question${band.n === 1 ? '' : 's'}).`;
+}
