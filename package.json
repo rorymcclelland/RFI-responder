@@ -22,6 +22,7 @@
     "eval:answerability": "tsx eval/run-answerability.ts",
     "eval:gates": "tsx eval/run-gates.ts",
     "eval:drafting": "tsx eval/run-drafting.ts",
+    "eval:plants": "tsx eval/run-plants.ts",
     "eval:redteam": "tsx eval/run-redteam.ts",
     "eval:duplicates": "tsx eval/run-duplicates.ts",
     "eval:extraction": "tsx eval/run-extraction.ts",
