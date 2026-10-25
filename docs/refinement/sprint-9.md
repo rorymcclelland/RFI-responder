@@ -75,3 +75,15 @@ Order: S9-1 (quick, standalone), S9-2, then S9-3 last (needs Rory's run). Sizes:
 | Q3 | F-35 | (a) Accept the 53% catch rate as a residual; the sweep goes in the report. (b) Lower the threshold to 0.50 (70% caught, 3.6% wrong, breaking the 2% bar). (c) Keep it open | (a): every setting that catches more makes more wrong replacements, and a wrong replacement costs more than a duplicate |
 | Q4 | F-19 in this sprint | (a) Yes, as S9-3. (b) No, keep the sprint to S9-1 and S9-2 | (a): it is the published figure least tested, and it fits the sprint's size |
 | Q5 | F-19 bar (if Q4 is yes) | (a) At least 90% of planted claims caught. (b) At least 95%. (c) Report only | (a): a clear bar that a small set can show, with the interval beside it |
+
+## Answers (Rory, 25 October 2026)
+
+| # | Answer |
+|---|---|
+| Q1 | Never bulk-approve a question calibrated on similarity alone: without a checker there is no bulk approval |
+| Q2 | F-41 closed on the evidence: no similarity floor |
+| Q3 | F-35 accepted as a residual (53% of real duplicates caught at 0.55, 1.9% wrong); the sweep goes in the duplicates report |
+| Q4 | F-19 joins the sprint as S9-3 |
+| Q5 | Bar for S9-3: at least 90% of planted claims caught, with the 95% interval stated |
+
+All three stories are Ready.

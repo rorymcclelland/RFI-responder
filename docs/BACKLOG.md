@@ -440,15 +440,15 @@ An independent security review found no high issues and ten smaller ones (three 
 | F-40 Similarity-only fallback lets near misses reach the bulk line and allows bulk approval | Backlog, from Sprint 8; proposed for Sprint 9 |
 | F-41 A "yes" with very low similarity is calibrated at about 85% | Backlog, from Sprint 8 review; proposed for Sprint 9 |
 
-## Sprint 9: the last bulk-approval gaps (confirmed 25 October 2026; refinement awaiting Rory's answers)
+## Sprint 9: the last bulk-approval gaps (confirmed 25 October 2026; refined and answered 25 October)
 
 Refinement: `docs/refinement/sprint-9.md`. Refinement found that F-41's premise does not hold on the data and that F-35 cannot be improved by moving the threshold, so both are decisions; F-19 is proposed to fill the sprint.
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S9-1 | Questions calibrated on similarity alone are never bulk-approved (F-40) | No threshold gets similarity-only confidence to zero near misses | Refined, awaiting answers |
-| S9-2 | F-41 and F-35 decided on the evidence | The data answers both; the backlog and register should say so | Refined, awaiting answers |
-| S9-3 | The faithfulness checker tested on unfaithful drafts (F-19) | The published figure least tested against failure | Refined, awaiting answers (Q4) |
+| S9-1 | Questions calibrated on similarity alone are never bulk-approved (F-40) | No threshold gets similarity-only confidence to zero near misses | Ready, Sprint 9 |
+| S9-2 | F-41 and F-35 decided on the evidence | The data answers both; the backlog and register should say so | Ready, Sprint 9 |
+| S9-3 | The faithfulness checker tested on unfaithful drafts (F-19) | The published figure least tested against failure | Ready, Sprint 9 |
 
 No spike.
 
