@@ -36,7 +36,7 @@ export interface DemoRecording {
   /** Every Claude call made while processing each response, entered as the owner's usage. */
   usage?: Record<string, DemoCall[]>;
 }
-export interface DemoCall { kind: 'judge' | 'gate' | 'draft'; model: string; inputTokens: number; outputTokens: number }
+export interface DemoCall { kind: 'judge' | 'gate' | 'draft' | 'embed'; model: string; inputTokens: number; outputTokens: number }
 export interface KbRow { question: string; answer: string; tags: string[]; source: string }
 
 const SAFE_REF = /^[\p{L}\p{N}.()\- ]{1,20}$/u;
@@ -116,10 +116,11 @@ function responseSql(r: DemoResponse, results: ProcessedQuestion[] | undefined, 
     throw new Error(`${r.key}: the recording has ${results?.length ?? 0} results for ${r.questions.length} questions; run npm run demo:record`);
   }
   const rows = r.questions.map((q, i) => questionValues(i, q, processed ? results![i] : null)).join(',\n    ');
-  // The recorded Claude calls, as the owner's usage of process-questions; the app's trigger prices them.
+  // The recorded calls (Claude, and since Sprint 8 the embedding calls), as the owner's usage of
+  // process-questions; the app's trigger prices them.
   const usage = calls.length
     ? `  INSERT INTO public.ai_usage (user_id, function, kind, provider, model, input_tokens, output_tokens, session_id, at) VALUES
-    ${calls.map((c) => `(owner, 'process-questions', ${lit(c.kind)}, 'anthropic', ${lit(c.model)}, ${num(c.inputTokens)}, ${num(c.outputTokens)}, sess, ${lit(at)}::timestamptz)`).join(',\n    ')};`
+    ${calls.map((c) => `(owner, 'process-questions', ${lit(c.kind)}, ${lit(c.kind === 'embed' ? 'voyage' : 'anthropic')}, ${lit(c.model)}, ${num(c.inputTokens)}, ${num(c.outputTokens)}, sess, ${lit(at)}::timestamptz)`).join(',\n    ')};`
     : '';
   const by = (ref: string) => `(SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = ${lit(ref)})`;
   const steps: string[] = [];
@@ -191,4 +192,22 @@ export function replaceSection(file: string, name: string, body: string): string
   const j = file.indexOf(end);
   if (i < 0 || j < i) throw new Error(`seed.sql has no "${name}" section`);
   return `${file.slice(0, i + begin.length)}\n${body}\n${file.slice(j)}`;
+}
+
+/**
+ * Sprint 8 (S8-4, F-37): per response approved in bulk, the questions bulk approval holds because the
+ * checker said only "partly" (or "no"): drafted, ungated, and at or above the response's bulk line.
+ */
+export function partlyHolds(plan: DemoPlan, recording: DemoRecording): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  for (const r of plan.responses) {
+    if (r.bulkAt === undefined) continue;
+    const results = recording.results[r.key] ?? [];
+    out[r.key] = r.questions.filter((q) => {
+      const x = results.find((y) => y.id === `${r.key}-${q.ref}`);
+      return !!x && x.gate === null && (x.draft_kind === 'generated' || x.draft_kind === 'assembled')
+        && x.confidence !== null && x.confidence >= r.bulkAt! && (x.verdict === 'partly' || x.verdict === 'no');
+    }).map((q) => q.ref);
+  }
+  return out;
 }

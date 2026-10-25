@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-24.1",
-  "note": "Synthetic demo responses (Sprint 7, S7-5). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
+  "version": "2026-10-25.1",
+  "note": "Synthetic demo responses (Sprint 7, S7-5; Sprint 8, S8-4 added A13 and A14, which the checker judged only \"partly\" answered at 85% in the Sprint 6 evaluation run, so the demo shows that hold). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
   "responses": [
     {
       "key": "juniper",
@@ -79,6 +79,14 @@
         {
           "ref": "A12",
           "text": "How do you manage the risks of open-source components in your software?"
+        },
+        {
+          "ref": "A13",
+          "text": "Are sessions of high-privilege users recorded and reviewed?"
+        },
+        {
+          "ref": "A14",
+          "text": "Which second-factor methods do staff use when signing in?"
         }
       ]
     },

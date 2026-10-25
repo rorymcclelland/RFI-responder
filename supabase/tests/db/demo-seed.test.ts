@@ -10,6 +10,7 @@ const plan = JSON.parse(readFileSync(new URL('../../../sample-data/demo-plan.jso
 
 const SPECIAL: Record<string, Partial<ProcessedQuestion>> = {
   A5: { verdict: 'partly', confidence: 0.875 },
+  A13: { verdict: 'partly', confidence: 0.853 },
   A7: { gate: 'pricing', gate_reason: 'Asks for a price.', draft_kind: 'person_required', generated_answer: 'Pricing is answered by a person.', cited_refs: [], draft_model: null },
   A8: { gate: 'legal', gate_reason: 'Asks to accept liability.' },
   A9: { verdict: 'no', confidence: 0.05, draft_kind: 'insufficient_evidence', generated_answer: 'Insufficient evidence.', cited_refs: [], draft_model: null },
@@ -28,7 +29,7 @@ const row = (key: string, ref: string, text: string): ProcessedQuestion => ({
 const recording: DemoRecording = {
   recordedAt: '2026-10-24T09:00:00.000Z', planVersion: plan.version, models: { judge: 'claude-haiku-5-5' }, promptVersions: { judge: 'judge-test' },
   results: Object.fromEntries(plan.responses.filter((r) => r.stage !== 'new').map((r) => [r.key, r.questions.map((q) => row(r.key, q.ref, q.text))])),
-  usage: { bluefin: [{ kind: 'judge', model: 'claude-haiku-5-5', inputTokens: 1000, outputTokens: 100 }, { kind: 'draft', model: 'claude-haiku-5-5', inputTokens: 2000, outputTokens: 300 }] },
+  usage: { bluefin: [{ kind: 'judge', model: 'claude-haiku-5-5', inputTokens: 1000, outputTokens: 100 }, { kind: 'draft', model: 'claude-haiku-5-5', inputTokens: 2000, outputTokens: 300 }, { kind: 'embed', model: 'voyage-4', inputTokens: 150, outputTokens: 0 }] },
 };
 
 beforeAll(async () => {
@@ -61,16 +62,18 @@ describe('S7-5 demo responses, one per stage', () => {
   it('the recorded calls are the owners\' usage, priced by the app', async () => {
     const r = await one<{ n: number; who: string; priced: boolean }>(`SELECT count(*)::int AS n, min(u.email) AS who, bool_and(a.cost_usd > 0) AS priced
       FROM ai_usage a JOIN auth.users u ON u.id = a.user_id WHERE a.function = 'process-questions'`);
-    expect(r).toEqual({ n: 2, who: 'priya.sharma@example.com', priced: true });
+    expect(r).toEqual({ n: 3, who: 'priya.sharma@example.com', priced: true });
+    // Sprint 8 (F-38): the embedding call is the voyage provider's, priced like the app's own.
+    expect(await one(`SELECT provider, kind FROM ai_usage WHERE model = 'voyage-4' AND function = 'process-questions'`)).toEqual({ provider: 'voyage', kind: 'embed' });
   });
 
   it('in review: bulk approval accepted only "yes" drafts, as the owner; the rest wait, two are assigned', async () => {
     const st = await asSuperuser<{ customer_ref: string; status: string }>(
       `SELECT q.customer_ref, q.status FROM rfi_questions q JOIN rfi_sessions s ON s.id = q.session_id JOIN opportunities o ON o.id = s.opportunity_id WHERE o.name LIKE 'Bluefin%' ORDER BY q.position`);
     const by = Object.fromEntries(st.rows.map((x) => [x.customer_ref, x.status]));
-    expect(by).toMatchObject({ A1: 'accepted', A5: 'pending', A7: 'pending', A8: 'pending', A9: 'pending', A10: 'pending', A11: 'pending' });
+    expect(by).toMatchObject({ A1: 'accepted', A5: 'pending', A7: 'pending', A8: 'pending', A9: 'pending', A10: 'pending', A11: 'pending', A13: 'pending', A14: 'accepted' });
     expect(await one(`SELECT count(*)::int AS n, bool_and(a.kind = 'bulk' AND a.threshold = 0.8) AS bulk, bool_and(u.email = 'priya.sharma@example.com') AS owner
-      FROM approvals a JOIN auth.users u ON u.id = a.decided_by JOIN opportunities o ON o.id = a.opportunity_id WHERE o.name LIKE 'Bluefin%'`)).toEqual({ n: 6, bulk: true, owner: true });
+      FROM approvals a JOIN auth.users u ON u.id = a.decided_by JOIN opportunities o ON o.id = a.opportunity_id WHERE o.name LIKE 'Bluefin%'`)).toEqual({ n: 7, bulk: true, owner: true });
     expect((await asSuperuser<{ email: string; status: string }>(`SELECT u.email, a.status FROM question_assignments a JOIN auth.users u ON u.id = a.assigned_to JOIN opportunities o ON o.id = a.opportunity_id WHERE o.name LIKE 'Bluefin%' ORDER BY u.email`)).rows)
       .toEqual([{ email: 'james.okafor@example.com', status: 'in_review' }, { email: 'lisa.huang@example.com', status: 'pending' }]);
   });

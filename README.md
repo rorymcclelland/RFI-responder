@@ -37,7 +37,7 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 | ![An exported response and what the knowledge base learned](docs/screenshots/6-export-and-learning.png) | ![The governance page: usage and limits](docs/screenshots/7-governance-usage.png) |
 | An exported response, and what the knowledge base learned | Spend, limits and prices on the governance page |
 
-All screenshots show the synthetic demo data in `supabase/seed.sql`. The governance page also counts two embedding calls made on the local install after the seed loaded; the seed itself records only the Claude calls from the recorded run.
+All screenshots show the synthetic demo data in `supabase/seed.sql`. The seed records every call the recorded run made, Claude and embedding alike. The governance page also counts the indexing of the knowledge base that the first sign-in after a reset triggers (two embedding calls).
 
 ## How it was built
 
