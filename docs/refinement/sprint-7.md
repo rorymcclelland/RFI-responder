@@ -145,3 +145,36 @@ Order: S7-1 and S7-2 (small safety fixes, change figures and docs), S7-3, S7-4, 
 | Q8 | A claims table with proposed wording; Rory edits his CV and website himself |
 
 All nine stories are Ready.
+
+## Close (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-7` (all three jobs). 545 unit tests and 227 database tests at the close; typecheck and lint clean.
+
+| Check | Result | Held? |
+|---|---|---|
+| S7-1: "yes" accepted in bulk; "partly" and "no" held and counted; similarity-only as before | Database tests 1 to 6, and test 7 added at the review | Yes |
+| S7-1 on screen | Bulk buttons greyed with the reason when nothing is eligible (local PC, Bluefin). A pending "partly" question at 80% or more was not in the demo data, so the held case was checked by the database tests only | Partly (see F-37) |
+| S7-2: a draft citing a replaced entry is held, naming the replacement | Database tests | Yes |
+| S7-3: every export carries the record | Built in the browser on the local PC as James (Larkspur), without downloading: CSV `answer_origin` column; Word `ai-generated` and model meta tags and a "How each answer was produced" table; Excel Provenance sheet and a document description ("6 of 7 answered questions were drafted by a model"). The Excel title property is empty (F-36) | Yes |
+| S7-4: every view fits 768 px | `docs/screenshots/layout-check.json`: all eight views fit | Yes |
+| S7-5: demo at four stages from a real run | Recorded 25 October 2026 with usage (73 Claude calls); Juniper (new), Bluefin (in review), Larkspur (exported), Harbour (archived, won); seed regenerated and tested | Yes |
+| S7-6: docs for a first-time reader | A reader given only the README and the architecture page found four gaps (Word extraction drawn in the browser, no pricing branch, "unchecked" undefined, R-06 unexplained), all fixed; docs tests check figures, links, paths and spelling | Yes |
+| S7-7: screenshots by script | Eight views captured on the local PC | Yes |
+| S7-8: history scan, main, CI on main | Full history (117 commits, 744 file versions): only the deliberately fake keys in tests and CI, and `env(...)` placeholders in the Supabase config. `main` brought up to `sprint-7` at the close | Yes; the public switch and the README render check are Rory's |
+| S7-9: claims table | `claude/rfi-respond-claims-table.md` in the project; Rory edits his CV and website | Yes |
+
+**Bugs found and fixed in the sprint.** BUG-23: the demo-seed database test collided with the real demo data (the test now strips the demo section). BUG-24: the screenshot script timed out signing in the second user (a fresh browser session per user). BUG-25: the screenshot script looked for the governance tabs as buttons. BUG-26: the "new" demo response showed "In review", and the governance page showed $0.0000 per question, because the seed had no usage (the new response has no questions; the recording now keeps each call's tokens).
+
+**Independent security review.** No high findings; two medium and five low, all fixed and tested (`20261027110000_sprint7_review_fixes.sql`, commit `7f66757`):
+
+1. (Medium) With a reranker as the checker, questions with a score but no verdict were bulk-approved as if no checker were configured. Now held and counted (`heldNoVerdict`).
+2. (Medium) The CSV and the export screen said the file recorded who approved each answer; the CSV had the origin only. It now has model, prompt version, approver, time and how; the Word table gained the prompt version and time.
+3. (Low, worse than reported) A no-draft placeholder accepted unedited was exported as "written by a person" and learned into the knowledge base. The database now refuses it for everyone; the card offers "Write an answer"; earlier records export as "placeholder accepted unedited".
+4. (Low) The seed generator's quoting could be ended by dollar-quote text. Refused; plan numbers checked.
+5. (Low) The evaluations summary named the wrong test, and the check only looked for a figure anywhere in its report. It now checks each figure's own row and column.
+6. (Low) The governance screenshot includes two embedding calls made on the local install after the seed loaded; the README says so (cause not established: F-38).
+7. (Low) The card now says why a drafted question is left out of bulk approval.
+
+**Open at the close.** The end-to-end check of the review fixes on screen (the "Write an answer" button and the hold reason) is with Rory, as browser actions from this session were blocked.
+
+**Raised at the close, now in the backlog.** F-36 Excel title property empty. F-37 the demo data has no pending "partly" question at the bulk line. F-38 the source of two embedding calls after a fresh seed is not established, and the recording does not keep embedding usage. F-39 the screenshot script checks that the app is local, not that the Supabase address in `.env` is.

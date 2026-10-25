@@ -372,23 +372,49 @@ Refinement: `docs/refinement/sprint-7.md` (answers recorded 24 October). Reposit
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S7-1 | Bulk approval needs a "yes" verdict (F-33) | "Partly" at 80% or more had the wrong top entry twice as often as "yes" (15% against 7%) | Ready, Sprint 7 |
-| S7-2 | A draft citing a replaced entry is held from bulk (F-32) | Small; same rule as S6-4 | Ready, Sprint 7 |
-| S7-3 | Exported answers carry a machine-readable record of how they were produced (F-27) | Publishing is where the claims are made | Ready, Sprint 7 |
-| S7-4 | Every screen fits a 768 px window (F-10) | Screenshots and first impressions | Ready, Sprint 7 |
-| S7-5 | Demo data at four stages, recorded from a real run on synthetic questions | A fresh install should show the workflow | Ready, Sprint 7 |
-| S7-6 | README, architecture, evaluation summary and governance pack for a first-time reader | The repository is about to be read by people who were not here | Ready, Sprint 7 |
-| S7-7 | Screenshots captured by a Playwright script on Rory's PC | Repeatable when the screens change | Ready, Sprint 7 |
-| S7-8 | Publish: `main` brought up to date, history rescanned, no licence (all rights reserved), deploying guide (F-8 documented); Rory makes it public | The goal of the upgrade | Ready, Sprint 7 |
-| S7-9 | CV and website claims checked against the code; Rory edits | The code and the claims go public together | Ready, Sprint 7 |
+| S7-1 | Bulk approval needs a "yes" verdict (F-33) | "Partly" at 80% or more had the wrong top entry twice as often as "yes" (15% against 7%) | Done, Sprint 7 |
+| S7-2 | A draft citing a replaced entry is held from bulk (F-32) | Small; same rule as S6-4 | Done, Sprint 7 |
+| S7-3 | Exported answers carry a machine-readable record of how they were produced (F-27) | Publishing is where the claims are made | Done, Sprint 7 |
+| S7-4 | Every screen fits a 768 px window (F-10) | Screenshots and first impressions | Done, Sprint 7 |
+| S7-5 | Demo data at four stages, recorded from a real run on synthetic questions | A fresh install should show the workflow | Done, Sprint 7 |
+| S7-6 | README, architecture, evaluation summary and governance pack for a first-time reader | The repository is about to be read by people who were not here | Done, Sprint 7 |
+| S7-7 | Screenshots captured by a Playwright script on Rory's PC | Repeatable when the screens change | Done, Sprint 7 |
+| S7-8 | Publish: `main` brought up to date, history rescanned, no licence (all rights reserved), deploying guide (F-8 documented); Rory makes it public | The goal of the upgrade | Done, Sprint 7 (making the repository public and checking the README renders are Rory's steps) |
+| S7-9 | CV and website claims checked against the code; Rory edits | The code and the claims go public together | Done, Sprint 7 |
 
 No spike.
 
+### Sprint 7 review (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-7`; 545 unit and 227 database tests at the close. End-to-end on the local PC: every export built in the browser carries its provenance record; every view fits 768 px (`docs/screenshots/layout-check.json`). The full git history scanned clean. Details per story in `docs/refinement/sprint-7.md` (Close).
+
+An independent security review found no high issues and seven smaller ones (two medium), all fixed and tested (`20261027110000_sprint7_review_fixes.sql`). The most important: a no-draft placeholder could be accepted unedited, exported as "written by a person" and learned into the knowledge base; the database now refuses it.
+
+**Bugs found and fixed in the sprint.** BUG-23 to BUG-26 (demo-seed test collision, two screenshot script faults, the new demo response showing "In review" and zero usage).
+
+**Open at the close.** The on-screen check of the review fixes is with Rory. Making the repository public and checking that the README renders are Rory's steps.
+
+### Where every Sprint 7 review item now lives
+
+| Item | Now |
+|---|---|
+| Seven security review findings | Done in Sprint 7 (review) |
+| BUG-23 to BUG-26 | Done in Sprint 7 |
+| R-01 and R-02 residual figures out of date in the risk register (280 claims, 12.9% lookalikes) | Corrected at the close (305 claims, 10.0%) |
+| F-36 Excel exports have an empty title property | Backlog, from Sprint 7 review |
+| F-37 The demo data has no pending "partly" question at the bulk line, so that hold cannot be seen on a fresh install | Backlog, from Sprint 7 review |
+| F-38 Two embedding calls appeared after a fresh seed, source not established; the demo recording keeps only Claude calls | Backlog, from Sprint 7 review |
+| F-39 The screenshot script checks the app address is local, not the Supabase address in `.env` | Backlog, from Sprint 7 review |
+
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 6 review)
 
-(Sprint 7 is above.)
+**Sprint 8, proposed at the Sprint 7 review (for Rory to confirm): honest figures.** The repository is now public-ready, so the next most valuable thing is how far a reader can trust the published figures.
+- F-16 Calibration intervals: show a range, not a single figure, and fit with cross-validation, since one item moved the near-miss result. The figures are what a reader of the public repository judges.
+- F-37 A pending "partly" question in the demo data, so the bulk hold is visible on a fresh install. Small; touches the demo plan the screenshots use.
+- F-38 Find the two embedding calls and record embedding usage in the demo, so the governance screenshot matches the seed exactly. Small.
+- F-36 and F-39 Excel title property; screenshot script checks the Supabase address too. Small, in code the sprint touches anyway.
 
-**Not yet in a sprint, ranked at the Sprint 6 review.** 1. F-16 calibration stability (intervals rather than single figures; small sets). 2. C-1 multilingual knowledge base. 3. F-35 duplicate catch rate after the threshold rise. 4. F-19 faithfulness judge on planted unfaithful drafts. 5. F-14 and F-15 reviewed Japanese and near-miss items. 6. F-20 rerankers (needs a Voyage payment method). 7. F-34 review during processing (fails safe). 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
+**Not yet in a sprint, ranked at the Sprint 7 review.** 1. C-1 multilingual knowledge base. 2. F-35 duplicate catch rate after the threshold rise. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 5. F-20 rerankers (needs a Voyage payment method; the bulk rule for a reranker is now set). 6. F-34 review during processing (fails safe). 7. F-8 leaked-password protection, with a hosted sprint. 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -396,7 +422,7 @@ No spike.
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 onwards from Sprint 6; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 onwards from Sprint 7; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -409,7 +435,7 @@ No spike.
 | F-7 | Make questions within a session editable only by the owner, assignees and admins | Done, Sprint 3. Team-editable until Sprint 3's readiness workflow |
 | F-8 | Turn on leaked-password protection in the hosted project | The Bolt migration claiming to do this was a no-op (decision 0003) |
 | F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Done, Sprint 1 (`85b39b4`, found at the Sprint 6 refinement). Found in the end-to-end run; a failed save is silent. Remainder (a refused save affecting no rows) is S6-5 |
-| F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Found in the end-to-end run |
+| F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Done, Sprint 7 (S7-4). Found in the end-to-end run |
 | F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Done, Sprint 3. Found in the end-to-end run; Sprint 3, with supersession |
 | F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | Done, Sprint 2. From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
 | F-14 | Japanese evaluation items are machine translations of the original questions, unreviewed | From the Sprint 1 review; reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
@@ -425,15 +451,19 @@ No spike.
 | F-24 | The transaction settings `app.bulk_threshold` and `app.deleting_response` can be set by anyone with a direct SQL connection | Done, Sprint 4. From the Sprint 3 security review; members reach the database only through the API, which cannot set them. Sprint 4: Rory chose to fix it rather than accept it |
 | F-25 | Learning at export confirms every matched entry, not only the ones the draft cited | Done, Sprint 4. From the Sprint 3 review; `last_reviewed_at` then overstates review for entries that were matched but not used. Sprint 4, with the stale-entry report |
 | F-26 | Assignments stay open after a response is exported or archived | Done, Sprint 5. From the Sprint 3 end-to-end run; close them at export, or show them as closed |
-| F-27 | Exported answers carry no machine-readable marker that a model drafted them (EU AI Act Article 50(2) may apply to the provider) | From Sprint 4's framework check (`docs/governance/FRAMEWORKS.md`) |
+| F-27 | Exported answers carry no machine-readable marker that a model drafted them (EU AI Act Article 50(2) may apply to the provider) | Done, Sprint 7 (S7-3). From Sprint 4's framework check (`docs/governance/FRAMEWORKS.md`) |
 | F-28 | Reviewing an entry clears the review gate only for questions processed afterwards; questions already processed keep it until reprocessed | Done, Sprint 6 (S6-4). From the Sprint 4 build |
 | F-29 | Each question reserves $0.01 against the budget; measured cost is about $0.0005, so with the defaults processing stops after about 1,000 questions a month while real spend is around 50p | Done, Sprint 5. From the Sprint 4 end-to-end run; set the default from measured usage |
 | F-30 | After "All eligible", an accepted card reads "bulk at 0%" | Done, Sprint 6 (S6-6). From the Sprint 5 end-to-end run |
 | F-31 | The Sent list of assignments does not say who each question went to | Done, Sprint 6 (S6-7). From the Sprint 5 end-to-end run |
-| F-32 | A draft citing a replaced (superseded) entry still counts as current for bulk approval | From the Sprint 6 security review (behaviour since Sprint 4) |
-| F-33 | A "partly" verdict on a near miss can reach the 80% bulk line; only the drafter's refusal keeps it out of bulk approval | From the Sprint 6 re-measure (n016 at 80.0% in one run; r015 at 81.7%) |
+| F-32 | A draft citing a replaced (superseded) entry still counts as current for bulk approval | Done, Sprint 7 (S7-2). From the Sprint 6 security review (behaviour since Sprint 4) |
+| F-33 | A "partly" verdict on a near miss can reach the 80% bulk line; only the drafter's refusal keeps it out of bulk approval | Done, Sprint 7 (S7-1). From the Sprint 6 re-measure (n016 at 80.0% in one run; r015 at 81.7%) |
 | F-34 | An entry reviewed while a question citing it is being processed leaves that question held until the entry is reviewed or confirmed again | From the Sprint 6 security review; fails safe |
 | F-35 | After the learning threshold rose to 0.55, 53.0% of real duplicates are caught (was 66.7%), so more near-duplicate entries are added | From the Sprint 6 re-measure; related to F-11 |
+| F-36 | Excel exports have an empty title property | From the Sprint 7 end-to-end export check; the description and Provenance sheet are filled |
+| F-37 | The demo data has no pending "partly" question at the bulk line | From the Sprint 7 close; the hold was checked by database tests only |
+| F-38 | Two embedding calls appeared after a fresh seed (source not established); the demo recording keeps only Claude calls | From the Sprint 7 security review (governance screenshot) |
+| F-39 | The screenshot script checks the app address is local, not the Supabase address in `.env` | From the Sprint 7 security review |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
