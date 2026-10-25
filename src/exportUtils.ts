@@ -115,7 +115,7 @@ export function exportCSV(questions: RFIQuestion[], sourceFileName = 'export', n
 // ─── Excel ────────────────────────────────────────────────────────────────────
 
 /** The answers, a Provenance sheet, and document properties saying how they were produced. */
-export async function buildExcelExport(questions: RFIQuestion[], names: Map<string, string> = new Map()) {
+export async function buildExcelExport(questions: RFIQuestion[], names: Map<string, string> = new Map(), sourceFileName = 'export') {
   const prov = provenanceRows(questions, names);
   const answered = prov.filter((r) => r.origin !== 'not answered');
   const drafted = answered.filter((r) => modelDrafted(r.origin));
@@ -129,12 +129,13 @@ export async function buildExcelExport(questions: RFIQuestion[], names: Map<stri
     creator: 'RFI Respond',
     keywords: `ai-generated: ${aiGenerated(prov)}; generator: RFI Respond`,
     subject: 'RFI response',
+    title: `RFI response: ${sourceFileName}`,
     description: `${drafted.length} of ${answered.length} answered questions were drafted by a model${models.length ? ` (${models.join(', ')})` : ''}; every answer was approved by a person. Details per answer on the Provenance sheet.`,
   });
 }
 
 export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()) {
-  triggerDownload(await buildExcelExport(questions, names), `${stem(sourceFileName)}.xlsx`,
+  triggerDownload(await buildExcelExport(questions, names, sourceFileName), `${stem(sourceFileName)}.xlsx`,
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
 

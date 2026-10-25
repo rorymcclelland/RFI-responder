@@ -6,16 +6,24 @@
  *   npm run screenshots
  *
  * Signs in as the fictional seed users with the local development password from supabase/seed.sql,
- * so it refuses any address other than localhost. Writes docs/screenshots/*.png and
+ * so it refuses any address other than localhost, for the app and for the Supabase address in .env. Writes docs/screenshots/*.png and
  * docs/screenshots/layout-check.json (each view at 768 px: whether the page scrolls sideways).
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium, type Browser, type Page } from 'playwright';
+import { isLocalUrl, supabaseUrlFromEnv } from './local-only';
 
 const BASE = process.env.APP_URL ?? 'http://localhost:5173';
-if (!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(BASE)) {
+if (!isLocalUrl(BASE)) {
   console.error(`Refusing to sign in to ${BASE}: the seed users and their password exist only on a local install.`);
+  process.exit(1);
+}
+// Sprint 8 (F-39): the app could be local but pointed at a hosted Supabase; refuse that too.
+const ENV = join(process.cwd(), '.env');
+const SUPABASE = existsSync(ENV) ? supabaseUrlFromEnv(readFileSync(ENV, 'utf8')) : null;
+if (!SUPABASE || !isLocalUrl(SUPABASE)) {
+  console.error(`Refusing to sign in: .env points the app at ${SUPABASE ?? 'no Supabase address'}, not a local Supabase.`);
   process.exit(1);
 }
 const PASSWORD = process.env.SEED_PASSWORD ?? 'LocalDev2026pw';

@@ -204,7 +204,7 @@ export async function buildXlsx(
 
 export interface SheetSpec { name: string; headers: string[]; rows: string[][]; columnWidths?: number[] }
 /** Document properties written into the file (Sprint 7, F-27: how the content was produced). */
-export interface WorkbookProperties { creator?: string; keywords?: string; description?: string; subject?: string }
+export interface WorkbookProperties { creator?: string; keywords?: string; description?: string; subject?: string; title?: string }
 
 /** An .xlsx with several sheets and document properties. Every cell is text, never a formula. */
 export async function buildWorkbook(sheets: SheetSpec[], props: WorkbookProperties = {}): Promise<Uint8Array<ArrayBuffer>> {
@@ -214,6 +214,7 @@ export async function buildWorkbook(sheets: SheetSpec[], props: WorkbookProperti
   if (props.keywords) wb.keywords = props.keywords;
   if (props.description) wb.description = props.description;
   if (props.subject) wb.subject = props.subject;
+  if (props.title) wb.title = props.title;
   for (const sheet of sheets) {
     const ws = wb.addWorksheet(sheet.name);
     ws.addRow(sheet.headers).font = { bold: true };

@@ -10,7 +10,7 @@ export default defineConfig({
     },
     projects: [
       {
-        test: { name: 'unit', include: ['src/**/*.test.ts', 'eval/**/*.test.ts', 'supabase/functions/**/*.test.ts', 'docs/**/*.test.ts'], environment: 'node' },
+        test: { name: 'unit', include: ['src/**/*.test.ts', 'eval/**/*.test.ts', 'supabase/functions/**/*.test.ts', 'docs/**/*.test.ts', 'scripts/**/*.test.ts'], environment: 'node' },
       },
       {
         // Needs a Postgres superuser connection in DB_TEST_URL; see supabase/tests/db/harness.ts.
