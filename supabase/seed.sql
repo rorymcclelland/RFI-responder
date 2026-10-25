@@ -235,15 +235,7 @@ BEGIN
   PERFORM set_config('request.jwt.claims', json_build_object('sub', owner, 'role', 'authenticated')::text, true);
   INSERT INTO public.opportunities (name, due_date, created_by, owner_id)
   VALUES ('Corvid Analytics (fictional): vendor security questionnaire', current_date + 21, owner, owner) RETURNING id INTO opp;
-  INSERT INTO public.rfi_sessions (file_name, question_count, opportunity_id)
-  VALUES ('corvid-vendor-questionnaire.xlsx', 6, opp) RETURNING id INTO sess;
-  INSERT INTO public.rfi_questions (session_id, position, question, customer_ref, generated_answer, confidence, retrieval_score, sources_json, answerability, verdict, gate, gate_reason, language, embedding_model, judge_model, judge_best_ref, judge_reason, draft_model, prompt_version, calibration_set, draft_kind, cited_refs, processing_note, processed_at) VALUES
-    (sess, 0, 'How is customer data encrypted when it is stored?', '1.1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    (sess, 1, 'Which multi-factor authentication methods do your staff use?', '1.2', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    (sess, 2, 'How often are your systems penetration tested by an outside firm?', '1.3', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    (sess, 3, 'How long do you keep backups, and how are they protected?', '1.4', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    (sess, 4, 'How do you assess the security of your own suppliers?', '1.5', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-    (sess, 5, 'What is your process for notifying customers of a personal data breach?', '1.6', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  -- New: created, nothing uploaded yet.
 
   PERFORM set_config('request.jwt.claims', '', true);
 END $demo$;
@@ -294,6 +286,7 @@ BEGIN
     (sess, 11, 'How do you manage the risks of open-source components in your software?', 'A12', 'We manage open-source software risk through a policy that requires legal review of licenses and security review of components before adoption. Software composition analysis (SCA) tooling continuously monitors production and development dependencies for known CVEs, and developers receive automated alerts when newly disclosed vulnerabilities affect components they use. We also maintain a curated internal catalog of approved open-source libraries so that teams can adopt vetted components.
 
 [References: KB-0069]', 1, 0.6290924511409692, '[{"id":"KB-0069","score":0.6290924511409692}]'::jsonb, 2.629092451140969, 'yes', NULL, NULL, 'en', 'voyage-4', 'claude-haiku-5-5', 'KB-0069', 'KB-0069 directly describes managing open-source risk: a policy requiring license and security review before adoption, continuous SCA monitoring for CVEs, and an approved component catalog, answering the question fully.', 'claude-haiku-5-5', 'draft-2026-10-23.1', '2026-10-22.3 (calibrate split)', 'generated', ARRAY['KB-0069']::text[], NULL, '2026-10-25T07:22:47.783Z'::timestamptz);
+
   PERFORM public.bulk_accept(sess, 0.8);
   INSERT INTO public.question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text, status)
   SELECT q.id::text, sess, opp, (SELECT id FROM auth.users WHERE email = 'james.okafor@example.com'), owner, q.question, 'in_review'
@@ -340,6 +333,7 @@ BEGIN
     (sess, 7, 'Describe your incident response process.', '3.8', 'We follow the NIST SP 800-61 framework for incident response, with defined phases: preparation, detection, containment, eradication, recovery, and post-incident review. A dedicated Security Incident Response Team (SIRT) is on call 24/7. We categorize incidents by severity, with associated SLA targets for response and notification. We conduct post-incident reviews within 5 business days and track findings to closure.
 
 [References: KB-0006]', 1, 0.6427630469643656, '[{"id":"KB-0006","score":0.6427630469643656}]'::jsonb, 2.6427630469643657, 'yes', NULL, NULL, 'en', 'voyage-4', 'claude-haiku-5-5', 'KB-0006', 'KB-0006 describes the NIST SP 800-61 phased incident response process, 24/7 SIRT, severity-based SLAs, and post-incident review within 5 business days, directly answering the question.', 'claude-haiku-5-5', 'draft-2026-10-23.1', '2026-10-22.3 (calibrate split)', 'generated', ARRAY['KB-0006']::text[], NULL, '2026-10-25T07:22:58.943Z'::timestamptz);
+
   UPDATE public.rfi_questions SET final_answer = 'We follow the UK GDPR and the EU GDPR. Our Data Protection Officer reviews new processing activities, and we keep records of processing and data protection impact assessments for high-risk processing.' WHERE id = (SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = '3.4');
   UPDATE public.rfi_questions SET status = 'accepted' WHERE id = (SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = '3.4');
   UPDATE public.rfi_questions SET final_answer = 'Our platform holds customer data in UK and EU regions only, chosen by the customer at onboarding. No customer data is stored outside the chosen region.' WHERE id = (SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = '3.2');
@@ -387,6 +381,7 @@ BEGIN
     (sess, 5, 'How do you manage security for staff working remotely?', 'S6', 'Remote workers are subject to the same security policies as on-site employees. We enforce these policies through MDM, endpoint protection, and ZTNA-based access controls. Security awareness training includes modules on home office risks, such as unsecured Wi-Fi and physical eavesdropping. VPN use is mandatory when accessing sensitive systems. Remote worker equipment is company-issued and managed.
 
 [References: KB-0043]', 1, 0.6854222469969923, '[{"id":"KB-0043","score":0.6854222469969923}]'::jsonb, 2.685422246996992, 'yes', NULL, NULL, 'en', 'voyage-4', 'claude-haiku-5-5', 'KB-0043', 'KB-0043 directly describes how remote workers are secured, covering policy enforcement, MDM and endpoint protection, ZTNA and VPN access controls, training, and company-issued managed equipment, which answers the question.', 'claude-haiku-5-5', 'draft-2026-10-23.1', '2026-10-22.3 (calibrate split)', 'generated', ARRAY['KB-0043']::text[], NULL, '2026-10-25T07:23:10.068Z'::timestamptz);
+
   PERFORM public.bulk_accept(sess, 0.8);
   -- Everything else decided individually: drafts accepted as written, the rest marked not answered.
   FOR qid, kind IN SELECT q.id, q.draft_kind FROM public.rfi_questions q WHERE q.session_id = sess AND q.status = 'pending' ORDER BY q.position LOOP

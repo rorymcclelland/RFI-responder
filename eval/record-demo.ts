@@ -14,7 +14,8 @@ import { join } from 'node:path';
 import { JUDGE_PROMPT_VERSION } from '../supabase/functions/_shared/answerability';
 import { DRAFT_PROMPT_VERSION } from '../supabase/functions/_shared/drafting';
 import { GATE_PROMPT_VERSION } from '../supabase/functions/_shared/gates';
-import { checkPlan, type DemoPlan, type DemoRecording } from './demo-seed';
+import { checkPlan, type DemoCall, type DemoPlan, type DemoRecording } from './demo-seed';
+import type { ClaudeClient } from '../supabase/functions/_shared/claude';
 import { ROOT } from './lib';
 import { ensureVectors, makeClaude, MODELS, runPipeline, unreadableChecks } from './pipeline';
 import { writeSeed } from './run-demo-seed';
@@ -30,12 +31,24 @@ async function main() {
     models: { embedding: 'voyage-4', judge: MODELS.judge, gate: MODELS.gate, draft: MODELS.draft },
     promptVersions: { judge: JUDGE_PROMPT_VERSION, gate: GATE_PROMPT_VERSION, draft: DRAFT_PROMPT_VERSION },
     results: {},
+    usage: {},
   };
   for (const r of plan.responses.filter((x) => x.stage !== 'new')) {
     const questions = r.questions.map((q) => ({ id: `${r.key}-${q.ref}`, question: q.text }));
     await ensureVectors(questions.map((q) => q.question));
     console.log(`${r.name}: ${questions.length} questions`);
-    const out = await runPipeline(client, questions);
+    // Log every call, by job (told apart by the system prompt, as the tests do), as the owner's usage.
+    const calls: DemoCall[] = [];
+    const logging: ClaudeClient = {
+      async json(req) {
+        const r = await client.json(req);
+        const kind = req.system.startsWith('You classify') ? 'gate' : req.system.startsWith('You check') ? 'judge' : 'draft';
+        calls.push({ kind, model: r.model, inputTokens: r.usage.inputTokens, outputTokens: r.usage.outputTokens });
+        return r;
+      },
+    } as ClaudeClient;
+    const out = await runPipeline(logging, questions);
+    recording.usage![r.key] = calls;
     if (unreadableChecks(out)) console.log(`  ${unreadableChecks(out)} unreadable checks: rerun to record a clean run`);
     recording.results[r.key] = questions.map((q) => out.find((o) => o.id === q.id)!);
   }

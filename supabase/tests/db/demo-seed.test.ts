@@ -27,7 +27,8 @@ const row = (key: string, ref: string, text: string): ProcessedQuestion => ({
 });
 const recording: DemoRecording = {
   recordedAt: '2026-10-24T09:00:00.000Z', planVersion: plan.version, models: { judge: 'claude-haiku-5-5' }, promptVersions: { judge: 'judge-test' },
-  results: Object.fromEntries(plan.responses.map((r) => [r.key, r.questions.map((q) => row(r.key, q.ref, q.text))])),
+  results: Object.fromEntries(plan.responses.filter((r) => r.stage !== 'new').map((r) => [r.key, r.questions.map((q) => row(r.key, q.ref, q.text))])),
+  usage: { bluefin: [{ kind: 'judge', model: 'claude-haiku-5-5', inputTokens: 1000, outputTokens: 100 }, { kind: 'draft', model: 'claude-haiku-5-5', inputTokens: 2000, outputTokens: 300 }] },
 };
 
 beforeAll(async () => {
@@ -53,9 +54,14 @@ describe('S7-5 demo responses, one per stage', () => {
     ]);
   });
 
-  it('the new response is uploaded but not processed', async () => {
-    expect(await one(`SELECT count(*) FILTER (WHERE q.processed_at IS NULL)::int AS unprocessed, count(*)::int AS n FROM rfi_questions q JOIN rfi_sessions s ON s.id = q.session_id JOIN opportunities o ON o.id = s.opportunity_id WHERE o.name LIKE 'Corvid%'`))
-      .toEqual({ unprocessed: 6, n: 6 });
+  it('the new response has nothing uploaded yet, so the overview shows it as new', async () => {
+    expect(await one(`SELECT stage, total FROM response_overview WHERE name LIKE 'Corvid%'`)).toEqual({ stage: 'new', total: 0 });
+  });
+
+  it('the recorded calls are the owners\' usage, priced by the app', async () => {
+    const r = await one<{ n: number; who: string; priced: boolean }>(`SELECT count(*)::int AS n, min(u.email) AS who, bool_and(a.cost_usd > 0) AS priced
+      FROM ai_usage a JOIN auth.users u ON u.id = a.user_id WHERE a.function = 'process-questions'`);
+    expect(r).toEqual({ n: 2, who: 'priya.sharma@example.com', priced: true });
   });
 
   it('in review: bulk approval accepted only "yes" drafts, as the owner; the rest wait, two are assigned', async () => {

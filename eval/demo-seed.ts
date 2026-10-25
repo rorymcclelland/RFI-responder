@@ -33,7 +33,10 @@ export interface DemoRecording {
   promptVersions: Record<string, string>;
   /** Processed rows by response key, in the plan's question order. */
   results: Record<string, ProcessedQuestion[]>;
+  /** Every Claude call made while processing each response, entered as the owner's usage. */
+  usage?: Record<string, DemoCall[]>;
 }
+export interface DemoCall { kind: 'judge' | 'gate' | 'draft'; model: string; inputTokens: number; outputTokens: number }
 export interface KbRow { question: string; answer: string; tags: string[]; source: string }
 
 const SAFE_REF = /^[\p{L}\p{N}.()\- ]{1,20}$/u;
@@ -97,12 +100,17 @@ function questionValues(pos: number, q: DemoQuestion, p: ProcessedQuestion | nul
 const actAs = (who: string) =>
   `  PERFORM set_config('request.jwt.claims', json_build_object('sub', ${who}, 'role', 'authenticated')::text, true);`;
 
-function responseSql(r: DemoResponse, results: ProcessedQuestion[] | undefined): string {
+function responseSql(r: DemoResponse, results: ProcessedQuestion[] | undefined, calls: DemoCall[] = [], at = ''): string {
   const processed = r.stage !== 'new';
   if (processed && (!results || results.length !== r.questions.length)) {
     throw new Error(`${r.key}: the recording has ${results?.length ?? 0} results for ${r.questions.length} questions; run npm run demo:record`);
   }
   const rows = r.questions.map((q, i) => questionValues(i, q, processed ? results![i] : null)).join(',\n    ');
+  // The recorded Claude calls, as the owner's usage of process-questions; the app's trigger prices them.
+  const usage = calls.length
+    ? `  INSERT INTO public.ai_usage (user_id, function, kind, provider, model, input_tokens, output_tokens, session_id, at) VALUES
+    ${calls.map((c) => `(owner, 'process-questions', ${lit(c.kind)}, 'anthropic', ${lit(c.model)}, ${num(c.inputTokens)}, ${num(c.outputTokens)}, sess, ${lit(at)}::timestamptz)`).join(',\n    ')};`
+    : '';
   const by = (ref: string) => `(SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = ${lit(ref)})`;
   const steps: string[] = [];
   // Decisions made one at a time as the owner, as a person would in the app.
@@ -140,10 +148,11 @@ BEGIN
 ${actAs('owner')}
   INSERT INTO public.opportunities (name, due_date, created_by, owner_id)
   VALUES (${lit(r.name)}, current_date + ${r.dueDays}, owner, owner) RETURNING id INTO opp;
-  INSERT INTO public.rfi_sessions (file_name, question_count, opportunity_id)
+${processed ? `  INSERT INTO public.rfi_sessions (file_name, question_count, opportunity_id)
   VALUES (${lit(r.file)}, ${r.questions.length}, opp) RETURNING id INTO sess;
   INSERT INTO public.rfi_questions (${QUESTION_COLUMNS.join(', ')}) VALUES
     ${rows};
+${usage}` : '  -- New: created, nothing uploaded yet.'}
 ${steps.join('\n')}
   PERFORM set_config('request.jwt.claims', '', true);
 END $demo$;`;
@@ -161,7 +170,7 @@ export function demoSeedSql(plan: DemoPlan, recording: DemoRecording | null): st
   return `-- Demo responses, one per stage (sample-data/demo-plan.json ${plan.version}). Every company,
 -- person and question is fictional.
 ${provenance}
-${responses.map((r) => responseSql(r, recording?.results[r.key])).join('\n\n')}`;
+${responses.map((r) => responseSql(r, recording?.results[r.key], recording?.usage?.[r.key], recording?.recordedAt)).join('\n\n')}`;
 }
 
 /** Replace the text between `-- BEGIN <name>` and `-- END <name>`, keeping the markers. */

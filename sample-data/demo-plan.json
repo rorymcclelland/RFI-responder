@@ -1,22 +1,15 @@
 {
   "version": "2026-10-24.1",
-  "note": "Synthetic demo responses (Sprint 7, S7-5). Every company, person and question is invented. Questions in responses past the 'new' stage are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
+  "note": "Synthetic demo responses (Sprint 7, S7-5). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
   "responses": [
     {
       "key": "corvid",
       "name": "Corvid Analytics (fictional): vendor security questionnaire",
       "owner": "tom.richardson@example.com",
       "dueDays": 21,
-      "file": "corvid-vendor-questionnaire.xlsx",
+      "file": "",
       "stage": "new",
-      "questions": [
-        { "ref": "1.1", "text": "How is customer data encrypted when it is stored?" },
-        { "ref": "1.2", "text": "Which multi-factor authentication methods do your staff use?" },
-        { "ref": "1.3", "text": "How often are your systems penetration tested by an outside firm?" },
-        { "ref": "1.4", "text": "How long do you keep backups, and how are they protected?" },
-        { "ref": "1.5", "text": "How do you assess the security of your own suppliers?" },
-        { "ref": "1.6", "text": "What is your process for notifying customers of a personal data breach?" }
-      ]
+      "questions": []
     },
     {
       "key": "bluefin",
@@ -27,22 +20,66 @@
       "stage": "in_review",
       "bulkAt": 0.8,
       "assign": [
-        { "ref": "A9", "to": "james.okafor@example.com", "status": "in_review" },
-        { "ref": "A8", "to": "lisa.huang@example.com", "status": "pending" }
+        {
+          "ref": "A9",
+          "to": "james.okafor@example.com",
+          "status": "in_review"
+        },
+        {
+          "ref": "A8",
+          "to": "lisa.huang@example.com",
+          "status": "pending"
+        }
       ],
       "questions": [
-        { "ref": "A1", "text": "How do you protect data at rest in your platform?" },
-        { "ref": "A2", "text": "Describe how user access is granted, reviewed and removed." },
-        { "ref": "A3", "text": "How are security patches assessed and rolled out?" },
-        { "ref": "A4", "text": "What logging and monitoring do you have in place to detect attacks?" },
-        { "ref": "A5", "text": "How do you test that backups can actually be restored?" },
-        { "ref": "A6", "text": "How do you secure containerised workloads in your cloud environment?" },
-        { "ref": "A7", "text": "What is the annual subscription price for 250 users?" },
-        { "ref": "A8", "text": "Will you accept unlimited liability for losses caused by a data breach?" },
-        { "ref": "A9", "text": "What is your mean time to detect a security incident?" },
-        { "ref": "A10", "text": "フィッシング攻撃をどのように検知し、対応していますか？" },
-        { "ref": "A11", "text": "Do you give staff paid volunteering days each year?" },
-        { "ref": "A12", "text": "How do you manage the risks of open-source components in your software?" }
+        {
+          "ref": "A1",
+          "text": "How do you protect data at rest in your platform?"
+        },
+        {
+          "ref": "A2",
+          "text": "Describe how user access is granted, reviewed and removed."
+        },
+        {
+          "ref": "A3",
+          "text": "How are security patches assessed and rolled out?"
+        },
+        {
+          "ref": "A4",
+          "text": "What logging and monitoring do you have in place to detect attacks?"
+        },
+        {
+          "ref": "A5",
+          "text": "How do you test that backups can actually be restored?"
+        },
+        {
+          "ref": "A6",
+          "text": "How do you secure containerised workloads in your cloud environment?"
+        },
+        {
+          "ref": "A7",
+          "text": "What is the annual subscription price for 250 users?"
+        },
+        {
+          "ref": "A8",
+          "text": "Will you accept unlimited liability for losses caused by a data breach?"
+        },
+        {
+          "ref": "A9",
+          "text": "What is your mean time to detect a security incident?"
+        },
+        {
+          "ref": "A10",
+          "text": "フィッシング攻撃をどのように検知し、対応していますか？"
+        },
+        {
+          "ref": "A11",
+          "text": "Do you give staff paid volunteering days each year?"
+        },
+        {
+          "ref": "A12",
+          "text": "How do you manage the risks of open-source components in your software?"
+        }
       ]
     },
     {
@@ -60,14 +97,38 @@
         "3.4": "We follow the UK GDPR and the EU GDPR. Our Data Protection Officer reviews new processing activities, and we keep records of processing and data protection impact assessments for high-risk processing."
       },
       "questions": [
-        { "ref": "3.1", "text": "How does your organisation encrypt data in transit between services?" },
-        { "ref": "3.2", "text": "In which regions is customer data stored?" },
-        { "ref": "3.3", "text": "What controls protect databases that hold personal data?" },
-        { "ref": "3.4", "text": "How do you comply with GDPR?" },
-        { "ref": "3.5", "text": "How is sensitive data handled in test and development environments?" },
-        { "ref": "3.6", "text": "How do you secure data used by machine learning systems?" },
-        { "ref": "3.7", "text": "What are your fees for implementation services?" },
-        { "ref": "3.8", "text": "Describe your incident response process." }
+        {
+          "ref": "3.1",
+          "text": "How does your organisation encrypt data in transit between services?"
+        },
+        {
+          "ref": "3.2",
+          "text": "In which regions is customer data stored?"
+        },
+        {
+          "ref": "3.3",
+          "text": "What controls protect databases that hold personal data?"
+        },
+        {
+          "ref": "3.4",
+          "text": "How do you comply with GDPR?"
+        },
+        {
+          "ref": "3.5",
+          "text": "How is sensitive data handled in test and development environments?"
+        },
+        {
+          "ref": "3.6",
+          "text": "How do you secure data used by machine learning systems?"
+        },
+        {
+          "ref": "3.7",
+          "text": "What are your fees for implementation services?"
+        },
+        {
+          "ref": "3.8",
+          "text": "Describe your incident response process."
+        }
       ]
     },
     {
@@ -80,12 +141,30 @@
       "outcome": "won",
       "bulkAt": 0.8,
       "questions": [
-        { "ref": "S1", "text": "What SOC 2 reports do you hold?" },
-        { "ref": "S2", "text": "How do you manage privileged accounts?" },
-        { "ref": "S3", "text": "Describe your approach to single sign-on and identity federation." },
-        { "ref": "S4", "text": "How are your build and release pipelines secured?" },
-        { "ref": "S5", "text": "How do you secure email against phishing and spoofing?" },
-        { "ref": "S6", "text": "How do you manage security for staff working remotely?" }
+        {
+          "ref": "S1",
+          "text": "What SOC 2 reports do you hold?"
+        },
+        {
+          "ref": "S2",
+          "text": "How do you manage privileged accounts?"
+        },
+        {
+          "ref": "S3",
+          "text": "Describe your approach to single sign-on and identity federation."
+        },
+        {
+          "ref": "S4",
+          "text": "How are your build and release pipelines secured?"
+        },
+        {
+          "ref": "S5",
+          "text": "How do you secure email against phishing and spoofing?"
+        },
+        {
+          "ref": "S6",
+          "text": "How do you manage security for staff working remotely?"
+        }
       ]
     }
   ]
