@@ -2,7 +2,7 @@
 // enforces who may approve and what is held back; questions are inserted as text only and
 // processed server-side in batches of ten.
 import { describe, expect, it, vi } from 'vitest';
-import { bulkAcceptInDb, describeBulk, insertQuestions, processInBatches } from './sessions';
+import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, processInBatches } from './sessions';
 
 describe('bulkAcceptInDb', () => {
   it('calls bulk_accept with the session and threshold, and returns what it did', async () => {
@@ -105,5 +105,19 @@ describe('processInBatches at the usage caps (Sprint 4, S4-1)', () => {
     const invoke = vi.fn().mockResolvedValueOnce({ data: null, error: new Error('Failed to send a request') });
     const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a'], () => undefined);
     expect(r.reasons).toEqual(['Failed to send a request']);
+  });
+});
+
+describe('exportNotice (Sprint 11, S11-1)', () => {
+  const at = '2026-10-25T10:00:00Z';
+  it('says nothing before an export', () => {
+    expect(exportNotice({ exportedAt: null, changedSinceExportAt: null }, 'review')).toBeNull();
+  });
+  it('warns on the export step that a change reopens the export', () => {
+    expect(exportNotice({ exportedAt: at, changedSinceExportAt: null }, 'export')).toMatch(/reopens the export/);
+    expect(exportNotice({ exportedAt: at, changedSinceExportAt: null }, 'review')).toBeNull();
+  });
+  it('after a change, asks for the export to be recorded again', () => {
+    expect(exportNotice({ exportedAt: at, changedSinceExportAt: at }, 'review')).toMatch(/Record export again/);
   });
 });

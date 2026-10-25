@@ -87,6 +87,8 @@ const STAGE: Record<ResponseStage, { label: string; pill: string; accent: string
   in_review: { label: 'In review', pill: 'bg-amber-50 text-amber-700 border-amber-200',       accent: 'border-l-amber-300' },
   ready:     { label: 'Ready',     pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', accent: 'border-l-emerald-400' },
   exported:  { label: 'Exported',  pill: 'bg-ink-900 text-white border-ink-900',              accent: 'border-l-ink-700' },
+  // Sprint 11 (S11-1): answers changed after the export was recorded; record it again.
+  changed:   { label: 'Changed since export', pill: 'bg-amber-50 text-amber-800 border-amber-300', accent: 'border-l-amber-400' },
   archived:  { label: 'Archived',  pill: 'bg-ink-50 text-ink-500 border-ink-200',             accent: 'border-l-ink-200' },
 };
 const OUTCOME_LABEL: Record<ResponseOutcome, string> = { won: 'Won', lost: 'Lost', withdrawn: 'Withdrawn' };
@@ -341,7 +343,7 @@ interface Props {
 }
 
 type Tab = 'active' | 'archived';
-const ACTIVE_STAGES: ResponseStage[] = ['new', 'in_review', 'ready', 'exported'];
+const ACTIVE_STAGES: ResponseStage[] = ['new', 'in_review', 'ready', 'exported', 'changed'];
 
 export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelectOpportunity, onImportKB }: Props) {
   const [responses, setResponses] = useState<Opportunity[]>([]);

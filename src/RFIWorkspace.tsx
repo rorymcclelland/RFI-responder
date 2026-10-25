@@ -13,7 +13,7 @@ import { extractFromWord } from './lib/wordExtraction';
 import { describeExtraction, fromExtraction, toInsertRows, type Draft } from './lib/questionDrafts';
 import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
-import { bulkAcceptInDb, describeBulk, insertQuestions, processInBatches, saveQuestionPatch } from './lib/sessions';
+import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
 import { describeLearning, recordExport } from './lib/responses';
 import { supabase } from './lib/supabase';
@@ -85,6 +85,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [uploadError, setUploadError]     = useState('');
   const [notice, setNotice]               = useState('');
   const [listCollapsed, setListCollapsed] = useState(false);
+  // Sprint 11 (S11-1): the open session's export, and whether answers changed since.
+  const [exportState, setExportState]     = useState<ExportState>({ exportedAt: null, changedSinceExportAt: null });
   const rawRows                           = useRef<Row[]>([]);
   // Sprint 5 (S5-3): questions found in a Word document, while the person checks them.
   const [drafts, setDrafts]               = useState<Draft[]>([]);
@@ -100,6 +102,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     }
     setFileName(session.fileName);
     setSessionId(session.id);
+    setExportState(await loadExportState(supabase, session.id));
     setStep(session.status === 'completed' ? 'export' : 'review');
     setLearning('');
     setListCollapsed(session.status === 'completed');
@@ -232,7 +235,13 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       previous = q;
       return { ...q, ...patch };
     }));
-    saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).catch((err: Error & { partial?: boolean }) => {
+    saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).then(async () => {
+      // A change to an exported session reopens its export (S11-1): show the review again, with why.
+      if (!sessionId || !exportState.exportedAt) return;
+      const next = await loadExportState(supabase, sessionId);
+      setExportState(next);
+      if (next.changedSinceExportAt) { setStep('review'); setListCollapsed(false); }
+    }).catch((err: Error & { partial?: boolean }) => {
       setUploadError(err.message);
       // Part of the change is in the database (the answer, not the decision): show what was saved.
       if (err.partial && sessionId) {
@@ -243,7 +252,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
       }
     });
-  }, [sessionId]);
+  }, [sessionId, exportState.exportedAt]);
 
   // The database records the approval (S3-2); show the same record at once rather than after a reload.
   const handleAccept   = useCallback((id: string, ans: string) => updateQuestion(id, {
@@ -281,6 +290,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     setUploadError(''); setNotice('');
     try {
       const summary = await recordExport(supabase, sessionId);
+      setExportState(await loadExportState(supabase, sessionId));
       setLearning(describeLearning(summary));
       setQuestions(await loadQuestions(supabase, sessionId));
       if (summary.added || summary.superseded) {
@@ -299,7 +309,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const startNew = () => {
     setStep('idle'); setQuestions([]); setFileName(''); setHeaders([]);
     setQuestionCol(''); setProgress(0); setSessionId(null);
-    setLearning(''); setListCollapsed(false); setNotice('');
+    setLearning(''); setListCollapsed(false); setNotice(''); setExportState({ exportedAt: null, changedSinceExportAt: null });
     setFilter('all'); setConfGroup('all'); setSearch(''); setExpandedId(null);
     loadPastSessions();
   };
@@ -426,6 +436,11 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         />
       )}
 
+      {exportNotice(exportState, step) && (
+        <div role="status" className={`flex items-center gap-2 text-sm rounded-xl px-4 py-3 font-medium border ${exportState.changedSinceExportAt ? 'text-amber-800 bg-amber-50 border-amber-200' : 'text-ink-600 bg-ink-50 border-ink-200'}`}>
+          <AlertTriangle size={14} className="flex-shrink-0" /> {exportNotice(exportState, step)}
+        </div>
+      )}
       {notice && (
         <div role="status" className="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 font-medium">
           <CheckCircle2 size={14} className="flex-shrink-0" /> {notice}

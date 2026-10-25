@@ -18,7 +18,7 @@ export interface RetrievedSource {
 // ─── Opportunities ────────────────────────────────────────────────────────────
 
 /** Where a response is in its life (computed by the database view response_overview, Sprint 3). */
-export type ResponseStage = 'new' | 'in_review' | 'ready' | 'exported' | 'archived';
+export type ResponseStage = 'new' | 'in_review' | 'ready' | 'exported' | 'changed' | 'archived';
 export type ResponseOutcome = 'won' | 'lost' | 'withdrawn';
 
 export interface Opportunity {

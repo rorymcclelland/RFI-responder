@@ -32,7 +32,7 @@ On a narrow window some of these show as icons only; hover over an icon to see i
 
 **Opportunities** lists the responses in progress (**Active**) and finished ones (**Archived**). Each card shows:
 
-- the response's name, its owner and its stage: **New** (no questions yet), **In review** (questions still pending), **Ready** (every question decided), **Exported**, or **Archived** with its outcome;
+- the response's name, its owner and its stage: **New** (no questions yet), **In review** (questions still pending), **Ready** (every question decided), **Exported**, **Changed since export** (an answer changed after the export was recorded), or **Archived** with its outcome;
 - how many of its questions are decided, and how many pricing or legal questions are still open;
 - the due date, and **Overdue** or **At risk** when it needs attention: at risk means three working days or fewer left with less than 80% of questions decided (or none uploaded yet), or a day or less left with pricing or legal questions still open;
 - how many assignments to colleagues are still open (**with experts**). An owner or admin counts them all; anyone else counts only their own.

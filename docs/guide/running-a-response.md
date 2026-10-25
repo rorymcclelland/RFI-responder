@@ -97,6 +97,10 @@ The app never sends anything to the customer: you send the files.
 
 ![An exported response and what the knowledge base learned](../screenshots/6-export-and-learning.png)
 
+### Changing an answer after the export
+
+If you find a mistake after recording the export, you can still change an answer or a decision; the owner, an admin or the person the question is assigned to can. The change reopens the export: it is recorded in the audit log with who made it, the response shows **Changed since export** on the overview, and the workspace says the files already downloaded no longer match. Accept the changed answer, then choose **Record export** again and download the answers again. Only the changed answers are learned the second time: an admin's correction replaces the entry learned before, and anyone else's waits beside it for an admin's review.
+
 ### What the knowledge base learns
 
 Recording the export turns edited and person-written answers into knowledge-base entries, linked to this response. The panel says what happened to each kind of answer. In short:
@@ -111,6 +115,6 @@ Recording the export turns edited and person-written answers into knowledge-base
 
 Choose **New upload** (or **Start New RFI** after the export) to add another file to the same response; earlier files stay under **Previous Sessions** (the ten most recent are listed), where **Resume** or **View** reopens them. The workspace opens on the most recent file.
 
-When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the export recorded first; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
+When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the export recorded first, and recorded again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 
 A response created by mistake can be deleted by an admin (see [Administering RFI Respond](admin.md)).

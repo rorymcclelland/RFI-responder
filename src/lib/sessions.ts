@@ -137,3 +137,29 @@ export async function processInBatches(
   }
   return { failed, reasons: [...new Set(reasons)] };
 }
+
+/**
+ * Sprint 11 (S11-1, F-42; Rory, Q1): a session's export, and whether it has changed since. Answers
+ * can still change after an export is recorded; the database then marks the session, and the
+ * export must be recorded again.
+ */
+export interface ExportState { exportedAt: string | null; changedSinceExportAt: string | null }
+
+export async function loadExportState(client: SupabaseClient, sessionId: string): Promise<ExportState> {
+  const { data, error } = await client.from('rfi_sessions').select('exported_at, changed_since_export_at').eq('id', sessionId).maybeSingle();
+  if (error || !data) return { exportedAt: null, changedSinceExportAt: null };
+  return { exportedAt: (data.exported_at as string | null) ?? null, changedSinceExportAt: (data.changed_since_export_at as string | null) ?? null };
+}
+
+/** What the workspace says about the export, or null when there is nothing to say. */
+export function exportNotice(s: ExportState, step: 'review' | 'export' | string): string | null {
+  if (!s.exportedAt) return null;
+  const when = new Date(s.exportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  if (s.changedSinceExportAt) {
+    return `Answers have changed since the export was recorded on ${when}, so the files already downloaded do not show them. When you are ready, choose Record export again and download the answers again.`;
+  }
+  if (step === 'export') {
+    return 'Changing an answer or a decision now reopens the export: the change is recorded in the audit log, and the export must be recorded again.';
+  }
+  return null;
+}
