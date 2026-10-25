@@ -111,6 +111,8 @@ export interface UserProfile {
   isAdmin: boolean;
   email?: string;
   createdAt: string;
+  /** When the person finished or skipped the introduction (Sprint 10, S10-6); null until then. */
+  onboardedAt?: string | null;
 }
 
 export interface OpportunityContributor {

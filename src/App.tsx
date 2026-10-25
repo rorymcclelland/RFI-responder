@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Database, X, BookOpen, Tag, CheckCircle2,
   Plus, ChevronLeft, Briefcase,
-  Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale,
+  Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
 import { loadKnowledgeBase, importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
@@ -16,6 +16,10 @@ import GovernanceAdmin from './GovernanceAdmin';
 import { loadUsageStatus, type UsageStatus } from './lib/usage';
 import { addEntry, parseTags } from './lib/entryReview';
 import { supabase } from './lib/supabase';
+import HelpView from './help/HelpView';
+import Introduction from './help/Introduction';
+import { startPage } from './lib/guide';
+import { markOnboarded, shouldShowIntroduction, stepsFor } from './lib/onboarding';
 import type { Session } from '@supabase/supabase-js';
 
 // ─── KB Entry ─────────────────────────────────────────────────────────────────
@@ -169,7 +173,7 @@ function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: Knowled
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
-type AppView = 'opportunities' | 'inbox' | 'users' | 'governance';
+type AppView = 'opportunities' | 'inbox' | 'users' | 'governance' | 'help';
 
 export default function App() {
   const [session, setSession]                     = useState<Session | null>(null);
@@ -185,6 +189,10 @@ export default function App() {
   // S4-1: admins are warned past the budget's warning point; everyone is told when it is reached.
   const [usage, setUsage]                         = useState<UsageStatus | null>(null);
   const [navOpen, setNavOpen]                     = useState(false);
+  // Sprint 10: the guide inside the app (S10-2) and the introduction (S10-6).
+  const [helpAt, setHelpAt]                       = useState<{ page: string; anchor: string | null } | null>(null);
+  const [helpMenuOpen, setHelpMenuOpen]           = useState(false);
+  const [introOpen, setIntroOpen]                 = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -223,8 +231,10 @@ export default function App() {
         id: data.id, displayName: data.display_name,
         jobTitle: data.job_title ?? '', department: data.department ?? '',
         expertiseTags: data.expertise_tags ?? [], isAdmin: data.is_admin,
-        createdAt: data.created_at,
+        createdAt: data.created_at, onboardedAt: data.onboarded_at ?? null,
       });
+      // Shown after the first sign-in, on any browser, until finished or skipped (S10-6).
+      if (shouldShowIntroduction({ onboardedAt: data.onboarded_at ?? null })) setIntroOpen(true);
     }
     await loadAllUsers();
     await refreshKB();
@@ -290,6 +300,22 @@ export default function App() {
     setView(v);
     setActiveOpportunity(null);
     setNavOpen(false);
+    setHelpMenuOpen(false);
+  };
+
+  const openGuide = (page: string, anchor: string | null) => {
+    setHelpAt({ page, anchor });
+    navigate('help');
+  };
+
+  /** Close the introduction and remember it on the account; a failed save only means it is shown again. */
+  const closeIntroduction = () => {
+    setIntroOpen(false);
+    if (currentUser && !currentUser.onboardedAt) {
+      void markOnboarded(supabase).then((saved) => {
+        if (saved) setCurrentUser((u) => (u ? { ...u, onboardedAt: new Date().toISOString() } : u));
+      });
+    }
   };
 
   // Loading
@@ -319,6 +345,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-ink-50 flex flex-col">
+      {introOpen && (
+        <Introduction
+          steps={stepsFor(currentUser.isAdmin)}
+          onClose={closeIntroduction}
+          onOpenGuide={(page, anchor) => { closeIntroduction(); openGuide(page, anchor); }}
+        />
+      )}
       {showKBModal && (
         <KBModal
           entries={kb}
@@ -404,8 +437,36 @@ export default function App() {
             </div>
           )}
 
-          {/* Right: KB + user */}
+          {/* Right: Help, KB and user */}
           <div className="ml-auto flex items-center gap-2">
+            {/* Help (S10-2): the guide, and the introduction again (S10-6). */}
+            <div className="relative hidden sm:block">
+              <button
+                onClick={() => setHelpMenuOpen((o) => !o)}
+                onKeyDown={(e) => { if (e.key === 'Escape') setHelpMenuOpen(false); }}
+                aria-haspopup="menu"
+                aria-expanded={helpMenuOpen}
+                title="Help"
+                aria-label="Help"
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl border transition-colors ${view === 'help' && !activeOpportunity ? 'bg-ink-900 text-white border-ink-900' : 'text-ink-600 border-ink-200 hover:bg-ink-50 hover:border-ink-300'}`}
+              >
+                <HelpCircle size={15} />
+                <span className="hidden lg:inline">Help</span>
+              </button>
+              {helpMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setHelpMenuOpen(false)} />
+                  <div role="menu" onKeyDown={(e) => { if (e.key === 'Escape') setHelpMenuOpen(false); }}
+                    className="absolute right-0 mt-2 w-56 bg-white border border-ink-200 rounded-2xl shadow-modal py-1.5 z-50">
+                    <button role="menuitem" autoFocus onClick={() => openGuide(startPage(currentUser.isAdmin), null)}
+                      className="w-full text-left text-sm px-4 py-2.5 hover:bg-ink-50 text-ink-700 font-medium">Open the guide</button>
+                    <button role="menuitem" onClick={() => { setHelpMenuOpen(false); setIntroOpen(true); }}
+                      className="w-full text-left text-sm px-4 py-2.5 hover:bg-ink-50 text-ink-700 font-medium">Show the introduction</button>
+                  </div>
+                </>
+              )}
+            </div>
+
             <button
               onClick={() => setShowKBModal(true)}
               className="hidden sm:flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-ink-600 border border-ink-200 rounded-xl hover:bg-ink-50 hover:border-ink-300 transition-colors"
@@ -468,6 +529,18 @@ export default function App() {
                 <Database size={18} /> Knowledge Base
                 <span className="ml-auto text-2xs bg-ink-900 text-white px-1.5 py-0.5 rounded-full font-bold">{kb.length}</span>
               </button>
+              <button
+                onClick={() => openGuide(startPage(currentUser.isAdmin), null)}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-ink-600 hover:bg-ink-50 transition-colors"
+              >
+                <HelpCircle size={18} /> Help
+              </button>
+              <button
+                onClick={() => { setNavOpen(false); setIntroOpen(true); }}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-ink-600 hover:bg-ink-50 transition-colors"
+              >
+                <Sparkles size={18} /> Show the introduction
+              </button>
             </div>
           </div>
         )}
@@ -511,6 +584,13 @@ export default function App() {
           <UserManagement currentUserId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : view === 'governance' && currentUser.isAdmin ? (
           <GovernanceAdmin />
+        ) : view === 'help' ? (
+          <HelpView
+            page={helpAt?.page ?? startPage(currentUser.isAdmin)}
+            anchor={helpAt?.anchor ?? null}
+            onOpen={openGuide}
+            onShowIntroduction={() => setIntroOpen(true)}
+          />
         ) : (
           <OpportunitiesDashboard
             currentUserId={currentUser.id}
