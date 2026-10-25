@@ -1,25 +1,103 @@
 # RFI Respond
 
-An internal tool that helps an organisation answer requests for information (RFIs) and requests for quotation (RFQs) faster and better, by turning its past answers into an **institutional knowledge base** that grows with every response.
+An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product brief: [`docs/PRODUCT.md`](docs/PRODUCT.md). Backlog: [`docs/BACKLOG.md`](docs/BACKLOG.md). Decisions: [`docs/decisions/`](docs/decisions/).
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in eight sprints (Sprints 0 to 7). Synthetic data only; runs locally.
 
-## Status
+![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
-Being upgraded from a prototype generated with Bolt.new, sprint by sprint. **Sprints 0 to 6 are complete** (clean-up; retrieval and confidence; grounded drafting and safety gates; workflow and the learning loop; cost controls and governance; Word questionnaires; checker reliability). What the code does today, stated plainly:
+## What it does
 
-- **Processing happens on the server.** Each uploaded question goes to a Supabase Edge Function, which matches it against the knowledge base by meaning (voyage-4, or a local model through Ollama), asks Claude whether the matched entries actually answer it, checks it for pricing and legal or contractual terms, and drafts an answer. Provider keys never reach the browser.
-- **Drafts are grounded and checked.** Claude writes only from the matched entries and cites them; code then rejects a draft that cites an entry it was not given, or contains a figure or link not in its sources. When the entries do not answer the question, there is no draft. Pricing questions are never drafted. Japanese questions get Japanese drafts, labelled as translations.
-- **Confidence is calibrated** on synthetic evaluation sets (`docs/evals/`): the measured chance that the knowledge base answers the question with the top entry. The sets are small, so the figures are estimates.
-- **Bulk approval is limited by the database**, not the screen: only the response owner or an admin, and never for pricing, legal, translated, unprocessed or uncalibrated questions, or ones without a draft. A single question is decided only by the response owner, an admin, or someone it is assigned to, and every approval is recorded (who, how, at what threshold).
-- **The knowledge base learns at export.** Recording an export is refused while any question is pending. It then turns edited and person-written answers into entries linked to the response they came from, replaces an entry only when the answer is a near-duplicate the checker confirmed (threshold measured per embedding model), and confirms entries that unedited drafts used. Pricing and Japanese answers, and anything the server did not process, are never learned.
-- **Spend is recorded and capped.** Every AI call is recorded with the provider's token counts and priced from dated published prices. Work is reserved before any call against per-person daily limits and a monthly budget, which admins set and watch on the Governance page.
-- **The knowledge base is reviewed.** Entries added by members, and answers learned from anyone but an admin, stay unreviewed until an admin approves them; entries fall due for review after 12 months. Drafts citing an unreviewed or overdue entry are never bulk-approved. The [governance pack](docs/governance/) (model card, risk register, data handling, provider terms) is tested against the code.
-- **Word questionnaires are read safely.** A `.docx` is read in the browser with size and decompression limits; Claude finds the questions, and code keeps only whole paragraphs, sentences or lettered parts found word for word, with the document's own numbers. A person checks the list before anything is saved. On a synthetic set of 237 questions in six layouts, 100% were found with nothing extra, and planted instructions changed nothing (`docs/evals/extraction-2026-10-23.md`).
-- **The checker's replies are complete and checked.** Sprint 6 found about a third of its replies were being cut off and counted as "no"; with that fixed it separates near misses from answerable questions with an AUROC of 0.997 on the synthetic set, and a reply that cannot be read leaves the question uncalibrated rather than scored. Run five times, its verdict still changed for 7.2% of test questions, mostly between "yes" and "partly" (`docs/evals/consistency-2026-10-23-sprint6.md`).
-- **Responses are archived, not deleted.** An archived response keeps its outcome (won, lost, withdrawn) and can no longer be changed. An admin can delete a response created in error, with a reason, and the deletion is logged.
+- **Reads the questions** from a spreadsheet or a Word questionnaire. Files are opened in the browser with size and decompression limits. For a Word document the text is then sent to the server, where Claude finds the questions; each is kept only if it appears in the document word for word, with the customer's own numbering, and a person checks the list before anything is saved.
+- **Drafts each answer from the knowledge base**, on the server. The question is matched by meaning (voyage-4 embeddings, or a local model); Claude Haiku 5.5 checks whether the matched entries actually answer it, then drafts only from those entries and cites them. Code rejects a draft that cites an entry it was not given, or contains a figure, link or email address not in its sources; the question is then left without a draft, with a note saying why, for a person to answer. When nothing answers the question, or it asks for a price, there is no draft.
+- **Says how confident it is, and why.** Confidence is calibrated on an evaluation set: the measured chance that the knowledge base answers the question. The card shows the checker's verdict and its one-sentence reason.
+- **Lets the owner approve in bulk, within limits the database enforces.** A question qualifies only if it was processed on the server, has a draft, has calibrated confidence at or above the chosen threshold, and the checker said "yes" (or, in a set-up with no checker configured, its confidence comes from similarity alone). Pricing, legal and translated questions, questions whose checks could not run, and drafts citing an entry that is unreviewed, overdue for review or replaced, are always decided by a person. Every approval records who, when and how.
+- **Routes specialist questions** to colleagues, suggesting who from stated expertise and who wrote or approved similar answers, with an inbox for each.
+- **Learns from each exported response.** Recording the export turns edited and person-written answers into knowledge-base entries linked to the response they came from. A member's addition, or an answer that would replace an existing entry, waits for an admin's review; pricing answers are never learned; entries fall due for review after 12 months.
+- **Exports** to Excel, CSV and Word, each file recording how every answer was produced (drafted by a model, edited or written by a person) and who approved it.
+- **Caps spend.** Every AI call is recorded and priced. Processing stops for a person who reaches the daily limit, and for everyone when the month's estimated spend reaches the budget.
 
-Features in the code, tested end to end in a browser against local Supabase: an overview of responses in flight with owner, due date, progress, overdue and at-risk flags; uploading questions from `.xlsx`, `.csv` or `.docx` (with a preview to correct the found questions); review lowest-confidence first, with accept, edit, skip and bulk approval; assigning questions to colleagues, with suggestions from stated expertise and who wrote or approved similar answers, and an inbox (assignments close when the export is recorded); export to Excel, CSV and Word; a shared knowledge base with import; invite-only accounts with admin, owner and member rights enforced in the database.
+## What it does not do
+
+- **It is not a hosted product.** It runs on a local PC against a local Supabase stack. A hosted deployment would need the steps in [`docs/DEPLOYING.md`](docs/DEPLOYING.md) first.
+- **Its figures come from small synthetic sets** (363 questions written by Claude, unreviewed by anyone outside the project). Read them as estimates: [`docs/evals/README.md`](docs/evals/README.md).
+- **The checker is not perfectly consistent.** Asked again, it changed its verdict for 7.2% of test questions, mostly between "yes" and "partly".
+- **Japanese questions** get Japanese drafts, labelled as translations and always reviewed individually. A knowledge base that works across languages is on the backlog, not built.
+- **It is not a compliance product.** The [governance pack](docs/governance/) maps the controls to the EU AI Act and the NIST AI Risk Management Framework, but makes no claim of compliance.
+- **No PDF or pasted-email input yet**, and users are invited through the Supabase dashboard, not the app.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Overview of responses in flight](docs/screenshots/1-overview.png) | ![Review, lowest confidence first, with the bulk approval bar](docs/screenshots/2-review.png) |
+| Responses in flight, with owner, due date and progress | Review, lowest confidence first; bulk approval above a threshold |
+| ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![An expert's assignment inbox](docs/screenshots/5-assignments.png) |
+| A pricing question, never drafted or bulk-approved | A specialist's inbox of assigned questions |
+| ![An exported response and what the knowledge base learned](docs/screenshots/6-export-and-learning.png) | ![The governance page: usage and limits](docs/screenshots/7-governance-usage.png) |
+| An exported response, and what the knowledge base learned | Spend, limits and prices on the governance page |
+
+All screenshots show the synthetic demo data in `supabase/seed.sql`.
+
+## How it was built
+
+The starting point was a prototype generated with Bolt.new: the first commit in this repository. Reviewed line by line, it matched by keywords, assembled drafts from templates, and part of its confidence score was a random number. It has been rebuilt sprint by sprint:
+
+| Sprint | What it delivered |
+|---|---|
+| 0 | Clean-up: access control in the database, tests, CI, honest copy |
+| 1 | Matching by meaning and calibrated confidence |
+| 2 | Grounded drafting, the answerability check, pricing and legal gates, server-side processing |
+| 3 | Workflow and the learning loop |
+| 4 | Cost controls, entry review and the governance pack |
+| 5 | Word questionnaires |
+| 6 | Checker reliability |
+| 7 | Documentation, demo data and publishing |
+
+Each sprint followed the same cycle:
+
+1. **Refine** the stories into test cases, risks and questions for the product owner, recorded in [`docs/refinement/`](docs/refinement/) with the answers.
+2. **Build test-first**, one commit per story.
+3. **Review:** a separate AI agent that had not seen the reasoning reviewed every sprint's changes for security and correctness. There was no human security review. Every finding was fixed with a test before the sprint closed (listed at the end of each refinement).
+4. **Check end to end** in a browser on the local PC, against the agreed test cases.
+5. **Close:** anything undelivered goes back to the [backlog](docs/BACKLOG.md), anything raised at the review and not fixed becomes a backlog row, the [risk register](docs/governance/RISK-REGISTER.md) is updated and the backlog re-ranked.
+
+The product brief is [`docs/PRODUCT.md`](docs/PRODUCT.md), the original requirements are the 65 job stories in [`docs/JOB_STORIES.md`](docs/JOB_STORIES.md), and the reasoning behind the main choices is in [`docs/decisions/`](docs/decisions/). How the parts fit together, and where the trust boundaries are: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Running it locally
+
+Needs Node 22, npm 11 (`npm install -g npm@11`) and Docker (for the local Supabase stack). Processing new questions needs an Anthropic API key and, for hosted embeddings, a Voyage AI key. Without them the app still runs and shows the demo data, whose drafts were recorded from a real run of the pipeline (`npm run demo:record`), so they are saved outputs, not live ones; the Edge Functions and their `.env` are only needed to process new questions.
+
+```bash
+npm ci
+npm run db:start                     # starts Supabase locally; prints the API URL and anon key
+cp .env.example .env                 # paste the API URL and anon key into .env
+cp supabase/functions/.env.example supabase/functions/.env   # API keys, server side only
+npm run db:reset                     # applies the migrations and loads the synthetic seed
+npx supabase functions serve         # the Edge Functions, in a second window
+npm run dev                          # http://127.0.0.1:5173
+```
+
+Sign in as any seeded user (for example `sarah.chen@example.com`, the admin, or `priya.sharma@example.com`, who owns a response in review) with the local development password in `supabase/seed.sql`. The seed loads 100 synthetic knowledge-base entries and four fictional responses, one at each stage.
+
+## Scripts
+
+| Script | What it does |
+|---|---|
+| `npm run dev` / `build` | Development server; production build |
+| `npm run typecheck` / `lint` | TypeScript; ESLint |
+| `npm test` / `coverage` | Unit tests (app, server pipeline, evaluations, documentation) |
+| `npm run test:db` | Database tests; needs `DB_TEST_URL` (a Postgres superuser connection) |
+| `npm run db:start` / `db:stop` / `db:reset` | Local Supabase stack |
+| `npm run eval:*` | The evaluations ([`docs/evals/README.md`](docs/evals/README.md)); need API keys |
+| `npm run demo:record` / `demo:seed` | Record the demo drafts from a real run; regenerate the seed |
+| `npm run screenshots` | The screenshots above, and a layout check at 768 px |
+
+## Tests
+
+- **Unit tests:** file reading and hostile input, the server pipeline (matching, checker, gates, drafting checks, extraction, calibration, usage), exports, the evaluation maths, and the documentation itself (figures against their reports, links, spelling).
+- **Database tests** (`supabase/tests/db/`): every row of the role matrix (who may read or change what, by role: [decision 0003](docs/decisions/0003-access-control.md)), run as real users against row-level security; approvals, learning, review and caps; the seed. They run on plain Postgres with a small Supabase shim ([decision 0004](docs/decisions/0004-local-first-and-testing.md)).
+- **CI** runs both, audits production dependencies, searches the built bundle for keys, builds, and applies every migration and the seed to the real Supabase stack.
 
 ## Project rules
 
@@ -31,53 +109,6 @@ Features in the code, tested end to end in a browser against local Supabase: an 
 6. **Uploads are untrusted** ([decision 0002](docs/decisions/0002-spreadsheets-and-dependencies.md)).
 7. **The knowledge base only learns with provenance.**
 
-## Stack
+## Licence
 
-React 18 and TypeScript, Vite, Tailwind; Supabase (Postgres with row-level security, Auth). ExcelJS and PapaParse for spreadsheets. Vitest for unit and database tests; GitHub Actions for CI.
-
-## Running it locally
-
-Needs Node 22, npm 11 (`npm install -g npm@11`) and Docker (for the local Supabase stack).
-
-```bash
-npm ci
-npm run db:start          # starts Supabase locally; prints the API URL and anon key
-cp .env.example .env      # paste the API URL and anon key into .env
-npm run db:reset          # applies migrations and loads the synthetic seed
-npm run dev               # http://127.0.0.1:5173
-```
-
-Sign in as any seeded user (for example `sarah.chen@example.com`, the admin) with the dev-only password `LocalDev2026pw`. To fill the knowledge base, use **Knowledge base > Bulk upload** with `sample-data/security-qa.csv`.
-
-Accounts are invite-only. Invite users from the Supabase dashboard (local: http://127.0.0.1:54323) or the CLI.
-
-## Scripts
-
-| Script | What it does |
-|---|---|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm run typecheck` | TypeScript, no emit |
-| `npm run lint` | ESLint |
-| `npm test` | Unit tests |
-| `npm run coverage` | Unit tests with coverage |
-| `npm run test:db` | Database tests; needs `DB_TEST_URL` (a Postgres superuser connection) |
-| `npm run db:start` / `db:stop` / `db:reset` | Local Supabase stack |
-| `npm run types` | Regenerate database types from the local stack |
-
-## Tests
-
-- **Unit tests** (`src/**/*.test.ts`): drafting and scoring, spreadsheet parsing limits and hostile input, export escaping, configuration.
-- **Database tests** (`supabase/tests/db/`): every row of the role matrix, run as real users against row-level security; knowledge-base import rules; the seed. They run on plain Postgres with a small Supabase shim ([decision 0004](docs/decisions/0004-local-first-and-testing.md)).
-- **CI** runs both, audits production dependencies, builds, and applies every migration and the seed to the real Supabase stack to check the auth settings.
-
-## Repository layout
-
-```
-docs/                 product brief, backlog, sprint refinements, decisions, job stories
-sample-data/          synthetic CSVs for demos
-src/                  the React app; pure logic in src/lib/
-supabase/migrations/  database schema and access rules, in order
-supabase/seed.sql     synthetic development data (never applied by migrations)
-supabase/tests/       database tests and the Supabase shim
-```
+No licence is granted. The code is published to be read; all rights are reserved, so it may not be reused without permission. (GitHub's terms still let anyone view and fork a public repository.)

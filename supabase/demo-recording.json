@@ -1,5 +1,5 @@
 {
- "recordedAt": "2026-10-25T07:22:23.765Z",
+ "recordedAt": "2026-10-25T08:11:46.802Z",
  "planVersion": "2026-10-24.1",
  "models": {
   "embedding": "voyage-4",
@@ -16,7 +16,7 @@
   "bluefin": [
    {
     "id": "bluefin-A1",
-    "generated_answer": "We encrypt all data at rest using AES-256 across storage systems, databases, and backup media. Encryption keys are managed through a dedicated key management service (KMS) with strict access controls and regular rotation schedules. Hardware Security Modules (HSMs) protect the root keys. We validate encryption coverage through quarterly audits.\n\n[References: KB-0001]",
+    "generated_answer": "We encrypt all data at rest using AES-256 across storage systems, databases, and backup media. Encryption keys are managed through a dedicated key management service (KMS) with strict access controls and regular rotation schedules. Hardware Security Modules (HSMs) are used to protect root keys. We validate encryption coverage through quarterly audits.\n\n[References: KB-0001]",
     "confidence": 1,
     "retrieval_score": 0.6298443826942993,
     "sources_json": [
@@ -42,11 +42,11 @@
      "KB-0001"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:30.012Z"
+    "processed_at": "2026-10-25T08:11:49.701Z"
    },
    {
     "id": "bluefin-A2",
-    "generated_answer": "We grant access through an Identity Governance and Administration (IGA) platform that automates provisioning, de-provisioning and access recertification. All access requests require documented business justification and manager approval before provisioning. We use a least-privilege, role-based access control (RBAC) model aligned with ISO 27001 Annex A controls. All access rights are reviewed quarterly through a formal access recertification process. Terminated user access is revoked within 4 hours of HR notification. Privileged access is further restricted through Privileged Access Management (PAM) tooling with session recording.\n\n[References: KB-0024, KB-0003]",
+    "generated_answer": "Access is granted through an Identity Governance and Administration (IGA) platform that automates provisioning and de-provisioning. All access requests require documented business justification and manager approval before provisioning. We follow a least-privilege, role-based access control (RBAC) model aligned with ISO 27001 Annex A controls. All access rights are reviewed quarterly through a formal access recertification process. Terminated user access is revoked within 4 hours of HR notification. Privileged access is further restricted via Privileged Access Management (PAM) tooling with session recording.\n\n[References: KB-0024, KB-0003]",
     "confidence": 0.892,
     "retrieval_score": 0.5295053240342207,
     "sources_json": [
@@ -67,7 +67,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0024",
-    "judge_reason": "KB-0024 covers granting access (manager approval and documented justification) and removal (revocation within 4 hours of HR notice), and mentions recertification workflows. KB-0003 adds quarterly access reviews, so all three parts are answered.",
+    "judge_reason": "KB-0024 covers granting (manager approval and documented justification before provisioning) and removal (termination revoked within 4 hours), and KB-0003 covers review (quarterly access recertification), so together they answer all three parts.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -77,11 +77,11 @@
      "KB-0003"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:29.949Z"
+    "processed_at": "2026-10-25T08:11:50.336Z"
    },
    {
     "id": "bluefin-A3",
-    "generated_answer": "We manage security patches on a defined cycle. Critical patches are deployed within 24–72 hours of release, high-severity patches within 7 days, and routine patches within 30 days. We use automated patch deployment for endpoints and servers where possible. Exceptions are tracked and risk-accepted by our CISO. We review patch compliance metrics weekly and escalate non-compliant assets through our vulnerability management workflow.\n\n[References: KB-0037]",
+    "generated_answer": "We follow a defined patch management cycle. Critical patches are deployed within 24–72 hours of release, high-severity patches within 7 days, and routine patches within 30 days. Automated patch deployment is used for endpoints and servers where possible. Exceptions are tracked and risk-accepted by our CISO. We review patch compliance metrics weekly and escalate non-compliant assets through our vulnerability management workflow.\n\n[References: KB-0037]",
     "confidence": 0.942,
     "retrieval_score": 0.56830859277055,
     "sources_json": [
@@ -98,7 +98,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0037",
-    "judge_reason": "KB-0037 describes how patches are assessed by severity, with deployment timelines per tier, automated rollout, tracked exceptions, and weekly compliance review, which covers both assessment and rollout.",
+    "judge_reason": "KB-0037 covers how patches are prioritized by severity, the deployment timelines for each tier, automated rollout, and how exceptions and non-compliance are handled. It does not describe a separate pre-deployment assessment or testing step.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -107,7 +107,7 @@
      "KB-0037"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:31.879Z"
+    "processed_at": "2026-10-25T08:11:53.010Z"
    },
    {
     "id": "bluefin-A4",
@@ -128,7 +128,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0021",
-    "judge_reason": "KB-0021 describes a centralized SIEM aggregating logs from critical systems, detection rules mapped to MITRE ATT&CK, and 24/7 SOC monitoring with escalation, which directly answers how attacks are detected.",
+    "judge_reason": "KB-0021 directly describes the logging and monitoring used to detect attacks: a centralized SIEM aggregating logs from critical systems, threat-intelligence-tuned detection rules, and 24/7 SOC alert monitoring with escalation procedures.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -137,11 +137,11 @@
      "KB-0021"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:34.401Z"
+    "processed_at": "2026-10-25T08:11:52.899Z"
    },
    {
     "id": "bluefin-A5",
-    "generated_answer": "We validate backup integrity through automated verification checks and conduct manual restoration tests quarterly. Recovery procedures are documented in run books. We also test RTO and RPO metrics against defined targets during annual disaster recovery exercises, and report the results.\n\n[References: KB-0023]",
+    "generated_answer": "We validate backup integrity through automated verification checks. We conduct manual restoration tests quarterly. Recovery procedures are documented in run books, and we test RTO and RPO metrics against defined targets during annual disaster recovery exercises, reporting the results against those targets.\n\n[References: KB-0023]",
     "confidence": 0.892,
     "retrieval_score": 0.4819225648116013,
     "sources_json": [
@@ -158,7 +158,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0023",
-    "judge_reason": "KB-0023 states that backup integrity is validated through manual restoration tests conducted quarterly, plus RTO/RPO testing during annual DR exercises, directly answering how restorability is tested.",
+    "judge_reason": "KB-0023 states that backup integrity is validated through manual restoration tests conducted quarterly and RTO/RPO metrics are tested during annual DR exercises, directly answering how restorability is tested.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -167,11 +167,11 @@
      "KB-0023"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:35.417Z"
+    "processed_at": "2026-10-25T08:11:53.968Z"
    },
    {
     "id": "bluefin-A6",
-    "generated_answer": "We secure containerised workloads in several layers. Container images are scanned in our CI/CD pipeline using SCA and vulnerability analysis tools, and are stored in a private registry subject to policy-based admission controls. Runtime security monitoring detects anomalous container behaviour. Our Kubernetes clusters are hardened per CIS benchmarks, with RBAC enforced at the namespace level. Secrets for containerised workloads are managed in a dedicated vault solution rather than environment variables.\n\n[References: KB-0041]",
+    "generated_answer": "We secure containerised workloads through image scanning in our CI/CD pipeline using SCA and vulnerability analysis tools. Images are stored in a private registry subject to policy-based admission controls. Runtime security monitoring detects anomalous container behavior. Our Kubernetes clusters are hardened per CIS benchmarks, with RBAC enforced at the namespace level. Secrets for containerised workloads are managed in a dedicated vault solution rather than environment variables.\n\n[References: KB-0041]",
     "confidence": 1,
     "retrieval_score": 0.7405122695499418,
     "sources_json": [
@@ -188,7 +188,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0041",
-    "judge_reason": "KB-0041 directly describes how containerised workloads are secured: image scanning, private registry with admission controls, runtime monitoring, CIS-hardened Kubernetes with RBAC, and vault-based secrets management.",
+    "judge_reason": "KB-0041 directly describes how containerised workloads are secured: image scanning, private registry admission controls, runtime monitoring, CIS-hardened Kubernetes with namespace RBAC, and vault-based secrets management.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -197,7 +197,7 @@
      "KB-0041"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:36.732Z"
+    "processed_at": "2026-10-25T08:11:56.953Z"
    },
    {
     "id": "bluefin-A7",
@@ -221,19 +221,19 @@
     "answerability": 0.21733557026961292,
     "verdict": "no",
     "gate": "pricing",
-    "gate_reason": "Rules matched: price. Classifier: The question asks for the annual subscription price for 250 users, which is a request for a price.",
+    "gate_reason": "Rules matched: price. Classifier: The question asks for the annual subscription price for 250 users, which is a request for pricing.",
     "language": "en",
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0055",
-    "judge_reason": "The entries cover privileged user monitoring, security awareness training, and zero trust architecture, but none mention subscription pricing or the price for 250 users, so the question cannot be answered from them.",
+    "judge_reason": "The question asks for a specific subscription price for 250 users, but none of the entries mention pricing; they cover privileged user monitoring, security training, and zero trust, which are unrelated to the question.",
     "draft_model": null,
     "prompt_version": null,
     "calibration_set": "2026-10-22.3 (calibrate split)",
     "draft_kind": "person_required",
     "cited_refs": [],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:36.013Z"
+    "processed_at": "2026-10-25T08:11:55.171Z"
    },
    {
     "id": "bluefin-A8",
@@ -257,19 +257,19 @@
     "answerability": 0.32703354830941544,
     "verdict": "no",
     "gate": "legal",
-    "gate_reason": "Rules matched: liability. Classifier: The question asks the company to accept unlimited liability for losses, which is a contractual liability term.",
+    "gate_reason": "Rules matched: liability. Classifier: The question asks the company to agree to a liability term (unlimited liability for data breach losses), which is a binding contractual commitment.",
     "language": "en",
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0009",
-    "judge_reason": "The entries cover incident handling, data loss prevention, and vendor risk management but say nothing about accepting unlimited liability for breach losses, which is the specific commitment asked for.",
+    "judge_reason": "The entries cover breach handling, data loss prevention, and vendor risk, but none states whether the company accepts unlimited liability for breach losses, which is the specific question asked.",
     "draft_model": null,
     "prompt_version": null,
     "calibration_set": "2026-10-22.3 (calibrate split)",
     "draft_kind": "insufficient_evidence",
     "cited_refs": [],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:37.267Z"
+    "processed_at": "2026-10-25T08:11:55.402Z"
    },
    {
     "id": "bluefin-A9",
@@ -298,18 +298,18 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0021",
-    "judge_reason": "The entries describe SIEM monitoring, 24/7 SOC coverage, and incident response SLAs, but none states a mean time to detect figure, which is the specific metric asked for.",
+    "judge_reason": "The entries cover incident response, vulnerability remediation, and SIEM/SOC monitoring but give no mean time to detect figure, so the specific metric asked for is absent.",
     "draft_model": null,
     "prompt_version": null,
     "calibration_set": "2026-10-22.3 (calibrate split)",
     "draft_kind": "insufficient_evidence",
     "cited_refs": [],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:37.758Z"
+    "processed_at": "2026-10-25T08:11:57.226Z"
    },
    {
     "id": "bluefin-A10",
-    "generated_answer": "当社は、フィッシング攻撃を次の方法で検知しています。セキュアメールゲートウェイによるメールスキャン、URLおよび添付ファイルのサンドボックス検査を含む高度な脅威防御、なりすましの送信元ドメインを遮断するDMARCの適用です。メールクライアントにはワンクリックの報告ボタンを導入しており、従業員は不審なメールをSOCへ報告できます。SOCは報告を迅速にトリアージします。当社を標的とした確認済みのフィッシングキャンペーンに対しては、24時間以内に脅威インテリジェンスを更新し、SIEMのルールを調整します。\n\n[References: KB-0073]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
+    "generated_answer": "当社は、セキュアメールゲートウェイによるメールスキャン、URLおよび添付ファイルのサンドボックス分析を備えた高度な脅威防御、なりすましドメインを遮断するDMARCの適用により、フィッシングを検知しています。メールクライアントにはワンクリックの報告ボタンを導入しており、従業員は不審なメールを報告でき、SOCが迅速にトリアージします。当社を標的とした確認済みのフィッシングキャンペーンが判明した場合は、24時間以内に脅威インテリジェンスを更新し、SIEMのルールを調整します。\n\n[References: KB-0073]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]",
     "confidence": 0.942,
     "retrieval_score": 0.6045446435511336,
     "sources_json": [
@@ -326,7 +326,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0073",
-    "judge_reason": "KB-0073 directly answers the question, describing detection via secure email gateway, URL and attachment sandboxing, and DMARC, plus employee reporting, SOC triage, and post-campaign threat intelligence updates and SIEM tuning within 24 hours.",
+    "judge_reason": "KB-0073 directly describes how phishing is detected (email gateway scanning, sandboxing, DMARC) and how it is responded to (SOC triage of user reports, threat intel and SIEM updates within 24 hours).",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -335,7 +335,7 @@
      "KB-0073"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:43.790Z"
+    "processed_at": "2026-10-25T08:12:00.293Z"
    },
    {
     "id": "bluefin-A11",
@@ -360,18 +360,18 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0020",
-    "judge_reason": "The entries cover security awareness training and GDPR compliance; neither mentions paid volunteering days or any employee leave or volunteering policy, so the question cannot be answered from them.",
+    "judge_reason": "The entries cover security awareness training and GDPR compliance, which are related to employee matters, but neither mentions paid volunteering days or any employee volunteering benefit.",
     "draft_model": null,
     "prompt_version": null,
     "calibration_set": "2026-10-22.3 (calibrate split)",
     "draft_kind": "insufficient_evidence",
     "cited_refs": [],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:44.961Z"
+    "processed_at": "2026-10-25T08:12:01.465Z"
    },
    {
     "id": "bluefin-A12",
-    "generated_answer": "We manage open-source software risk through a policy that requires legal review of licenses and security review of components before adoption. Software composition analysis (SCA) tooling continuously monitors production and development dependencies for known CVEs, and developers receive automated alerts when newly disclosed vulnerabilities affect components they use. We also maintain a curated internal catalog of approved open-source libraries so that teams can adopt vetted components.\n\n[References: KB-0069]",
+    "generated_answer": "We manage open-source software risk under a policy that requires legal review of licenses and security review of components before adoption. Software composition analysis (SCA) tooling continuously monitors production and development dependencies for known CVEs, and developers receive automated notifications when newly disclosed vulnerabilities affect components they use. We maintain a curated internal catalog of approved open-source libraries to streamline adoption of vetted components.\n\n[References: KB-0069]",
     "confidence": 1,
     "retrieval_score": 0.6290924511409692,
     "sources_json": [
@@ -388,7 +388,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0069",
-    "judge_reason": "KB-0069 directly describes managing open-source risk: a policy requiring license and security review before adoption, continuous SCA monitoring for CVEs, and an approved component catalog, answering the question fully.",
+    "judge_reason": "KB-0069 directly describes managing open-source risk: a policy requiring license and security review, SCA tooling monitoring dependencies for CVEs, and an approved component catalog, which answers the question.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -397,7 +397,7 @@
      "KB-0069"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:47.783Z"
+    "processed_at": "2026-10-25T08:12:04.095Z"
    }
   ],
   "larkspur": [
@@ -420,7 +420,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0002",
-    "judge_reason": "KB-0002 directly states that data in transit is protected with TLS 1.2 or higher and that internal service-to-service traffic uses mutual TLS, answering the question about encryption between services.",
+    "judge_reason": "KB-0002 directly states that data in transit is protected with TLS 1.2 or higher and that internal service-to-service traffic uses mutual TLS, which answers the question.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -429,11 +429,11 @@
      "KB-0002"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:51.884Z"
+    "processed_at": "2026-10-25T08:12:07.712Z"
    },
    {
     "id": "larkspur-3.2",
-    "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The knowledge base describes data residency controls, including region configuration, data center selection, and automated geographic restrictions, but does not name the regions or countries where customer data is stored. Please confirm the specific storage regions before this question is answered). It needs an answer written by a person.",
+    "generated_answer": "Insufficient evidence: the matched knowledge-base entries do not answer this question (The entries do not name the regions or countries where customer data is stored. KB-0070 describes how residency requirements are documented per customer and jurisdiction and enforced through cloud region configuration, data center selection, and automated controls, but it does not list the specific…). It needs an answer written by a person.",
     "confidence": 0.875,
     "retrieval_score": 0.5687427656317937,
     "sources_json": [
@@ -450,18 +450,18 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0070",
-    "judge_reason": "KB-0070 explains that data residency is documented per customer and enforced through cloud region controls, but it never names the specific storage regions the question asks for.",
+    "judge_reason": "KB-0070 describes residency controls and enforcement in general terms but does not name the specific regions where customer data is stored, which is what the question asks for.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
     "draft_kind": "insufficient_evidence",
     "cited_refs": [],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:53.534Z"
+    "processed_at": "2026-10-25T08:12:08.291Z"
    },
    {
     "id": "larkspur-3.3",
-    "generated_answer": "We protect databases with role-based access based on least-privilege principles, and we enforce encrypted connections for all client connections. Database audit logging is integrated with our SIEM to monitor activity. Privileged database accounts are managed through PAM with session recording. Sensitive data fields, including PII, are masked or tokenized where feasible. We audit database configurations against CIS benchmarks quarterly.\n\n[References: KB-0045]",
+    "generated_answer": "We protect databases that hold personal data with role-based access under least-privilege principles and encrypted connections enforced for all client connections. Database activity is monitored through audit logging integrated with our SIEM. Privileged database accounts are managed through PAM with session recording. Sensitive data fields, such as PII and financial information, are masked or tokenized where feasible. Database configurations are audited against CIS benchmarks quarterly.\n\n[References: KB-0045]",
     "confidence": 0.942,
     "retrieval_score": 0.6186763710186036,
     "sources_json": [
@@ -478,7 +478,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0045",
-    "judge_reason": "KB-0045 directly describes controls protecting databases, including least-privilege access, encrypted connections, audit logging, privileged account management, and masking or tokenizing PII.",
+    "judge_reason": "KB-0045 directly describes controls protecting databases, including least-privilege access, encrypted connections, audit logging, PAM for privileged accounts, and masking or tokenizing PII fields.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -487,11 +487,11 @@
      "KB-0045"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:52.556Z"
+    "processed_at": "2026-10-25T08:12:06.712Z"
    },
    {
     "id": "larkspur-3.4",
-    "generated_answer": "We maintain a GDPR compliance program overseen by a designated Data Protection Officer (DPO). The program covers data mapping, privacy impact assessments (DPIAs), and a documented legal basis for each processing activity. Data subject rights requests (access, erasure, portability) are handled through a defined workflow with a 30-day response SLA. Annual privacy audits validate compliance, and staff receive mandatory GDPR training upon hire and annually thereafter.\n\n[References: KB-0015]",
+    "generated_answer": "We comply with GDPR through a program overseen by a designated Data Protection Officer (DPO). The program covers data mapping, privacy impact assessments (DPIAs), and a documented legal basis for each processing activity. We handle data subject rights requests (access, erasure, portability) through a defined workflow with a 30-day response SLA. Annual privacy audits validate compliance, and staff receive mandatory GDPR training upon hire and annually thereafter.\n\n[References: KB-0015]",
     "confidence": 0.942,
     "retrieval_score": 0.6236683753539237,
     "sources_json": [
@@ -508,7 +508,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0015",
-    "judge_reason": "KB-0015 directly describes how the organization complies with GDPR, covering DPO oversight, DPIAs, legal bases, a 30-day data subject request SLA, annual audits, and staff training.",
+    "judge_reason": "KB-0015 directly describes the GDPR compliance program, including a DPO, DPIAs, legal bases for processing, a 30-day data subject request SLA, annual audits, and staff training, which answers how the company complies.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -517,11 +517,11 @@
      "KB-0015"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:54.738Z"
+    "processed_at": "2026-10-25T08:12:10.972Z"
    },
    {
     "id": "larkspur-3.5",
-    "generated_answer": "Production data is prohibited from use in our development, test, and staging environments by policy. Where realistic test data is required, we use a data anonymization and synthetic data generation process to create functionally equivalent data sets that contain no real PII or sensitive information. Access to non-production environments is controlled separately from production and is reviewed quarterly.\n\n[References: KB-0081]",
+    "generated_answer": "Production data is prohibited from use in development, test, and staging environments by policy. Where realistic test data is required, we use a data anonymization and synthetic data generation process to create functionally equivalent data sets that contain no real PII or sensitive information. Access to non-production environments is controlled separately from production and reviewed quarterly.\n\n[References: KB-0081]",
     "confidence": 0.942,
     "retrieval_score": 0.6254138352669715,
     "sources_json": [
@@ -538,7 +538,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0081",
-    "judge_reason": "KB-0081 states production data is prohibited in dev, test, and staging, that realistic test data is anonymized or synthetic with no real PII, and that non-production access is controlled and reviewed quarterly, directly answering the question.",
+    "judge_reason": "KB-0081 directly states production data is prohibited in test and development environments, that anonymized or synthetic data is used instead, and that non-production access is controlled and reviewed quarterly.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -547,11 +547,11 @@
      "KB-0081"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:57.161Z"
+    "processed_at": "2026-10-25T08:12:11.406Z"
    },
    {
     "id": "larkspur-3.6",
-    "generated_answer": "We apply the same data governance and security controls to AI/ML systems that process sensitive data as to our other systems. We minimize data in training datasets and anonymize or pseudonymize PII before it is used for model training. We assess model outputs for privacy risks, including re-identification potential, before deployment. Access to AI/ML platforms and training data is controlled through role-based access control (RBAC), and we maintain audit logs of data access.\n\n[References: KB-0085]",
+    "generated_answer": "AI/ML systems that process sensitive data are subject to the same data governance and security controls as our other systems. We apply data minimization to training datasets and anonymize or pseudonymize PII before it is used in model training. Model outputs are assessed for privacy risks, including re-identification potential, before deployment. Access to AI/ML platforms and training data is controlled through RBAC, and audit logs of data access are maintained.\n\n[References: KB-0085]",
     "confidence": 1,
     "retrieval_score": 0.6883856374785732,
     "sources_json": [
@@ -568,7 +568,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0085",
-    "judge_reason": "KB-0085 directly answers how data used by AI/ML systems is secured, covering data minimization, PII anonymization before training, RBAC access control, and audit logging of data access.",
+    "judge_reason": "KB-0085 directly answers how data for AI/ML systems is secured, covering minimization, PII anonymization or pseudonymization in training, RBAC access controls, and audit logging of data access.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -577,7 +577,7 @@
      "KB-0085"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:56.150Z"
+    "processed_at": "2026-10-25T08:12:11.795Z"
    },
    {
     "id": "larkspur-3.7",
@@ -601,19 +601,19 @@
     "answerability": 0.16874246859635247,
     "verdict": "no",
     "gate": "pricing",
-    "gate_reason": "Rules matched: fee. Classifier: The question asks about the company's fees for implementation services, which is a request for pricing information.",
+    "gate_reason": "Rules matched: fee. Classifier: The question asks about fees for implementation services, which is a request for pricing information.",
     "language": "en",
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
-    "judge_best_ref": "KB-0025",
-    "judge_reason": "All three entries cover security and privacy controls (zero trust, identity management, privacy-by-design); none mention implementation service fees or pricing, so the question is unanswered.",
+    "judge_best_ref": "KB-0024",
+    "judge_reason": "The entries cover zero trust, identity provisioning, and privacy-by-design, but none mention fees, pricing, or costs for implementation services, so the question is unanswered.",
     "draft_model": null,
     "prompt_version": null,
     "calibration_set": "2026-10-22.3 (calibrate split)",
     "draft_kind": "person_required",
     "cited_refs": [],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:56.092Z"
+    "processed_at": "2026-10-25T08:12:12.330Z"
    },
    {
     "id": "larkspur-3.8",
@@ -634,7 +634,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0006",
-    "judge_reason": "KB-0006 describes the NIST SP 800-61 phased incident response process, 24/7 SIRT, severity-based SLAs, and post-incident review within 5 business days, directly answering the question.",
+    "judge_reason": "KB-0006 describes the incident response framework, phases, 24/7 response team, severity-based SLAs, and post-incident review process, directly answering the request to describe the incident response process.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -643,13 +643,13 @@
      "KB-0006"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:22:58.943Z"
+    "processed_at": "2026-10-25T08:12:14.491Z"
    }
   ],
   "harbour": [
    {
     "id": "harbour-S1",
-    "generated_answer": "We hold a SOC 2 Type II report covering the Trust Services Criteria for Security, Availability, and Confidentiality. It was issued by an independent AICPA-accredited auditor, covers an audit period of a minimum of six months, and is refreshed annually. Bridge letters are available on request for periods between reports. Copies are available under NDA to qualified prospective and current customers.\n\n[References: KB-0017]",
+    "generated_answer": "We hold a SOC 2 Type II report covering the Trust Services Criteria for Security, Availability, and Confidentiality. It was issued by an independent AICPA-accredited auditor, covers an audit period of at least six months, and is refreshed annually. Bridge letters are available on request for periods between reports. Copies of the report are available under NDA to qualified prospective and current customers.\n\n[References: KB-0017]",
     "confidence": 0.892,
     "retrieval_score": 0.5488312761657221,
     "sources_json": [
@@ -666,7 +666,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0017",
-    "judge_reason": "KB-0017 directly states the company holds a SOC 2 Type II report covering Security, Availability, and Confidentiality, which answers what SOC 2 reports are held.",
+    "judge_reason": "KB-0017 directly states the company holds a SOC 2 Type II report covering Security, Availability, and Confidentiality, which answers which SOC 2 reports are held.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -675,11 +675,11 @@
      "KB-0017"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:23:03.257Z"
+    "processed_at": "2026-10-25T08:12:18.135Z"
    },
    {
     "id": "harbour-S2",
-    "generated_answer": "We manage privileged accounts through a Privileged Access Management (PAM) solution. Privileged accounts are inventoried, and access is granted just-in-time rather than as standing access wherever possible. Elevation is time-limited and approval-gated. Passwords are stored in a vault with automated rotation, and privileged sessions are recorded. Privileged account activity is monitored with enhanced monitoring and anomaly alerting in our SIEM.\n\n[References: KB-0031]",
+    "generated_answer": "We manage privileged accounts through a Privileged Access Management (PAM) solution. Privileged accounts are inventoried, and access is granted just-in-time rather than as standing access wherever possible, using time-limited, approval-gated elevation. Passwords are stored in a vault with automated rotation, and privileged sessions are recorded. Privileged account activity is subject to enhanced monitoring and anomaly alerting within our SIEM.\n\n[References: KB-0031]",
     "confidence": 0.942,
     "retrieval_score": 0.6159884170053993,
     "sources_json": [
@@ -696,7 +696,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0031",
-    "judge_reason": "KB-0031 directly describes how privileged accounts are managed: PAM solution, just-in-time access, session recording, password vaulting with rotation, and SIEM monitoring of privileged activity.",
+    "judge_reason": "KB-0031 directly describes how privileged accounts are managed: PAM solution, just-in-time access, session recording, password vaulting with rotation, and enhanced monitoring, which answers the question fully.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -705,7 +705,7 @@
      "KB-0031"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:23:04.455Z"
+    "processed_at": "2026-10-25T08:12:17.498Z"
    },
    {
     "id": "harbour-S3",
@@ -726,7 +726,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0075",
-    "judge_reason": "KB-0075 directly describes the SSO and identity federation approach, naming SAML 2.0 and OIDC, a central identity provider, MFA enforcement, and annual trust reviews, matching the question.",
+    "judge_reason": "KB-0075 directly describes the SSO approach: SAML 2.0 and OIDC federation through a central identity provider, with MFA enforcement and annual trust reviews, which matches the question.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -735,11 +735,11 @@
      "KB-0075"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:23:02.571Z"
+    "processed_at": "2026-10-25T08:12:17.100Z"
    },
    {
     "id": "harbour-S4",
-    "generated_answer": "We harden our software build pipeline with access controls that limit modification rights to authorized CI/CD service accounts. All build artifacts are signed with code signing certificates traceable to an internal certificate authority, and artifact integrity is verified at each deployment stage. Pipeline configurations are version-controlled, and changes require security team review. Third-party build tool dependencies are managed through a curated internal package mirror subject to vulnerability scanning.\n\n[References: KB-0099]",
+    "generated_answer": "We limit modification rights to our software build pipeline to authorized CI/CD service accounts. All build artifacts are signed with code signing certificates traceable to an internal certificate authority, and artifact integrity is verified at each deployment stage. Pipeline configurations are version-controlled, and changes require security team review. Third-party build tool dependencies are managed through a curated internal package mirror that is subject to vulnerability scanning.\n\n[References: KB-0099]",
     "confidence": 1,
     "retrieval_score": 0.7128342050730675,
     "sources_json": [
@@ -756,7 +756,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0099",
-    "judge_reason": "KB-0099 directly describes how the build and release pipeline is secured: restricted CI/CD access, signed artifacts, integrity checks at each deployment stage, reviewed pipeline configuration changes, and vetted dependencies.",
+    "judge_reason": "KB-0099 directly describes how the build and release pipeline is secured: restricted access for CI/CD accounts, signed artifacts, integrity checks at each deployment stage, reviewed pipeline configuration changes, and vetted dependencies.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -765,11 +765,11 @@
      "KB-0099"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:23:08.956Z"
+    "processed_at": "2026-10-25T08:12:20.719Z"
    },
    {
     "id": "harbour-S5",
-    "generated_answer": "We secure email through a secure email gateway that provides anti-phishing, anti-malware, and spam filtering. We use DMARC, DKIM, and SPF records to prevent domain spoofing. Advanced threat protection scans attachments and URLs in sandboxed environments, and suspicious emails are quarantined for review. Our security awareness training includes phishing simulation exercises.\n\n[References: KB-0035]",
+    "generated_answer": "We secure email against phishing and spoofing through a secure email gateway that provides anti-phishing, anti-malware, and spam filtering. We use DMARC, DKIM, and SPF records to prevent domain spoofing. Advanced threat protection scans attachments and URLs in sandboxed environments, and suspicious emails are quarantined for review. Our security awareness training includes phishing simulation exercises to reinforce user vigilance.\n\n[References: KB-0035]",
     "confidence": 1,
     "retrieval_score": 0.6696145686287308,
     "sources_json": [
@@ -786,7 +786,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0035",
-    "judge_reason": "KB-0035 directly describes anti-phishing filtering via a secure email gateway and DMARC, DKIM, and SPF records to prevent domain spoofing, which is exactly what the question asks about.",
+    "judge_reason": "KB-0035 directly describes anti-phishing filtering, DMARC/DKIM/SPF records to prevent domain spoofing, and attachment and URL scanning, which together answer how email is secured against phishing and spoofing.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -795,11 +795,11 @@
      "KB-0035"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:23:10.326Z"
+    "processed_at": "2026-10-25T08:12:20.247Z"
    },
    {
     "id": "harbour-S6",
-    "generated_answer": "Remote workers are subject to the same security policies as on-site employees. We enforce these policies through MDM, endpoint protection, and ZTNA-based access controls. Security awareness training includes modules on home office risks, such as unsecured Wi-Fi and physical eavesdropping. VPN use is mandatory when accessing sensitive systems. Remote worker equipment is company-issued and managed.\n\n[References: KB-0043]",
+    "generated_answer": "We subject remote workers to the same security policies as on-site employees, enforced through MDM, endpoint protection, and ZTNA-based access controls. Our security awareness training includes modules on home office risks such as unsecured Wi-Fi and physical eavesdropping. VPN use is mandatory when accessing sensitive systems, and remote worker equipment is company-issued and managed.\n\n[References: KB-0043]",
     "confidence": 1,
     "retrieval_score": 0.6854222469969923,
     "sources_json": [
@@ -816,7 +816,7 @@
     "embedding_model": "voyage-4",
     "judge_model": "claude-haiku-5-5",
     "judge_best_ref": "KB-0043",
-    "judge_reason": "KB-0043 directly describes how remote workers are secured, covering policy enforcement, MDM and endpoint protection, ZTNA and VPN access controls, training, and company-issued managed equipment, which answers the question.",
+    "judge_reason": "KB-0043 directly describes how remote workers are secured: same policies, MDM, endpoint protection, ZTNA, home-office training, mandatory VPN, and company-managed equipment, matching the question.",
     "draft_model": "claude-haiku-5-5",
     "prompt_version": "draft-2026-10-23.1",
     "calibration_set": "2026-10-22.3 (calibrate split)",
@@ -825,7 +825,453 @@
      "KB-0043"
     ],
     "processing_note": null,
-    "processed_at": "2026-10-25T07:23:10.068Z"
+    "processed_at": "2026-10-25T08:12:20.716Z"
+   }
+  ]
+ },
+ "usage": {
+  "bluefin": [
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 589,
+    "outputTokens": 61
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 60
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 62
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 708,
+    "outputTokens": 78
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 879,
+    "outputTokens": 292
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 733,
+    "outputTokens": 332
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 867,
+    "outputTokens": 143
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 1038,
+    "outputTokens": 216
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 592,
+    "outputTokens": 56
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 744,
+    "outputTokens": 257
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 711,
+    "outputTokens": 95
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 62
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 903,
+    "outputTokens": 178
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 892,
+    "outputTokens": 657
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 587,
+    "outputTokens": 43
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 591,
+    "outputTokens": 63
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 870,
+    "outputTokens": 367
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 754,
+    "outputTokens": 103
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 1048,
+    "outputTokens": 89
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 594,
+    "outputTokens": 55
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 1100,
+    "outputTokens": 83
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 55
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 595,
+    "outputTokens": 60
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 756,
+    "outputTokens": 103
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 913,
+    "outputTokens": 188
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 1082,
+    "outputTokens": 84
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 915,
+    "outputTokens": 649
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 588,
+    "outputTokens": 49
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 907,
+    "outputTokens": 81
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 727,
+    "outputTokens": 93
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 589,
+    "outputTokens": 71
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 886,
+    "outputTokens": 388
+   }
+  ],
+  "larkspur": [
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 54
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 719,
+    "outputTokens": 92
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 583,
+    "outputTokens": 56
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 589,
+    "outputTokens": 58
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 720,
+    "outputTokens": 85
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 718,
+    "outputTokens": 192
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 878,
+    "outputTokens": 169
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 879,
+    "outputTokens": 153
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 583,
+    "outputTokens": 60
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 877,
+    "outputTokens": 256
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 741,
+    "outputTokens": 200
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 702,
+    "outputTokens": 88
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 587,
+    "outputTokens": 59
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 588,
+    "outputTokens": 70
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 736,
+    "outputTokens": 92
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 900,
+    "outputTokens": 449
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 861,
+    "outputTokens": 370
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 895,
+    "outputTokens": 451
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 1037,
+    "outputTokens": 83
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 583,
+    "outputTokens": 39
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 580,
+    "outputTokens": 57
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 723,
+    "outputTokens": 87
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 882,
+    "outputTokens": 163
+   }
+  ],
+  "harbour": [
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 724,
+    "outputTokens": 85
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 726,
+    "outputTokens": 92
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 589,
+    "outputTokens": 61
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 584,
+    "outputTokens": 58
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 721,
+    "outputTokens": 95
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 65
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 885,
+    "outputTokens": 160
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 880,
+    "outputTokens": 175
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 585,
+    "outputTokens": 59
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 883,
+    "outputTokens": 157
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 741,
+    "outputTokens": 109
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 586,
+    "outputTokens": 57
+   },
+   {
+    "kind": "gate",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 588,
+    "outputTokens": 56
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 729,
+    "outputTokens": 104
+   },
+   {
+    "kind": "judge",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 724,
+    "outputTokens": 96
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 888,
+    "outputTokens": 175
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 883,
+    "outputTokens": 156
+   },
+   {
+    "kind": "draft",
+    "model": "claude-haiku-5-5",
+    "inputTokens": 900,
+    "outputTokens": 473
    }
   ]
  }

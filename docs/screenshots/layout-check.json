@@ -1,0 +1,54 @@
+{
+ "width": 768,
+ "checkedAt": "2026-10-25T08:15:05.859Z",
+ "views": [
+  {
+   "view": "overview",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "review list",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "card expanded",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "pricing card",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "assignments",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "exported response",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "governance usage",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "entries to review",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  }
+ ]
+}
