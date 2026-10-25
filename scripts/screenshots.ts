@@ -86,7 +86,7 @@ async function main() {
   page = await signIn(browser, 'sarah.chen@example.com');
   await nav(page, 'Governance');
   await shoot(page, '7-governance-usage.png', 'governance usage');
-  await page.getByRole('button', { name: /^Entries to review/ }).click();
+  await page.getByRole('tab', { name: 'Entries to review' }).click();
   await page.waitForLoadState('networkidle');
   await shoot(page, '8-entries-to-review.png', 'entries to review');
 
