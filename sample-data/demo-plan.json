@@ -1,6 +1,6 @@
 {
-  "version": "2026-10-25.1",
-  "note": "Synthetic demo responses (Sprint 7, S7-5; Sprint 8, S8-4 added A13 and A14, which the checker judged only \"partly\" answered in the Sprint 6 evaluation run (at 88% and 82% with the table of the time; 85% with the Sprint 8 table), so the demo shows that hold). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
+  "version": "2026-10-25.2",
+  "note": "Synthetic demo responses (Sprint 7, S7-5; Sprint 8, S8-4 added A13 and A14, which the checker judged only \"partly\" answered yet the drafter still drafted in the Sprint 6 drafting run (d024 and d010), so the demo shows that bulk hold, so the demo shows that hold). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
   "responses": [
     {
       "key": "juniper",
@@ -82,11 +82,11 @@
         },
         {
           "ref": "A13",
-          "text": "Are sessions of high-privilege users recorded and reviewed?"
+          "text": "What endpoint protection solutions are deployed?"
         },
         {
           "ref": "A14",
-          "text": "Which second-factor methods do staff use when signing in?"
+          "text": "What compliance certifications does your organization hold?"
         }
       ]
     },
