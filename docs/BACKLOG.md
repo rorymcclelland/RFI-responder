@@ -414,15 +414,40 @@ Refinement: `docs/refinement/sprint-8.md`. No API spend except Rory's demo recor
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S8-1 | Every published figure carries a 95% interval | The repository is public; "0 of 33" should not read as "never" | Ready, Sprint 8 |
-| S8-2 | Calibration fitted and checked by cross-validation (F-16) | The bulk-line safety figure swung when one item was removed | Ready, Sprint 8 |
-| S8-3 | The confidence tooltip gives the range | The card's figure says how precise it is | Ready, Sprint 8 |
-| S8-4 | Demo data shows the "partly" hold, and its usage is complete (F-37, F-38) | A fresh install should show every hold; F-38's cause is found (first sign-in indexes the knowledge base) | Ready, Sprint 8 |
-| S8-5 | Excel title property (F-36); screenshot script checks the Supabase address (F-39) | Small, in code the sprint touches | Ready, Sprint 8 |
+| S8-1 | Every published figure carries a 95% interval | The repository is public; "0 of 33" should not read as "never" | Done, Sprint 8 |
+| S8-2 | Calibration fitted and checked by cross-validation (F-16) | The bulk-line safety figure swung when one item was removed | Done, Sprint 8 |
+| S8-3 | The confidence tooltip gives the range | The card's figure says how precise it is | Done, Sprint 8 |
+| S8-4 | Demo data shows the "partly" hold, and its usage is complete (F-37, F-38) | A fresh install should show every hold; F-38's cause is found (first sign-in indexes the knowledge base) | Done, Sprint 8 |
+| S8-5 | Excel title property (F-36); screenshot script checks the Supabase address (F-39) | Small, in code the sprint touches | Done, Sprint 8 |
 
 No spike.
 
-**Not yet in a sprint, ranked at the Sprint 7 review.** 1. C-1 multilingual knowledge base. 2. F-35 duplicate catch rate after the threshold rise. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 5. F-20 rerankers (needs a Voyage payment method; the bulk rule for a reranker is now set). 6. F-34 review during processing (fails safe). 7. F-8 leaked-password protection, with a hosted sprint. 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
+### Sprint 8 review (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-8`; 614 unit and 227 database tests. Every summary figure has a 95% interval; with the checker, no near miss reaches the bulk line in any fold and no single question changes that; calibration error is 0.047 cross-validated (0.014 on one split before). The demo, recorded again on the local PC, shows two questions held for a "partly" verdict; Rory checked the hold reason and the tooltip's range on screen. Details in `docs/refinement/sprint-8.md` (Close).
+
+An independent security review found no high issues and ten smaller ones (three medium), all fixed and tested. BUG-28 (the tooltip clipped by its card) was found and fixed in the end-to-end check.
+
+**Decisions.** Commits stay under Rory's name with Claude as co-author, for consistency with the history; revisit for the next project (Rory, 25 October).
+
+### Where every Sprint 8 review item now lives
+
+| Item | Now |
+|---|---|
+| Ten security review findings | Done in Sprint 8 (review) |
+| BUG-28 | Done in Sprint 8 |
+| F-16, F-36, F-37, F-38, F-39 | Done in Sprint 8 (S8-2, S8-5, S8-4, S8-4, S8-5) |
+| F-40 Similarity-only fallback lets near misses reach the bulk line and allows bulk approval | Backlog, from Sprint 8; proposed for Sprint 9 |
+| F-41 A "yes" with very low similarity is calibrated at about 85% | Backlog, from Sprint 8 review; proposed for Sprint 9 |
+
+**Sprint 9, proposed at the Sprint 8 review (for Rory to confirm): the last bulk-approval gaps.** Small, and both make the bulk rule hold in every configuration rather than only the default one.
+- F-40 Hold questions calibrated on similarity alone from bulk approval, as a reranker's already are. One rule change in the database and the screen, with tests; the fallback then fails safe.
+- F-41 A similarity floor for bulk approval (for example, below the lowest similarity at which a "yes" was right in the evaluation set), so a "yes" on a weak match is decided by a person.
+- F-35 (optional, if the two above are quick) look again at the duplicate catch rate now that calibration is cross-validated.
+
+**Not yet in a sprint, ranked at the Sprint 8 review.** 1. C-1 multilingual knowledge base. 2. F-19 faithfulness judge on planted unfaithful drafts. 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 4. F-20 rerankers (needs a Voyage payment method). 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
+
+**Ranked at the Sprint 7 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-35 duplicate catch rate after the threshold rise. 3. F-19 faithfulness judge on planted unfaithful drafts. 4. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 5. F-20 rerankers (needs a Voyage payment method; the bulk rule for a reranker is now set). 6. F-34 review during processing (fails safe). 7. F-8 leaked-password protection, with a hosted sprint. 8. F-2 generated database types. 9. F-3 invite screen. 10. F-4 Tailwind 4.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -448,7 +473,7 @@ No spike.
 | F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | Done, Sprint 2. From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
 | F-14 | Japanese evaluation items are machine translations of the original questions, unreviewed | From the Sprint 1 review; reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
 | F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
-| F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
+| F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | Done, Sprint 8 (S8-2). From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
 | F-17 | High confidence is shown as "100%" | Done, Sprint 3. From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
 | F-18 | The judge says "no" to some answerable questions (DSAR, MFA in Japanese); calibration then shows 63% beside a refusal | Done, Sprint 6 (S6-1, S6-3: the "no"s were mostly cut-off replies; verdict and reason now on the card). From the Sprint 2 review |
 | F-19 | The faithfulness judge has only been checked on faithful drafts (9 of 9 agreed) | From the Sprint 2 review; plant unfaithful drafts to test that it catches them |
@@ -468,10 +493,10 @@ No spike.
 | F-33 | A "partly" verdict on a near miss can reach the 80% bulk line; only the drafter's refusal keeps it out of bulk approval | Done, Sprint 7 (S7-1). From the Sprint 6 re-measure (n016 at 80.0% in one run; r015 at 81.7%) |
 | F-34 | An entry reviewed while a question citing it is being processed leaves that question held until the entry is reviewed or confirmed again | From the Sprint 6 security review; fails safe |
 | F-35 | After the learning threshold rose to 0.55, 53.0% of real duplicates are caught (was 66.7%), so more near-duplicate entries are added | From the Sprint 6 re-measure; related to F-11 |
-| F-36 | Excel exports have an empty title property | From the Sprint 7 end-to-end export check; the description and Provenance sheet are filled |
-| F-37 | The demo data has no pending "partly" question at the bulk line | From the Sprint 7 close; the hold was checked by database tests only |
-| F-38 | Two embedding calls appeared after a fresh seed (source not established); the demo recording keeps only Claude calls | From the Sprint 7 security review (governance screenshot) |
-| F-39 | The screenshot script checks the app address is local, not the Supabase address in `.env` | From the Sprint 7 security review |
+| F-36 | Excel exports have an empty title property | Done, Sprint 8 (S8-5). From the Sprint 7 end-to-end export check; the description and Provenance sheet are filled |
+| F-37 | The demo data has no pending "partly" question at the bulk line | Done, Sprint 8 (S8-4). From the Sprint 7 close; the hold was checked by database tests only |
+| F-38 | Two embedding calls appeared after a fresh seed (source not established); the demo recording keeps only Claude calls | Done, Sprint 8 (S8-4: the first sign-in after a reset indexes the knowledge base). From the Sprint 7 security review (governance screenshot) |
+| F-39 | The screenshot script checks the app address is local, not the Supabase address in `.env` | Done, Sprint 8 (S8-5). From the Sprint 7 security review |
 | F-40 | With no checker configured (similarity only), 5 of 33 near misses reach the 80% bulk line, and bulk approval is allowed in that set-up | From the Sprint 8 calibration run; the fallback already missed the Sprint 2 bars. Consider holding similarity-only questions from bulk approval, as a reranker's are |
 | F-41 | A "yes" verdict with very low similarity (below about 0.45) is calibrated at about 85%, so is bulk-eligible; the lowest "yes" in the evaluation set has similarity 0.30 | From the Sprint 8 security review; behaviour since Sprint 2 (the old table gave 87.5%). Consider a similarity floor for bulk approval |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |

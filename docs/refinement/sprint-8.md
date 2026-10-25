@@ -115,3 +115,38 @@ Order: S8-5 (quick, standalone), S8-1, S8-2, S8-3 (needs S8-2), then S8-4 last (
 | Q5 | No larger evaluation set this sprint; F-14 and F-15 stay in the backlog |
 
 All five stories are Ready.
+
+## Close (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-8` (all three jobs). 614 unit tests and 227 database tests at the close; typecheck and lint clean.
+
+| Check | Result | Held? |
+|---|---|---|
+| S8-1: every summary figure has a 95% interval, checked by the docs test | 17 figures in `docs/evals/intervals-2026-10-25.md`; Wilson values recomputed independently by the review | Yes |
+| S8-2: cross-validation, leave-one-out, table fitted on all 363 | voyage-4 + checker: calibration error 0.047 (was 0.014 on one split); near misses at or above 80%: 0 in every fold; no single question changes that | Yes, with the checker. The similarity-only fallback misses the bars (F-40) |
+| S8-3: the range in the tooltip | Rory, local PC, Bluefin A14 at 81%: "13 of 16 evaluation questions scored like this had the right entry (95% interval 57 to 93%)" | Yes, after BUG-28 |
+| S8-4: the demo shows the "partly" hold; usage complete | Recorded on the local PC (plan 2026-10-25.2): A13 and A14 drafted and judged "partly" at 85.3% and 81.3%, held from bulk approval at 80%; the card shows the reason (Rory checked A14). Governance shows the recorded calls plus the two indexing calls of the first sign-in, as the README says | Yes |
+| S8-5: Excel title; screenshot script local only | Unit tests; the browser in the script now refuses any request that is not local (fonts excepted) | Yes |
+
+**What changed during the build.**
+- The first A13 and A14 (from the answerability set) got "partly" or "yes" from the checker but no draft: the drafter is stricter than the checker. Re-running could not help. They were replaced by d024 and d010, which were judged "partly" and still drafted in the drafting runs, and the recorder now prints each question's verdict and draft when it refuses a run.
+- The calibration error published for the app's set-up rose from 0.014 to 0.047. The new figure is cross-validated over every question and is the more honest one.
+
+**Bugs found and fixed in the sprint.** BUG-28: the confidence tooltip, longer now that it gives the range, rose above the card and its top was cut off (the card hid its overflow). Found by Rory in the end-to-end check.
+
+**Independent security review.** No high findings; three medium and seven low, all fixed and tested (commit `1130456`):
+
+1. (Medium) R-12 and the model card claimed stability and the "yes" rule without saying they hold only with the checker; reworded, with the fallback's figures.
+2. (Medium) A clustered interval could narrow when one failure appeared; with failures in fewer than five clusters, the wider of two methods is given.
+3. (Medium) The screenshot script read only the first Supabase address in `.env`; it now checks every source Vite reads, and its browser refuses non-local requests.
+4. (Low) The tooltip could pair a question with another table's range; now only when the calibration set matches.
+5. (Low) The tooltip wording described the interval as the share; now a count with the interval.
+6. (Low) The demo plan's note misstated the Sprint 6 figures; corrected.
+7. (Low) The docs test could check an older same-day intervals report; fixed.
+8. (Low) A table in the evaluations summary did not render; fixed, with a docs test for every table.
+9. (Low) The duplicates interval's denominator would have counted unreadable checks; filtered.
+10. (Low) A report header said "Test questions" for out-of-fold counts; corrected.
+
+**Raised in the sprint, now in the backlog.** F-40: with no checker configured, similarity alone lets 5 of 33 near misses reach 80% and still allows bulk approval. F-41: a "yes" with very low similarity is calibrated at about 85% (since Sprint 2).
+
+Sprint 8 closed 25 October 2026.
