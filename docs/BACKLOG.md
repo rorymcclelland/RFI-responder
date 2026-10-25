@@ -469,6 +469,18 @@ An independent security review found one high issue (plants misplaced in the Jap
 
 **What remains.** Every item left needs something the project does not have yet: C-1 is a large feature; F-14 and F-15 need a native Japanese reader and an outside reviewer; F-20 needs a Voyage payment method; F-8 needs a hosted deployment. The smaller ones (F-34, F-2, F-3, F-4) are housekeeping. Proposed at the Sprint 9 review: pause here, with the repository public and every published figure tested, or take C-1 as its own refined sprint.
 
+## Sprint 10: full documentation (asked for by Rory, 25 October 2026; refined the same day)
+
+Refinement: `docs/refinement/sprint-10.md`. User guides for every role, in the repository and in the app; a technical reference; a developer guide; screenshots for the guides.
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| S10-1 | User guides for the response owner, specialist and admin, and the question card label by label | No user guide exists | Ready, Sprint 10 |
+| S10-2 | Help in the app, from the same Markdown files | Rory, refinement | Ready, Sprint 10 |
+| S10-3 | Technical reference: data model and access, Edge Functions, configuration, developer guide | The "what" and "how" are undocumented | Ready, Sprint 10 |
+| S10-4 | Screenshots for the guides | Rory, refinement | Ready, Sprint 10 |
+| S10-5 | Index, and an independent accuracy review | Project rule 1 | Ready, Sprint 10 |
+
 **Not yet in a sprint, ranked at the Sprint 9 review.** 1. C-1 multilingual knowledge base. 2. F-14 and F-15 reviewed Japanese and near-miss items. 3. F-20 rerankers. 4. F-34 review during processing (fails safe). 5. F-8 leaked-password protection, with a hosted sprint. 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
 
 **Ranked at the Sprint 8 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-19 faithfulness judge on planted unfaithful drafts. 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 4. F-20 rerankers (needs a Voyage payment method). 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
