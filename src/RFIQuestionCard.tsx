@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
-import { approvalLabel, checkerSummary, formatConfidence } from './lib/format';
+import { approvalLabel, bulkHoldReason, checkerSummary, formatConfidence, needsWrittenAnswer } from './lib/format';
 import { answerSource, ANSWER_HEADING, ANSWER_TIP } from './lib/answerLabel';
 import { suggestExperts, type ExpertSuggestion } from './lib/responses';
 import { supabase } from './lib/supabase';
@@ -302,8 +302,10 @@ export default function RFIQuestionCard({
     else onAccept(question.finalAnswer);
   };
 
+  // A question with no draft starts from an empty box, not the placeholder (security review, Sprint 7).
+  const placeholderOnly = needsWrittenAnswer(question);
   const handleStartEdit = () => {
-    setEditText(question.finalAnswer);
+    setEditText(placeholderOnly ? '' : question.finalAnswer);
     setEditing(true);
     if (!isExpanded) onToggleExpand();
   };
@@ -433,6 +435,7 @@ export default function RFIQuestionCard({
                   <InfoTip text="Whether the matched entries actually answer this question, as judged by the model shown in the details. Its verdict feeds the confidence above. Not available means the check failed, so the question is not calibrated and is never bulk-approved." />
                 </div>
                 <p className="text-sm text-ink-700"><span className="font-black">{checker.label}</span>{checker.detail && <span>{'. '}{checker.detail}</span>}</p>
+                {bulkHoldReason(question) && <p className="text-xs text-ink-500 font-medium mt-1">{bulkHoldReason(question)}</p>}
               </div>
             );
           })()}
@@ -484,7 +487,7 @@ export default function RFIQuestionCard({
               <p className="section-label flex items-center gap-1.5">
                 {editing ? 'Edit Response' : ANSWER_HEADING[source]}
                 {!editing && <InfoTip text={source === 'draft'
-                  ? `${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'} Accept as it is, edit, or skip.`
+                  ? `${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'}${placeholderOnly ? ' Write the answer, or skip.' : ' Accept as it is, edit, or skip.'}`
                   : ANSWER_TIP[source]} />}
               </p>
               {!editing && canDecide && question.status !== 'skipped' && (
@@ -506,7 +509,8 @@ export default function RFIQuestionCard({
                   className="input resize-none leading-relaxed font-normal"
                 />
                 <div className="flex items-center gap-2">
-                  <button onClick={() => { onAccept(editText); setEditing(false); }} className="btn-primary text-xs py-2">
+                  <button onClick={() => { onAccept(editText); setEditing(false); }} className="btn-primary text-xs py-2 disabled:opacity-50"
+                    disabled={needsWrittenAnswer({ ...question, finalAnswer: editText })}>
                     <CheckCircle2 size={13} /> Save & Accept
                   </button>
                   <button onClick={() => { setEditing(false); setEditText(question.finalAnswer); }} className="btn-ghost text-xs py-2">
@@ -546,12 +550,20 @@ export default function RFIQuestionCard({
             <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
               {question.status !== 'accepted' && question.status !== 'skipped' && (
                 <>
-                  <button onClick={handleAccept} className="btn-primary text-xs py-2">
-                    <CheckCircle2 size={14} /> Accept
-                  </button>
-                  <button onClick={handleStartEdit} className="btn-ghost text-xs py-2">
-                    <Pencil size={13} /> Edit First
-                  </button>
+                  {placeholderOnly ? (
+                    <button onClick={handleStartEdit} className="btn-primary text-xs py-2">
+                      <Pencil size={13} /> Write an answer
+                    </button>
+                  ) : (
+                    <>
+                      <button onClick={handleAccept} className="btn-primary text-xs py-2">
+                        <CheckCircle2 size={14} /> Accept
+                      </button>
+                      <button onClick={handleStartEdit} className="btn-ghost text-xs py-2">
+                        <Pencil size={13} /> Edit First
+                      </button>
+                    </>
+                  )}
                   <button onClick={(e) => { e.stopPropagation(); onSkip(); }}
                     className="flex items-center gap-1.5 text-xs font-bold text-ink-400 hover:text-ink-700 transition-colors ml-auto">
                     <SkipForward size={13} /> Skip

@@ -1,6 +1,6 @@
 # Evaluations
 
-What has been measured, on what, and the latest figure for each measure. Every figure below is checked against the report it cites by a test (`docs/governance/governance.test.ts`), so this page cannot drift from the reports.
+What has been measured, on what, and the latest figure for each measure. A test (`docs/docs.test.ts`) checks that every figure below is the figure in its own row and column of the report it cites, so a figure cannot be changed here without the report agreeing.
 
 **Read every figure as an estimate on small synthetic sets.** The evaluation set (version 2026-10-22.3) has 363 questions written by Claude from the synthetic knowledge base: paraphrases, machine translations into Japanese, unanswerable questions and near misses (questions on a topic the knowledge base covers that ask for something it does not hold). Nobody outside the project has reviewed them, and calibration moved noticeably when one item was removed (backlog F-16). The scripts are in [`eval/`](../../eval/), with instructions in [`eval/README.md`](../../eval/README.md).
 

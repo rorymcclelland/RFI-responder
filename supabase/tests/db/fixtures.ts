@@ -18,7 +18,7 @@ export async function session(opp: string): Promise<string> {
 /** A processed, drafted, ungated question; `cited` defaults to the first source. */
 export async function question(s: string, o: {
   confidence?: number; gate?: string | null; sources?: string[]; cited?: string[]; text?: string; generated?: string; final?: string | null;
-  verdict?: string | null; judgeModel?: string | null;
+  verdict?: string | null; judgeModel?: string | null; draftKind?: string;
 } = {}): Promise<string> {
   const sources = o.sources ?? [];
   return (await one<{ id: string }>(
@@ -26,12 +26,12 @@ export async function question(s: string, o: {
        verdict, sources_json, embedding_model, judge_model, draft_model, prompt_version, calibration_set, draft_kind, processed_at,
        judge_best_ref, cited_refs)
      VALUES ($1, 0, $2, $3, $4, $5, 'pending', $6, 'en', $10, $7, 'voyage-4', $11, 'claude-haiku-5-5', 'draft-1', 'set 1',
-       'generated', now(), $8, $9)
+       $12, now(), $8, $9)
      RETURNING id`,
     [s, o.text ?? 'How is data encrypted at rest?', o.generated ?? 'We encrypt data at rest.', o.final === undefined ? null : o.final,
       o.confidence ?? 0.9, o.gate ?? null, JSON.stringify(sources.map((id, i) => ({ id, score: 0.9 - i / 100 }))),
       sources[0] ?? null, o.cited ?? sources.slice(0, 1), o.verdict === undefined ? 'yes' : o.verdict,
-      o.judgeModel === undefined ? 'claude-haiku-5-5' : o.judgeModel])).id;
+      o.judgeModel === undefined ? 'claude-haiku-5-5' : o.judgeModel, o.draftKind ?? 'generated'])).id;
 }
 
 /** A knowledge-base entry; reviewed unless `reviewed` is false. */

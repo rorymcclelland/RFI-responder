@@ -56,12 +56,22 @@ export function checkPlan(plan: DemoPlan): string[] {
       if (!refs.has(ref)) problems.push(`${r.key}: ${ref} is not one of its questions`);
     }
     if (r.stage === 'archived' && !r.outcome) problems.push(`${r.key}: an archived response needs an outcome`);
+    if (!Number.isInteger(r.dueDays)) problems.push(`${r.key}: dueDays must be a whole number`);
+    if (r.bulkAt !== undefined && !(typeof r.bulkAt === 'number' && r.bulkAt >= 0 && r.bulkAt <= 1)) problems.push(`${r.key}: bulkAt must be between 0 and 1`);
   }
   return problems;
 }
 
-/** A SQL string literal (standard_conforming_strings is on in Postgres 16, so only quotes need doubling). */
-export const lit = (s: string | null | undefined): string => (s === null || s === undefined ? 'NULL' : `'${s.replace(/'/g, "''")}'`);
+/**
+ * A SQL string literal (standard_conforming_strings is on in Postgres 16, so only quotes need doubling).
+ * The literals sit inside DO $kb$ ... $kb$ and DO $demo$ ... $demo$ blocks, so text that looks like a
+ * dollar-quote tag could end the block early; it is refused (security review, Sprint 7, finding 4).
+ */
+export const lit = (s: string | null | undefined): string => {
+  if (s === null || s === undefined) return 'NULL';
+  if (/\$[A-Za-z_]*\$/.test(s)) throw new Error(`Refusing text with a dollar-quote tag in the seed: ${s.slice(0, 60)}`);
+  return `'${s.replace(/'/g, "''")}'`;
+};
 const num = (n: number | null | undefined) => (n === null || n === undefined || !Number.isFinite(n) ? 'NULL' : String(n));
 const arr = (xs: string[]) => `ARRAY[${xs.map(lit).join(', ')}]::text[]`;
 

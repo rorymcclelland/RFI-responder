@@ -107,8 +107,12 @@ describe('Sprint 7, S7-1: bulk approval needs a "yes" verdict (F-33)', () => {
     const base = toQuestion(row({ verdict: 'yes', processed_at: '2026-10-24T00:00:00Z', draft_kind: 'generated', judge_model: 'm' }), new Map());
     expect(bulkEligible(base)).toBe(true);
     expect(bulkEligible({ ...base, checker: { ...base.checker, verdict: 'partly' } })).toBe(false);
-    expect(bulkEligible({ ...base, checker: { verdict: null, bestRef: null, reason: null } })).toBe(true);
+    // Security review, Sprint 7: a checker ran (a reranker) but gave no verdict, so it is not similarity-only.
+    expect(bulkEligible({ ...base, checker: { ...base.checker, verdict: null } })).toBe(false);
+    expect(bulkEligible({ ...base, checker: { ...base.checker, verdict: null }, provenance: { ...base.provenance, judgeModel: null } })).toBe(true);
     expect(describeBulk({ accepted: 3, heldGated: 0, heldUncalibrated: 0, heldNoDraft: 0, belowThreshold: 0, heldPartly: 2 }, 0.8))
       .toBe('3 accepted; 2 held because the checker said the entries answer them only in part (accept them individually).');
+    expect(describeBulk({ accepted: 0, heldGated: 0, heldUncalibrated: 0, heldNoDraft: 0, belowThreshold: 0, heldNoVerdict: 1 }, 0.8))
+      .toBe('0 accepted; 1 held because the checker gave a score but no verdict (accept it individually).');
   });
 });

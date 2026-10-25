@@ -47,6 +47,15 @@ describe('S7-1 bulk approval needs a "yes" verdict (F-33)', () => {
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldPartly: 1 });
     });
   });
+  it('7 (security review, Sprint 7). a checker that gives a score but no verdict (a reranker) is held, not treated as no checker', async () => {
+    const s = await session(await response(owner.id));
+    const scored = await question(s, { verdict: null, judgeModel: 'rerank-2.5', confidence: 0.9, text: 'Reranker, no verdict (S7 review)?' });
+    await as(owner, async (q) => {
+      const r = await q<{ bulk_accept: Bulk & { heldNoVerdict: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldPartly: 0, heldNoVerdict: 1 });
+      expect((await statuses(q, s)).get(scored)).toBe('pending');
+    });
+  });
 });
 
 describe('S7-2 a draft citing a replaced entry is held from bulk (F-32)', () => {
@@ -90,6 +99,35 @@ describe('S7-2 a draft citing a replaced entry is held from bulk (F-32)', () => 
       expect((await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0.8)`, [s])).rows[0].bulk_accept.accepted).toBe(1);
       const g = await q<{ id: string; gate: string | null }>(`SELECT id, gate FROM rfi_questions WHERE id = ANY($1)`, [[ok, done]]);
       expect(g.rows.every((x) => x.gate === null)).toBe(true);
+    });
+  });
+});
+
+describe('Security review, Sprint 7 (finding 3): a placeholder is never accepted as an answer', () => {
+  const placeholder = 'Insufficient evidence: the matched knowledge-base entries do not answer this question. It needs an answer written by a person.';
+
+  it('1. accepting an unedited "insufficient evidence" or pricing placeholder is refused, by the owner and by an admin', async () => {
+    const admin = await createUser({ admin: true });
+    const s = await session(await response(owner.id));
+    const none = await question(s, { draftKind: 'insufficient_evidence', generated: placeholder, final: placeholder, text: 'Placeholder (review 3 t1)?' });
+    const price = await question(s, { draftKind: 'person_required', gate: 'pricing', generated: 'Pricing: a person answers.', final: null, text: 'Price (review 3 t1)?' });
+    for (const user of [owner, admin]) {
+      for (const id of [none, price]) {
+        await expect(as(user, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]))).rejects.toThrow(/written by a person/);
+      }
+    }
+  });
+
+  it('2. once a person has written an answer, it can be accepted; a model draft accepted unedited is unaffected', async () => {
+    const s = await session(await response(owner.id));
+    const none = await question(s, { draftKind: 'insufficient_evidence', generated: placeholder, final: placeholder, text: 'Placeholder, then written (review 3 t2)?' });
+    const drafted = await question(s, { text: 'Drafted (review 3 t2)?' });
+    await as(owner, async (q) => {
+      await q(`UPDATE rfi_questions SET final_answer = 'We hold ISO 27001 certification.' WHERE id = $1`, [none]);
+      await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [none]);
+      await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [drafted]);
+      const st = await statuses(q, s);
+      expect([st.get(none), st.get(drafted)]).toEqual(['accepted', 'accepted']);
     });
   });
 });

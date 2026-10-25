@@ -11,10 +11,10 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 - **Reads the questions** from a spreadsheet or a Word questionnaire. Files are opened in the browser with size and decompression limits. For a Word document the text is then sent to the server, where Claude finds the questions; each is kept only if it appears in the document word for word, with the customer's own numbering, and a person checks the list before anything is saved.
 - **Drafts each answer from the knowledge base**, on the server. The question is matched by meaning (voyage-4 embeddings, or a local model); Claude Haiku 5.5 checks whether the matched entries actually answer it, then drafts only from those entries and cites them. Code rejects a draft that cites an entry it was not given, or contains a figure, link or email address not in its sources; the question is then left without a draft, with a note saying why, for a person to answer. When nothing answers the question, or it asks for a price, there is no draft.
 - **Says how confident it is, and why.** Confidence is calibrated on an evaluation set: the measured chance that the knowledge base answers the question. The card shows the checker's verdict and its one-sentence reason.
-- **Lets the owner approve in bulk, within limits the database enforces.** A question qualifies only if it was processed on the server, has a draft, has calibrated confidence at or above the chosen threshold, and the checker said "yes" (or, in a set-up with no checker configured, its confidence comes from similarity alone). Pricing, legal and translated questions, questions whose checks could not run, and drafts citing an entry that is unreviewed, overdue for review or replaced, are always decided by a person. Every approval records who, when and how.
+- **Lets the owner approve in bulk, within limits the database enforces.** A question qualifies only if it was processed on the server, has a draft, has calibrated confidence at or above the chosen threshold, and the checker said "yes" (or, in a set-up with no checker configured, its confidence comes from similarity alone; a reranker's score without a verdict does not count). Pricing, legal and translated questions, questions whose checks could not run, and drafts citing an entry that is unreviewed, overdue for review or replaced, are always decided by a person, and a question with no draft cannot be accepted until a person has written its answer. Every approval records who, when and how.
 - **Routes specialist questions** to colleagues, suggesting who from stated expertise and who wrote or approved similar answers, with an inbox for each.
 - **Learns from each exported response.** Recording the export turns edited and person-written answers into knowledge-base entries linked to the response they came from. A member's addition, or an answer that would replace an existing entry, waits for an admin's review; pricing answers are never learned; entries fall due for review after 12 months.
-- **Exports** to Excel, CSV and Word, each file recording how every answer was produced (drafted by a model, edited or written by a person) and who approved it.
+- **Exports** to Excel, CSV and Word, each file recording how every answer was produced (drafted by a model, edited or written by a person), with which model and prompt version, and who approved it, when and how.
 - **Caps spend.** Every AI call is recorded and priced. Processing stops for a person who reaches the daily limit, and for everyone when the month's estimated spend reaches the budget.
 
 ## What it does not do
@@ -37,7 +37,7 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 | ![An exported response and what the knowledge base learned](docs/screenshots/6-export-and-learning.png) | ![The governance page: usage and limits](docs/screenshots/7-governance-usage.png) |
 | An exported response, and what the knowledge base learned | Spend, limits and prices on the governance page |
 
-All screenshots show the synthetic demo data in `supabase/seed.sql`.
+All screenshots show the synthetic demo data in `supabase/seed.sql`. The governance page also counts two embedding calls made on the local install after the seed loaded; the seed itself records only the Claude calls from the recorded run.
 
 ## How it was built
 

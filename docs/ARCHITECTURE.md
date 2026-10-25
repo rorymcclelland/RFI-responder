@@ -85,7 +85,7 @@ sequenceDiagram
   Owner->>App: Download Excel, CSV or Word, each with a provenance record per answer
 ```
 
-**What decides whether a question can be approved in bulk.** All of these, checked by the database at the moment of approval: processed on the server; calibrated confidence at or above the threshold; a draft to approve; the checker's verdict "yes" (or no checker configured); no gate (pricing; legal; translation; unchecked, meaning the classifier or the review check could not run; or citing an entry that is unreviewed, overdue for review or replaced). Everything else is decided by a person, one question at a time, and every decision is recorded with who, when and how.
+**What decides whether a question can be approved in bulk.** All of these, checked by the database at the moment of approval: processed on the server; calibrated confidence at or above the threshold; a draft to approve; the checker's verdict "yes" (or no checker configured; a reranker's score without a verdict is held); no gate (pricing; legal; translation; unchecked, meaning the classifier or the review check could not run; or citing an entry that is unreviewed, overdue for review or replaced). Everything else is decided by a person, one question at a time, and every decision is recorded with who, when and how.
 
 ## Where things are
 

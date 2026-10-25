@@ -1,4 +1,4 @@
-import { approvalLabel } from './lib/format';
+import { approvalLabel, needsWrittenAnswer } from './lib/format';
 import { buildCsv, buildWorkbook, escapeHtml } from './lib/spreadsheet';
 import { RFIQuestion } from './types';
 
@@ -50,7 +50,7 @@ export function exportRows(questions: RFIQuestion[]) {
 export type AnswerOrigin =
   | 'model-drafted, approved unedited' | 'model-drafted, edited by a person'
   | 'assembled from knowledge-base entries, approved unedited' | 'assembled from knowledge-base entries, edited by a person'
-  | 'written by a person' | 'not answered' | 'not recorded (processed before provenance was kept)';
+  | 'written by a person' | 'placeholder accepted unedited' | 'not answered' | 'not recorded (processed before provenance was kept)';
 
 /** How one answer was produced, from what the database recorded. */
 export function answerOrigin(q: RFIQuestion): AnswerOrigin {
@@ -58,7 +58,10 @@ export function answerOrigin(q: RFIQuestion): AnswerOrigin {
   const edited = q.finalAnswer !== q.generatedAnswer;
   if (q.draftKind === 'generated') return edited ? 'model-drafted, edited by a person' : 'model-drafted, approved unedited';
   if (q.draftKind === 'assembled') return edited ? 'assembled from knowledge-base entries, edited by a person' : 'assembled from knowledge-base entries, approved unedited';
-  if (q.draftKind === 'insufficient_evidence' || q.draftKind === 'person_required') return 'written by a person';
+  if (q.draftKind === 'insufficient_evidence' || q.draftKind === 'person_required') {
+    // Security review, Sprint 7 (finding 3): the database now refuses this; earlier records say so plainly.
+    return needsWrittenAnswer(q) ? 'placeholder accepted unedited' : 'written by a person';
+  }
   return 'not recorded (processed before provenance was kept)';
 }
 
@@ -95,12 +98,13 @@ const modelsUsed = (rows: ProvenanceRow[]) => [...new Set(rows.map((r) => r.mode
 
 // ─── CSV ──────────────────────────────────────────────────────────────────────
 
-/** CSV has no file properties, so the origin is a column (Sprint 7, F-27). */
+/** CSV has no file properties, so the provenance is in columns (Sprint 7, F-27). */
 export function buildCsvExport(questions: RFIQuestion[], names: Map<string, string> = new Map()): string {
   const prov = provenanceRows(questions, names);
   return buildCsv(
-    ['#', 'Question', 'Answer', 'answer_origin'],
-    exportRows(questions).map((r, i) => [r.number, r.question, r.answer, prov[i].origin]),
+    ['#', 'Question', 'Answer', 'answer_origin', 'model', 'prompt_version', 'approved_by', 'approved_at', 'approval'],
+    exportRows(questions).map((r, i) => [r.number, r.question, r.answer, prov[i].origin, prov[i].model, prov[i].promptVersion,
+      prov[i].approvedBy, prov[i].approvedAt, prov[i].approval]),
   );
 }
 
@@ -140,7 +144,7 @@ export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'ex
 export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()): string {
   const exported = exportRows(questions);
   const prov = provenanceRows(questions, names);
-  const provRows = prov.map((r) => `<tr><td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.model)}</td><td>${escapeHtml(r.approvedBy)}</td><td>${escapeHtml(r.approval)}</td></tr>`).join('');
+  const provRows = prov.map((r) => `<tr><td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.model)}</td><td>${escapeHtml(r.promptVersion)}</td><td>${escapeHtml(r.approvedBy)}</td><td>${escapeHtml(r.approvedAt)}</td><td>${escapeHtml(r.approval)}</td></tr>`).join('');
   const answered = exported.filter((r) => r.answer !== NOT_ANSWERED).length;
   const date     = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -195,7 +199,7 @@ export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export', na
       </table>
       <h2 style="font-size:14px;color:#0f172a;margin:32px 0 8px;">How each answer was produced</h2>
       <table class="provenance">
-        <thead><tr><th>#</th><th>Origin</th><th>Model</th><th>Approved by</th><th>Approval</th></tr></thead>
+        <thead><tr><th>#</th><th>Origin</th><th>Model</th><th>Prompt version</th><th>Approved by</th><th>Approved at</th><th>Approval</th></tr></thead>
         <tbody>${provRows}</tbody>
       </table>
     </body>

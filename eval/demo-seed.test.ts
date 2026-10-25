@@ -22,6 +22,14 @@ describe('S7-5 SQL generation', () => {
     expect(lit("O'Brien; DROP TABLE x")).toBe("'O''Brien; DROP TABLE x'");
     expect(lit(null)).toBe('NULL');
   });
+  it('refuses text that could end a dollar-quoted block, and numbers that are not numbers (security review, Sprint 7)', () => {
+    expect(() => lit('fine $kb$ SELECT 1; DO $x$')).toThrow(/dollar/);
+    expect(() => lit('ends $demo$ early')).toThrow(/dollar/);
+    expect(() => lit('$$')).toThrow(/dollar/);
+    expect(lit('Costs $5 a month')).toBe("'Costs $5 a month'");
+    const bad = { ...plan, responses: [{ ...plan.responses[1], dueDays: '1; DROP TABLE x' as unknown as number, bulkAt: 2 }] };
+    expect(checkPlan(bad).join('\n')).toMatch(/dueDays[\s\S]*bulkAt/);
+  });
   it('4. states its provenance, or seeds only the new response when there is no recording', () => {
     const none = demoSeedSql(plan, null);
     expect(none).toMatch(/No recording yet/);

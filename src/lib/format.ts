@@ -52,3 +52,31 @@ export function assignmentPeople(tab: 'mine' | 'sent' | 'all', a: { assignedByPr
   return tab === 'mine' ? by : tab === 'sent' ? to : `${by}, ${to}`;
 }
 
+
+/**
+ * A question with no draft carries a placeholder where a draft would be ("Insufficient evidence: ...",
+ * or the pricing note). It needs an answer written by a person before it can be accepted; the database
+ * refuses it otherwise (security review, Sprint 7, finding 3).
+ */
+export function needsWrittenAnswer(q: { draftKind: string | null; generatedAnswer: string | null; finalAnswer: string | null }): boolean {
+  if (q.draftKind !== 'insufficient_evidence' && q.draftKind !== 'person_required') return false;
+  const written = (q.finalAnswer ?? '').trim();
+  return written === '' || written === (q.generatedAnswer ?? '').trim();
+}
+
+/**
+ * Why a pending, drafted, ungated question is left out of bulk approval because of its checker
+ * verdict (Sprint 7, S7-1; shown on the card since the Sprint 7 security review). Null when the
+ * verdict does not hold it; gates and missing confidence have their own labels on the card.
+ */
+export function bulkHoldReason(q: {
+  status: string; gate: string | null; draftKind: string | null;
+  checker: { verdict: string | null }; provenance: { judgeModel: string | null };
+}): string | null {
+  if (q.status !== 'pending' || q.gate !== null || (q.draftKind !== 'generated' && q.draftKind !== 'assembled')) return null;
+  const why = q.checker.verdict === 'partly' ? 'the checker said the entries answer it only in part'
+    : q.checker.verdict === 'no' ? 'the checker said the entries do not answer it'
+    : q.checker.verdict === null && q.provenance.judgeModel !== null ? 'the checker gave a score but no verdict'
+    : null;
+  return why && `Not included in bulk approval: ${why}. Accept it on its own if the draft is right.`;
+}

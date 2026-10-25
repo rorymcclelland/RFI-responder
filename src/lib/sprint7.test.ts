@@ -23,6 +23,9 @@ describe('S7-3 test 1: each origin from what was recorded', () => {
     [{ draftKind: 'assembled' as const, finalAnswer: 'Changed.' }, 'assembled from knowledge-base entries, edited by a person'],
     [{ draftKind: 'insufficient_evidence' as const, generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Written.' }, 'written by a person'],
     [{ draftKind: 'person_required' as const, generatedAnswer: 'Pricing.', finalAnswer: 'Written.' }, 'written by a person'],
+    // Security review, Sprint 7 (finding 3): accepted before the database refused it.
+    [{ draftKind: 'insufficient_evidence' as const, generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Insufficient evidence.' }, 'placeholder accepted unedited'],
+    [{ draftKind: 'person_required' as const, generatedAnswer: 'Pricing.', finalAnswer: ' Pricing. ' }, 'placeholder accepted unedited'],
     [{ status: 'skipped' as const }, 'not answered'],
     [{ draftKind: null, processed: false }, 'not recorded (processed before provenance was kept)'],
   ])('%o is "%s"', (over, origin) => {
@@ -79,8 +82,42 @@ describe('S7-3 tests 4 and 5: CSV', () => {
   it('has an answer_origin column, and neutralises formula-like values', () => {
     const csv = buildCsvExport([q({}, 0), q({ question: '=HYPERLINK("x")' }, 1)], names);
     const [head, first, second] = csv.trim().split(/\r?\n/);
-    expect(head).toBe('"#","Question","Answer","answer_origin"');
-    expect(first).toMatch(/,"?model-drafted, approved unedited"?$/);
+    expect(head).toBe('"#","Question","Answer","answer_origin","model","prompt_version","approved_by","approved_at","approval"');
+    expect(first).toContain('"model-drafted, approved unedited","claude-haiku-5-5","draft-2026-10-23.1","Sarah Chen","2026-10-24T10:00:00Z","individual"');
     expect(second).toMatch(/^"2","'=HYPERLINK/);
+  });
+});
+
+describe('Security review, Sprint 7 (findings 2 and 3)', () => {
+  it('the Word table gives the approval time and prompt version, like the other formats', () => {
+    const html = wordHtml([q({})], 'f', names);
+    expect(html).toContain('<th>Prompt version</th>');
+    expect(html).toContain('<td>draft-2026-10-23.1</td>');
+    expect(html).toContain('<td>2026-10-24T10:00:00Z</td>');
+  });
+
+  it('a question with no draft needs a written answer before it can be accepted', async () => {
+    const { needsWrittenAnswer } = await import('./format');
+    expect(needsWrittenAnswer(q({ status: 'pending', draftKind: 'insufficient_evidence', generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Insufficient evidence.' }))).toBe(true);
+    expect(needsWrittenAnswer(q({ status: 'pending', draftKind: 'person_required', generatedAnswer: 'Pricing.', finalAnswer: '' }))).toBe(true);
+    expect(needsWrittenAnswer(q({ status: 'pending', draftKind: 'insufficient_evidence', generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Written.' }))).toBe(false);
+    expect(needsWrittenAnswer(q({ status: 'pending' }))).toBe(false);
+  });
+});
+
+describe('Security review, Sprint 7 (finding 7): the card says why a drafted question is left out of bulk approval', () => {
+  it('names the checker verdict, or the missing verdict, and says nothing otherwise', async () => {
+    const { bulkHoldReason } = await import('./format');
+    const pending = (over: Partial<RFIQuestion>) => q({ status: 'pending', ...over });
+    expect(bulkHoldReason(pending({ checker: { verdict: 'partly', bestRef: null, reason: null } })))
+      .toBe('Not included in bulk approval: the checker said the entries answer it only in part. Accept it on its own if the draft is right.');
+    expect(bulkHoldReason(pending({ checker: { verdict: 'no', bestRef: null, reason: null } })))
+      .toBe('Not included in bulk approval: the checker said the entries do not answer it. Accept it on its own if the draft is right.');
+    expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null } })))
+      .toBe('Not included in bulk approval: the checker gave a score but no verdict. Accept it on its own if the draft is right.');
+    expect(bulkHoldReason(pending({}))).toBeNull();
+    expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null }, provenance: { ...base.provenance, judgeModel: null } }))).toBeNull();
+    expect(bulkHoldReason(pending({ gate: 'pricing', checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
+    expect(bulkHoldReason(q({ checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
   });
 });

@@ -42,7 +42,7 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
 
         <div className="border-t border-ink-100 pt-5">
           <p className="section-label mb-1">Download as</p>
-          <p className="text-xs text-ink-500 mb-4">Each file records how every answer was produced (drafted by a model, edited or written by a person) and who approved it: on a Provenance sheet in Excel, at the end of the Word file, and in a column in CSV.</p>
+          <p className="text-xs text-ink-500 mb-4">Each file records how every answer was produced (drafted by a model, edited or written by a person) and who approved it: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV.</p>
           <div className="flex flex-wrap gap-3">
             <button onClick={() => exportExcel(questions, fileName, names)}
               className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-emerald-300 text-emerald-700 rounded-2xl hover:bg-emerald-50 transition-colors shadow-card">

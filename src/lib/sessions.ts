@@ -9,6 +9,8 @@ export interface BulkResult {
   heldNoDraft?: number;
   /** Sprint 7 (F-33): at the threshold, but the checker said only "partly" or "no". */
   heldPartly?: number;
+  /** Security review, Sprint 7: a checker ran (a reranker) but gave a score, not a verdict. */
+  heldNoVerdict?: number;
   belowThreshold: number;
 }
 
@@ -30,6 +32,7 @@ export function describeBulk(r: BulkResult, threshold: number): string {
   if (r.heldUncalibrated) parts.push(`${r.heldUncalibrated} without calibrated confidence`);
   if (r.heldNoDraft) parts.push(`${r.heldNoDraft} with no draft to approve`);
   if (r.heldPartly) parts.push(`${r.heldPartly} held because the checker said the entries answer them only in part (accept them individually)`);
+  if (r.heldNoVerdict) parts.push(`${r.heldNoVerdict} held because the checker gave a score but no verdict (accept ${r.heldNoVerdict === 1 ? 'it' : 'them'} individually)`);
   return `${parts.join('; ')}.`;
 }
 
