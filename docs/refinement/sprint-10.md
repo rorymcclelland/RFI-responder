@@ -79,6 +79,14 @@ The README and the docs index point to the guides and the technical reference. A
 
 **Size.** M. Depends on S10-1 (the guide pages it links to) and S10-2 (the Help menu).
 
+## Found while building
+
+Writing the guides and the technical reference meant reading every screen and function against what it claims. What that turned up:
+
+- **BUG-29 (fixed).** The inbox showed an assignment's new stage, and saved notes, even when the database refused the change (for example after the response's export closed its assignments): the update affected no rows and reported no error. `src/lib/assignments.ts` now checks that a row changed and says so when it did not, the inbox reloads after each change, and marking yours approved approves the others on the same question only when you may (5 tests).
+- **Fixed in the documentation.** The architecture page and the model card said each question stores "models and prompt versions"; it stores the matching, checking and drafting models and the drafting prompt's version only. Corrected. The limit messages pointed to a "Usage page" that the app calls **Usage and limits** on the governance page; reworded. `EXTRACT_MODEL` was missing from `supabase/functions/.env.example`; added.
+- **For the close (code, not changed in this sprint).** From reading the Edge Functions: `embed` counts units against the daily cap even when it then refuses the request; `embed-entries` can report the daily limit when the monthly budget is the cause, and returns raw database error text on two 500s; a missing Voyage key gives a vague 500; nothing in the app calls `embed`; `rerank-3` has no price row, so its cost is recorded as unknown. From reading the data model: an assignee (or the owner) can still change a question on an exported but unarchived response, which reopens it; `purge_old_usage` is never scheduled; changes to `ai_prices` and an admin setting `kb_entries.superseded_by` directly are not audited; owners can set most columns of a new assignment; `handle_new_user` has `search_path = public` rather than empty; the settings, prices and learning thresholds are inserted by migrations, which the "no data in migrations" rule does not anticipate (they are configuration, not sample data). They are triaged at the close.
+
 ## Not in this sprint
 
 New features. Translating the guides.

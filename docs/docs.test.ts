@@ -25,7 +25,10 @@ function table(markdown: string, firstHeader: string): string[][] {
 }
 
 /** The pages a first-time reader starts from. */
-const PAGES = ['README.md', 'docs/ARCHITECTURE.md', 'docs/evals/README.md', 'docs/DEPLOYING.md'].filter((p) => existsSync(join(ROOT, p)));
+const inDir = (d: string) => (existsSync(join(ROOT, d)) ? readdirSync(join(ROOT, d)).filter((f) => f.endsWith('.md')).map((f) => `${d}/${f}`) : []);
+// Sprint 10: the user guide and the technical reference are checked the same way.
+const PAGES = ['README.md', 'docs/ARCHITECTURE.md', 'docs/evals/README.md', 'docs/DEPLOYING.md', ...inDir('docs/guide'), ...inDir('docs/technical')]
+  .filter((p) => existsSync(join(ROOT, p)));
 
 /** Every table in a report: its header and rows. */
 function tables(markdown: string): { header: string[]; rows: string[][] }[] {

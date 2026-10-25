@@ -12,7 +12,7 @@ RFI Respond drafts answers to procurement questionnaires (RFIs and RFQs) from an
 | Draft the answer from the entries | claude-haiku-5-5 | claude-haiku-5-5 | `process-questions` | `draft_model`, `prompt_version` |
 | Find the questions in an uploaded Word document | claude-haiku-5-5 (rules if it fails) | claude-haiku-5-5 (rules if it fails) | `extract-questions` | returned to the preview with the prompt version |
 
-Choices and reasons: decisions [0005](../decisions/0005-where-the-ai-runs.md), [0006](../decisions/0006-retrieval-defaults.md) and [0007](../decisions/0007-answerability-and-drafting-defaults.md). Prompts carry a version (`draft-2026-10-23.1`, `judge-2026-10-24.1`, `gate-2026-10-24.1`, `extract-2026-10-23.2`); every processed question stores the models, the prompt version and the calibration set behind its confidence.
+Choices and reasons: decisions [0005](../decisions/0005-where-the-ai-runs.md), [0006](../decisions/0006-retrieval-defaults.md) and [0007](../decisions/0007-answerability-and-drafting-defaults.md). Prompts carry a version (`draft-2026-10-23.1`, `judge-2026-10-24.1`, `gate-2026-10-24.1`, `extract-2026-10-23.2`); every processed question stores the matching, checking and drafting models, the drafting prompt's version and the calibration set behind its confidence (the classifier's model is recorded only in the usage log, and the checker's and classifier's prompt versions are not recorded per question).
 
 ## What the output is
 

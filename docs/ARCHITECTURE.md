@@ -76,7 +76,7 @@ sequenceDiagram
     Fn->>AI: Draft from the matched entries only
     Fn->>Fn: Reject a draft citing an entry it was not given, or a figure, link or email not in its sources (no draft, with a note)
   end
-  Fn->>DB: Save draft, calibrated confidence, gate, verdict and reason, models and prompt versions, and record usage
+  Fn->>DB: Save draft, calibrated confidence, gate, verdict and reason, the matching, checking and drafting models and the drafting prompt's version, and record usage
   Owner->>App: Review, lowest confidence first
   Owner->>DB: Bulk-approve above a threshold (bulk_accept: never gated, uncalibrated or "partly" questions)
   Owner->>DB: Accept, edit, skip or assign the rest

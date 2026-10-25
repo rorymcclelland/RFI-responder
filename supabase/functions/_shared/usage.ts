@@ -63,13 +63,13 @@ export type QuotaReason = 'daily_questions' | 'daily_embed' | 'daily_extract' | 
 export function quotaMessage(reason: QuotaReason): string {
   switch (reason) {
     case 'daily_questions':
-      return "You have reached today's limit on processing questions. An admin can raise it on the Usage page.";
+      return "You have reached today's limit on processing questions. An admin can raise it under Governance, Usage and limits.";
     case 'daily_embed':
-      return "You have reached today's limit on indexing knowledge-base text. An admin can raise it on the Usage page.";
+      return "You have reached today's limit on indexing knowledge-base text. An admin can raise it under Governance, Usage and limits.";
     case 'daily_extract':
-      return "You have reached today's limit on reading Word documents. An admin can raise it on the Usage page.";
+      return "You have reached today's limit on reading Word documents. An admin can raise it under Governance, Usage and limits.";
     case 'monthly_budget':
-      return "This month's AI budget has been reached, so nothing more can be processed. An admin can raise it on the Usage page.";
+      return "This month's AI budget has been reached, so nothing more can be processed. An admin can raise it under Governance, Usage and limits.";
   }
 }
 

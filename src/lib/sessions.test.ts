@@ -72,12 +72,12 @@ describe('processInBatches at the usage caps (Sprint 4, S4-1)', () => {
   it('shows the server\'s reason and stops sending batches once the cap refuses', async () => {
     const invoke = vi.fn()
       .mockResolvedValueOnce({ data: { processed: Array.from({ length: 10 }, (_, i) => ({ id: `q${i}`, saved: true })) }, error: null })
-      .mockResolvedValueOnce(refusal(429, "You have reached today's limit on processing questions. An admin can raise it on the Usage page."));
+      .mockResolvedValueOnce(refusal(429, "You have reached today's limit on processing questions. An admin can raise it under Governance, Usage and limits."));
     const ids = Array.from({ length: 30 }, (_, i) => `q${i}`);
     const r = await processInBatches({ functions: { invoke } } as never, 's1', ids, () => undefined);
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(r.failed).toEqual(ids.slice(10));
-    expect(r.reasons).toEqual(["You have reached today's limit on processing questions. An admin can raise it on the Usage page."]);
+    expect(r.reasons).toEqual(["You have reached today's limit on processing questions. An admin can raise it under Governance, Usage and limits."]);
   });
 
   it('reports questions held back part-way through a batch, with the limit', async () => {
