@@ -390,7 +390,7 @@ No spike.
 
 An independent security review found no high issues and seven smaller ones (two medium), all fixed and tested (`20261027110000_sprint7_review_fixes.sql`). The most important: a no-draft placeholder could be accepted unedited, exported as "written by a person" and learned into the knowledge base; the database now refuses it.
 
-**Bugs found and fixed in the sprint.** BUG-23 to BUG-26 (demo-seed test collision, two screenshot script faults, the new demo response showing "In review" and zero usage).
+**Bugs found and fixed in the sprint.** BUG-23 to BUG-26 (demo-seed test collision, two screenshot script faults, the new demo response showing "In review" and zero usage), and BUG-27 after publishing (the architecture page's sequence diagram did not render on GitHub: semicolons in Mermaid messages; a docs test now catches it).
 
 **Checked after the close.** Rory confirmed the "Write an answer" behaviour on screen (25 October). Making the repository public and checking that the README renders are Rory's steps.
 
@@ -399,7 +399,7 @@ An independent security review found no high issues and seven smaller ones (two 
 | Item | Now |
 |---|---|
 | Seven security review findings | Done in Sprint 7 (review) |
-| BUG-23 to BUG-26 | Done in Sprint 7 |
+| BUG-23 to BUG-27 | Done in Sprint 7 (BUG-27 after publishing) |
 | R-01 and R-02 residual figures out of date in the risk register (280 claims, 12.9% lookalikes) | Corrected at the close (305 claims, 10.0%) |
 | F-36 Excel exports have an empty title property | Backlog, from Sprint 7 review |
 | F-37 The demo data has no pending "partly" question at the bulk line, so that hold cannot be seen on a fresh install | Backlog, from Sprint 7 review |

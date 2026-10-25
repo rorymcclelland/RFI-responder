@@ -81,6 +81,11 @@ describe('evaluations summary', () => {
 
 describe.each(PAGES)('%s', (page) => {
   const text = read(page);
+  it('has Mermaid diagrams GitHub can parse: no semicolon inside a statement (it ends the statement)', () => {
+    // Found on GitHub after publishing (Sprint 7): a semicolon in a sequence diagram's message cut it short.
+    const blocks = [...text.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1]);
+    for (const line of blocks.flatMap((b) => b.split('\n'))) expect(line, `${page}: ${line.trim()}`).not.toMatch(/;/);
+  });
   it('links only to files that exist', () => {
     const links = [...text.matchAll(/\]\(([^)#\s]+)(?:#[^)]*)?\)/g)].map((m) => m[1]).filter((l) => !/^(https?:|mailto:)/.test(l));
     for (const l of links) expect(existsSync(normalize(join(ROOT, dirname(page), l))), `${page} links to ${l}`).toBe(true);

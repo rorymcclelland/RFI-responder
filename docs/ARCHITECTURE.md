@@ -63,7 +63,7 @@ sequenceDiagram
 
   Owner->>App: Upload a spreadsheet or Word file
   App->>App: Open the file (size and decompression limits)
-  App->>Fn: Word only: send the text; extract-questions finds the questions, keeping only those found word for word
+  App->>Fn: Word only: send the text, and extract-questions finds the questions, keeping only those found word for word
   Owner->>App: Check the list in the preview
   App->>DB: Save the questions (text only)
   App->>Fn: Process in batches of ten
@@ -76,12 +76,12 @@ sequenceDiagram
     Fn->>AI: Draft from the matched entries only
     Fn->>Fn: Reject a draft citing an entry it was not given, or a figure, link or email not in its sources (no draft, with a note)
   end
-  Fn->>DB: Save draft, calibrated confidence, gate, verdict and reason, models and prompt versions; record usage
+  Fn->>DB: Save draft, calibrated confidence, gate, verdict and reason, models and prompt versions, and record usage
   Owner->>App: Review, lowest confidence first
   Owner->>DB: Bulk-approve above a threshold (bulk_accept: never gated, uncalibrated or "partly" questions)
   Owner->>DB: Accept, edit, skip or assign the rest
   Owner->>DB: Record the export (record_export)
-  DB->>DB: Learn: edited and person-written answers become entries with provenance; members' replacements wait for an admin's review
+  DB->>DB: Learn: edited and person-written answers become entries with provenance, and members' replacements wait for an admin's review
   Owner->>App: Download Excel, CSV or Word, each with a provenance record per answer
 ```
 

@@ -177,4 +177,6 @@ All nine stories are Ready.
 
 **Checked after the close (Rory, 25 October, local PC).** As Priya on Bluefin, A11 (no draft) offers "Write an answer" instead of Accept; the box opens empty; "Save & Accept" stays greyed until text is typed and greys again when it is deleted. The hold-reason line on the card has no demo case to show it (F-37) and is covered by unit tests.
 
+**After publishing (Rory, 25 October).** The repository is public, with its description and topics; the README renders with all seven screenshots. BUG-27: the architecture page's sequence diagram did not render on GitHub, because a semicolon ends a statement in Mermaid and three messages contained one. Fixed, both diagrams checked with the Mermaid renderer (which reproduced the failure), and a docs test now refuses a semicolon inside a diagram.
+
 **Raised at the close, now in the backlog.** F-36 Excel title property empty. F-37 the demo data has no pending "partly" question at the bulk line. F-38 the source of two embedding calls after a fresh seed is not established, and the recording does not keep embedding usage. F-39 the screenshot script checks that the app is local, not that the Supabase address in `.env` is.
