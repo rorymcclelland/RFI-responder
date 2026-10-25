@@ -18,7 +18,7 @@ export interface AuditRow {
 export const AUDIT_GROUPS: Record<string, { label: string; actions: string[] }> = {
   exports: { label: 'Exports and changes after export', actions: ['response.exported', 'question.changed_after_export'] },
   responses: { label: 'Archives and deletions', actions: ['response.archived', 'response.deleted'] },
-  knowledge: { label: 'Knowledge-base reviews', actions: ['kb.reviewed', 'kb.confirmed'] },
+  knowledge: { label: 'Knowledge-base reviews and changes', actions: ['kb.reviewed', 'kb.confirmed', 'kb.changed', 'kb.deleted'] },
   holds: { label: 'Questions held and released', actions: ['question.held', 'question.released'] },
   settings: { label: 'Settings and prices', actions: ['settings.changed', 'prices.changed'] },
   people: { label: 'Admin rights', actions: ['user.admin_granted', 'user.admin_removed'] },
@@ -33,7 +33,11 @@ export async function loadAuditLog(client: SupabaseClient, group: string | null)
     .limit(AUDIT_LIMIT);
   if (group && AUDIT_GROUPS[group]) query = query.in('action', AUDIT_GROUPS[group].actions);
   const { data, error } = await query;
-  if (error) throw new Error(`The audit log could not be read: ${error.message}`);
+  if (error) {
+    // Security review, Sprint 11 (low 5): the database's message stays in the console.
+    console.error('audit_log read failed', error);
+    throw new Error('The audit log could not be read. Try again, or check that you are still an admin.');
+  }
   return ((data ?? []) as Record<string, unknown>[]).map((r) => {
     const profile = r.actor_profile as { display_name?: string } | { display_name?: string }[] | null;
     const name = Array.isArray(profile) ? profile[0]?.display_name : profile?.display_name;
@@ -73,6 +77,10 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
       return `Reviewed ${str(d.ref)}${d.edited ? ', with corrections' : ''}${d.replaced ? `, replacing ${str(d.replaced)}` : ''}.`;
     case 'kb.confirmed':
       return `Confirmed ${Array.isArray(d.refs) ? (d.refs as unknown[]).join(', ') : str(d.refs)} as still correct, by exporting an unedited draft that cited ${Array.isArray(d.refs) && d.refs.length === 1 ? 'it' : 'them'}.`;
+    case 'kb.changed':
+      return `Changed ${str(d.ref)} directly: ${changes(d.before, d.after)}.`;
+    case 'kb.deleted':
+      return `Deleted ${str(d.ref)} ("${str(d.question)}").`;
     case 'question.held':
       return `Held a question from bulk approval (${str(d.to ?? d.gate)}).`;
     case 'question.released':

@@ -152,7 +152,7 @@ describe('indexBeforeMatching (Sprint 11, S11-2)', () => {
     const broken = store(4, { failSave: true });
     expect(await indexBeforeMatching({ db: broken.db, provider: fakeProvider('voyage-4') })).toMatchObject({ indexed: 0, remaining: 4, failed: true });
     const unreadable = store(2, { failFetch: true });
-    expect(await indexBeforeMatching({ db: unreadable.db, provider: fakeProvider('voyage-4') })).toMatchObject({ remaining: 1, failed: true });
+    expect(await indexBeforeMatching({ db: unreadable.db, provider: fakeProvider('voyage-4') })).toMatchObject({ remaining: null, failed: true });
   });
 
   it('indexes at most two batches before matching (latency), leaving the rest counted', async () => {

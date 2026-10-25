@@ -71,9 +71,10 @@ export interface ProcessDeps {
   /**
    * Sprint 11 (S11-2, F-43): how many current knowledge-base entries still have no vector from the
    * embedding model after process-questions tried to index them. Matching by meaning cannot find
-   * them, so a question matched that way says so and is held from bulk approval. Omitted: 0.
+   * them, so a question matched that way says so and is held from bulk approval. Null: unknown
+   * (counted as some). Omitted: 0.
    */
-  unindexed?: number;
+  unindexed?: number | null;
   /** How many questions are worked on at once (provider rate limits). */
   concurrency?: number;
   now?: () => string;
@@ -213,6 +214,21 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       cited = assembledFrom(sources);
     }
 
+    // Sprint 11 (S11-2): entries without a vector were not searched when matching by meaning. Checked
+    // before the source gates (security review, M1): a source gate is released when its entries are
+    // reviewed, which would let this question into bulk approval; this gate is never released.
+    const unindexed = deps.unindexed === undefined ? 0 : deps.unindexed;
+    if (vector && (unindexed === null || unindexed > 0)) {
+      const what = unindexed === null
+        ? 'Some knowledge-base entries may not have been indexed (the count could not be read), so the best match may have been missed.'
+        : `${unindexed}${unindexed >= 500 ? ' or more' : ''} knowledge-base ${unindexed === 1 ? 'entry was' : 'entries were'} not yet indexed and ${unindexed === 1 ? 'was' : 'were'} not searched, so the best match may have been missed.`;
+      notes.push(what);
+      if (!gateValue) {
+        gateValue = 'unindexed_entries';
+        gateReason = `${what} It is reviewed individually.`;
+      }
+    }
+
     // Sprint 4: a draft resting on an entry nobody has reviewed, or one overdue for review, is
     // never bulk-approved. An earlier gate (pricing, legal, translation, unchecked) is kept.
     if (!gateValue && cited.length > 0 && deps.sourceStatus) {
@@ -231,17 +247,6 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       } catch {
         gateValue = 'unchecked';
         gateReason = 'The review status of the cited entries could not be read, so it is reviewed individually.';
-      }
-    }
-
-    // Sprint 11 (S11-2): entries without a vector were not searched when matching by meaning.
-    if (vector && (deps.unindexed ?? 0) > 0) {
-      const n = deps.unindexed!;
-      const what = `${n}${n >= 500 ? ' or more' : ''} knowledge-base ${n === 1 ? 'entry was' : 'entries were'} not yet indexed and ${n === 1 ? 'was' : 'were'} not searched, so the best match may have been missed.`;
-      notes.push(what);
-      if (!gateValue) {
-        gateValue = 'unindexed_entries';
-        gateReason = `${what} It is reviewed individually.`;
       }
     }
 

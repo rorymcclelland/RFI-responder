@@ -85,7 +85,7 @@ serve(async (req) => {
     const embedder = provider ? meteredEmbedder(provider, usage) : null;
     // Sprint 11 (S11-2, F-43): entries with no vector cannot be matched by meaning. Index them first
     // (two batches at most, under the caller's indexing cap); questions are told about any left.
-    let unindexed = 0;
+    let unindexed: number | null = 0;
     if (embedder) {
       const indexing = await indexBeforeMatching({
         db: serviceEntryStore(admin),

@@ -31,7 +31,7 @@ Refined 25 October 2026, after Rory confirmed Sprint 11 ("please run sprint 11")
 
 **The job.** A question is matched against every current entry, or the reviewer is told it was not.
 
-**What changes.** `process-questions` first indexes entries that have no vector for the configured model (up to one batch per call, reserved against the caller's indexing cap and the budget, as `embed-entries` does). If any remain unindexed, each question in the batch carries a note ("N knowledge-base entries were not yet indexed and were not searched") and is held from bulk approval (Q2). The app's messages and the guide say so.
+**What changes.** `process-questions` first indexes entries that have no vector for the configured model (up to two batches of 64 per call, changed from one while building to cover a typical import, reserved against the caller's indexing cap and the budget, as `embed-entries` does). If any remain unindexed, each question in the batch carries a note ("N knowledge-base entries were not yet indexed and were not searched") and is held from bulk approval (Q2). The app's messages and the guide say so.
 
 **Test cases.** 1. With every entry indexed, nothing changes (no extra calls, no note). 2. With a few unindexed entries, they are indexed before matching and can be matched. 3. When indexing is refused (cap or budget) or fails, questions are still processed, carry the note, and are not bulk-approved. 4. The extra indexing is counted in usage under the caller. 5. Hostile: an entry whose text is an instruction is indexed like any other and gains no influence (existing red-team checks).
 
@@ -79,6 +79,25 @@ The development server listens on `127.0.0.1`, matching the README and Supabase'
 - **Rule 4, human in the loop:** S11-1 records every change made after an export and asks for the export to be recorded again; S11-2 holds a question matched against an incomplete index.
 - **Rule 5, least privilege:** S11-7 narrows grants; every change has role-matrix tests (decision 0003).
 - **Rule 2, synthetic data:** S11-8 rewords it without weakening it.
+
+## Review
+
+**Security review** (a separate agent, given the code but not the reasoning): no high findings; three medium and eight low, all fixed before the end-to-end check.
+
+- **M1.** A question matched against an incomplete index that also cited an unreviewed entry got the source gate, which a review later releases, so it could reach bulk approval. The incomplete-index gate is now checked first, since nothing releases it.
+- **M2.** The skip trigger undid the foreign key's clean-up when a person's account was deleted, leaving their id behind. Only a signed-in user's change now keeps the earlier value.
+- **M3.** Deleting an account failed if the person had contributed to, been assigned on, or skipped a question in an archived response (the archive lock refused the database's own clean-up). The lock now lets exactly that clean-up through.
+- **Low.**
+  1. The audit row recorded the status before a changed accepted answer was reopened; the trigger now runs after the reopening one.
+  2. Re-accepting an unchanged answer after a change learned it again (a copy, or a fresh confirmation); now a re-export learns only answers that changed.
+  3. An unknown count of unindexed entries was reported as "1"; it now says it is unknown.
+  4. "Nobody can change" the audit log overstated it (the service role can), and an admin's direct deletion of an entry, or change to its tags or source, was not audited; both corrected.
+  5. The audit screen showed the database's error text, and a deleted user's entries as "The system"; corrected.
+  6. The migration test also stripped `DO` blocks, which run during a migration; it now strips only function bodies.
+  7. This page said one batch is indexed before matching; it is two.
+  8. The purge's date filter on reservations had no index; added.
+
+**Deviation recorded.** The S11-2 commit message says `embed-entries` uses the shared entry store; that change landed in the next commit (S11-4).
 
 ## Questions for Rory (answered 25 October 2026)
 

@@ -302,3 +302,64 @@ describe('S11-9 the audit-log screen reads what admins may read (F-53)', () => {
     });
   });
 });
+
+describe('Sprint 11 security review', () => {
+  it('M2 and M3: deleting an account forgets who skipped, and works even on an archived response', async () => {
+    const skipper = await createUser();
+    const opp = await response(owner.id);
+    const s = await session(opp);
+    const id = await question(s);
+    await asSuperuser(`INSERT INTO opportunity_contributors (opportunity_id, user_id) VALUES ($1, $2)`, [opp, skipper.id]);
+    await asSuperuser(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text)
+                       VALUES ($1, $2, $3, $4, $5, 'q')`, [id, s, opp, skipper.id, owner.id]);
+    await as(skipper, (q) => q(`SELECT 1`));
+    await asSuperuser(`UPDATE rfi_questions SET status = 'skipped', skipped_by = $1, skipped_at = now() WHERE id = $2`, [skipper.id, id]);
+    await asSuperuser(`UPDATE opportunities SET archived_at = now(), outcome = 'withdrawn' WHERE id = $1`, [opp]);
+    await asSuperuser(`DELETE FROM auth.users WHERE id = $1`, [skipper.id]);
+    const row = await one<{ skipped_by: string | null; skipped_at: string | null; status: string }>(`SELECT skipped_by, skipped_at, status FROM rfi_questions WHERE id = $1`, [id]);
+    expect(row.skipped_by).toBeNull();
+    expect(row.status).toBe('skipped');
+    expect((await one<{ n: string }>(`SELECT count(*)::text AS n FROM opportunity_contributors WHERE opportunity_id = $1`, [opp])).n).toBe('0');
+    // The archive still refuses every other change.
+    await refused(asSuperuser(`UPDATE rfi_questions SET final_answer = 'x' WHERE id = $1`, [id]));
+  });
+
+  it('low 1: the audit row records the final status when an accepted answer is changed (it reopens)', async () => {
+    const { s, id } = await exported();
+    await as(owner, async (q) => {
+      await q(`UPDATE rfi_questions SET final_answer = 'Corrected.' WHERE id = $1`, [id]);
+      const { audit } = await asWritten(q as Q, s, id);
+      expect(audit[0].details).toMatchObject({ status_from: 'accepted', status_to: 'pending' });
+    });
+  });
+
+  it('low 2: re-accepting an unchanged answer after a change learns nothing new on re-export', async () => {
+    const opp = await response(owner.id);
+    const s = await session(opp);
+    const id = await question(s, { text: `Unchanged relearn ${Math.random()}?` });
+    await as(admin, async (q) => {
+      await q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'The answer, edited.' WHERE id = $1`, [id]);
+      await q(`SELECT record_export($1)`, [s]);
+      const first = (await q(`SELECT learned_entry_id FROM rfi_questions WHERE id = $1`, [id])).rows[0].learned_entry_id;
+      await q(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [id]);
+      await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+      await q(`SELECT record_export($1)`, [s]);
+      const after = (await q(`SELECT learned_entry_id, learn_outcome, learned_at FROM rfi_questions WHERE id = $1`, [id])).rows[0];
+      expect(after.learned_entry_id).toBe(first);
+      expect(after.learn_outcome).toBe('added');
+      expect(after.learned_at).not.toBeNull();
+      const entries = (await q(`SELECT count(*)::int AS n FROM kb_entries WHERE origin_ref LIKE $1`, [`%question:${id}`])).rows[0].n;
+      expect(entries).toBe(1);
+    });
+  });
+
+  it('low 4: an admin deleting an entry or changing its tags is audited', async () => {
+    const e = await one<{ id: string }>(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('Audited change S11?', 'A.', '{}', 'seed') RETURNING id`);
+    await as(admin, async (q) => {
+      await q(`UPDATE kb_entries SET tags = '{new}' WHERE id = $1`, [e.id]);
+      await q(`DELETE FROM kb_entries WHERE id = $1`, [e.id]);
+      const actions = (await q(`SELECT action FROM audit_log WHERE target_id = $1 ORDER BY id`, [e.id])).rows.map((r) => r.action);
+      expect(actions).toEqual(['kb.changed', 'kb.deleted']);
+    });
+  });
+});

@@ -10,8 +10,12 @@ import { describe, expect, it } from 'vitest';
 const DIR = join(__dirname, '..', 'migrations');
 const ALLOWED = new Set(['ai_settings', 'ai_prices', 'learning_thresholds']);
 
-/** A migration's statements outside function bodies (code in $$ ... $$ runs later, on real data). */
-const topLevel = (sql: string) => sql.replace(/--[^\n]*/g, '').replace(/\$(\w*)\$[\s\S]*?\$\1\$/g, '');
+/**
+ * A migration's statements outside function bodies (a function's code runs later, on real data).
+ * DO blocks run during the migration, so they are kept (security review, Sprint 11, low 6).
+ */
+const topLevel = (sql: string) => sql.replace(/--[^\n]*/g, '')
+  .replace(/(CREATE (?:OR REPLACE )?FUNCTION[\s\S]*?AS\s*)\$(\w*)\$[\s\S]*?\$\2\$/gi, '$1');
 
 describe('what migrations insert', () => {
   const files = readdirSync(DIR).filter((f) => f.endsWith('.sql'));

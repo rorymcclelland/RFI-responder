@@ -325,7 +325,7 @@ function AuditTab({ names }: { names: Map<string, string> }) {
           <option value="">Everything</option>
           {Object.entries(AUDIT_GROUPS).map(([key, g]) => <option key={key} value={key}>{g.label}</option>)}
         </select>
-        <p className="text-xs text-ink-500">The most recent {AUDIT_LIMIT} entries, newest first. Written by the database; nobody can change them.</p>
+        <p className="text-xs text-ink-500">The most recent {AUDIT_LIMIT} entries, newest first. Written by the database; admins cannot change or delete them.</p>
       </div>
       {error && <p role="alert" className="text-sm text-coral-700">{error}</p>}
       {rows === null ? (
@@ -338,7 +338,7 @@ function AuditTab({ names }: { names: Map<string, string> }) {
             <li key={r.id} className="px-5 py-3">
               <p className="text-sm text-ink-800">{describeAudit(r, names)}</p>
               <p className="text-xs text-ink-500 mt-0.5">
-                {r.actorName ?? 'The system'} · {new Date(r.at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · <code className="text-[0.85em]">{r.action}</code>
+                {r.actorName ?? 'The system, or someone no longer a user'} · {new Date(r.at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · <code className="text-[0.85em]">{r.action}</code>
               </p>
             </li>
           ))}

@@ -346,4 +346,17 @@ describe('Sprint 11 (S11-2, F-43): matching against an incomplete index', () => 
     expect(r.gate).not.toBe('unindexed_entries');
     expect(r.processing_note ?? '').not.toMatch(/not yet indexed/);
   });
+
+  it('security review M1: the gate wins over a source gate, which a review would release', async () => {
+    const status = async () => new Map([['KB-0001', { reviewed: false, overdueSince: null }]]);
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ unindexed: 2, sourceStatus: status }));
+    expect(r.gate).toBe('unindexed_entries');
+  });
+
+  it('security review low 3: an unknown count is held and said to be unknown, not a number', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ unindexed: null }));
+    expect(r.gate).toBe('unindexed_entries');
+    expect(r.processing_note).toMatch(/could not be read/);
+    expect(r.processing_note).not.toMatch(/\d+ knowledge-base/);
+  });
 });

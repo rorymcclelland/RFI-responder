@@ -37,7 +37,7 @@ Created in [`20260430160006_user_profiles_and_assignments.sql`](../../supabase/m
 
 | Column | Meaning |
 |---|---|
-| `id` | The account's id in `auth.users` (deleting the account deletes the profile) |
+| `id` | The account's id in `auth.users` (deleting the account deletes the profile, their contributor and assignment rows, and the record of what they skipped, also on archived responses) |
 | `display_name`, `job_title`, `department` | Shown in the app |
 | `expertise_tags` | Used by `suggest_experts` to suggest people for a question |
 | `is_admin` | Admin rights. Changed only by `set_user_admin` |
@@ -243,10 +243,10 @@ Privileged and consequential changes.
 
 Created and access rules set in [`20261022120000_access_control.sql`](../../supabase/migrations/20261022120000_access_control.sql).
 
-Columns: `at`, `actor`, `action`, `target_id`, `details`. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`, and since Sprint 11 `question.changed_after_export` and `prices.changed`. Admins read it on the governance page's **Audit log** tab ([`src/lib/auditLog.ts`](../../src/lib/auditLog.ts), whose test fails if an action has no wording).
+Columns: `at`, `actor`, `action`, `target_id`, `details`. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`, and since Sprint 11 `question.changed_after_export`, `prices.changed`, `kb.changed` and `kb.deleted`. Admins read it on the governance page's **Audit log** tab ([`src/lib/auditLog.ts`](../../src/lib/auditLog.ts), whose test fails if an action has no wording).
 
 - **Member:** no access.
-- **Admin:** read; no insert, update or delete.
+- **Admin:** read; no insert, update or delete. (The service role, which the Edge Functions use, has full rights.)
 - **Written only** by `SECURITY DEFINER` functions and triggers (`set_user_admin`, `archive_response`, `delete_response`, `record_export`, `review_entry`, `bulk_accept`, `private.release_source_gates`, `stamp_settings_change`, `note_change_after_export`, `audit_price_change`).
 
 Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts).
@@ -407,14 +407,15 @@ Run only by the triggers named in the table sections; they cannot be called dire
 
 | Function | Trigger | Defined in |
 |---|---|---|
-| `note_change_after_export` | `rfi_questions_change_after_export`, before a change of `status` or `final_answer`: in an exported session, marks it changed since export, audits `question.changed_after_export` (who, from and to, whether the answer changed) and clears the question's learning record | [`20261030100000`](../../supabase/migrations/20261030100000_changes_after_export.sql) |
+| `note_change_after_export` | `rfi_questions_zz_change_after_export` (named to run after the trigger that reopens a changed accepted answer), before a change of `status` or `final_answer`: in an exported session, marks it changed since export, audits `question.changed_after_export` (who, from and to, whether the answer changed) and clears `learned_at`, so `record_export` considers it again and learns it only if the answer changed | [`20261030100000`](../../supabase/migrations/20261030100000_changes_after_export.sql) |
 | `record_skip` | `rfi_questions_record_skip`, before insert or update: sets `skipped_by` and `skipped_at` when a question is skipped, clears them on restore, and ignores any value sent | [`20261030120000`](../../supabase/migrations/20261030120000_who_skipped.sql) |
+| `audit_entry_change` | `kb_entries_audit_direct`, after a signed-in user deletes an entry or changes its tags or source: audits `kb.deleted` or `kb.changed` | [`20261030160000`](../../supabase/migrations/20261030160000_sprint11_review_fixes.sql) |
 | `audit_price_change` | `ai_prices_audit`: audits every change of a price | [`20261030110000`](../../supabase/migrations/20261030110000_sprint11_access.sql) |
 | `normalise_new_assignment` | `question_assignments_normalise`, before insert by a signed-in user | [`20261030110000`](../../supabase/migrations/20261030110000_sprint11_access.sql) |
 | `handle_new_user` | `on_auth_user_created` on `auth.users`: creates the profile (empty `search_path` since Sprint 11) | [`20260430160006`](../../supabase/migrations/20260430160006_user_profiles_and_assignments.sql) |
 | `set_updated_at` | `opportunities_updated_at`, `kb_entries_set_updated_at` | [`20260430172201`](../../supabase/migrations/20260430172201_fix_security_issues.sql) |
 | `refuse_archived_response_edit` | `opportunities_archived` | [`20261023130000`](../../supabase/migrations/20261023130000_workflow_and_learning.sql) |
-| `refuse_if_archived` | `rfi_sessions_archived`, `rfi_questions_archived`, `question_assignments_archived` | [`20261024100000`](../../supabase/migrations/20261024100000_unforgeable_markers.sql) |
+| `refuse_if_archived` | `rfi_sessions_archived`, `rfi_questions_archived`, `question_assignments_archived`, `opportunity_contributors_archived`: refuses changes to an archived response, except `delete_response`'s and the database's own clean-up when a person's account is deleted (their contributor and assignment rows, and who skipped a question) | [`20261030160000`](../../supabase/migrations/20261030160000_sprint11_review_fixes.sql) |
 | `check_bulk_acceptance` | `rfi_questions_bulk_acceptance` | [`20261024100000`](../../supabase/migrations/20261024100000_unforgeable_markers.sql) |
 | `record_approval` | `rfi_questions_record_approval` | [`20261024100000`](../../supabase/migrations/20261024100000_unforgeable_markers.sql) |
 | `reopen_changed_answer` | `rfi_questions_reopen_changed_answer` | [`20261023110000`](../../supabase/migrations/20261023110000_review_fixes.sql) |
