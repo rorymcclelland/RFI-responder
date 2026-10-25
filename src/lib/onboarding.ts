@@ -130,6 +130,25 @@ export function shouldShowIntroduction(profile: { onboardedAt?: string | null } 
 }
 
 /**
+ * The profile columns every member may read (security review, Sprint 10, L3): everything except
+ * onboarded_at, which only its owner reads, through loadOnboardedAt.
+ */
+export const PROFILE_COLUMNS = 'id, display_name, job_title, department, expertise_tags, is_admin, created_at, updated_at';
+
+/**
+ * When the signed-in person finished or skipped the introduction: a time, null for never, or
+ * undefined when it could not be read (then it is not opened automatically, rather than every time).
+ */
+export async function loadOnboardedAt(client: Pick<SupabaseClient, 'rpc'>): Promise<string | null | undefined> {
+  try {
+    const { data, error } = await client.rpc('my_onboarded_at');
+    return error ? undefined : ((data as string | null) ?? null);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Record that the person has seen the introduction. A failure does not block the app: the
  * introduction closes, and is shown again next time (S10-6 test 7). Returns whether it was saved.
  */

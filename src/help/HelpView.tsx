@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import { BookOpen, Sparkles } from 'lucide-react';
 import GuideContent from './GuideContent';
+import { guideId } from '../lib/markdown';
 import { GUIDE_FILES, GUIDE_PAGES, REPO_URL, SCREENSHOTS, findPage } from '../lib/guide';
 
 export default function HelpView({ page, anchor, onOpen, onShowIntroduction }: {
@@ -15,7 +16,7 @@ export default function HelpView({ page, anchor, onOpen, onShowIntroduction }: {
 
   // Go to the heading a link named, or the top of a new page.
   useEffect(() => {
-    const target = anchor ? document.getElementById(anchor) : null;
+    const target = anchor ? document.getElementById(guideId(anchor)) : null;
     if (target) target.scrollIntoView({ block: 'start' });
     else window.scrollTo({ top: 0 });
     // Move focus to the page for keyboard and screen-reader users.

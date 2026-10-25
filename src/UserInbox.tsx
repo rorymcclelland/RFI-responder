@@ -256,7 +256,8 @@ export default function UserInbox({ userId, isAdmin }: Props) {
     if (!a) return;
     setError('');
     try {
-      await setAssignmentStatus(supabase, a, status);
+      const r = await setAssignmentStatus(supabase, a, status);
+      if (r.othersRefused) setError(`Yours was approved, but the other assignments on this question were not: ${r.othersRefused}`);
     } catch (err) {
       setError((err as Error).message);
     }

@@ -76,6 +76,13 @@ const DELIMITER = /^\|(\s*:?-+:?\s*\|)+\s*$/;
 export function parseMarkdown(source: string): Block[] {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
   const blocks: Block[] = [];
+  // Repeated headings get -1, -2 and so on, as on GitHub, so every anchor is unique on the page.
+  const used = new Map<string, number>();
+  const uniqueId = (id: string) => {
+    const n = used.get(id) ?? 0;
+    used.set(id, n + 1);
+    return n === 0 ? id : `${id}-${n}`;
+  };
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
@@ -86,7 +93,7 @@ export function parseMarkdown(source: string): Block[] {
     const heading = line.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
       const content = parseInline(heading[2].trim());
-      blocks.push({ kind: 'heading', level: heading[1].length, id: slug(plainText(content)), content });
+      blocks.push({ kind: 'heading', level: heading[1].length, id: uniqueId(slug(plainText(content))), content });
       i += 1;
       continue;
     }
@@ -166,6 +173,14 @@ function lastItemOf(children: Block[]): ListItem | { content: Inline[] } {
   return list.kind === 'list' && list.items.length ? list.items[list.items.length - 1] : { content: [] };
 }
 
+/**
+ * The element id of a guide heading: prefixed, so a heading can never take an id the app uses
+ * (security review, Sprint 10). Links between pages keep GitHub's anchors; this maps them.
+ */
+export function guideId(anchor: string): string {
+  return `guide-${anchor}`;
+}
+
 /** Where a link in a guide page goes. */
 export type LinkTarget =
   | { kind: 'page'; page: string; anchor: string | null }
@@ -178,11 +193,13 @@ export type LinkTarget =
  * a link at all.
  */
 export function resolveLink(href: string, currentPage: string, pages: readonly string[], repoUrl: string): LinkTarget {
-  if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href)) return { kind: 'external', href };
-  if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return { kind: 'none' };
+  if (/^https:\/\//i.test(href) || /^mailto:/i.test(href)) return { kind: 'external', href };
+  // Any other scheme, and encoded or backslashed paths that a browser could read as ".." (security
+  // review, Sprint 10, L1), are not links.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) || /[%\\]/.test(href) || href.startsWith('//')) return { kind: 'none' };
   const [path, anchor = null] = href.split('#') as [string, string?];
   if (path === '') return { kind: 'page', page: currentPage, anchor };
-  if (!path.endsWith('.md') || path.includes('\\')) return { kind: 'none' };
+  if (!path.endsWith('.md')) return { kind: 'none' };
   if (!path.includes('/')) return pages.includes(path) ? { kind: 'page', page: path, anchor } : { kind: 'none' };
   // A page elsewhere in the repository, relative to docs/guide.
   const parts = ['docs', 'guide'];

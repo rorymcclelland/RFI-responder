@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { INTRO_STEPS, markOnboarded, shouldShowIntroduction, stepsFor } from './onboarding';
+import { INTRO_STEPS, loadOnboardedAt, markOnboarded, PROFILE_COLUMNS, shouldShowIntroduction, stepsFor } from './onboarding';
 import { findPage, GUIDE_FILES, SCREENSHOTS } from './guide';
 
 function sourceFiles(dir: string): string[] {
@@ -59,5 +59,22 @@ describe('the introduction (S10-6)', () => {
     expect(ok.rpc).toHaveBeenCalledWith('mark_onboarded');
     expect(await markOnboarded({ rpc: vi.fn().mockResolvedValue({ data: null, error: { message: 'no' } }) } as never)).toBe(false);
     expect(await markOnboarded({ rpc: vi.fn().mockRejectedValue(new Error('offline')) } as never)).toBe(false);
+  });
+
+  it('reads its own record through my_onboarded_at, and does not open on a failed read', async () => {
+    expect(await loadOnboardedAt({ rpc: vi.fn().mockResolvedValue({ data: null, error: null }) } as never)).toBeNull();
+    expect(await loadOnboardedAt({ rpc: vi.fn().mockResolvedValue({ data: '2026-10-25T10:00:00Z', error: null }) } as never)).toBe('2026-10-25T10:00:00Z');
+    expect(await loadOnboardedAt({ rpc: vi.fn().mockResolvedValue({ data: null, error: { message: 'no' } }) } as never)).toBeUndefined();
+    expect(await loadOnboardedAt({ rpc: vi.fn().mockRejectedValue(new Error('offline')) } as never)).toBeUndefined();
+  });
+});
+
+describe('reading profiles (security review, Sprint 10, L3)', () => {
+  it('asks only for the columns members may read, which are the ones the migration grants', () => {
+    const migration = readFileSync(join(__dirname, '../../supabase/migrations/20261029110000_onboarding_private.sql'), 'utf8');
+    const granted = migration.match(/GRANT SELECT \(([^)]+)\)/)![1].split(',').map((c) => c.trim());
+    expect(PROFILE_COLUMNS.split(',').map((c) => c.trim())).toEqual(granted);
+    expect(granted).not.toContain('onboarded_at');
+    expect(SRC).not.toMatch(/from\('user_profiles'\)\.select\('\*'\)/);
   });
 });

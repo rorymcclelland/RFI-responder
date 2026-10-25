@@ -1,7 +1,9 @@
 /**
  * Sprint 10 (S10-6): the introduction. A dialog of steps, each a picture of the screen and a few
  * lines, with a link to the guide page that covers it. Focus moves into the dialog and back to
- * where it was; Tab stays inside it; Escape closes it, as Skip does; each step is announced.
+ * where it was (or to the Help button, if that was a menu item that has gone); Tab stays inside it;
+ * Escape closes it, as Skip does; each step is announced. The rest of the app is inert while it is
+ * open, so a click outside cannot take focus behind it (security review, Sprint 10, L4).
  */
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Sparkles, X } from 'lucide-react';
@@ -19,27 +21,44 @@ export default function Introduction({ steps, onClose, onOpenGuide }: {
   onOpenGuide: (page: string, anchor: string | null) => void;
 }) {
   const [index, setIndex] = useState(0);
+  const overlay = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const step = steps[index];
   const last = index === steps.length - 1;
 
-  // Remember where focus was, and return it there when the dialog closes.
+  // Remember where focus was, and return it there when the dialog closes. Make everything beside the
+  // dialog inert while it is open.
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null;
-    return () => { if (before && document.contains(before)) before.focus(); };
+    const siblings = overlay.current?.parentElement
+      ? [...overlay.current.parentElement.children].filter((el) => el !== overlay.current && !el.hasAttribute('inert'))
+      : [];
+    siblings.forEach((el) => el.setAttribute('inert', ''));
+    return () => {
+      siblings.forEach((el) => el.removeAttribute('inert'));
+      const back = before && document.contains(before) && before !== document.body ? before : document.querySelector<HTMLElement>('button[aria-label="Help"]');
+      back?.focus();
+    };
   }, []);
 
   // Each new step takes focus at its heading, so a screen reader reads it.
   useEffect(() => { heading.current?.focus(); }, [index]);
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
+  // Keys are handled for the whole page while the dialog is open, so they work wherever focus is.
+  const onKey = useRef<(e: KeyboardEvent) => void>(() => {});
+  onKey.current = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      e.stopPropagation();
+      e.preventDefault();
       onClose('skipped');
       return;
     }
     if (e.key !== 'Tab' || !dialog.current) return;
+    if (!dialog.current.contains(document.activeElement)) {
+      e.preventDefault();
+      heading.current?.focus();
+      return;
+    }
     const items = [...dialog.current.querySelectorAll<HTMLElement>(FOCUSABLE)];
     if (items.length === 0) return;
     const first = items[0];
@@ -52,18 +71,23 @@ export default function Introduction({ steps, onClose, onOpenGuide }: {
       first.focus();
     }
   };
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => onKey.current(e);
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   const ctx = { page: 'README.md', pages: GUIDE_FILES, repoUrl: REPO_URL, screenshots: SCREENSHOTS, onOpen: onOpenGuide };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in">
+    <div ref={overlay} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) { e.preventDefault(); heading.current?.focus(); } }}>
       <div
         ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-labelledby="intro-title"
         aria-describedby="intro-body"
-        onKeyDown={onKeyDown}
         className="bg-white rounded-3xl shadow-modal w-full max-w-xl max-h-[90vh] flex flex-col"
       >
         <div className="flex items-center justify-between px-6 pt-5">

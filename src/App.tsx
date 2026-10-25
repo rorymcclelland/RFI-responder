@@ -19,7 +19,7 @@ import { supabase } from './lib/supabase';
 import HelpView from './help/HelpView';
 import Introduction from './help/Introduction';
 import { startPage } from './lib/guide';
-import { markOnboarded, shouldShowIntroduction, stepsFor } from './lib/onboarding';
+import { loadOnboardedAt, markOnboarded, PROFILE_COLUMNS, shouldShowIntroduction, stepsFor } from './lib/onboarding';
 import type { Session } from '@supabase/supabase-js';
 
 // ─── KB Entry ─────────────────────────────────────────────────────────────────
@@ -225,16 +225,19 @@ export default function App() {
 
   async function loadUserProfile(userId: string) {
     setAuthLoading(true);
-    const { data } = await supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle();
+    const [{ data }, onboardedAt] = await Promise.all([
+      supabase.from('user_profiles').select(PROFILE_COLUMNS).eq('id', userId).maybeSingle(),
+      loadOnboardedAt(supabase),
+    ]);
     if (data) {
       setCurrentUser({
         id: data.id, displayName: data.display_name,
         jobTitle: data.job_title ?? '', department: data.department ?? '',
         expertiseTags: data.expertise_tags ?? [], isAdmin: data.is_admin,
-        createdAt: data.created_at, onboardedAt: data.onboarded_at ?? null,
+        createdAt: data.created_at, onboardedAt: onboardedAt ?? null,
       });
       // Shown after the first sign-in, on any browser, until finished or skipped (S10-6).
-      if (shouldShowIntroduction({ onboardedAt: data.onboarded_at ?? null })) setIntroOpen(true);
+      if (onboardedAt !== undefined && shouldShowIntroduction({ onboardedAt })) setIntroOpen(true);
     }
     await loadAllUsers();
     await refreshKB();
@@ -246,7 +249,7 @@ export default function App() {
   }
 
   async function loadAllUsers() {
-    const { data } = await supabase.from('user_profiles').select('*').order('display_name');
+    const { data } = await supabase.from('user_profiles').select(PROFILE_COLUMNS).order('display_name');
     if (data) {
       setAllUsers(data.map((r) => ({
         id: r.id, displayName: r.display_name,

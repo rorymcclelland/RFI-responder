@@ -4,7 +4,7 @@
  * only to screenshots bundled with the app.
  */
 import { Fragment, type ReactNode } from 'react';
-import { imageFile, resolveLink, type Block, type Inline } from '../lib/markdown';
+import { guideId, imageFile, resolveLink, type Block, type Inline } from '../lib/markdown';
 
 export interface GuideContext {
   page: string;
@@ -34,7 +34,7 @@ function renderInline(nodes: Inline[], ctx: GuideContext): ReactNode {
         }
         if (target.kind === 'page') {
           return (
-            <a key={i} href={`#${target.anchor ?? ''}`} className="text-sky-700 underline underline-offset-2 hover:text-sky-900"
+            <a key={i} href={`#${target.anchor ? guideId(target.anchor) : ''}`} className="text-sky-700 underline underline-offset-2 hover:text-sky-900"
               onClick={(e) => { e.preventDefault(); ctx.onOpen(target.page, target.anchor); }}>
               {children}
             </a>
@@ -69,7 +69,7 @@ function renderBlocks(blocks: Block[], ctx: GuideContext): ReactNode {
     switch (b.kind) {
       case 'heading': {
         const Tag = `h${Math.min(b.level, 4)}` as 'h1' | 'h2' | 'h3' | 'h4';
-        return <Tag key={i} id={b.id} className={`scroll-mt-24 ${HEADING_CLASS[b.level] ?? 'text-sm font-bold text-ink-900 mt-4 mb-2'}`}>{renderInline(b.content, ctx)}</Tag>;
+        return <Tag key={i} id={guideId(b.id)} className={`scroll-mt-24 ${HEADING_CLASS[b.level] ?? 'text-sm font-bold text-ink-900 mt-4 mb-2'}`}>{renderInline(b.content, ctx)}</Tag>;
       }
       case 'paragraph':
         return <p key={i} className="text-sm text-ink-700 leading-relaxed my-3">{renderInline(b.content, ctx)}</p>;

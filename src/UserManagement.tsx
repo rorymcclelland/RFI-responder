@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Tag, X, Shield, Search, ChevronDown, Briefcase, Building2, SlidersHorizontal } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import { PROFILE_COLUMNS } from './lib/onboarding';
 import { UserProfile } from './types';
 
 const SUGGESTED_TAGS = [
@@ -320,7 +321,7 @@ export default function UserManagement({ currentUserId, isAdmin }: Props) {
 
   async function loadUsers() {
     setLoading(true);
-    const { data } = await supabase.from('user_profiles').select('*').order('display_name');
+    const { data } = await supabase.from('user_profiles').select(PROFILE_COLUMNS).order('display_name');
     if (data) {
       setUsers(data.map((r) => ({
         id: r.id, displayName: r.display_name, jobTitle: r.job_title ?? '',

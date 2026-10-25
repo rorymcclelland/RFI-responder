@@ -14,15 +14,17 @@ export async function setAssignmentStatus(
   client: SupabaseClient,
   a: { id: string; questionId: string; sessionId: string },
   status: AssignmentStatus,
-): Promise<{ othersApproved: number }> {
+): Promise<{ othersApproved: number; othersRefused: string | null }> {
   const now = new Date().toISOString();
   const patch = { status, updated_at: now, ...(status === 'approved' ? { completed_at: now } : {}) };
   const own = (await client.from('question_assignments').update(patch).eq('id', a.id).select('id')) as unknown as Saved;
   if (own.error || !own.data?.length) throw new Error(`The change was not saved: ${own.error?.message ?? 'you can no longer change this assignment'}`);
-  if (status !== 'approved') return { othersApproved: 0 };
+  if (status !== 'approved') return { othersApproved: 0, othersRefused: null };
   const others = (await client.from('question_assignments').update(patch)
     .eq('question_id', a.questionId).eq('session_id', a.sessionId).neq('id', a.id).select('id')) as unknown as Saved;
-  return { othersApproved: others.error ? 0 : others.data?.length ?? 0 };
+  // Security review, Sprint 10 (L2): one refused assignment fails the whole statement; say why.
+  if (others.error) return { othersApproved: 0, othersRefused: others.error.message };
+  return { othersApproved: others.data?.length ?? 0, othersRefused: null };
 }
 
 export async function saveAssignmentNotes(client: SupabaseClient, id: string, notes: string): Promise<void> {

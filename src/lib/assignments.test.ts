@@ -27,7 +27,7 @@ const a = { id: 'a1', questionId: 'q1', sessionId: 's1' };
 describe('setAssignmentStatus', () => {
   it('moves your own assignment on', async () => {
     const { client, calls } = fakeClient([{ data: [{ id: 'a1' }], error: null }]);
-    expect(await setAssignmentStatus(client, a, 'in_review')).toEqual({ othersApproved: 0 });
+    expect(await setAssignmentStatus(client, a, 'in_review')).toEqual({ othersApproved: 0, othersRefused: null });
     expect(calls[0].patch.status).toBe('in_review');
     expect(calls[0].filters).toEqual([['eq', 'id', 'a1']]);
   });
@@ -39,14 +39,21 @@ describe('setAssignmentStatus', () => {
 
   it('approving tries the other assignments on the question too, and says how many it could change', async () => {
     const { client, calls } = fakeClient([{ data: [{ id: 'a1' }], error: null }, { data: [{ id: 'a2' }], error: null }]);
-    expect(await setAssignmentStatus(client, a, 'approved')).toEqual({ othersApproved: 1 });
+    expect(await setAssignmentStatus(client, a, 'approved')).toEqual({ othersApproved: 1, othersRefused: null });
     expect(calls[1].filters).toEqual([['eq', 'question_id', 'q1'], ['eq', 'session_id', 's1'], ['neq', 'id', 'a1']]);
     expect(calls[0].patch.completed_at).toBeDefined();
   });
 
   it('a specialist who is not the owner approves only their own: the others are left, not shown as approved', async () => {
     const { client } = fakeClient([{ data: [{ id: 'a1' }], error: null }, { data: [], error: null }]);
-    expect(await setAssignmentStatus(client, a, 'approved')).toEqual({ othersApproved: 0 });
+    expect(await setAssignmentStatus(client, a, 'approved')).toEqual({ othersApproved: 0, othersRefused: null });
+  });
+});
+
+describe('setAssignmentStatus, others refused (security review, Sprint 10, L2)', () => {
+  it('says why the other assignments were not approved when the database refuses them', async () => {
+    const { client } = fakeClient([{ data: [{ id: 'a1' }], error: null }, { data: null, error: { message: 'assignment is closed' } }]);
+    expect(await setAssignmentStatus(client, a, 'approved')).toEqual({ othersApproved: 0, othersRefused: 'assignment is closed' });
   });
 });
 

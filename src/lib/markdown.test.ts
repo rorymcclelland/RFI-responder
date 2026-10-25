@@ -45,6 +45,13 @@ describe('parseMarkdown (S10-2)', () => {
   });
 });
 
+describe('heading anchors', () => {
+  it('are unique on a page, as on GitHub', () => {
+    const ids = parseMarkdown('# A\n\n## Notes\n\n## Notes\n\n## Notes').flatMap((b) => (b.kind === 'heading' ? [b.id] : []));
+    expect(ids).toEqual(['a', 'notes', 'notes-1', 'notes-2']);
+  });
+});
+
 describe('parseInline', () => {
   it('reads bold, code, links and images', () => {
     expect(parseInline('Choose **Accept**, see [the card](question-card.md#actions), run `npm test` ![x](../screenshots/a.png).')).toEqual([
@@ -83,7 +90,9 @@ describe('resolveLink', () => {
       .toEqual({ kind: 'external', href: `${REPO}/blob/main/docs/technical/DEVELOPMENT.md` });
   });
   it('makes no link of anything else', () => {
-    for (const bad of ['javascript:alert(1)', 'JaVaScRiPt:alert(1)', 'data:text/html,x', 'missing.md', 'file.exe', 'vbscript:x']) {
+    for (const bad of ['javascript:alert(1)', 'JaVaScRiPt:alert(1)', 'data:text/html,x', 'missing.md', 'file.exe', 'vbscript:x',
+      // Security review, Sprint 10 (L1): encoded "..", backslashes, protocol-relative and plain http.
+      '%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/%2e%2e/attacker/evil/x.md', '..\\..\\x.md', '//evil.example/x.md', 'http://example.com']) {
       expect(resolveLink(bad, 'README.md', PAGES, REPO), bad).toEqual({ kind: 'none' });
     }
   });

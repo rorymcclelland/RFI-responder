@@ -257,7 +257,7 @@ Set locally in a `.env` file in `supabase/functions/` (ignored by git, copied fr
 | `ANSWERABILITY_CHECKER` | `claude-haiku-5-5` | `process-questions` | See process-questions |
 | `GATE_MODEL` | `claude-haiku-5-5` | `process-questions` | |
 | `DRAFT_MODEL` | `claude-haiku-5-5` | `process-questions` | |
-| `EXTRACT_MODEL` | `claude-haiku-5-5` | `extract-questions` | Not in `.env.example` |
+| `EXTRACT_MODEL` | `claude-haiku-5-5` | `extract-questions` | |
 
 `OLLAMA_URL_HOST` in `.env.example` is read by the evaluation scripts, not by the functions. The caps, budget, cost estimates and prices are database settings (see "Caps and budget"), not environment variables.
 

@@ -25,7 +25,7 @@ describe('GuideContent (S10-2)', () => {
 
   it('keeps links between guide pages in the app, and makes no link of anything else', () => {
     const out = html('[Admin](admin.md#people) [bad](javascript:alert(1)) [gone](missing.md)');
-    expect(out).toContain('<a href="#people"');
+    expect(out).toContain('<a href="#guide-people"');
     expect(out).not.toContain('target="_blank"');
     expect(out).not.toContain('javascript:');
     expect(out).toContain('bad');
@@ -34,7 +34,7 @@ describe('GuideContent (S10-2)', () => {
 
   it('shows only bundled screenshots, and gives headings their anchors', () => {
     const out = html('# Getting started\n\n![The overview](../screenshots/1-overview.png)\n\n![Elsewhere](https://example.com/x.png)');
-    expect(out).toContain('<h1 id="getting-started"');
+    expect(out).toContain('<h1 id="guide-getting-started"');
     expect(out).toContain('<img src="/assets/1-overview.png" alt="The overview"');
     expect(out).not.toContain('example.com');
     expect(out).toContain('Elsewhere');

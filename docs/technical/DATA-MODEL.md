@@ -33,7 +33,7 @@ Sixteen tables: fifteen in `public` and one in `private`.
 
 One row per account: the person's name and details, and whether they are an admin.
 
-Created in [`20260430160006_user_profiles_and_assignments.sql`](../../supabase/migrations/20260430160006_user_profiles_and_assignments.sql); access rules last changed in [`20261022120000_access_control.sql`](../../supabase/migrations/20261022120000_access_control.sql); `onboarded_at` added in [`20261029100000_onboarding.sql`](../../supabase/migrations/20261029100000_onboarding.sql).
+Created in [`20260430160006_user_profiles_and_assignments.sql`](../../supabase/migrations/20260430160006_user_profiles_and_assignments.sql); access rules last changed in [`20261022120000_access_control.sql`](../../supabase/migrations/20261022120000_access_control.sql); `onboarded_at` added in [`20261029100000_onboarding.sql`](../../supabase/migrations/20261029100000_onboarding.sql), and reading made column by column in [`20261029110000_onboarding_private.sql`](../../supabase/migrations/20261029110000_onboarding_private.sql).
 
 | Column | Meaning |
 |---|---|
@@ -41,9 +41,9 @@ Created in [`20260430160006_user_profiles_and_assignments.sql`](../../supabase/m
 | `display_name`, `job_title`, `department` | Shown in the app |
 | `expertise_tags` | Used by `suggest_experts` to suggest people for a question |
 | `is_admin` | Admin rights. Changed only by `set_user_admin` |
-| `onboarded_at` | When the person finished or skipped the introduction. Set only by `mark_onboarded`, for the caller's own row, once |
+| `onboarded_at` | When the person finished or skipped the introduction. Set only by `mark_onboarded`, for the caller's own row, once; read only by its owner, through `my_onboarded_at` |
 
-- **Member:** read every profile; update own row, columns `display_name`, `job_title`, `department`, `expertise_tags`, `updated_at`; no insert or delete.
+- **Member:** read every profile's other columns (reading is granted column by column, so `SELECT *` is refused); update own row, columns `display_name`, `job_title`, `department`, `expertise_tags`, `updated_at`; no insert or delete.
 - **Admin:** as a member, and update the same columns on any profile. `is_admin` and `onboarded_at` cannot be written directly by anyone through the API.
 - **Rows are created** by the `on_auth_user_created` trigger on `auth.users` (`handle_new_user`), which copies the display name from the sign-up metadata or the email's local part.
 
@@ -363,6 +363,7 @@ The service role may also execute each of these, but those that check `is_admin(
 | `overdue_entries()` | Current entries past their review date, oldest first, with how often each was cited in the last 90 days | Admin | Definer | [`20261024130000`](../../supabase/migrations/20261024130000_review_dates.sql) | [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) |
 | `set_user_admin(target, make_admin)` | Grants or removes admin rights | Admin | Locks the admin rows first; refuses to remove the last admin. Audited. Definer | [`20261022140000`](../../supabase/migrations/20261022140000_access_control_hardening.sql) | [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts) |
 | `mark_onboarded()` | Records that the caller finished or skipped the introduction | Any member | Signed in; sets only the caller's own `onboarded_at`, and only the first time. Definer | [`20261029100000`](../../supabase/migrations/20261029100000_onboarding.sql) | [`sprint10.test.ts`](../../supabase/tests/db/sprint10.test.ts) |
+| `my_onboarded_at()` | Returns when the caller finished or skipped the introduction, or null | Any member | Signed in; reads only the caller's own row. Definer | [`20261029110000`](../../supabase/migrations/20261029110000_onboarding_private.sql) | [`sprint10.test.ts`](../../supabase/tests/db/sprint10.test.ts) |
 | `usage_status()` | The caller's use today against each daily cap, the monthly budget, and whether the alert share or the budget is reached; spend figures for admins only | Any member | Signed in. Definer | [`20261025110000`](../../supabase/migrations/20261025110000_extraction_caps.sql) | [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint5.test.ts`](../../supabase/tests/db/sprint5.test.ts) |
 | `usage_report()` | This month's spend by person and by model, unpriced calls, questions processed and the average cost per question | Admin | Definer | [`20261025100000`](../../supabase/migrations/20261025100000_reserve_and_assignments.sql) | [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint5.test.ts`](../../supabase/tests/db/sprint5.test.ts) |
 | `suggest_experts(p_question)` | Up to five people to assign a question to, scored on having written the entries it cites, having approved answers drawn from the same entries, and expertise tags matching those entries' tags, with the reasons | Any member | Invoker: reads under the caller's rights | [`20261023140000`](../../supabase/migrations/20261023140000_suggest_experts.sql) | [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts) (S3-6) |
