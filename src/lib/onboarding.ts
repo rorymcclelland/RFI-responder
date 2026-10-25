@@ -47,8 +47,8 @@ export const INTRO_STEPS: IntroStep[] = [
     body: [
       'Upload the customer\'s spreadsheet (.xlsx or .csv) or Word document (.docx). For a spreadsheet you choose the question column; for a Word document the app finds the questions, and you check them before anything is saved.',
     ],
-    image: null,
-    imageAlt: '',
+    image: '10-mapping.png',
+    imageAlt: 'Choosing the question column of a spreadsheet',
     guide: { page: 'running-a-response.md', anchor: '2-upload-the-questions', label: 'Uploading the questions' },
   },
   {

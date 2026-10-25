@@ -20,6 +20,8 @@ Drafts are written only from the knowledge base, so its quality is the quality o
 - **Add entry** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
 - **Import Q&A** (or **Import KB** on the overview) adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are skipped, and so is any question already in the knowledge base (ignoring case and spacing).
 
+![Importing a spreadsheet of questions and answers into the knowledge base](../screenshots/12-kb-import.png)
+
 New entries are indexed for meaning-based search straight away. If indexing fails (a provider problem, or your daily indexing limit), the app says so, and questions are not matched to those entries until they are indexed; the app tries again at the next sign-in or import.
 
 Entries are also learned from responses when their export is recorded ([Running a response](running-a-response.md#what-the-knowledge-base-learns)).
@@ -41,6 +43,8 @@ Entries are also learned from responses when their export is recorded ([Running 
   - The exchange rate from US dollars, which providers price in.
   - How often knowledge-base entries fall due for review (in months).
 - **Prices**: the price per million tokens for each model, with the date it was checked. Local models cost nothing. Set spending limits in the providers' own consoles as well.
+
+![The limits on the governance page](../screenshots/13-governance-limits.png)
 
 ### Entries to review
 

@@ -112,6 +112,8 @@ async function main() {
   // Assigning: the data-at-rest question again, with the list of suggested people open.
   await page.getByText('How do you protect data at rest in your platform?', { exact: true }).click();
   await page.getByRole('button', { name: /^Assign (for review|another)/ }).click();
+  // The list opens below the fold: bring it into view.
+  await page.getByText('Top pick').first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
   await shoot(page, '11-assign.png', 'assigning a question');
 
   // Tom owns the new response: the upload, and choosing the question column of a sample file.
@@ -137,7 +139,9 @@ async function main() {
   await page.waitForLoadState('networkidle');
   await shoot(page, '8-entries-to-review.png', 'entries to review');
   await page.getByRole('tab', { name: 'Usage and limits' }).click();
-  await page.getByText('Limits', { exact: true }).scrollIntoViewIfNeeded();
+  // To the top of the window, below the sticky header (it is partly visible already, so
+  // scrollIntoViewIfNeeded would not move it; found in the Sprint 10 run).
+  await page.getByText('Limits', { exact: true }).evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96 }));
   await shoot(page, '13-governance-limits.png', 'governance limits');
 
   // Importing into the knowledge base: the synthetic Q&A file, at the column mapping.

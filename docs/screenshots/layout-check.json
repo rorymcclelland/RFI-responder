@@ -1,6 +1,6 @@
 {
  "width": 768,
- "checkedAt": "2026-10-25T10:54:37.204Z",
+ "checkedAt": "2026-10-25T14:36:40.449Z",
  "views": [
   {
    "view": "overview",
@@ -27,6 +27,24 @@
    "fits": true
   },
   {
+   "view": "assigning a question",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "upload",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "column mapping",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
    "view": "assignments",
    "scrollWidth": 768,
    "clientWidth": 768,
@@ -46,6 +64,30 @@
   },
   {
    "view": "entries to review",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "governance limits",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "knowledge-base import",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "help",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "introduction",
    "scrollWidth": 768,
    "clientWidth": 768,
    "fits": true

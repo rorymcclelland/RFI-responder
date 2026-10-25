@@ -17,9 +17,13 @@ In the workspace (**New RFI Session**), drop the customer's file on the upload a
 
 Files are opened in your browser with limits on their size and content; nothing in them is run.
 
+![The upload area of a new response](../screenshots/9-upload.png)
+
 ### A spreadsheet: choose the question column
 
 **Map Your Columns** shows the columns it found and picks the one that looks like the questions. Change it if it is wrong (the drop-down, or a name under **Detected columns**), then choose **Match and draft**.
+
+![Choosing the question column of a spreadsheet](../screenshots/10-mapping.png)
 
 ### A Word document: check the questions
 
@@ -75,9 +79,9 @@ The bar says how many are held, and why in general; each card says why for that 
 
 When a question needs a specialist, open its card and under **Expert Assignment** choose **Assign for review**. People are suggested from who wrote or approved similar answers before and from the expertise on their profiles, with the reasons shown; **Top pick** marks the strongest suggestion. Choose **Assign** beside a name. You can assign more than one person, and remove someone who has not yet approved it.
 
-The question appears in their **Assignments** inbox ([Answering assigned questions](specialists.md)). Anyone assigned can decide the question in this workspace. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
+![Assigning a question, with suggested people and their reasons](../screenshots/11-assign.png)
 
-![A specialist's inbox](../screenshots/5-assignments.png)
+The question appears in their **Assignments** inbox ([Answering assigned questions](specialists.md)). Anyone assigned can decide the question in this workspace. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
 
 ## 5. Record the export
 

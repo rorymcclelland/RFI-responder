@@ -8,6 +8,8 @@ If you have forgotten your password, choose **Forgot password?**, enter your ema
 
 The first time you sign in, a short introduction explains what the app does. You can open it again at any time from **Help**, with **Show the introduction**.
 
+![A step of the introduction](../screenshots/14-introduction.png)
+
 ## The screens
 
 The bar at the top of every screen has:
@@ -20,7 +22,9 @@ The bar at the top of every screen has:
 - **Help**: this guide, and the introduction.
 - Your name, and **Sign out** (the arrow icon).
 
-On a narrow window some of these show as icons only; hover over an icon to see its name.
+On a narrow window some of these show as icons only; hover over an icon to see its name. On a phone-sized screen they are in the menu (the three lines at the top right).
+
+![The guide, opened from Help](../screenshots/15-help.png)
 
 ![The overview of responses](../screenshots/1-overview.png)
 
