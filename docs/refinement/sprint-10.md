@@ -55,10 +55,34 @@ Pages: data model and access (every table, view and function a signed-in user ca
 
 The README and the docs index point to the guides and the technical reference. A separate agent that has not seen the writing reads the guides and the reference against the code and reports anything they claim that the code does not do; every finding is fixed before the close.
 
+### S10-6 Onboarding, shown once and available any time (added by Rory, 25 October 2026)
+
+**The job.** Someone signing in for the first time learns what the app does and how a response goes from upload to export, without reading the guides; anyone can run it again later.
+
+**Rory's answers.** A short dialog of steps, each a picture of the screen and a few lines (not a tour that points at the screen); remembered on the person's account, so it is shown once on any browser; content by role.
+
+**What changes.**
+- A dialog of steps: what RFI Respond is for; the overview of responses; uploading a spreadsheet or Word file; how a draft is made and what its confidence and checker mean; what is never approved in bulk and why; assigning to specialists and the inbox; export, provenance and what the knowledge base learns. Admins also get a step on people, the knowledge base and the governance page. Each step links to the guide page that covers it in full (S10-1).
+- Roles: everyone sees the common steps, and the steps for running a response (any member can own one); admins see the admin step too.
+- Shown automatically after the first sign-in, until the person finishes it or chooses **Skip**; available again at any time from the **Help** menu (S10-2), as **Show the introduction** or similar.
+- Remembered on the account: a migration adds an `onboarded_at` column to `user_profiles`. A person can set only their own, and only that column; it is covered by the role-matrix tests (decision 0003).
+- Keyboard and screen readers: focus moves into the dialog and back, Escape closes it (as Skip), and the steps are announced.
+
+**Test cases.**
+1. Database: a member can set their own `onboarded_at`; cannot set another person's; cannot change any other column through it; an admin cannot set it for someone else either (it is the person's own record of having seen it).
+2. A person with no `onboarded_at` sees the dialog after signing in; finishing or skipping sets it and it does not appear again, on this or another browser.
+3. **Show the introduction** opens it at any time, whatever `onboarded_at` says, and does not change it.
+4. A member sees the common and response steps; an admin sees those plus the admin step.
+5. Every UI label the steps name exists in the app, and every guide page they link to exists (as S10-1 test 1 and 2).
+6. Escape closes it; focus returns to where it was; it fits a 768 px window.
+7. If saving `onboarded_at` fails, the dialog still closes and the failure does not block the app (it is shown again next time).
+
+**Size.** M. Depends on S10-1 (the guide pages it links to) and S10-2 (the Help menu).
+
 ## Not in this sprint
 
 New features. Translating the guides.
 
 ## The sprint as a whole
 
-Order: S10-3 (reference, read from the code), S10-1 (guides), S10-4 (screenshots, Rory's run), S10-2 (Help in the app), S10-5. About three days. No spike.
+Order: S10-3 (reference, read from the code), S10-1 (guides), S10-2 (Help in the app), S10-6 (onboarding), S10-4 (screenshots, Rory's run, so the onboarding's pictures and the guides' come from one run), S10-5. About four days. No spike.

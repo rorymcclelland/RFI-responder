@@ -480,6 +480,7 @@ Refinement: `docs/refinement/sprint-10.md`. User guides for every role, in the r
 | S10-3 | Technical reference: data model and access, Edge Functions, configuration, developer guide | The "what" and "how" are undocumented | Ready, Sprint 10 |
 | S10-4 | Screenshots for the guides | Rory, refinement | Ready, Sprint 10 |
 | S10-5 | Index, and an independent accuracy review | Project rule 1 | Ready, Sprint 10 |
+| S10-6 | Onboarding: a short dialog of steps by role, shown once per person (remembered on the account) and available any time from Help | Added by Rory at refinement | Ready, Sprint 10 |
 
 **Not yet in a sprint, ranked at the Sprint 9 review.** 1. C-1 multilingual knowledge base. 2. F-14 and F-15 reviewed Japanese and near-miss items. 3. F-20 rerankers. 4. F-34 review during processing (fails safe). 5. F-8 leaked-password protection, with a hosted sprint. 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
 
