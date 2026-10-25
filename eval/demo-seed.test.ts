@@ -25,7 +25,7 @@ describe('S7-5 SQL generation', () => {
   it('4. states its provenance, or seeds only the new response when there is no recording', () => {
     const none = demoSeedSql(plan, null);
     expect(none).toMatch(/No recording yet/);
-    expect(none).toContain('Corvid Analytics (fictional)');
+    expect(none).toContain('Juniper Utilities (fictional)');
     expect(none).not.toContain('Bluefin');
   });
   it('refuses a recording that does not match the plan', () => {

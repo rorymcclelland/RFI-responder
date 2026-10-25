@@ -48,14 +48,14 @@ describe('S7-5 demo responses, one per stage', () => {
       `SELECT o.name, o.exported_at IS NOT NULL AS exported, o.outcome, u.email AS owner FROM opportunities o JOIN auth.users u ON u.id = o.owner_id ORDER BY o.name`);
     expect(r.rows).toEqual([
       { name: 'Bluefin Freight (fictional): security questionnaire', exported: false, outcome: null, owner: 'priya.sharma@example.com' },
-      { name: 'Corvid Analytics (fictional): vendor security questionnaire', exported: false, outcome: null, owner: 'tom.richardson@example.com' },
       { name: 'Harbour Logistics (fictional): RFQ security schedule', exported: true, outcome: 'won', owner: 'maya.patel@example.com' },
+      { name: 'Juniper Utilities (fictional): vendor security questionnaire', exported: false, outcome: null, owner: 'tom.richardson@example.com' },
       { name: 'Larkspur Health (fictional): data platform RFI', exported: true, outcome: null, owner: 'james.okafor@example.com' },
     ]);
   });
 
   it('the new response has nothing uploaded yet, so the overview shows it as new', async () => {
-    expect(await one(`SELECT stage, total FROM response_overview WHERE name LIKE 'Corvid%'`)).toEqual({ stage: 'new', total: 0 });
+    expect(await one(`SELECT stage, total FROM response_overview WHERE name LIKE 'Juniper%'`)).toEqual({ stage: 'new', total: 0 });
   });
 
   it('the recorded calls are the owners\' usage, priced by the app', async () => {

@@ -3,8 +3,8 @@
   "note": "Synthetic demo responses (Sprint 7, S7-5). Every company, person and question is invented. The new response has nothing uploaded yet. Questions in the other responses are processed by the real pipeline with `npm run demo:record`, and the results are written into supabase/seed.sql with the date, models and prompt versions.",
   "responses": [
     {
-      "key": "corvid",
-      "name": "Corvid Analytics (fictional): vendor security questionnaire",
+      "key": "juniper",
+      "name": "Juniper Utilities (fictional): vendor security questionnaire",
       "owner": "tom.richardson@example.com",
       "dueDays": 21,
       "file": "",

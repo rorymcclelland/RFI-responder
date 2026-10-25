@@ -222,7 +222,7 @@ END $kb$;
 -- Drafts, verdicts and confidences recorded from a real run of the pipeline on 2026-10-25
 -- (plan 2026-10-24.1; models embedding voyage-4, judge claude-haiku-5-5, gate claude-haiku-5-5, draft claude-haiku-5-5;
 -- prompts judge-2026-10-24.1, gate-2026-10-24.1, draft-2026-10-23.1). Not edited by hand.
--- Corvid Analytics (fictional): vendor security questionnaire: stage "new".
+-- Juniper Utilities (fictional): vendor security questionnaire: stage "new".
 DO $demo$
 DECLARE
   owner uuid := (SELECT id FROM auth.users WHERE email = 'tom.richardson@example.com');
@@ -231,10 +231,10 @@ DECLARE
   qid   uuid;
   kind  text;
 BEGIN
-  IF owner IS NULL OR EXISTS (SELECT 1 FROM public.opportunities WHERE name = 'Corvid Analytics (fictional): vendor security questionnaire') THEN RETURN; END IF;
+  IF owner IS NULL OR EXISTS (SELECT 1 FROM public.opportunities WHERE name = 'Juniper Utilities (fictional): vendor security questionnaire') THEN RETURN; END IF;
   PERFORM set_config('request.jwt.claims', json_build_object('sub', owner, 'role', 'authenticated')::text, true);
   INSERT INTO public.opportunities (name, due_date, created_by, owner_id)
-  VALUES ('Corvid Analytics (fictional): vendor security questionnaire', current_date + 21, owner, owner) RETURNING id INTO opp;
+  VALUES ('Juniper Utilities (fictional): vendor security questionnaire', current_date + 21, owner, owner) RETURNING id INTO opp;
   -- New: created, nothing uploaded yet.
 
   PERFORM set_config('request.jwt.claims', '', true);
