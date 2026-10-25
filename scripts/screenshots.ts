@@ -11,7 +11,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { chromium, type Page } from 'playwright';
+import { chromium, type Browser, type Page } from 'playwright';
 
 const BASE = process.env.APP_URL ?? 'http://localhost:5173';
 if (!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(BASE)) {
@@ -25,17 +25,16 @@ const NARROW = { width: 768, height: 1024 };
 
 const layout: { view: string; scrollWidth: number; clientWidth: number; fits: boolean }[] = [];
 
-async function signIn(page: Page, email: string) {
+/** A fresh browser session for each user, so no sign-out is needed between them. */
+async function signIn(browser: Browser, email: string): Promise<Page> {
+  const page = await (await browser.newContext({ viewport: WIDE })).newPage();
   await page.goto(BASE);
-  const signOut = page.getByTitle('Sign out');
-  if (await signOut.isVisible().catch(() => false)) {
-    await signOut.click();
-  }
   await page.locator('input[type=email]').fill(email);
   await page.locator('input[type=password]').fill(PASSWORD);
   await page.locator('input[type=password]').press('Enter');
   await page.getByRole('button', { name: 'Opportunities' }).waitFor();
   await page.waitForLoadState('networkidle');
+  return page;
 }
 
 async function nav(page: Page, name: string) {
@@ -65,10 +64,9 @@ async function shoot(page: Page, file: string, view: string) {
 async function main() {
   mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: WIDE });
 
   // Priya owns the response in review; the bulk bar and her questions are what an owner sees.
-  await signIn(page, 'priya.sharma@example.com');
+  let page = await signIn(browser, 'priya.sharma@example.com');
   await shoot(page, '1-overview.png', 'overview');
   await openResponse(page, 'Bluefin Freight (fictional): security questionnaire');
   await shoot(page, '2-review.png', 'review list');
@@ -78,14 +76,14 @@ async function main() {
   await shoot(page, '4-pricing-held.png', 'pricing card');
 
   // James was assigned a question by Priya, and owns the exported response.
-  await signIn(page, 'james.okafor@example.com');
+  page = await signIn(browser, 'james.okafor@example.com');
   await nav(page, 'Assignments');
   await shoot(page, '5-assignments.png', 'assignments');
   await openResponse(page, 'Larkspur Health (fictional): data platform RFI');
   await shoot(page, '6-export-and-learning.png', 'exported response');
 
   // Sarah is the admin: governance, and James's edit waiting for review.
-  await signIn(page, 'sarah.chen@example.com');
+  page = await signIn(browser, 'sarah.chen@example.com');
   await nav(page, 'Governance');
   await shoot(page, '7-governance-usage.png', 'governance usage');
   await page.getByRole('button', { name: /^Entries to review/ }).click();
