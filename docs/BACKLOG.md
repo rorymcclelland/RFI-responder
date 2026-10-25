@@ -475,14 +475,36 @@ Refinement: `docs/refinement/sprint-10.md`. User guides for every role, in the r
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S10-1 | User guides for the response owner, specialist and admin, and the question card label by label | No user guide exists | Ready, Sprint 10 |
-| S10-2 | Help in the app, from the same Markdown files | Rory, refinement | Ready, Sprint 10 |
-| S10-3 | Technical reference: data model and access, Edge Functions, configuration, developer guide | The "what" and "how" are undocumented | Ready, Sprint 10 |
-| S10-4 | Screenshots for the guides | Rory, refinement | Ready, Sprint 10 |
-| S10-5 | Index, and an independent accuracy review | Project rule 1 | Ready, Sprint 10 |
-| S10-6 | Onboarding: a short dialog of steps by role, shown once per person (remembered on the account) and available any time from Help | Added by Rory at refinement | Ready, Sprint 10 |
+| S10-1 | User guides for the response owner, specialist and admin, and the question card label by label | No user guide exists | Done, Sprint 10 |
+| S10-2 | Help in the app, from the same Markdown files | Rory, refinement | Done, Sprint 10 |
+| S10-3 | Technical reference: data model and access, Edge Functions, configuration, developer guide | The "what" and "how" are undocumented | Done, Sprint 10 |
+| S10-4 | Screenshots for the guides | Rory, refinement | Done, Sprint 10 |
+| S10-5 | Index, and an independent accuracy review | Project rule 1 | Done, Sprint 10 |
+| S10-6 | Onboarding: a short dialog of steps by role, shown once per person (remembered on the account) and available any time from Help | Added by Rory at refinement | Done, Sprint 10 |
 
-**Not yet in a sprint, ranked at the Sprint 9 review.** 1. C-1 multilingual knowledge base. 2. F-14 and F-15 reviewed Japanese and near-miss items. 3. F-20 rerankers. 4. F-34 review during processing (fails safe). 5. F-8 leaked-password protection, with a hosted sprint. 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
+### Sprint 10 review (25 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-10`; 779 unit and 239 database tests. Every bold label in the guide, every guide link, every badge, hold reason and role, every environment variable, table, view, function, Edge Function and npm script is checked against the code by tests. Rory checked the introduction (first sign-in, skip, not shown again), Help and its links, the admin's extra step, the 768 px layout and the new password screen on his PC, and ran the screenshots twice: 15 views, all fitting 768 px. Details in `docs/refinement/sprint-10.md`.
+
+An independent security review found no high or medium issues and four low ones (an encoded link, a hidden refusal, colleagues' first-use dates readable, a partly modal dialog), all fixed. An independent accuracy review of the guides, the reference and the introduction found 28 places where they said more than, or other than, the code does; all fixed, three of them in the app (BUG-30 to BUG-32).
+
+**Bugs found and fixed in the sprint.** BUG-29 the inbox showed changes the database refused; BUG-30 invitation and reset links never let a person choose a password; BUG-31 a card's number followed the review order, not the upload; BUG-32 an answer written where there was no draft was labelled "edited".
+
+### Where every Sprint 10 review item now lives
+
+| Item | Now |
+|---|---|
+| Four security review findings and two notes | Done in Sprint 10 (review) |
+| 28 accuracy review findings | Done in Sprint 10 (review) |
+| BUG-29 to BUG-32 | Done in Sprint 10 |
+| BUG-33 The breadcrumb is squeezed to one letter beside the Help button | Backlog, from Sprint 10 review |
+| F-42 to F-56, found reading the code for the reference and by the accuracy review | Backlog, from Sprint 10 review |
+
+**Not yet in a sprint, ranked at the Sprint 10 review.** 1. Proposed Sprint 11 (below). 2. C-1 multilingual knowledge base. 3. F-14 and F-15 reviewed Japanese and near-miss items. 4. F-20 rerankers. 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4. 10. F-53 an audit-log screen.
+
+**Proposed Sprint 11: what reading the code turned up (for Rory to confirm).** F-42 (a decided question can be changed after export: correctness of the record), F-55 (the local default model has no calibration, so local mode never bulk-approves), F-43 (unindexed entries are invisible to matching), F-49 and F-50 (unaudited admin changes; owners set assignment fields), F-44 to F-46 (Edge Function limit and error messages), F-47 (`purge_old_usage` never runs), F-51 (`handle_new_user` search path), F-52 (decide the "no data in migrations" rule for configuration rows), BUG-33. All small, all in code the reference now describes, no spike.
+
+**Not yet in a sprint, ranked at the Sprint 9 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-14 and F-15 reviewed Japanese and near-miss items. 3. F-20 rerankers. 4. F-34 review during processing (fails safe). 5. F-8 leaked-password protection, with a hosted sprint. 6. F-2 generated database types. 7. F-3 invite screen. 8. F-4 Tailwind 4.
 
 **Ranked at the Sprint 8 review (superseded above).** 1. C-1 multilingual knowledge base. 2. F-19 faithfulness judge on planted unfaithful drafts. 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 4. F-20 rerankers (needs a Voyage payment method). 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
 
@@ -494,7 +516,7 @@ Refinement: `docs/refinement/sprint-10.md`. User guides for every role, in the r
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 onwards from Sprint 7; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 onwards from Sprint 10; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -538,6 +560,22 @@ Refinement: `docs/refinement/sprint-10.md`. User guides for every role, in the r
 | F-39 | The screenshot script checks the app address is local, not the Supabase address in `.env` | Done, Sprint 8 (S8-5). From the Sprint 7 security review |
 | F-40 | With no checker configured (similarity only), 5 of 33 near misses reach the 80% bulk line, and bulk approval is allowed in that set-up | Done, Sprint 9 (S9-1). From the Sprint 8 calibration run; the fallback already missed the Sprint 2 bars. Consider holding similarity-only questions from bulk approval, as a reranker's are |
 | F-41 | A "yes" verdict with very low similarity (below about 0.45) is calibrated at about 85%, so is bulk-eligible; the lowest "yes" in the evaluation set has similarity 0.30 | Closed, Sprint 9 (S9-2): no floor (Rory, Q2); all six "yes" verdicts below similarity 0.40 were right, and below 0.45, 23 of 28 were (82%, against the 85% given); wrong ones occur in every band from 0.40 up, most often just above 0.40 (corrected after the security review). From the Sprint 8 security review; behaviour since Sprint 2 (the old table gave 87.5%). Consider a similarity floor for bulk approval |
+| F-42 | An assignee or the owner can still change a question on an exported, unarchived response; changing an accepted answer reopens it in a session already marked exported | From the Sprint 10 data model reference. `can_decide_question` ignores the export; consider refusing changes once the export is recorded |
+| F-43 | Entries not yet indexed are not matched at all while questions have vectors; indexing can stop at its daily cap or fail while questions still embed | From the Sprint 10 accuracy review. Consider a keyword fallback for unindexed entries, or holding processing until the index is complete |
+| F-44 | `embed` counts units against the daily cap even when it then refuses the request; reserved units are never given back | From the Sprint 10 Edge Functions reference |
+| F-45 | `embed-entries` can report the daily limit when the monthly budget is the cause, and returns raw database error text on two 500s | From the Sprint 10 Edge Functions reference |
+| F-46 | A missing Voyage key, or an unknown `EMBEDDING_PROVIDER`, gives "500 Unexpected error"; nothing in the app calls `embed` | From the Sprint 10 Edge Functions reference |
+| F-47 | `purge_old_usage` (13-month retention) is never scheduled | From the Sprint 10 data model reference; the data handling page states the retention |
+| F-48 | `rerank-3` and any non-default model have no `ai_prices` row, so their cost is recorded as unknown | From the Sprint 10 Edge Functions reference |
+| F-49 | Changes to `ai_prices`, and an admin setting `kb_entries.superseded_by` directly, are not audited; `opportunity_contributors` is not locked by archiving | From the Sprint 10 data model reference |
+| F-50 | Owners hold table-wide insert on `question_assignments`, so can set a new assignment's status (except closed), dates and question text | From the Sprint 10 data model reference |
+| F-51 | `handle_new_user` uses `search_path = public` rather than empty | From the Sprint 10 data model reference; low risk (members cannot create objects in `public`) |
+| F-52 | Migrations insert the settings, prices and learning thresholds, which the "no data in migrations" rule does not anticipate | From the Sprint 10 data model reference. A decision: allow configuration rows in migrations, or move them |
+| F-53 | No screen for the audit log; admins read it in the Supabase dashboard | From the Sprint 10 admin guide |
+| F-54 | `est_usd_per_embed_text` is not on the governance page; only who accepted is recorded, not who skipped or restored | From the Sprint 10 accuracy review |
+| F-55 | The Ollama default model in code is `bge-m3`, which has no calibration with the checker, while decision 0006 chose `qwen3-embedding:0.6b`; local mode therefore leaves every question uncalibrated | From the Sprint 10 accuracy review and configuration reference |
+| F-56 | `npm run dev` serves on `localhost`; the README and Supabase's `site_url` use `127.0.0.1`, which may not answer on every machine | From the Sprint 10 accuracy review |
+| BUG-33 | The workspace breadcrumb is squeezed to one letter of the response name at 1,280 px, now that Help sits beside it | From the Sprint 10 screenshots |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked

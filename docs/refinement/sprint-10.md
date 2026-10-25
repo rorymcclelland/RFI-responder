@@ -106,3 +106,34 @@ New features. Translating the guides.
 ## The sprint as a whole
 
 Order: S10-3 (reference, read from the code), S10-1 (guides), S10-2 (Help in the app), S10-6 (onboarding), S10-4 (screenshots, Rory's run, so the onboarding's pictures and the guides' come from one run), S10-5. About four days. No spike.
+
+## Close (25 October 2026)
+
+**Delivered.** All six stories, done:
+
+- **S10-1:** the user guide, seven pages.
+- **S10-2:** Help in the app.
+- **S10-3:** the technical reference, four pages.
+- **S10-4:** fifteen screenshots, all fitting 768 px.
+- **S10-5:** the index, and the two independent reviews with every finding fixed.
+- **S10-6:** the introduction, remembered on the account.
+
+**Evidence.** CI green on `sprint-10`; 779 unit and 239 database tests. Rory checked on his PC:
+
+- the introduction on a first sign-in, and that it is not shown again;
+- Help and its links;
+- the admin's extra step;
+- the 768 px layout;
+- the new password screen after **Forgot password?**.
+
+**Deviations from the plan.** The stories were committed in a different order from the plan:
+
+- S10-1, S10-2 and the introduction's screens share one commit, because each names the others and the tests check across them.
+- S10-5's index: a Documentation section in the README points to the guide and each page of the reference; the guide's own index page is the entry point, opened from Help in the app. There is no separate `docs/README.md`.
+
+**Back to the backlog.** Nothing from the sprint. New rows from reading the code and from the reviews:
+
+- F-42 to F-56;
+- BUG-33.
+
+They are proposed as Sprint 11 in `docs/BACKLOG.md`.

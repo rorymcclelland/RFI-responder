@@ -39,6 +39,14 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 
 All screenshots show the synthetic demo data in `supabase/seed.sql`. The seed records every call the recorded run made, Claude and embedding alike. The governance page also counts the indexing of the knowledge base that the first sign-in after a reset triggers (two embedding calls).
 
+## Documentation
+
+- **[User guide](docs/guide/README.md)**, for every role: getting started, running a response, answering assigned questions, administering, the question card label by label, and common problems. The same pages open inside the app under **Help**.
+- **Technical reference:** [data model and access](docs/technical/DATA-MODEL.md), [Edge Functions](docs/technical/EDGE-FUNCTIONS.md), [configuration](docs/technical/CONFIGURATION.md) and [development](docs/technical/DEVELOPMENT.md).
+- [Architecture](docs/ARCHITECTURE.md), [deploying](docs/DEPLOYING.md), [evaluations](docs/evals/README.md), [governance](docs/governance/README.md) and the [decisions](docs/decisions/).
+
+Tests check the guide and the reference against the code: every button the guide names, every reason a question is held, every setting, table and function.
+
 ## How it was built
 
 The starting point was a prototype generated with Bolt.new: the first commit in this repository. Reviewed line by line, it matched by keywords, assembled drafts from templates, and part of its confidence score was a random number. It has been rebuilt sprint by sprint:
@@ -55,6 +63,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 7 | Documentation, demo data and publishing |
 | 8 | Honest figures: 95% intervals on every published figure, cross-validated calibration |
 | 9 | Bulk approval needs the checker's "yes" in every set-up; the faithfulness judge tested on planted claims |
+| 10 | A user guide for every role, shown in the app under Help; an introduction on first sign-in; the technical reference |
 
 Each sprint followed the same cycle:
 
