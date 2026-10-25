@@ -13,7 +13,7 @@ function InfoTip({ text }: { text: string }) {
   return (
     <span className="relative group inline-flex items-center">
       <Info size={12} className="text-ink-300 hover:text-ink-500 cursor-default transition-colors" />
-      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 bg-ink-900 text-white text-xs rounded-xl px-3 py-2 leading-relaxed shadow-modal opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-30 whitespace-normal font-normal">
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-ink-900 text-white text-xs rounded-xl px-3 py-2 leading-relaxed shadow-modal opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-30 whitespace-normal font-normal">
         {text}
         <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-ink-900" />
       </span>
@@ -311,8 +311,9 @@ export default function RFIQuestionCard({
     if (!isExpanded) onToggleExpand();
   };
 
+  // No overflow-hidden on the card: it clipped tooltips that rise above it (Sprint 8 end-to-end check).
   return (
-    <div className={`bg-white rounded-2xl border overflow-hidden transition-all duration-150 shadow-card ${STATUS_RING[question.status]}`}>
+    <div className={`bg-white rounded-2xl border transition-all duration-150 shadow-card ${STATUS_RING[question.status]}`}>
       {kbArticle && (
         <KBArticleModal entry={kbArticle.entry} score={kbArticle.score} onClose={() => setKbArticle(null)} />
       )}
