@@ -175,6 +175,6 @@ All nine stories are Ready.
 6. (Low) The governance screenshot includes two embedding calls made on the local install after the seed loaded; the README says so (cause not established: F-38).
 7. (Low) The card now says why a drafted question is left out of bulk approval.
 
-**Open at the close.** The end-to-end check of the review fixes on screen (the "Write an answer" button and the hold reason) is with Rory, as browser actions from this session were blocked.
+**Checked after the close (Rory, 25 October, local PC).** As Priya on Bluefin, A11 (no draft) offers "Write an answer" instead of Accept; the box opens empty; "Save & Accept" stays greyed until text is typed and greys again when it is deleted. The hold-reason line on the card has no demo case to show it (F-37) and is covered by unit tests.
 
 **Raised at the close, now in the backlog.** F-36 Excel title property empty. F-37 the demo data has no pending "partly" question at the bulk line. F-38 the source of two embedding calls after a fresh seed is not established, and the recording does not keep embedding usage. F-39 the screenshot script checks that the app is local, not that the Supabase address in `.env` is.

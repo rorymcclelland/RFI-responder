@@ -392,7 +392,7 @@ An independent security review found no high issues and seven smaller ones (two 
 
 **Bugs found and fixed in the sprint.** BUG-23 to BUG-26 (demo-seed test collision, two screenshot script faults, the new demo response showing "In review" and zero usage).
 
-**Open at the close.** The on-screen check of the review fixes is with Rory. Making the repository public and checking that the README renders are Rory's steps.
+**Checked after the close.** Rory confirmed the "Write an answer" behaviour on screen (25 October). Making the repository public and checking that the README renders are Rory's steps.
 
 ### Where every Sprint 7 review item now lives
 
