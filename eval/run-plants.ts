@@ -5,15 +5,16 @@
  *
  *   npm run eval:plants
  *
- * Takes the faithful drafts from the newest drafting run, plants one unsupported claim in each by
- * fixed rules (eval/plants.ts), and asks the same judge, with the same prompt and cache, as
- * eval:drafting. The unchanged drafts are judged too, as controls: an unsupported claim there is a
- * false alarm. Writes docs/evals/faithfulness-plants-<date>.md and .json.
+ * Takes the faithful English drafts from the newest drafting run, plants one unsupported claim in each
+ * by fixed rules (eval/plants.ts), and asks the same judge, with the same prompt, as eval:drafting.
+ * The unchanged drafts are judged again too, in this run's own cache (security review, Sprint 9: the
+ * drafting run's verdicts were what selected them, so reusing them would make false alarms 0 by
+ * construction). Writes docs/evals/faithfulness-plants-<date>.md and .json.
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { citedRefs, FAITH_SCHEMA, FAITH_SYSTEM, FAITHFULNESS_JUDGE } from './faithfulness';
-import { clusteredProportion, formatInterval, wilson } from './intervals';
+import { formatInterval, wilson } from './intervals';
 import { diskCache, loadKb, newestReport, reportBase, ROOT, withRetry } from './lib';
 import { makeClaude } from './pipeline';
 import { caught, plantSet, PLANT_RULES } from './plants';
@@ -34,15 +35,16 @@ async function main() {
     });
   const items = plantSet(drafts);
   const entriesOf = new Map(drafts.map((d) => [d.id, d.entries]));
-  console.log(`${drafts.length} faithful drafts from ${source}: ${items.length} to judge (${items.filter((i) => i.rule !== 'control').length} planted, ${drafts.length} controls)`);
+  const controlCount = items.filter((i) => i.rule === 'control').length;
+  console.log(`${controlCount} faithful English drafts from ${source}: ${items.length} to judge (${items.length - controlCount} planted, ${controlCount} controls)`);
 
   const { client, usage } = makeClaude();
-  const cache = diskCache<Claims>('faithfulness', FAITHFULNESS_JUDGE);
+  // Its own cache: a fresh verdict on every item, controls included.
+  const cache = diskCache<Claims>('faithfulness-plants', FAITHFULNESS_JUDGE);
   const judged = [];
   let done = 0;
   for (const item of items) {
     const entries = entriesOf.get(item.id)!;
-    // The same cache key as eval:drafting, so controls already judged there cost nothing.
     const key = JSON.stringify([item.text, entries.map((e) => e.ref)]);
     let v = cache.get(key);
     if (!v) {
@@ -50,43 +52,51 @@ async function main() {
         model: FAITHFULNESS_JUDGE, system: FAITH_SYSTEM, schema: FAITH_SCHEMA, maxTokens: 1500,
         user: JSON.stringify({ draft: item.text, entries: entries.map((e) => ({ ref: e.ref, question: e.question, answer: e.answer })) }),
       }));
-      v = out.data ?? { claims: [] };
-      cache.set(key, v);
+      // An empty or unreadable reply is counted as unreadable and not cached, so a rerun can recover it.
+      if (out.data && out.data.claims.length > 0) { v = out.data; cache.set(key, v); }
     }
-    judged.push({ ...item, claims: v.claims, caught: item.marker ? caught(v.claims, item.marker) : null, alarms: v.claims.filter((c) => !c.supported).length });
+    judged.push({ ...item, unreadable: !v, claims: v?.claims ?? [], caught: v && item.marker ? caught(v.claims, item.marker) : null, alarms: v ? v.claims.filter((c) => !c.supported).length : null });
     process.stdout.write(`  ${++done}/${items.length}\r`);
   }
   process.stdout.write('\n');
 
-  const planted = judged.filter((j) => j.rule !== 'control');
-  const controls = judged.filter((j) => j.rule === 'control');
+  const unreadable = judged.filter((j) => j.unreadable).length;
+  const planted = judged.filter((j) => j.rule !== 'control' && !j.unreadable);
+  const controls = judged.filter((j) => j.rule === 'control' && !j.unreadable);
   const k = planted.filter((p) => p.caught).length;
-  // Plants in the same draft share its wording, so the interval resamples by draft.
-  const byDraft = [...new Set(planted.map((p) => p.id))].map((id) => ({ k: planted.filter((p) => p.id === id && p.caught).length, n: planted.filter((p) => p.id === id).length }));
-  const interval = clusteredProportion(byDraft, { seed: 20261025 });
-  const falseAlarms = controls.filter((c) => c.alarms > 0).length;
+  const falseAlarms = controls.filter((c) => (c.alarms ?? 0) > 0).length;
+  // Security review, Sprint 9: the plants are four rules, two of them the same appended sentence in
+  // every draft, so each rule gets its own rate and interval, and the bar applies to each as well as overall.
+  const perRule = PLANT_RULES.map((r) => {
+    const p = planted.filter((x) => x.rule === r.name);
+    const c = p.filter((x) => x.caught).length;
+    return { name: r.name, n: p.length, c, interval: p.length ? formatInterval(wilson(c, p.length), 'percent') : 'n/a', met: p.length > 0 && c / p.length >= BAR };
+  });
+  const overallMet = planted.length > 0 && k / planted.length >= BAR;
+  const allRulesMet = perRule.filter((r) => r.n > 0).every((r) => r.met);
   const pct = (a: number, b: number) => `${((a / b) * 100).toFixed(1)}%`;
   const date = new Date().toISOString().slice(0, 10);
   const base = reportBase('faithfulness-plants', date);
   const lines = [
     `# Faithfulness judge on planted claims, ${date}`,
     '',
-    `The faithful drafts of \`${source}\` (${drafts.length}), each with one unsupported claim planted by a fixed rule (\`eval/plants.ts\`), judged by ${FAITHFULNESS_JUDGE} with the drafting evaluation's prompt. A plant is caught when the judge marks a claim holding the planted words as unsupported. Generated by \`npm run eval:plants\`. Bar (Sprint 9): at least ${BAR * 100}% caught.`,
+    `The faithful English drafts of \`${source}\` (${controls.length + (judged.filter((j) => j.rule === 'control' && j.unreadable).length)}; every claim supported in that run), each with one unsupported claim planted by a fixed rule (\`eval/plants.ts\`), judged by ${FAITHFULNESS_JUDGE} with the drafting evaluation's prompt. A plant is caught when the judge marks a claim holding the planted word or number as unsupported. The unchanged drafts are judged again in the same run, as controls. Generated by \`npm run eval:plants\`. Bar (Sprint 9): at least ${BAR * 100}% caught, overall and for each rule.`,
     '',
-    '**Read with care.** The plants are written by rules, so they may be easier to spot than a model\'s own mistakes; the drafts and sources are synthetic.',
+    `**Read with care.** The plants are written by rules, so they may be easier to spot than a model's own mistakes; ${perRule.filter((r) => r.name === 'added certification' || r.name === 'absolute claim').reduce((a, r) => a + r.n, 0)} of the ${planted.length} are one of two fixed sentences added to every draft, so the per-rule rows matter more than the total. The drafts and sources are synthetic.`,
     '',
     '| Measure | Result | 95% interval | Bar | Met |',
     '|---|---|---|---|---|',
-    `| Planted claims caught | ${k} of ${planted.length} (${pct(k, planted.length)}) | ${formatInterval(interval, 'percent')} | at least ${BAR * 100}% | ${k / planted.length >= BAR ? 'yes' : 'no'} |`,
+    `| Planted claims caught | ${k} of ${planted.length} (${pct(k, planted.length)}) | ${formatInterval(wilson(k, planted.length), 'percent')} | at least ${BAR * 100}%, and for each rule | ${overallMet && allRulesMet ? 'yes' : 'no'} |`,
     `| Unchanged drafts with a claim marked unsupported (false alarms) | ${falseAlarms} of ${controls.length} | ${formatInterval(wilson(falseAlarms, controls.length), 'percent')} | reported | |`,
+    `| Unreadable judge replies (left out above; not cached) | ${unreadable} of ${judged.length} | | none | ${unreadable === 0 ? 'yes' : 'no'} |`,
     '',
-    `Interval method: ${interval.method.replace(/cluster(s?)/g, 'draft$1')}.`,
+    'Intervals: Wilson. The overall interval treats plants as independent; plants of the same rule share their wording, so read it with the rows below.',
     '',
     '## By rule',
     '',
-    '| Rule | Planted | Caught |',
-    '|---|---|---|',
-    ...PLANT_RULES.map((r) => { const p = planted.filter((x) => x.rule === r.name); return `| ${r.name} | ${p.length} | ${p.filter((x) => x.caught).length} |`; }),
+    '| Rule | Planted | Caught | 95% interval | At least 90% |',
+    '|---|---|---|---|---|',
+    ...perRule.map((r) => `| ${r.name} | ${r.n} | ${r.c} | ${r.interval} | ${r.n ? (r.met ? 'yes' : 'no') : 'n/a'} |`),
     '',
     '## Missed',
     '',

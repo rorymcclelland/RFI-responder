@@ -1,6 +1,6 @@
 // Sprint 9. Test numbers refer to docs/refinement/sprint-9.md.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, buildDatabase, closePool, createUser, type TestUser } from './harness';
+import { as, asSuperuser, buildDatabase, closePool, createUser, type TestUser } from './harness';
 import { question, response, session } from './fixtures';
 
 let owner: TestUser;
@@ -45,6 +45,19 @@ describe('S9-1 questions calibrated on similarity alone are never bulk-approved 
     await as(owner, async (q) => {
       const r = await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0)`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldNoChecker: 1 });
+    });
+  });
+});
+
+describe('security review, Sprint 9: a drafted "yes" the server never processed is never bulk-approved', () => {
+  it('is held as uncalibrated, not accepted', async () => {
+    const s = await session(await response(owner.id));
+    const id = await question(s, { verdict: 'yes', confidence: 0.95, text: 'Never processed (S9 review)?' });
+    await asSuperuser(`UPDATE rfi_questions SET processed_at = NULL WHERE id = $1`, [id]);
+    await as(owner, async (q) => {
+      const r = await q<{ bulk_accept: Bulk & { heldUncalibrated: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldUncalibrated: 1 });
+      expect(await status(q, id)).toBe('pending');
     });
   });
 });

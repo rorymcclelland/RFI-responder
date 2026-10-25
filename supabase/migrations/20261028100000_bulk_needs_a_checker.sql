@@ -1,7 +1,7 @@
 -- Sprint 9, S9-1 (F-40; Rory, Q1). Bulk approval needs the checker's "yes" in every configuration.
 -- With no checker configured, confidence comes from similarity alone, and cross-validated near misses
--- still reach the bulk line at every threshold (4 of 33 at 80%, 1 at 95%:
--- docs/evals/calibration-2026-10-25.md). Such questions are now held and counted as heldNoChecker;
+-- still reach the bulk line at every threshold (4 of 33 at 80%, 1 at 95%: the out-of-fold
+-- predictions in docs/evals/calibration-2026-10-25.json). Such questions are now held and counted as heldNoChecker;
 -- they can still be accepted one at a time. Tested in supabase/tests/db/sprint9.test.ts.
 
 CREATE OR REPLACE FUNCTION public.bulk_accept(p_session uuid, p_min_confidence numeric)

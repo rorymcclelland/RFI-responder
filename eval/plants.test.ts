@@ -44,3 +44,37 @@ describe('scoring', () => {
     expect(caught([{ claim: 'Keys rotate every 90 days.', supported: false }], 'FedRAMP')).toBe(false);
   });
 });
+
+describe('security review, Sprint 9', () => {
+  const ja = '暗号化の対象範囲は四半期ごとの監査で検証しています。\n\n[References: KB-0001]\n\n[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]';
+  const en = 'Logs are reviewed quarterly.\n\n[References: KB-0001]\n\n[Translated from English knowledge-base entries.]';
+
+  it('plants go into the body, never after the reference list or a translation note', () => {
+    const p = PLANT_RULES.find((r) => r.name === 'added certification')!.plant(en, ['Logs are reviewed quarterly.'])!;
+    expect(p.text).toBe('Logs are reviewed quarterly. We also hold FedRAMP High authorisation.\n\n[References: KB-0001]\n\n[Translated from English knowledge-base entries.]');
+  });
+
+  it('Japanese drafts are not planted in', () => {
+    expect(plantSet([{ id: 'd061', text: ja, sources: ['x'] }])).toEqual([]);
+  });
+
+  it('a bound is left alone, since a larger one would still be true; an exact figure is changed', () => {
+    const fig = PLANT_RULES.find((r) => r.name === 'changed figure')!;
+    expect(fig.plant('We notify you within 4 hours.\n\n[References: KB-0001]', ['within 4 hours'])).toBeNull();
+    expect(fig.plant('We guarantee 99% uptime.\n\n[References: KB-0001]', ['99% uptime'])!.marker).toBe('199');
+    expect(fig.plant('Keys rotate every 90 days.\n\n[References: KB-0001]', ['every 90 days'])!.marker).toBe('181');
+    expect(fig.plant('Patches within 24–72 hours.\n\n[References: KB-0001]', ['24–72 hours'])).toBeNull();
+    expect(fig.plant('Kept for 1 year.\n\n[References: KB-0001]', ['1 year'])).toBeNull();
+  });
+
+  it('a frequency is only made more frequent, keeping its capital', () => {
+    const freq = PLANT_RULES.find((r) => r.name === 'changed frequency')!;
+    expect(freq.plant('Quarterly audits check it.\n\n[References: KB-0001]', ['quarterly audits'])!.text).toMatch(/^Monthly audits check it\./);
+    expect(freq.plant('Backups run daily.\n\n[References: KB-0001]', ['daily'])).toBeNull();
+  });
+
+  it('a number marker matches whole numbers only', () => {
+    expect(caught([{ claim: 'Recovery takes 90 minutes.', supported: false }], '9')).toBe(false);
+    expect(caught([{ claim: 'Incidents are notified within 9 hours.', supported: false }], '9')).toBe(true);
+  });
+});
