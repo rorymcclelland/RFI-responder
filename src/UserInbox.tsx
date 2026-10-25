@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Inbox, Clock, TrendingUp, CheckCircle2, CheckCheck, ChevronDown, RefreshCw, MessageSquare, X, ArrowRight, Lock } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { assignmentPeople } from './lib/format';
+import { saveAssignmentNotes, setAssignmentStatus } from './lib/assignments';
 import { QuestionAssignment, AssignmentStatus } from './types';
 
 // ─── Status config ─────────────────────────────────────────────────────────────
@@ -248,33 +249,28 @@ export default function UserInbox({ userId, isAdmin }: Props) {
     setLoading(false);
   }
 
+  // BUG-29: every change is checked, then the list is reloaded, so it shows what the database holds.
+  const [error, setError] = useState('');
   const handleStatusChange = async (id: string, status: AssignmentStatus) => {
-    const now = new Date().toISOString();
-    await supabase.from('question_assignments')
-      .update({ status, updated_at: now, ...(status === 'approved' ? { completed_at: now } : {}) })
-      .eq('id', id);
-
-    if (status === 'approved') {
-      const thisA = assignments.find((a) => a.id === id);
-      if (thisA) {
-        await supabase.from('question_assignments')
-          .update({ status: 'approved', updated_at: now, completed_at: now })
-          .eq('question_id', thisA.questionId).eq('session_id', thisA.sessionId).neq('id', id);
-        setAssignments((prev) =>
-          prev.map((a) =>
-            a.questionId === thisA.questionId && a.sessionId === thisA.sessionId
-              ? { ...a, status: 'approved', completedAt: now, updatedAt: now } : a
-          )
-        );
-        return;
-      }
+    const a = assignments.find((x) => x.id === id);
+    if (!a) return;
+    setError('');
+    try {
+      await setAssignmentStatus(supabase, a, status);
+    } catch (err) {
+      setError((err as Error).message);
     }
-    setAssignments((prev) => prev.map((a) => a.id === id ? { ...a, status, updatedAt: now } : a));
+    await loadAssignments();
   };
 
   const handleNotesUpdate = async (id: string, notes: string) => {
-    await supabase.from('question_assignments').update({ notes, updated_at: new Date().toISOString() }).eq('id', id);
-    setAssignments((prev) => prev.map((a) => a.id === id ? { ...a, notes } : a));
+    setError('');
+    try {
+      await saveAssignmentNotes(supabase, id, notes);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+    await loadAssignments();
   };
 
   const tabItems: { key: InboxTab; label: string }[] = [
@@ -346,6 +342,8 @@ export default function UserInbox({ userId, isAdmin }: Props) {
           ))}
         </div>
       </div>
+
+      {error && <div role="alert" className="text-sm text-coral-700 bg-coral-50 border border-coral-200 rounded-xl px-4 py-3 font-medium">{error}</div>}
 
       {/* List */}
       {loading ? (
