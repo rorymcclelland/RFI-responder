@@ -18,7 +18,7 @@ Use **Add Notes** (or **Edit Notes**) to tell the owner what you found, what you
 
 ## Deciding the question itself
 
-The inbox tracks the assignment; the answer is decided in the response's workspace. Open **Opportunities**, choose the response (its name is shown on the assignment), and find the question. As someone assigned to it you can **Accept** the draft, **Edit First** and **Save & Accept** your version, **Write an answer** when there is no draft, or **Skip** it, exactly as the owner can ([Running a response](running-a-response.md#deciding-one-question)). [The question card](question-card.md) explains what you will see.
+The inbox tracks the assignment; the answer is decided in the response's workspace. Open **Opportunities**, choose the response (its name is shown on the assignment), and find the question. The workspace opens on the response's most recent file; if the question came from an earlier one, choose **New upload** and open it under **Previous Sessions**. As someone assigned to it you can **Accept** the draft, **Edit First** and **Save & Accept** your version, **Write an answer** when there is no draft, or **Skip** it, exactly as the owner can ([Running a response](running-a-response.md#deciding-one-question)). [The question card](question-card.md) explains what you will see.
 
 You cannot approve questions in bulk, assign others, or record the export: those are the owner's.
 

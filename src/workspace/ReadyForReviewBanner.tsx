@@ -21,7 +21,7 @@ export default function ReadyForReviewBanner({
         </div>
         <div className="flex-1 text-left">
           <p className="text-sm font-bold text-amber-900">
-            {items.length} response{items.length !== 1 ? 's' : ''} ready for review
+            {items.length} assignment{items.length !== 1 ? 's' : ''} with notes to review
           </p>
           <p className="text-xs text-amber-700 font-medium">Team members have added notes</p>
         </div>

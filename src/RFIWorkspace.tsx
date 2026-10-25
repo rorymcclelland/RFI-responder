@@ -304,6 +304,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     loadPastSessions();
   };
 
+  // BUG-31 (Sprint 10 accuracy review): a card's number is its place in the upload, not in the
+  // review order (which is sorted by confidence).
+  const uploadOrder = new Map([...questions].sort((x, y) => x.position - y.position).map((q, i) => [q.id, i]));
   const visible = questions.filter((q) => {
     if (filter !== 'all' && q.status !== filter) return false;
     if (confGroup !== 'all') {
@@ -534,7 +537,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
               <div key={q.id} id={`question-${q.id}`}>
                 <RFIQuestionCard
                   question={q}
-                  index={questions.indexOf(q)}
+                  index={uploadOrder.get(q.id) ?? 0}
                   isExpanded={expandedId === q.id}
                   onToggleExpand={() => setExpandedId(expandedId === q.id ? null : q.id)}
                   onAccept={(ans) => handleAccept(q.id, ans)}

@@ -56,7 +56,7 @@ export const INTRO_STEPS: IntroStep[] = [
     title: 'How a draft is made',
     body: [
       'Each question is matched against the knowledge base. A checker reads the best entries and says whether they answer it: **Yes**, **Partly** or **No**, with a reason. A draft is written from those entries only, and checked against them.',
-      '**Confidence** is the measured chance that the knowledge base answers the question, from tests on questions with known answers. The questions least likely to be answered come first.',
+      '**Confidence** is the measured chance that the knowledge base answers the question, from tests on questions with known answers. Questions without a measured confidence come first, then the lowest.',
     ],
     image: '3-draft-and-checker.png',
     imageAlt: 'A question card with its draft, sources and the checker\'s verdict',
@@ -89,7 +89,7 @@ export const INTRO_STEPS: IntroStep[] = [
     title: 'Export, and the knowledge base learns',
     body: [
       'When every question is decided, **Record export** and download the answers. Each file records how every answer was produced and who approved it.',
-      'Answers people edited or wrote are added to the knowledge base, so later responses can draw on them.',
+      'Most answers people edited or wrote are added to the knowledge base, so later responses can draw on them; pricing answers never are.',
     ],
     image: '6-export-and-learning.png',
     imageAlt: 'An exported response and what the knowledge base learned',
@@ -111,7 +111,7 @@ export const INTRO_STEPS: IntroStep[] = [
     id: 'help',
     title: 'Help is always there',
     body: [
-      'The full guide, and this introduction, are under **Help** at the top of every screen.',
+      'The full guide, and this introduction, are under **Help** at the top of every screen (in the menu on a narrow screen).',
     ],
     image: null,
     imageAlt: '',

@@ -9,11 +9,14 @@ import type { RFIQuestion } from '../types';
 
 export type AnswerSource = 'draft' | 'edited' | 'person';
 
-export function answerSource(q: Pick<RFIQuestion, 'generatedAnswer' | 'finalAnswer'>): AnswerSource {
+export function answerSource(q: Pick<RFIQuestion, 'generatedAnswer' | 'finalAnswer'> & { draftKind?: RFIQuestion['draftKind'] }): AnswerSource {
   const draft = (q.generatedAnswer ?? '').trim();
   const final = (q.finalAnswer ?? '').trim();
   if (final === draft) return 'draft';
-  return draft === '' ? 'person' : 'edited';
+  // BUG-32 (Sprint 10 accuracy review): with no draft, the stored text is a placeholder ("No
+  // matching knowledge-base entry..."), so anything else in the box was written by a person.
+  const noDraft = q.draftKind === 'insufficient_evidence' || q.draftKind === 'person_required';
+  return draft === '' || noDraft ? 'person' : 'edited';
 }
 
 export const ANSWER_HEADING: Record<AnswerSource, string> = {

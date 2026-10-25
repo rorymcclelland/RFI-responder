@@ -83,7 +83,7 @@ describe('the guide covers the app', () => {
       heldGated: 'pricing, legal or translated',
       heldUncalibrated: 'without calibrated confidence',
       heldNoDraft: 'without a draft',
-      heldPartly: 'judged only partly answered by the checker',
+      heldPartly: 'judged only partly answered, or not answered, by the checker',
       heldNoVerdict: 'not checked by a checker at all',
       heldNoChecker: 'not checked by a checker at all',
       belowThreshold: 'at or above a confidence',

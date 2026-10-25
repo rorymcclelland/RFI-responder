@@ -31,7 +31,7 @@ Choose the right one under **Map Your Columns** before **Match and draft**.
 
 ### Questions are missing from a Word document, or split in two
 
-In **Check the questions**, add the missing ones and use **Join the parts into one question**. If the screen says simple rules were used because the AI service was unavailable, check the whole list: rules miss questions without a question mark.
+In **Check the questions**, add the missing ones and use **Join the parts into one question**. If the screen says simple rules were used because the AI service was unavailable, check the whole list: rules can miss questions.
 
 ## Matching and drafting
 
@@ -53,7 +53,7 @@ The checker was unavailable while they were processed, or matching fell back to 
 
 ### A message says meaning-based search is unavailable
 
-Knowledge-base entries could not be indexed, so matching uses keywords until they are. Tell whoever runs the installation; the AI provider's key or limit is the usual cause.
+Some knowledge-base entries could not be indexed, so questions are not matched to them until they are. The app tries again at the next sign-in or import. If it keeps happening, tell whoever runs the installation: the AI provider's key or limit, or your daily indexing limit, is the usual cause.
 
 ## Review and approval
 
@@ -61,9 +61,9 @@ Knowledge-base entries could not be indexed, so matching uses keywords until the
 
 The message after it says why each group was held: below the threshold, pricing, legal or translated, citing an unreviewed or overdue entry, partly answered, or not calibrated. Those must be accepted one at a time. See [Approving in bulk](running-a-response.md#approving-in-bulk).
 
-### I cannot see the bulk bar, or Accept
+### The bulk buttons are greyed out, or there is no Accept
 
-Only the response's owner or an admin can approve in bulk. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
+Only the response's owner or an admin can approve in bulk; others see the bar with its buttons greyed out (hover for why), and **Record export** is shown only to the owner and admins. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
 
 ### I cannot accept a question with no draft
 
@@ -71,7 +71,7 @@ Write its answer first; a placeholder is not an answer.
 
 ### Record export is not available
 
-Every question must be accepted or skipped first; the button says how many are still pending.
+Every question must be accepted or skipped first; hover over the button to see how many are still pending.
 
 ### I cannot archive a response as Won or Lost
 
@@ -89,7 +89,7 @@ The inbox says why, for example when the response has been exported and its assi
 
 ### Nobody is suggested for a question
 
-Suggestions come from who wrote the cited entries, who approved answers drawn from them, and expertise tags that match the entries' tags. Anyone can still be assigned.
+Suggestions come from who wrote the entries matched to the question, who approved (one at a time) answers drawn from them, and expertise tags that match those entries' tags. Anyone can still be assigned.
 
 ## The knowledge base
 
@@ -99,8 +99,8 @@ Rows without a question or an answer are skipped, and so are questions already i
 
 ### My entry says "Not yet reviewed"
 
-Entries added by members wait for an admin's review. They are used for drafts at once, but a draft that cites one is not approved in bulk until it is reviewed.
+Entries added by members wait for an admin's review. They can be used for drafts as soon as they are indexed, but a draft that cites one is not approved in bulk until it is reviewed.
 
 ## Still stuck
 
-Ask an admin. An admin can check usage and limits under **Governance**, and whoever runs the installation can read the Edge Function logs ([Development](../technical/DEVELOPMENT.md)).
+Ask an admin. An admin can check usage and limits under **Governance**, and whoever runs the installation can read the Edge Function logs ([Development](../technical/DEVELOPMENT.md#logs)).

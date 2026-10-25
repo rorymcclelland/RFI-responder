@@ -5,9 +5,9 @@ Every question in a response has a card. This page explains each thing on it. Ch
 ## The heading
 
 - The dot and the bar show the confidence: green for **High** (80% or more), amber for **Medium** (40% to 80%), red for **Low** (under 40%), grey for **Not calibrated**. The bar reads `n/c` when there is no calibrated confidence.
-- The number is the question's place in the upload; a small grey label beside it is the customer's own number for the question, kept in the export.
+- The number is the question's place in the upload (the list itself is in review order); a small grey label beside it is the customer's own number for the question, kept in the export.
 - Badges say why the question is reviewed one at a time (below), and **Not processed yet** if matching and drafting have not run.
-- **Accepted** or **Accepted (edited)**, with who accepted it and when, and "bulk at 80%" or similar if it was approved in bulk. **Skipped** if it was skipped.
+- **Accepted**, **Accepted (edited)** or **Accepted (written by a person)**, with who accepted it and when, and "bulk at 80%" or similar if it was approved in bulk. **Skipped** if it was skipped.
 - **Assigned** (or how many are assigned) if colleagues have been asked to look at it.
 
 ## Confidence and similarity
@@ -41,7 +41,7 @@ These badges mean a question is never approved in bulk. Hover over the badge, or
 |---|---|
 | Pricing: a person answers | It asks about price, cost or commercial terms. No draft is written, and the answer is never learned automatically. |
 | Legal: review individually | It touches contract terms, liability, indemnity, warranties and similar. A draft may be written, but a person checks it. |
-| Not fully checked | The pricing and legal classifier, or the check of the cited entries' review status, could not run. Only simple rules were applied. |
+| Not fully checked | The pricing and legal classifier could not run, so only simple rules were applied; or the review status of the cited entries could not be read. |
 | Translated draft | The question is in Japanese, and the draft is translated from English entries. |
 | Cites an unreviewed entry | The draft relies on a knowledge-base entry an admin has not reviewed yet. |
 | Cites an entry overdue for review | The draft relies on an entry overdue for its periodic review, or one that has since been replaced. |
@@ -50,7 +50,7 @@ Pricing and legal questions are found two ways, by rules (words such as "price" 
 
 ## KB Sources
 
-The entries the draft came from, up to three, each with its number and its similarity to the question. Choose one to read it in full.
+The best-matching entries, up to three, which the draft is written from, each with its number and its similarity to the question. Choose one to read it in full.
 
 ## The answer
 
@@ -58,9 +58,9 @@ The box's heading says who wrote what is in it:
 
 - **Proposed Response**: the system's draft. The tooltip says how it was made:
   - written by a language model from the matched entries only, citing them; every citation, figure, link and email address was checked against the entries before it was offered;
-  - or assembled from sentences of the matched entries, with references, when no drafting model is configured or drafting failed. Nothing was generated.
+  - or assembled from sentences of the matched entries, with references, when no drafting model is configured, drafting failed, or matching fell back to keywords. Nothing was generated.
 - **Answer (edited by a person)**: someone changed the draft. The checks applied to the draft, not to the edits.
-- **Answer (written by a person)**: there was no draft, so no automatic checks apply.
+- **Answer (written by a person)**: there was no draft, so someone wrote the answer and no automatic checks apply.
 
 ### When there is no draft
 
@@ -75,7 +75,7 @@ A note under the answer says when a draft was written but not offered, for examp
 
 ### How it was produced
 
-The small line at the bottom names the models: which matched the question, which checked the entries, and which drafted the answer, with the version of the drafting prompt. The same record goes into the export.
+The small line at the bottom names the models: which matched the question, which checked the entries, and which drafted the answer, with the version of the drafting prompt. The export records how each answer was produced and, for a model's draft, the drafting model and prompt version.
 
 ## Notes under the answer
 

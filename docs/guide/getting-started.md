@@ -2,9 +2,9 @@
 
 ## Signing in
 
-Open the app and sign in with the email address and password from your invitation, then choose **Sign In**. There is no sign-up: if you do not have an account, ask an admin to invite you.
+The first time, follow the link in your invitation email: the app asks you to choose a password (at least 12 characters, with letters and digits). After that, sign in with your email address and password and choose **Sign In**. There is no sign-up: if you do not have an account, ask an admin to invite you.
 
-If you have forgotten your password, choose **Forgot password?**, enter your email address and choose **Send Reset Link**. The email contains a link back to the app where you set a new password.
+If you have forgotten your password, choose **Forgot password?**, enter your email address and choose **Send Reset Link**. The email contains a link back to the app, which asks you to choose a new password.
 
 The first time you sign in, a short introduction explains what the app does. You can open it again at any time from **Help**, with **Show the introduction**.
 
@@ -31,7 +31,7 @@ On a narrow window some of these show as icons only; hover over an icon to see i
 - the response's name, its owner and its stage: **New** (no questions yet), **In review** (questions still pending), **Ready** (every question decided), **Exported**, or **Archived** with its outcome;
 - how many of its questions are decided, and how many pricing or legal questions are still open;
 - the due date, and **Overdue** or **At risk** when it needs attention: at risk means three working days or fewer left with less than 80% of questions decided (or none uploaded yet), or a day or less left with pricing or legal questions still open;
-- how many questions are with colleagues (**with experts**).
+- how many assignments to colleagues are still open (**with experts**). An owner or admin counts them all; anyone else counts only their own.
 
 The tiles at the top count the responses **In review**, **Ready to export**, **At risk** and **Overdue**; choose the first two to filter the list. You can also filter by stage, show **Mine only**, or search by name.
 

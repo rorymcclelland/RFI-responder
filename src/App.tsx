@@ -17,6 +17,8 @@ import { loadUsageStatus, type UsageStatus } from './lib/usage';
 import { addEntry, parseTags } from './lib/entryReview';
 import { supabase } from './lib/supabase';
 import HelpView from './help/HelpView';
+import SetPassword from './SetPassword';
+import { linkPurpose } from './lib/passwordLink';
 import Introduction from './help/Introduction';
 import { startPage } from './lib/guide';
 import { loadOnboardedAt, markOnboarded, PROFILE_COLUMNS, shouldShowIntroduction, stepsFor } from './lib/onboarding';
@@ -78,7 +80,7 @@ function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void;
     try {
       const r = await addEntry(supabase, { question, answer, tags: parseTags(tags), source });
       const indexed = await indexNewEntries();
-      onDone(`${r.ref} added.${r.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}${indexed.ok ? '' : ` It could not be indexed yet (${indexed.reason}), so it is found by keywords only for now.`}`);
+      onDone(`${r.ref} added.${r.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}${indexed.ok ? '' : ` It could not be indexed yet (${indexed.reason}), so questions are not matched to it until it is (it is tried again at the next sign-in or import).`}`);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -173,6 +175,9 @@ function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: Knowled
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
+// BUG-30: read before the Supabase client clears the address's fragment.
+const ARRIVED_FOR = linkPurpose(window.location.hash);
+
 type AppView = 'opportunities' | 'inbox' | 'users' | 'governance' | 'help';
 
 export default function App() {
@@ -193,6 +198,7 @@ export default function App() {
   const [helpAt, setHelpAt]                       = useState<{ page: string; anchor: string | null } | null>(null);
   const [helpMenuOpen, setHelpMenuOpen]           = useState(false);
   const [introOpen, setIntroOpen]                 = useState(false);
+  const [settingPassword, setSettingPassword]     = useState(ARRIVED_FOR);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -201,7 +207,8 @@ export default function App() {
       else setAuthLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      if (event === 'PASSWORD_RECOVERY') setSettingPassword('recovery');
       setSession(s);
       if (s) {
         (async () => { await loadUserProfile(s.user.id); })();
@@ -244,7 +251,7 @@ export default function App() {
     setAuthLoading(false);
     // Fill any gaps in the meaning-based index (existing entries, or after a model change). Quiet unless it fails.
     void indexNewEntries().then((r) => {
-      if (!r.ok) showToast(`Meaning-based search is unavailable (${r.reason}); matching will use keywords only.`, 'error');
+      if (!r.ok) showToast(`Some knowledge-base entries could not be indexed (${r.reason}); questions are not matched to them until they are.`, 'error');
     });
   }
 
@@ -283,7 +290,7 @@ export default function App() {
       if (indexed.ok) {
         showToast(describeImport(result));
       } else {
-        showToast(`${describeImport(result)} Not yet indexed for meaning-based search (${indexed.reason}); they will be indexed on the next import.`, 'error');
+        showToast(`${describeImport(result)} Not yet indexed for meaning-based search (${indexed.reason}), so questions are not matched to them until they are; they are tried again at the next sign-in or import.`, 'error');
       }
       return true;
     } catch (err) {
@@ -337,6 +344,10 @@ export default function App() {
 
   if (!session || !currentUser) {
     return <AuthPage onAuthenticated={() => {}} />;
+  }
+
+  if (settingPassword) {
+    return <SetPassword purpose={settingPassword} onDone={() => { setSettingPassword(null); history.replaceState(null, '', window.location.pathname); }} />;
   }
 
   const navItems: { key: AppView; icon: React.ReactNode; label: string }[] = [

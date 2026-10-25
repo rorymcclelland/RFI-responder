@@ -23,7 +23,7 @@ Files are opened in your browser with limits on their size and content; nothing 
 
 ### A Word document: check the questions
 
-For a Word document the app finds the questions for you: the text is sent to the server, where a language model (Claude) proposes them, and each is kept only if it appears in the document word for word, with the customer's own numbering. If the AI service is unavailable, simple rules are used instead and the screen says so; check the list more carefully then, as rules miss questions without a question mark.
+For a Word document the app finds the questions for you: the text is sent to the server, where a language model (Claude) proposes them, and each is kept only if it appears in the document word for word, with the customer's own numbering. If the AI service is unavailable, simple rules are used instead and the screen says so; check the list more carefully then, as rules can miss questions.
 
 **Check the questions** shows the list before anything is saved. You can edit a question, remove it, add one, or join the parts of a question that was split (**Join the parts into one question**); **Where it came from** shows the passage it was found in. Then choose **Save and match**.
 
@@ -37,7 +37,7 @@ Each question is processed on the server, in batches of ten (**Matching and draf
 4. Unless nothing close enough was found, a draft is written from the matched entries only, citing them; the drafting model writes none if the entries do not answer the question. Code then rejects a draft that cites an entry it was not given, or contains a figure, link or email address that is not in its sources; the question is left without a draft, with a note saying why.
 5. Pricing questions, and questions the knowledge base does not answer, get no draft: a person writes those. [The question card](question-card.md#when-there-is-no-draft) lists the reasons.
 
-Each question gets a calibrated confidence: the measured chance, on a test set, that the knowledge base answers it with the top entry.
+Each question gets a calibrated confidence when one can be measured: the measured chance, on a test set, that the knowledge base answers it with the top entry.
 
 Processing stops if you reach your daily limit, or the organisation reaches its monthly budget; the screen says which. Questions that could not be processed stay in the list marked **Not processed yet**, with **Process now** to try again.
 
@@ -45,7 +45,7 @@ Processing stops if you reach your daily limit, or the organisation reaches its 
 
 ![Review, lowest confidence first, with the bulk approval bar](../screenshots/2-review.png)
 
-The questions are listed lowest confidence first, so the ones most likely to need you come first. Filter them by status (pending, accepted, skipped), by confidence (**High ≥80%**, **Medium 40–80%**, **Low <40%**, and **Not calibrated** when there are any), or search them.
+The questions are listed with those without a calibrated confidence first, then lowest confidence first, so the ones most likely to need you come first. Filter them by status (pending, accepted, skipped), by confidence (**High ≥80%**, **Medium 40–80%**, **Low <40%**, and **Not calibrated** when there are any), or search them.
 
 Choose a question to open its card: the checker's verdict and reason, the entries the draft came from (**KB Sources**; choose one to read it in full), the draft, and how it was produced. [The question card](question-card.md) explains every label.
 
@@ -55,9 +55,9 @@ Choose a question to open its card: the checker's verdict and reason, the entrie
 - **Edit First** opens it for editing; **Save & Accept** approves your version.
 - **Write an answer** appears instead when there is no draft: write the answer, then **Save & Accept**. A question with no draft cannot be accepted until someone has written its answer.
 - **Skip** leaves it unanswered (it is exported as "Not answered"); **Restore** brings it back.
-- **Revise Answer** changes an accepted answer. Changing it reopens the question, so accept it again.
+- **Revise Answer** changes an accepted answer; **Save & Accept** records the revised answer as a new acceptance.
 
-Every decision records who made it, when, and how.
+Every acceptance records who made it, when, and how (one at a time or in bulk).
 
 ### Approving in bulk
 
@@ -66,22 +66,22 @@ The bulk bar approves every pending draft at or above a confidence in one step: 
 - pricing, legal or translated;
 - not fully checked (the classifier or the review check could not run);
 - citing a knowledge-base entry that is unreviewed, overdue for review, or replaced;
-- judged only partly answered by the checker, or not checked by a checker at all;
+- judged only partly answered, or not answered, by the checker, or not checked by a checker at all;
 - without calibrated confidence, or without a draft.
 
-Those are listed under the bar and must be accepted one at a time. After a bulk approval a message says how many were accepted and why the rest were held.
+The bar says how many are held, and why in general; each card says why for that question. They must be accepted one at a time. After a bulk approval a message says how many were accepted and why the rest were held.
 
 ## Asking a colleague
 
 When a question needs a specialist, open its card and under **Expert Assignment** choose **Assign for review**. People are suggested from who wrote or approved similar answers before and from the expertise on their profiles, with the reasons shown; **Top pick** marks the strongest suggestion. Choose **Assign** beside a name. You can assign more than one person, and remove someone who has not yet approved it.
 
-The question appears in their **Assignments** inbox ([Answering assigned questions](specialists.md)). Anyone assigned can decide the question in this workspace. When a colleague adds notes, a banner at the top of the review list says how many responses are ready for review; choose one to go to its question.
+The question appears in their **Assignments** inbox ([Answering assigned questions](specialists.md)). Anyone assigned can decide the question in this workspace. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
 
 ![A specialist's inbox](../screenshots/5-assignments.png)
 
 ## 5. Record the export
 
-When every question is accepted or skipped, choose **Record export** on the bulk bar. Until then it says how many are still pending. Recording the export:
+When every question is accepted or skipped, choose **Record export** on the bulk bar. Until then it is greyed out; hover over it to see how many are still pending. Recording the export:
 
 - marks the response as exported;
 - closes its open assignments;
@@ -105,7 +105,7 @@ Recording the export turns edited and person-written answers into knowledge-base
 
 ## 6. Finish
 
-Choose **New upload** (or **Start New RFI** after the export) to add another file to the same response; earlier files stay under **Previous Sessions**, where **Resume** or **View** reopens them.
+Choose **New upload** (or **Start New RFI** after the export) to add another file to the same response; earlier files stay under **Previous Sessions** (the ten most recent are listed), where **Resume** or **View** reopens them. The workspace opens on the most recent file.
 
 When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the export recorded first; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 

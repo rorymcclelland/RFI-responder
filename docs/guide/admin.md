@@ -6,7 +6,7 @@ For admins: the people who look after the workspace. An admin can do everything 
 
 ### Inviting someone
 
-Accounts are by invitation only, and invitations are sent from Supabase, not from the app: in the Supabase dashboard (Studio) open Authentication, then Users, and invite the person by email. On a local install Studio is at the address `npx supabase start` prints (usually `http://127.0.0.1:54323`). The person's profile is created when their account is, and they can sign in once they have set a password from the invitation. An in-app invite screen is on the backlog (F-3).
+Accounts are by invitation only, and invitations are sent from Supabase, not from the app: in the Supabase dashboard (Studio) open Authentication, then Users, and invite the person by email. On a local install Studio is at the address `npx supabase start` prints (usually `http://127.0.0.1:54323`). The person's profile is created when their account is. The link in the invitation brings them to the app, which asks them to choose a password. An in-app invite screen is on the backlog (F-3).
 
 ### Roles and profiles
 
@@ -20,7 +20,7 @@ Drafts are written only from the knowledge base, so its quality is the quality o
 - **Add entry** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
 - **Import Q&A** (or **Import KB** on the overview) adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are skipped, and so is any question already in the knowledge base (ignoring case and spacing).
 
-New entries are indexed for meaning-based search straight away. If indexing fails, they are found by keywords until the next attempt, and the app says so.
+New entries are indexed for meaning-based search straight away. If indexing fails (a provider problem, or your daily indexing limit), the app says so, and questions are not matched to those entries until they are indexed; the app tries again at the next sign-in or import.
 
 Entries are also learned from responses when their export is recorded ([Running a response](running-a-response.md#what-the-knowledge-base-learns)).
 
@@ -52,7 +52,7 @@ For each entry choose **Approve**, or **Correct** to fix the question or answer 
 
 ### Overdue for review
 
-Entries not reviewed or confirmed within the review interval. A draft that cites one is never approved in bulk until it is reviewed again. Each card shows how long it has been due and how often it was cited recently. Choose **Still correct**, or **Correct** it. An answer accepted unedited at export also counts as a confirmation of the entries it cited.
+Entries not reviewed or confirmed within the review interval. A draft that cites one is never approved in bulk until it is reviewed again. Each card shows the date it fell due and, if it was cited in the last 90 days, how often. Choose **Still correct**, or **Correct** it. An answer accepted unedited at export also counts as a confirmation of the entries it cited.
 
 ## Deleting a response
 

@@ -352,7 +352,7 @@ export default function RFIQuestionCard({
             {question.status === 'accepted' && (
               <span className="flex items-center gap-1 text-2xs text-emerald-700 font-bold">
                 <CheckCircle2 size={11} />
-                {question.finalAnswer !== question.generatedAnswer ? 'Accepted (edited)' : 'Accepted'}
+                {source === 'person' ? 'Accepted (written by a person)' : source === 'edited' ? 'Accepted (edited)' : 'Accepted'}
                 {question.approval && (
                   <span className="font-medium text-emerald-600">
                     {' '}by {users.find((u) => u.id === question.approval!.by)?.displayName ?? 'a team member'},{' '}

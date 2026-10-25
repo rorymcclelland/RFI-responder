@@ -121,6 +121,10 @@ npm run db:reset
 2. The database tests, on Postgres with the shim.
 3. On the real Supabase stack: every migration and the seed applied from scratch, sign-up refused, the seeded admin able to sign in, and the Edge Functions refusing unsigned calls, enforcing their limits, and failing safely when a provider cannot be reached, without echoing a key. The Edge Functions are type-checked with Deno first.
 
+## Logs
+
+Locally, the Edge Functions print to the window running `npx supabase functions serve`; an unexpected error is logged there in full ([`http.ts`](../../supabase/functions/_shared/http.ts)) while the caller gets only a general message. On a hosted project, each function's logs are in the Supabase dashboard under Edge Functions. Usage, limits and spend are in the app under **Governance**.
+
 ## Deploying
 
 [Deploying](../DEPLOYING.md) covers a hosted Supabase project, the function secrets and the app.
@@ -135,4 +139,4 @@ The work is planned in [the backlog](../BACKLOG.md), with the project's rules at
 4. **Check end to end** on a local install, on a real browser.
 5. **Close.** Delivered items are marked done, unfinished ones go back to the backlog, and findings are logged in the backlog.
 
-British spelling and no em dashes in the documentation and the app's text; the tests check both.
+British spelling and no em dashes in the documentation and the app's text; the tests check the documentation and the introduction's text.
