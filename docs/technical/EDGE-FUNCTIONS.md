@@ -118,7 +118,7 @@ Provider failures and unreadable model replies do not produce an error status: e
 
 | Call | Usage `kind` | Model | Configured by |
 |---|---|---|---|
-| Embedding (one per batch) | `embed` | `voyage-4` or `bge-m3` by default | `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`, `VOYAGE_API_KEY`, `OLLAMA_URL` |
+| Embedding (one per batch) | `embed` | `voyage-4` or `qwen3-embedding:0.6b` by default | `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`, `VOYAGE_API_KEY`, `OLLAMA_URL` |
 | Answerability judge (at most two per question) | `judge` | `claude-haiku-5-5` | `ANSWERABILITY_CHECKER`, `ANTHROPIC_API_KEY` |
 | Answerability rerank (at most one per question) | `rerank` | The `rerank-...` value given | `ANSWERABILITY_CHECKER`, `VOYAGE_API_KEY` |
 | Pricing and legal classifier (one or two per question) | `gate` | `claude-haiku-5-5` | `GATE_MODEL`, `ANTHROPIC_API_KEY` |
@@ -250,7 +250,7 @@ Set locally in a `.env` file in `supabase/functions/` (ignored by git, copied fr
 | `SUPABASE_SERVICE_ROLE_KEY` | None | All four | As above. Secret |
 | `APP_ORIGIN` | `http://localhost:5173,http://127.0.0.1:5173` | All four (`http.ts`) | Comma-separated allowed browser origins |
 | `EMBEDDING_PROVIDER` | `voyage` | `process-questions`, `embed`, `embed-entries` | `voyage` or `ollama` |
-| `EMBEDDING_MODEL` | `voyage-4` (Voyage), `bge-m3` (Ollama) | As above | |
+| `EMBEDDING_MODEL` | `voyage-4` (Voyage), `qwen3-embedding:0.6b` (Ollama) | As above | |
 | `VOYAGE_API_KEY` | None | As above, and `process-questions` for a `rerank-...` checker | Secret. Required for Voyage |
 | `OLLAMA_URL` | `http://host.docker.internal:11434` | As above | Ollama as seen from inside Docker |
 | `ANTHROPIC_API_KEY` | None | `process-questions`, `extract-questions` | Secret. Without it: no classifier, judge or drafter; extraction uses the rules |

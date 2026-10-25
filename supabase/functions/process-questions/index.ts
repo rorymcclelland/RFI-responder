@@ -17,7 +17,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { claudeJudge, voyageRerankChecker, type AnswerabilityChecker } from '../_shared/answerability.ts';
 import { CALIBRATION_TABLES } from '../_shared/calibration-tables.ts';
 import { claudeClient } from '../_shared/claude.ts';
-import { providerFromEnv } from '../_shared/embeddings.ts';
+import { DEFAULT_CHECKER, providerFromEnv } from '../_shared/embeddings.ts';
 import { HttpError, json, requireUser, serve } from '../_shared/http.ts';
 import { finishUsage, meteredClaude, meteredEmbedder, meteredFetch, quotaMessage, reserveQuota, type UsageRow } from '../_shared/usage.ts';
 import { processQuestions, validateProcessRequest } from '../_shared/process-core.ts';
@@ -29,7 +29,7 @@ import type { MatchRow } from '../_shared/sources.ts';
  * than quietly falling back (security review).
  */
 function checkerFromEnv(env: Record<string, string | undefined>, usage: UsageRow[]): AnswerabilityChecker | null {
-  const choice = env.ANSWERABILITY_CHECKER ?? 'claude-haiku-5-5';
+  const choice = env.ANSWERABILITY_CHECKER ?? DEFAULT_CHECKER;
   if (choice === 'none') return null;
   const key = choice.startsWith('rerank-') ? env.VOYAGE_API_KEY : env.ANTHROPIC_API_KEY;
   if (!key) {

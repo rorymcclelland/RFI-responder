@@ -139,17 +139,27 @@ export function ollamaProvider(opts: { baseUrl: string; model: string; fetch?: F
   };
 }
 
+/**
+ * The model each provider uses when EMBEDDING_MODEL is not set. Sprint 11 (F-55): the local default
+ * follows decision 0006 (qwen3-embedding:0.6b), which has a calibration table with the default
+ * checker; bge-m3 had none, so local mode left every question uncalibrated.
+ */
+export const DEFAULT_EMBEDDING_MODEL = { voyage: 'voyage-4', ollama: 'qwen3-embedding:0.6b' } as const;
+
+/** The answerability checker when ANSWERABILITY_CHECKER is not set. */
+export const DEFAULT_CHECKER = 'claude-haiku-5-5';
+
 /** Build the configured provider from environment variables (Edge Function secrets or a local .env). */
 export function providerFromEnv(env: Record<string, string | undefined>, fetchImpl?: Fetch): EmbeddingProvider {
   const provider = env.EMBEDDING_PROVIDER ?? 'voyage';
   if (provider === 'voyage') {
     if (!env.VOYAGE_API_KEY) throw new Error('VOYAGE_API_KEY is not set');
-    return voyageProvider({ apiKey: env.VOYAGE_API_KEY, model: env.EMBEDDING_MODEL ?? 'voyage-4', fetch: fetchImpl });
+    return voyageProvider({ apiKey: env.VOYAGE_API_KEY, model: env.EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL.voyage, fetch: fetchImpl });
   }
   if (provider === 'ollama') {
     return ollamaProvider({
       baseUrl: env.OLLAMA_URL ?? 'http://host.docker.internal:11434',
-      model: env.EMBEDDING_MODEL ?? 'bge-m3',
+      model: env.EMBEDDING_MODEL ?? DEFAULT_EMBEDDING_MODEL.ollama,
       fetch: fetchImpl,
     });
   }

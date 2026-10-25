@@ -1,6 +1,7 @@
 // Sprint 1, story S1-2: embedding providers (test numbers from docs/refinement/sprint-1.md).
 import { describe, expect, it, vi } from 'vitest';
-import { EMBEDDING_DIMENSION, EmbeddingError, providerFromEnv, voyageProvider, ollamaProvider } from './embeddings';
+import { DEFAULT_CHECKER, DEFAULT_EMBEDDING_MODEL, EMBEDDING_DIMENSION, EmbeddingError, providerFromEnv, voyageProvider, ollamaProvider } from './embeddings';
+import { CALIBRATION_TABLES } from './calibration-tables';
 
 const vec = (seed: number) => Array.from({ length: EMBEDDING_DIMENSION }, (_, i) => (i === seed ? 1 : 0));
 const ok = (body: unknown) => new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -103,5 +104,17 @@ describe('rate limits (found in the first comparison run, 22 Oct)', () => {
     const p = voyageProvider({ apiKey: 'k', model: 'voyage-4', fetch: fetchMock, retry: { attempts: 3, baseDelayMs: 1, sleep: async () => {} } });
     await expect(p.embed(['a'], 'query')).rejects.toMatchObject({ status: 502 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('defaults (Sprint 11, S11-3, F-55)', () => {
+  it('local mode defaults to the model decision 0006 chose', () => {
+    expect(providerFromEnv({ EMBEDDING_PROVIDER: 'ollama' }).model).toBe('qwen3-embedding:0.6b');
+    expect(providerFromEnv({ EMBEDDING_PROVIDER: 'ollama', EMBEDDING_MODEL: 'bge-m3' }).model).toBe('bge-m3');
+  });
+  it('every default combination of embedding model and checker has a calibration table', () => {
+    for (const model of Object.values(DEFAULT_EMBEDDING_MODEL)) {
+      expect(CALIBRATION_TABLES[`${model} + ${DEFAULT_CHECKER}`], model).toBeDefined();
+    }
   });
 });

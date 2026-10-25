@@ -26,7 +26,7 @@ Copied from [`supabase/functions/.env.example`](../../supabase/functions/.env.ex
 | `SUPABASE_SERVICE_ROLE_KEY` | Supplied by Supabase | Yes | Bypasses row-level security; used only on the server, after the caller has been identified |
 | `APP_ORIGIN` | `http://localhost:5173,http://127.0.0.1:5173` | No | The browser origins allowed to call the functions (CORS), comma-separated. Set it to the app's address when hosted |
 | `EMBEDDING_PROVIDER` | `voyage` | No | `voyage` (hosted) or `ollama` (local) |
-| `EMBEDDING_MODEL` | `voyage-4` for Voyage, `bge-m3` for Ollama | No | Changing it needs a calibration table for the new model (`npm run eval:calibrate`) and re-indexes the knowledge base |
+| `EMBEDDING_MODEL` | `voyage-4` for Voyage, `qwen3-embedding:0.6b` for Ollama (decision 0006) | No | Changing it needs a calibration table for the new model (`npm run eval:calibrate`) and re-indexes the knowledge base |
 | `VOYAGE_API_KEY` | None | Yes | Needed for Voyage embeddings and for a `rerank-...` checker |
 | `OLLAMA_URL` | `http://host.docker.internal:11434` | No | Ollama as seen from inside Docker |
 | `ANTHROPIC_API_KEY` | None | Yes | Needed for the checker, the pricing and legal classifier, drafting and reading Word documents. Without it, questions are not calibrated, are marked "not fully checked", get assembled rather than generated drafts, and Word documents are read by rules |
@@ -35,7 +35,7 @@ Copied from [`supabase/functions/.env.example`](../../supabase/functions/.env.ex
 | `DRAFT_MODEL` | `claude-haiku-5-5` | No | The drafting model. Also read by the evaluation scripts |
 | `EXTRACT_MODEL` | `claude-haiku-5-5` | No | The model that finds questions in Word documents |
 
-Confidence is calibrated for one combination of embedding model and checker. A combination with no calibration table in [`calibration-tables.ts`](../../supabase/functions/_shared/calibration-tables.ts) leaves every question "Not calibrated", so nothing is approved in bulk. That includes the local defaults: there is no table for `bge-m3` with the default checker, so with `EMBEDDING_PROVIDER=ollama` every question is "Not calibrated" (the tables are for `voyage-4` and `qwen3-embedding:0.6b` with `claude-haiku-5-5`, and for similarity alone).
+Confidence is calibrated for one combination of embedding model and checker. A combination with no calibration table in [`calibration-tables.ts`](../../supabase/functions/_shared/calibration-tables.ts) leaves every question "Not calibrated", so nothing is approved in bulk. Both defaults have one (`voyage-4` and `qwen3-embedding:0.6b`, each with `claude-haiku-5-5`), and a test keeps it so. A model set explicitly without one, such as `bge-m3`, leaves every question "Not calibrated".
 
 ## Evaluations, scripts and tests
 
