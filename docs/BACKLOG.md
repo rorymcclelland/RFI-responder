@@ -7,7 +7,7 @@ Way of working: Claude writes the code, Rory reads and questions it. Each sprint
 ## Project rules (checked against every story)
 
 1. **Honesty.** Nothing in the code, UI, docs or demo claims more than the code does. No invented customers, testimonials or performance figures. Claims elsewhere (CV, website) follow `_context\shared\positioning.md`.
-2. **Synthetic data only.** No real company's questionnaire, policy or customer data in the repo, the database or any demo.
+2. **Synthetic data only.** No real company's questionnaire, policy or customer data in the repo, the database or any demo. Migrations may insert only the configuration every install needs (settings, model prices, learning thresholds), dated and sourced (Sprint 11, Q3).
 3. **Secrets stay server-side.** No API keys in the browser bundle or the repo. Only the Supabase anon key is public, and the database rules must hold with it in an attacker's hands.
 4. **Human in the loop.** The AI drafts; a person approves. Every answer in an exported response has a named human decision behind it: either an individual review, or the response owner's bulk approval above a stated threshold, recorded with who, which threshold and when. Pricing and legal or contractual questions are never bulk-approved. Calibrated confidence is what makes bulk approval safe.
 5. **Least privilege.** Every table has row-level security matched to a written role matrix.

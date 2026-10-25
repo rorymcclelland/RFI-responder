@@ -12,7 +12,7 @@ Read `docs/PRODUCT.md` (what and why), `docs/BACKLOG.md` (project rules and spri
 ## Rules that are easy to break
 
 - Never claim in code, UI or docs more than the code does (project rule 1). No invented figures or testimonials.
-- Synthetic data only, in `sample-data/` and `supabase/seed.sql`. Never put data in migrations.
+- Synthetic data only, in `sample-data/` and `supabase/seed.sql`. Migrations hold no sample or customer data; the only rows they may insert are the configuration every install needs (the `ai_settings` row, `ai_prices`, `learning_thresholds`), dated and sourced (Sprint 11, Q3; `supabase/tests/migrations.test.ts` checks it).
 - Never ship an API key to the browser. AI calls go through Supabase Edge Functions (decision 0005).
 - Access rules live in migrations and are tested in `supabase/tests/db/`. A new table needs RLS, column grants and a test for every row of the role matrix (decision 0003).
 - Treat uploads as hostile; go through `src/lib/spreadsheet.ts`.
