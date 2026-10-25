@@ -1,5 +1,6 @@
 /**
- * Screenshots for the README, and a layout check at 768 px (Sprint 7, S7-7 and S7-4).
+ * Screenshots for the README and the user guide, and a layout check at 768 px (Sprint 7, S7-7 and
+ * S7-4; the guide's views and the introduction since Sprint 10, S10-4).
  * Run on Rory's PC against the local app, after `npx supabase db reset` has loaded the demo seed:
  *
  *   npx playwright install chromium     (once; a test browser, about 150 MB)
@@ -49,7 +50,26 @@ async function signIn(browser: Browser, email: string): Promise<Page> {
   await page.locator('input[type=password]').press('Enter');
   await page.getByRole('button', { name: 'Opportunities' }).waitFor();
   await page.waitForLoadState('networkidle');
+  await dismissIntroduction(page);
   return page;
+}
+
+/**
+ * The seed users have not seen the introduction, so it opens on their first sign-in (S10-6).
+ * Skipping it records that on the local seed; `npm run db:reset` brings it back.
+ */
+async function dismissIntroduction(page: Page) {
+  const dialog = page.getByRole('dialog');
+  if (await dialog.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({ state: 'hidden' });
+  }
+}
+
+async function openHelp(page: Page, item: 'Open the guide' | 'Show the introduction') {
+  await page.getByRole('button', { name: 'Help', exact: true }).click();
+  await page.getByRole('menuitem', { name: item }).click();
+  await page.waitForLoadState('networkidle');
 }
 
 async function nav(page: Page, name: string) {
@@ -89,6 +109,18 @@ async function main() {
   await shoot(page, '3-draft-and-checker.png', 'card expanded');
   await page.getByText('What is the annual subscription price for 250 users?', { exact: true }).click();
   await shoot(page, '4-pricing-held.png', 'pricing card');
+  // Assigning: the data-at-rest question again, with the list of suggested people open.
+  await page.getByText('How do you protect data at rest in your platform?', { exact: true }).click();
+  await page.getByRole('button', { name: /^Assign (for review|another)/ }).click();
+  await shoot(page, '11-assign.png', 'assigning a question');
+
+  // Tom owns the new response: the upload, and choosing the question column of a sample file.
+  page = await signIn(browser, 'tom.richardson@example.com');
+  await openResponse(page, 'Juniper Utilities (fictional): vendor security questionnaire');
+  await shoot(page, '9-upload.png', 'upload');
+  await page.locator('input[type=file]').setInputFiles(join(process.cwd(), 'sample-data/sample-questions.csv'));
+  await page.getByText('Map Your Columns').waitFor();
+  await shoot(page, '10-mapping.png', 'column mapping');
 
   // James was assigned a question by Priya, and owns the exported response.
   page = await signIn(browser, 'james.okafor@example.com');
@@ -104,6 +136,28 @@ async function main() {
   await page.getByRole('tab', { name: 'Entries to review' }).click();
   await page.waitForLoadState('networkidle');
   await shoot(page, '8-entries-to-review.png', 'entries to review');
+  await page.getByRole('tab', { name: 'Usage and limits' }).click();
+  await page.getByText('Limits', { exact: true }).scrollIntoViewIfNeeded();
+  await shoot(page, '13-governance-limits.png', 'governance limits');
+
+  // Importing into the knowledge base: the synthetic Q&A file, at the column mapping.
+  await page.locator('header button', { hasText: 'KB' }).first().click();
+  await page.getByRole('button', { name: 'Import Q&A' }).click();
+  await page.locator('input[type=file]').setInputFiles(join(process.cwd(), 'sample-data/security-qa.csv'));
+  await page.getByText('Preview Import').waitFor();
+  await shoot(page, '12-kb-import.png', 'knowledge-base import');
+  await page.keyboard.press('Escape');
+  await page.goto(BASE);
+  await page.waitForLoadState('networkidle');
+  await dismissIntroduction(page);
+
+  // Help, and the introduction opened from it (at the step on how a draft is made).
+  await openHelp(page, 'Open the guide');
+  await shoot(page, '15-help.png', 'help');
+  await openHelp(page, 'Show the introduction');
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: /^Next/ }).click();
+  await shoot(page, '14-introduction.png', 'introduction');
+  await page.keyboard.press('Escape');
 
   await browser.close();
   writeFileSync(join(OUT, 'layout-check.json'), JSON.stringify({ width: NARROW.width, checkedAt: new Date().toISOString(), views: layout }, null, 1) + '\n');

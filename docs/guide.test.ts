@@ -96,6 +96,14 @@ describe('the guide covers the app', () => {
     for (const gate of ['unreviewed', 'overdue for review', 'replaced']) expect(running).toContain(gate);
   });
 
+  it('uses only screenshots the screenshot script produces (S10-4)', () => {
+    const produced = new Set([...read(join(ROOT, 'scripts/screenshots.ts')).matchAll(/shoot\(page, '([\w.-]+\.png)'/g)].map((m) => m[1]));
+    expect(produced.size).toBeGreaterThanOrEqual(8);
+    const used = PAGES.flatMap((p) => [...read(join(GUIDE, p)).matchAll(/\(\.\.\/screenshots\/([\w.-]+\.png)\)/g)].map((m) => m[1]));
+    const intro = [...read(join(ROOT, 'src/lib/onboarding.ts')).matchAll(/image: '([\w.-]+\.png)'/g)].map((m) => m[1]);
+    for (const f of [...used, ...intro]) expect(produced, f).toContain(f);
+  });
+
   it('describes every role', () => {
     const index = read(join(GUIDE, 'README.md'));
     for (const role of ['Member', 'Response owner', 'Admin']) expect(index).toMatch(new RegExp(`^\\| ${role} \\|`, 'm'));
