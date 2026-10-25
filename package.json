@@ -18,6 +18,7 @@
     "types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "eval:retrieval": "tsx eval/run-retrieval.ts",
     "eval:calibrate": "tsx eval/run-calibration.ts",
+    "eval:intervals": "tsx eval/run-intervals.ts",
     "eval:answerability": "tsx eval/run-answerability.ts",
     "eval:gates": "tsx eval/run-gates.ts",
     "eval:drafting": "tsx eval/run-drafting.ts",

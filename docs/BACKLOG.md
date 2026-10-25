@@ -472,6 +472,7 @@ No spike.
 | F-37 | The demo data has no pending "partly" question at the bulk line | From the Sprint 7 close; the hold was checked by database tests only |
 | F-38 | Two embedding calls appeared after a fresh seed (source not established); the demo recording keeps only Claude calls | From the Sprint 7 security review (governance screenshot) |
 | F-39 | The screenshot script checks the app address is local, not the Supabase address in `.env` | From the Sprint 7 security review |
+| F-40 | With no checker configured (similarity only), 5 of 33 near misses reach the 80% bulk line, and bulk approval is allowed in that set-up | From the Sprint 8 calibration run; the fallback already missed the Sprint 2 bars. Consider holding similarity-only questions from bulk approval, as a reranker's are |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
