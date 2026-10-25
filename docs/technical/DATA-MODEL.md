@@ -79,6 +79,7 @@ Columns: `opportunity_id`, `user_id` (unique together), `added_at`.
 
 - **Member:** read all; no insert, update or delete.
 - **Owner and admin:** insert and delete contributors on the response. No role can update a row through the API (there is no update policy).
+- **Trigger:** `opportunity_contributors_archived` (`refuse_if_archived`): nothing changes once the response is archived (Sprint 11).
 
 Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts) (role-matrix rows).
 
@@ -170,6 +171,7 @@ Triggers that enforce behaviour:
 - `question_assignments_question_matches` (`check_assignment_question`): a session is required and `question_id` must be a question in it.
 - `question_assignments_guard_closed` (`guard_closed_assignments`): only `record_export` closes assignments; a closed assignment cannot be changed or deleted. Not applied to the service role.
 - `question_assignments_archived` (`refuse_if_archived`): nothing changes once the response is archived, except inside `delete_response`.
+- `question_assignments_normalise` (`normalise_new_assignment`, Sprint 11): a signed-in user's new assignment starts `pending`, with no notes or completion date, dated now, and with the question's own text, whatever was sent.
 
 Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts) (question assignments), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts) (findings 1 and 2), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts) (Sprint 3 security review findings), [`sprint5.test.ts`](../../supabase/tests/db/sprint5.test.ts) (F-26, closed assignments), [`processing.test.ts`](../../supabase/tests/db/processing.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts).
 
@@ -211,7 +213,7 @@ Created in [`20261022130000_knowledge_base.sql`](../../supabase/migrations/20261
 Review due date: `entry_review_due` gives `last_reviewed_at` (or `reviewed_at`, or `created_at`) plus `ai_settings.review_interval_months`.
 
 - **Member:** read all; insert columns `question`, `answer`, `tags`, `source`, `origin` with `origin` `import` or `manual` and `created_by` the caller (the default); no update or delete. `import_kb_entries` is the bulk route.
-- **Admin:** as a member; update columns `source`, `tags`, `superseded_by`, `updated_at`; delete entries. Question, answer and review dates change only through `review_entry`.
+- **Admin:** as a member; update columns `source`, `tags`, `updated_at`; delete entries. Question, answer, review dates and `superseded_by` change only through `review_entry` and `record_export` (Sprint 11).
 - **Service role:** writes embeddings.
 
 Triggers that enforce behaviour:
@@ -271,7 +273,7 @@ Created and access rules set in [`20261024110000_usage_and_caps.sql`](../../supa
 Columns: `provider`, `model` (together the key), `input_usd_per_mtok`, `output_usd_per_mtok`, `checked_on`, `source_url`.
 
 - **Member:** read; no insert, update or delete.
-- **Admin:** read, insert, update and delete. Price changes are not written to the audit log.
+- **Admin:** read, insert, update and delete. Every change is written to the audit log as `prices.changed`, with the row before and after (`audit_price_change`, Sprint 11).
 
 Tests: [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) (S4-1).
 
@@ -405,7 +407,9 @@ Run only by the triggers named in the table sections; they cannot be called dire
 | Function | Trigger | Defined in |
 |---|---|---|
 | `note_change_after_export` | `rfi_questions_change_after_export`, before a change of `status` or `final_answer`: in an exported session, marks it changed since export, audits `question.changed_after_export` (who, from and to, whether the answer changed) and clears the question's learning record | [`20261030100000`](../../supabase/migrations/20261030100000_changes_after_export.sql) |
-| `handle_new_user` | `on_auth_user_created` on `auth.users`: creates the profile | [`20260430160006`](../../supabase/migrations/20260430160006_user_profiles_and_assignments.sql) |
+| `audit_price_change` | `ai_prices_audit`: audits every change of a price | [`20261030110000`](../../supabase/migrations/20261030110000_sprint11_access.sql) |
+| `normalise_new_assignment` | `question_assignments_normalise`, before insert by a signed-in user | [`20261030110000`](../../supabase/migrations/20261030110000_sprint11_access.sql) |
+| `handle_new_user` | `on_auth_user_created` on `auth.users`: creates the profile (empty `search_path` since Sprint 11) | [`20260430160006`](../../supabase/migrations/20260430160006_user_profiles_and_assignments.sql) |
 | `set_updated_at` | `opportunities_updated_at`, `kb_entries_set_updated_at` | [`20260430172201`](../../supabase/migrations/20260430172201_fix_security_issues.sql) |
 | `refuse_archived_response_edit` | `opportunities_archived` | [`20261023130000`](../../supabase/migrations/20261023130000_workflow_and_learning.sql) |
 | `refuse_if_archived` | `rfi_sessions_archived`, `rfi_questions_archived`, `question_assignments_archived` | [`20261024100000`](../../supabase/migrations/20261024100000_unforgeable_markers.sql) |

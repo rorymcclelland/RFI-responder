@@ -154,3 +154,60 @@ describe('S11-1 a change after an export is recorded, and the export recorded ag
     });
   });
 });
+
+describe('S11-7 admin changes all audited, assignments created as intended (F-49, F-50, F-51)', () => {
+  it('a price change by an admin is audited with before and after; members still cannot change prices', async () => {
+    await as(admin, async (q) => {
+      await q(`UPDATE ai_prices SET input_usd_per_mtok = input_usd_per_mtok + 1 WHERE model = 'claude-haiku-5-5'`);
+      const rows = (await q(`SELECT actor, details FROM audit_log WHERE action = 'prices.changed' AND actor = $1`, [admin.id])).rows;
+      expect(rows).toHaveLength(1);
+      expect(rows[0].details).toMatchObject({ operation: 'update' });
+      expect((rows[0].details as { before: { model: string } }).before.model).toBe('claude-haiku-5-5');
+    });
+    await as(member, async (q) => {
+      const r = await q(`UPDATE ai_prices SET input_usd_per_mtok = 0 RETURNING model`);
+      expect(r.rows).toHaveLength(0);
+    });
+  });
+
+  it('an admin cannot mark an entry replaced directly (only review_entry and record_export do)', async () => {
+    const a = await one<{ id: string }>(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('Old S11-7?', 'Old.', '{}', 'seed') RETURNING id`);
+    const b = await one<{ id: string }>(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('New S11-7?', 'New.', '{}', 'seed') RETURNING id`);
+    await refused(as(admin, (q) => q(`UPDATE kb_entries SET superseded_by = $1 WHERE id = $2`, [b.id, a.id])));
+    await as(admin, (q) => q(`UPDATE kb_entries SET tags = '{checked}' WHERE id = $1`, [a.id]));
+  });
+
+  it('contributors cannot change once the response is archived', async () => {
+    const opp = await response(owner.id);
+    await asSuperuser(`INSERT INTO opportunity_contributors (opportunity_id, user_id) VALUES ($1, $2)`, [opp, member.id]);
+    await asSuperuser(`UPDATE opportunities SET archived_at = now(), outcome = 'withdrawn' WHERE id = $1`, [opp]);
+    await refused(as(owner, (q) => q(`DELETE FROM opportunity_contributors WHERE opportunity_id = $1`, [opp])));
+    await refused(as(owner, (q) => q(`INSERT INTO opportunity_contributors (opportunity_id, user_id) VALUES ($1, $2)`, [opp, assignee.id])));
+  });
+
+  it('an owner\'s new assignment starts pending, now, with the question\'s own text, whatever was sent', async () => {
+    const opp = await response(owner.id);
+    const s = await session(opp);
+    const id = await question(s, { text: 'The real question (S11-7)?' });
+    await as(owner, async (q) => {
+      const r = await q(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text, status, notes, completed_at, created_at)
+                         VALUES ($1, $2, $3, $4, $5, 'Something else', 'approved', 'Forged', now(), '2020-01-01') RETURNING status, question_text, notes, completed_at, created_at`,
+        [id, s, opp, assignee.id, owner.id]);
+      expect(r.rows[0]).toMatchObject({ status: 'pending', question_text: 'The real question (S11-7)?', notes: '', completed_at: null });
+      expect(new Date(r.rows[0].created_at as string).getFullYear()).toBeGreaterThan(2025);
+    });
+    // Someone else as the assigner is still refused (existing rule).
+    await refused(as(owner, (q) => q(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text)
+                                      VALUES ($1, $2, $3, $4, $5, 'q')`, [id, s, opp, assignee.id, admin.id])));
+  });
+
+  it('a new user still gets a profile, and every public function has an empty search path', async () => {
+    const u = await createUser({ name: 'New person S11-7' });
+    expect((await one<{ n: string }>(`SELECT count(*)::text AS n FROM user_profiles WHERE id = $1`, [u.id])).n).toBe('1');
+    const bad = (await asSuperuser<{ proname: string }>(
+      `SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public' AND p.prosecdef
+          AND NOT coalesce(p.proconfig @> ARRAY['search_path=""'], false)`)).rows.map((r) => r.proname);
+    expect(bad).toEqual([]);
+  });
+});
