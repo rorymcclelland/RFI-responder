@@ -28,7 +28,7 @@ Entries are also learned from responses when their export is recorded ([Running 
 
 ## Governance
 
-**Governance** has three tabs.
+**Governance** has four tabs; the fourth, the audit log, is described [below](#the-audit-log).
 
 ![The governance page: usage and limits](../screenshots/7-governance-usage.png)
 
@@ -64,4 +64,4 @@ Archive finished responses rather than deleting them: an archived response is th
 
 ## The audit log
 
-Exports, archives, deletions, reviews, settings and admin changes are recorded in the database's audit log, which only admins can read. There is no screen for it in the app yet; read it in the Supabase dashboard (table `audit_log`).
+Exports (and exports recorded again), changes after an export, archives, deletions, knowledge-base reviews, questions held and released, settings, prices and admin changes are recorded by the database in its audit log, which only admins can read and nobody can change. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.

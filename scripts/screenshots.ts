@@ -143,6 +143,11 @@ async function main() {
   // scrollIntoViewIfNeeded would not move it; found in the Sprint 10 run).
   await page.getByText('Limits', { exact: true }).evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96 }));
   await shoot(page, '13-governance-limits.png', 'governance limits');
+  // Sprint 11 (S11-9): the audit log.
+  await page.getByRole('tab', { name: 'Audit log' }).click();
+  await page.getByText(/Recorded the export|Reviewed KB-|Changed the limits|Nothing recorded yet/).first().waitFor();
+  await page.evaluate(() => window.scrollTo({ top: 0 }));
+  await shoot(page, '16-audit-log.png', 'audit log');
 
   // Importing into the knowledge base: the synthetic Q&A file, at the column mapping.
   await page.locator('header button', { hasText: 'KB' }).first().click();

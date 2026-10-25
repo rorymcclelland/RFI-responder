@@ -1,7 +1,7 @@
 /**
  * Governance (admins only, Sprint 4): AI usage and caps (S4-1), entries waiting for review (S4-3)
- * and entries overdue for review (S4-4). The database enforces all of it; this page shows it and
- * lets an admin change the settings.
+ * and entries overdue for review (S4-4), and since Sprint 11 the audit log (S11-9). The database
+ * enforces all of it; this page shows it and lets an admin change the settings.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, BarChart3, CheckCircle2, Pencil, RefreshCw, Save } from 'lucide-react';
@@ -11,10 +11,11 @@ import {
   type AiPrice, type AiSettings, type SettingsChange, type UsageReport, type UsageStatus,
 } from './lib/usage';
 import { describeOrigin, loadEntriesToReview, loadOverdueEntries, reviewEntry, type EntryForReview } from './lib/entryReview';
+import { AUDIT_GROUPS, AUDIT_LIMIT, describeAudit, loadAuditLog, type AuditRow } from './lib/auditLog';
 
-type Tab = 'usage' | 'review' | 'overdue';
+type Tab = 'usage' | 'review' | 'overdue' | 'audit';
 
-export default function GovernanceAdmin() {
+export default function GovernanceAdmin({ names = new Map() }: { names?: Map<string, string> }) {
   const [tab, setTab] = useState<Tab>('usage');
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -23,7 +24,7 @@ export default function GovernanceAdmin() {
         <p className="text-sm text-ink-500 mt-1">What the AI costs and what limits it, and the state of the knowledge base. Admins only.</p>
       </div>
       <div className="flex gap-2 border-b border-ink-100" role="tablist">
-        {([['usage', 'Usage and limits'], ['review', 'Entries to review'], ['overdue', 'Overdue for review']] as [Tab, string][]).map(([key, label]) => (
+        {([['usage', 'Usage and limits'], ['review', 'Entries to review'], ['overdue', 'Overdue for review'], ['audit', 'Audit log']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             role="tab"
@@ -38,6 +39,7 @@ export default function GovernanceAdmin() {
       {tab === 'usage' && <UsageTab />}
       {tab === 'review' && <ReviewTab mode="unreviewed" />}
       {tab === 'overdue' && <ReviewTab mode="overdue" />}
+      {tab === 'audit' && <AuditTab names={names} />}
     </div>
   );
 }
@@ -299,3 +301,50 @@ function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e
     </div>
   );
 }
+
+/** Sprint 11 (S11-9, F-53): the audit log, newest first, in plain words. Read-only. */
+function AuditTab({ names }: { names: Map<string, string> }) {
+  const [group, setGroup] = useState<string>('');
+  const [rows, setRows] = useState<AuditRow[] | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let live = true;
+    setError('');
+    loadAuditLog(supabase, group || null)
+      .then((r) => { if (live) setRows(r); })
+      .catch((err: Error) => { if (live) { setRows([]); setError(err.message); } });
+    return () => { live = false; };
+  }, [group]);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="text-sm font-semibold text-ink-700" htmlFor="audit-group">Show</label>
+        <select id="audit-group" value={group} onChange={(e) => setGroup(e.target.value)} className="input w-auto text-sm py-2">
+          <option value="">Everything</option>
+          {Object.entries(AUDIT_GROUPS).map(([key, g]) => <option key={key} value={key}>{g.label}</option>)}
+        </select>
+        <p className="text-xs text-ink-500">The most recent {AUDIT_LIMIT} entries, newest first. Written by the database; nobody can change them.</p>
+      </div>
+      {error && <p role="alert" className="text-sm text-coral-700">{error}</p>}
+      {rows === null ? (
+        <p className="text-sm text-ink-400">Loading…</p>
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-ink-400">Nothing recorded yet.</p>
+      ) : (
+        <ul className="bg-white rounded-2xl border border-ink-100 shadow-card divide-y divide-ink-100">
+          {rows.map((r) => (
+            <li key={r.id} className="px-5 py-3">
+              <p className="text-sm text-ink-800">{describeAudit(r, names)}</p>
+              <p className="text-xs text-ink-500 mt-0.5">
+                {r.actorName ?? 'The system'} · {new Date(r.at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · <code className="text-[0.85em]">{r.action}</code>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+

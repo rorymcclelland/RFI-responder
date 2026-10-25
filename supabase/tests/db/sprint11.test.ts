@@ -289,3 +289,16 @@ describe('S11-6 unpriced usage is named, and the rerankers are priced (F-48)', (
     for (const m of ['anthropic claude-haiku-5-5', 'voyage voyage-4', 'voyage rerank-2.5', 'voyage rerank-3']) expect(rows, m).toContain(m);
   });
 });
+
+describe('S11-9 the audit-log screen reads what admins may read (F-53)', () => {
+  it('1. an admin reads the log with who did each thing; a member reads nothing', async () => {
+    await asSuperuser(`INSERT INTO audit_log (actor, action, details) VALUES ($1, 'response.archived', '{"outcome":"won"}')`, [owner.id]);
+    await as(admin, async (q) => {
+      const r = await q(`SELECT a.action, p.display_name FROM audit_log a LEFT JOIN user_profiles p ON p.id = a.actor ORDER BY a.at DESC LIMIT 200`);
+      expect(r.rows.length).toBeGreaterThan(0);
+    });
+    await as(member, async (q) => {
+      expect((await q(`SELECT * FROM audit_log`)).rows).toHaveLength(0);
+    });
+  });
+});

@@ -67,7 +67,7 @@ Created in [`20260430154332_add_opportunities_table.sql`](../../supabase/migrati
 - **Admin:** update any response, same columns. No direct delete for anyone through the API: `delete_response` is the only route.
 - **Triggers:** `opportunities_archived` refuses any update to an archived response for every role, the service role included, except the database owner (`postgres` or `supabase_admin`). `opportunities_updated_at` stamps `updated_at`.
 
-Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts) (opportunities), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts) (S3-3 archive), [`processing.test.ts`](../../supabase/tests/db/processing.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts).
+Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts) (opportunities), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts) (S3-3 archive), [`processing.test.ts`](../../supabase/tests/db/processing.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts), [`sprint11.test.ts`](../../supabase/tests/db/sprint11.test.ts).
 
 ### `public.opportunity_contributors`
 
@@ -243,11 +243,11 @@ Privileged and consequential changes.
 
 Created and access rules set in [`20261022120000_access_control.sql`](../../supabase/migrations/20261022120000_access_control.sql).
 
-Columns: `at`, `actor`, `action`, `target_id`, `details`. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`.
+Columns: `at`, `actor`, `action`, `target_id`, `details`. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`, and since Sprint 11 `question.changed_after_export` and `prices.changed`. Admins read it on the governance page's **Audit log** tab ([`src/lib/auditLog.ts`](../../src/lib/auditLog.ts), whose test fails if an action has no wording).
 
 - **Member:** no access.
 - **Admin:** read; no insert, update or delete.
-- **Written only** by `SECURITY DEFINER` functions and triggers (`set_user_admin`, `archive_response`, `delete_response`, `record_export`, `review_entry`, `bulk_accept`, `private.release_source_gates`, `stamp_settings_change`).
+- **Written only** by `SECURITY DEFINER` functions and triggers (`set_user_admin`, `archive_response`, `delete_response`, `record_export`, `review_entry`, `bulk_accept`, `private.release_source_gates`, `stamp_settings_change`, `note_change_after_export`, `audit_price_change`).
 
 Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts).
 
