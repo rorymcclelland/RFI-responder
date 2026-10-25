@@ -439,21 +439,23 @@ export default function App() {
 
           {/* Breadcrumb when in workspace */}
           {activeOpportunity && (
-            <div className="hidden lg:flex items-center gap-2 ml-2 text-sm min-w-0">
+            // BUG-33: the breadcrumb takes the space left and truncates the name (full name on hover); it
+            // never overlaps Help. The back link is an icon, since Opportunities is already in the bar.
+            <div className="hidden lg:flex flex-1 items-center gap-1.5 ml-2 text-sm min-w-0">
               <button
                 onClick={() => { setActiveOpportunity(null); setView('opportunities'); }}
-                className="flex items-center gap-1.5 text-ink-400 hover:text-ink-700 transition-colors font-medium"
+                title="Back to Opportunities"
+                aria-label="Back to Opportunities"
+                className="flex-shrink-0 flex items-center text-ink-400 hover:text-ink-700 transition-colors"
               >
-                <ChevronLeft size={14} /> Opportunities
+                <ChevronLeft size={16} />
               </button>
-              <span className="text-ink-200">/</span>
-              {/* BUG-33: never squeezed to a letter beside Help; the full name on hover. */}
-              <span className="font-semibold text-ink-800 truncate min-w-[7rem] max-w-[180px]" title={activeOpportunity.name}>{activeOpportunity.name}</span>
+              <span className="font-semibold text-ink-800 truncate min-w-0" title={activeOpportunity.name}>{activeOpportunity.name}</span>
             </div>
           )}
 
           {/* Right: Help, KB and user */}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex-shrink-0 flex items-center gap-2">
             {/* Help (S10-2): the guide, and the introduction again (S10-6). */}
             <div className="relative hidden sm:block">
               <button

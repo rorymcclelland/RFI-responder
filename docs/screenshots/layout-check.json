@@ -1,6 +1,6 @@
 {
  "width": 768,
- "checkedAt": "2026-10-25T14:42:49.285Z",
+ "checkedAt": "2026-10-25T17:56:55.193Z",
  "views": [
   {
    "view": "overview",
@@ -70,6 +70,12 @@
   },
   {
    "view": "governance limits",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "audit log",
    "scrollWidth": 768,
    "clientWidth": 768,
    "fits": true

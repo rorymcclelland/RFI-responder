@@ -65,3 +65,5 @@ Archive finished responses rather than deleting them: an archived response is th
 ## The audit log
 
 Exports (and exports recorded again), changes after an export, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices and admin changes are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.
+
+![The audit log on the governance page](../screenshots/16-audit-log.png)
