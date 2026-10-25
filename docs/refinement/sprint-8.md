@@ -37,7 +37,7 @@ Refined 25 October 2026, for Rory's sign-off before building. Backlog: `docs/BAC
 
 **The job.** The calibrated confidence, and the safety figure that rests on it (near misses at the 80% bulk line), no longer swing when one question is added or removed.
 
-**Before and after.** Today: one fit on half the set, checked once on the other half. After: five-fold cross-validation over all 363 questions estimates calibration error and near misses at the bulk line, with the spread across folds; a leave-one-out check reports the largest change any single question makes; the app's table is fitted as Q2 decides.
+**Before and after.** Today: one fit on half the set, checked once on the other half. After: five-fold cross-validation over all 363 questions estimates calibration error and near misses at the bulk line, with the spread across folds; a leave-one-out check reports the largest change any single question makes; the app's table is then fitted on all 363 questions (Q2).
 
 **What changes.** `eval/calibration-fit.ts` (folds stratified by question kind, so each fold holds near misses), `eval/run-calibration.ts` (a cross-validation section and the leave-one-out check in the report), `supabase/functions/_shared/calibration-tables.ts` regenerated, the model card and risk register R-12 updated with the new figures.
 
@@ -45,7 +45,7 @@ Refined 25 October 2026, for Rory's sign-off before building. Backlog: `docs/BAC
 1. Every question is checked exactly once across the five folds, and each fold holds near misses from both splits.
 2. The folds repeat with the same seed.
 3. A planted fit where one question flips the near-miss result is caught by the leave-one-out check.
-4. The bars hold, or the miss is reported for Rory to decide: calibration error at most 0.1, and near misses at or above 80% at most 1 (Q3 sets where this is measured).
+4. The bars hold, or the miss is reported for Rory to decide: calibration error at most 0.1; near misses at or above 80% at most 1 in every fold; and no single question, removed, moves that total by more than 1 (Q3).
 5. Existing calibration tests still pass on the regenerated table.
 
 **Out of scope.** A larger evaluation set (F-14, F-15 stay in the backlog: they need outside reviewers).
@@ -103,3 +103,15 @@ Order: S8-5 (quick, standalone), S8-1, S8-2, S8-3 (needs S8-2), then S8-4 last (
 | Q3 | Bar for stability | (a) Near misses at or above 80%: at most 1 in every fold, and no single question moves the total by more than 1. (b) Report only, no bar | (a): the safety figure is the one that matters, and it was the one that swung |
 | Q4 | Showing the range in the app | (a) In the confidence tooltip only. (b) On the card beside the figure. (c) Not in the app, reports only | (a): the card stays readable, and the range is one hover away |
 | Q5 | A larger evaluation set | (a) Not this sprint; F-14 and F-15 stay (they need outside reviewers). (b) Generate more items with Claude now | (a): more unreviewed items written by Claude would narrow the intervals without making the set more representative |
+
+## Answers (Rory, 25 October 2026)
+
+| # | Answer |
+|---|---|
+| Q1 | Wilson intervals for proportions; bootstrap for calibration error and AUROC; claim-level figures resampled by draft |
+| Q2 | Estimate by cross-validation, then fit the app's table on all 363 questions |
+| Q3 | A stability bar on near misses: at most 1 at or above 80% in every fold, and no single question moves the total by more than 1 |
+| Q4 | The range shows in the confidence tooltip only |
+| Q5 | No larger evaluation set this sprint; F-14 and F-15 stay in the backlog |
+
+All five stories are Ready.

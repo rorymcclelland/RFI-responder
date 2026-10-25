@@ -408,17 +408,17 @@ An independent security review found no high issues and seven smaller ones (two 
 
 ## Later sprints (one line each; refined at the previous sprint's close; re-ranked at the Sprint 6 review)
 
-## Sprint 8: honest figures (confirmed 25 October 2026; refinement awaiting Rory's answers)
+## Sprint 8: honest figures (confirmed 25 October 2026; refined and answered 25 October)
 
 Refinement: `docs/refinement/sprint-8.md`. No API spend except Rory's demo recording (a few pence).
 
 | ID | Story | Why now | Status |
 |---|---|---|---|
-| S8-1 | Every published figure carries a 95% interval | The repository is public; "0 of 33" should not read as "never" | Refined, awaiting answers |
-| S8-2 | Calibration fitted and checked by cross-validation (F-16) | The bulk-line safety figure swung when one item was removed | Refined, awaiting answers |
-| S8-3 | The confidence tooltip gives the range | The card's figure says how precise it is | Refined, awaiting answers |
-| S8-4 | Demo data shows the "partly" hold, and its usage is complete (F-37, F-38) | A fresh install should show every hold; F-38's cause is found (first sign-in indexes the knowledge base) | Refined, awaiting answers |
-| S8-5 | Excel title property (F-36); screenshot script checks the Supabase address (F-39) | Small, in code the sprint touches | Refined, awaiting answers |
+| S8-1 | Every published figure carries a 95% interval | The repository is public; "0 of 33" should not read as "never" | Ready, Sprint 8 |
+| S8-2 | Calibration fitted and checked by cross-validation (F-16) | The bulk-line safety figure swung when one item was removed | Ready, Sprint 8 |
+| S8-3 | The confidence tooltip gives the range | The card's figure says how precise it is | Ready, Sprint 8 |
+| S8-4 | Demo data shows the "partly" hold, and its usage is complete (F-37, F-38) | A fresh install should show every hold; F-38's cause is found (first sign-in indexes the knowledge base) | Ready, Sprint 8 |
+| S8-5 | Excel title property (F-36); screenshot script checks the Supabase address (F-39) | Small, in code the sprint touches | Ready, Sprint 8 |
 
 No spike.
 
