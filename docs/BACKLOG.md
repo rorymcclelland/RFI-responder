@@ -440,10 +440,17 @@ An independent security review found no high issues and ten smaller ones (three 
 | F-40 Similarity-only fallback lets near misses reach the bulk line and allows bulk approval | Backlog, from Sprint 8; proposed for Sprint 9 |
 | F-41 A "yes" with very low similarity is calibrated at about 85% | Backlog, from Sprint 8 review; proposed for Sprint 9 |
 
-**Sprint 9, proposed at the Sprint 8 review (for Rory to confirm): the last bulk-approval gaps.** Small, and both make the bulk rule hold in every configuration rather than only the default one.
-- F-40 Hold questions calibrated on similarity alone from bulk approval, as a reranker's already are. One rule change in the database and the screen, with tests; the fallback then fails safe.
-- F-41 A similarity floor for bulk approval (for example, below the lowest similarity at which a "yes" was right in the evaluation set), so a "yes" on a weak match is decided by a person.
-- F-35 (optional, if the two above are quick) look again at the duplicate catch rate now that calibration is cross-validated.
+## Sprint 9: the last bulk-approval gaps (confirmed 25 October 2026; refinement awaiting Rory's answers)
+
+Refinement: `docs/refinement/sprint-9.md`. Refinement found that F-41's premise does not hold on the data and that F-35 cannot be improved by moving the threshold, so both are decisions; F-19 is proposed to fill the sprint.
+
+| ID | Story | Why now | Status |
+|---|---|---|---|
+| S9-1 | Questions calibrated on similarity alone are never bulk-approved (F-40) | No threshold gets similarity-only confidence to zero near misses | Refined, awaiting answers |
+| S9-2 | F-41 and F-35 decided on the evidence | The data answers both; the backlog and register should say so | Refined, awaiting answers |
+| S9-3 | The faithfulness checker tested on unfaithful drafts (F-19) | The published figure least tested against failure | Refined, awaiting answers (Q4) |
+
+No spike.
 
 **Not yet in a sprint, ranked at the Sprint 8 review.** 1. C-1 multilingual knowledge base. 2. F-19 faithfulness judge on planted unfaithful drafts. 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 4. F-20 rerankers (needs a Voyage payment method). 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
 
