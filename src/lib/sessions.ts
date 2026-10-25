@@ -11,6 +11,8 @@ export interface BulkResult {
   heldPartly?: number;
   /** Security review, Sprint 7: a checker ran (a reranker) but gave a score, not a verdict. */
   heldNoVerdict?: number;
+  /** Sprint 9 (F-40): no checker configured, so confidence comes from similarity alone. */
+  heldNoChecker?: number;
   belowThreshold: number;
 }
 
@@ -32,6 +34,7 @@ export function describeBulk(r: BulkResult, threshold: number): string {
   if (r.heldUncalibrated) parts.push(`${r.heldUncalibrated} without calibrated confidence`);
   if (r.heldNoDraft) parts.push(`${r.heldNoDraft} with no draft to approve`);
   if (r.heldPartly) parts.push(`${r.heldPartly} held because the checker said the entries answer them only in part (accept them individually)`);
+  if (r.heldNoChecker) parts.push(`${r.heldNoChecker} held because no checker is configured (accept ${r.heldNoChecker === 1 ? 'it' : 'them'} individually)`);
   if (r.heldNoVerdict) parts.push(`${r.heldNoVerdict} held because the checker gave a score but no verdict (accept ${r.heldNoVerdict === 1 ? 'it' : 'them'} individually)`);
   return `${parts.join('; ')}.`;
 }

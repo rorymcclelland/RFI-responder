@@ -70,13 +70,16 @@ export function needsWrittenAnswer(q: { draftKind: string | null; generatedAnswe
  * verdict does not hold it; gates and missing confidence have their own labels on the card.
  */
 export function bulkHoldReason(q: {
-  status: string; gate: string | null; draftKind: string | null;
+  status: string; gate: string | null; draftKind: string | null; confidence: number | null;
   checker: { verdict: string | null }; provenance: { judgeModel: string | null };
 }): string | null {
   if (q.status !== 'pending' || q.gate !== null || (q.draftKind !== 'generated' && q.draftKind !== 'assembled')) return null;
+  // Uncalibrated questions have their own label on the card.
+  if (q.confidence === null) return null;
   const why = q.checker.verdict === 'partly' ? 'the checker said the entries answer it only in part'
     : q.checker.verdict === 'no' ? 'the checker said the entries do not answer it'
     : q.checker.verdict === null && q.provenance.judgeModel !== null ? 'the checker gave a score but no verdict'
+    : q.checker.verdict === null ? 'no checker is configured, so confidence comes from similarity alone'
     : null;
   return why && `Not included in bulk approval: ${why}. Accept it on its own if the draft is right.`;
 }

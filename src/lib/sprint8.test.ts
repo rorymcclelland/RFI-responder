@@ -62,3 +62,26 @@ describe('S8-3: the confidence tooltip gives the range', () => {
     expect(confidenceRange(0.99, 'voyage-4', 'claude-haiku-5-5', set, CALIBRATION_TABLES)).toMatch(/^\d+ of \d+ evaluation questions scored like this had the right entry \(95% interval \d+ to \d+%\)\.$/);
   });
 });
+
+describe('Sprint 9, S9-1 tests 4 and 5 (F-40): the screen and the summary', () => {
+  it('4. a similarity-only question is not bulk-eligible', async () => {
+    const { bulkEligible } = await import('../workspace/questionRows');
+    const simOnly = { ...q, status: 'pending' as const, checker: { verdict: null, bestRef: null, reason: null }, provenance: { ...q.provenance, judgeModel: null } };
+    expect(bulkEligible(simOnly)).toBe(false);
+    expect(bulkEligible({ ...q, status: 'pending' })).toBe(true);
+  });
+  it('5. the bulk summary names the count', async () => {
+    const { describeBulk } = await import('./sessions');
+    expect(describeBulk({ accepted: 1, heldGated: 0, heldUncalibrated: 0, heldNoDraft: 0, belowThreshold: 0, heldNoChecker: 2 }, 0.8))
+      .toBe('1 accepted; 2 held because no checker is configured (accept them individually).');
+  });
+});
+
+describe('Sprint 9, S9-1: the hold reason is only for calibrated questions', () => {
+  it('says nothing about the checker for a question with no calibrated confidence', async () => {
+    const { bulkHoldReason } = await import('./format');
+    const base = { ...q, status: 'pending' as const, checker: { verdict: null, bestRef: null, reason: null }, provenance: { ...q.provenance, judgeModel: null } };
+    expect(bulkHoldReason({ ...base, confidence: null })).toBeNull();
+    expect(bulkHoldReason({ ...base, confidence: 0.9 })).toMatch(/no checker is configured/);
+  });
+});

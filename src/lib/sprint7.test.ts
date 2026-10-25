@@ -116,7 +116,9 @@ describe('Security review, Sprint 7 (finding 7): the card says why a drafted que
     expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null } })))
       .toBe('Not included in bulk approval: the checker gave a score but no verdict. Accept it on its own if the draft is right.');
     expect(bulkHoldReason(pending({}))).toBeNull();
-    expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null }, provenance: { ...base.provenance, judgeModel: null } }))).toBeNull();
+    // Sprint 9 (F-40): similarity alone now has its own reason.
+    expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null }, provenance: { ...base.provenance, judgeModel: null } })))
+      .toBe('Not included in bulk approval: no checker is configured, so confidence comes from similarity alone. Accept it on its own if the draft is right.');
     expect(bulkHoldReason(pending({ gate: 'pricing', checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
     expect(bulkHoldReason(q({ checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
   });

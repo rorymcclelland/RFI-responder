@@ -106,6 +106,6 @@ export async function loadQuestions(client: SupabaseClient, sessionId: string): 
 export const bulkEligible = (q: RFIQuestion) =>
   q.status === 'pending' && q.processed && q.gate === null && q.confidence !== null &&
   (q.draftKind === 'generated' || q.draftKind === 'assembled') &&
-  // Sprint 7 (F-33): the checker must have said "yes". Only similarity-only calibration (no checker
-  // configured) has no verdict and keeps the earlier rule; a reranker scores but gives no verdict, so it is held.
-  (q.checker.verdict === 'yes' || (q.checker.verdict === null && q.provenance.judgeModel === null));
+  // The checker must have said "yes" (Sprint 7, F-33), in every configuration since Sprint 9 (F-40):
+  // a reranker's score and similarity alone are held.
+  q.checker.verdict === 'yes';

@@ -33,8 +33,10 @@ const one = async <T>(sql: string, params: unknown[] = []) => (await asSuperuser
 async function question(s: string, opts: { confidence?: number | null; gate?: string | null } = {}): Promise<string> {
   const conf = opts.confidence === undefined ? 0.9 : opts.confidence;
   return (await one<{ id: string }>(
-    `INSERT INTO rfi_questions (session_id, position, question, confidence, gate, processed_at, draft_kind)
-     VALUES ($1, 0, 'Q', $2, $3, now(), 'generated') RETURNING id`, [s, conf, opts.gate ?? null])).id;
+    // With the checker's "yes", as the default set-up records it: since Sprint 9 (F-40) a question
+    // with no verdict (similarity alone) is never bulk-approved, so these tests would test nothing else.
+    `INSERT INTO rfi_questions (session_id, position, question, confidence, gate, processed_at, draft_kind, verdict, judge_model)
+     VALUES ($1, 0, 'Q', $2, $3, now(), 'generated', 'yes', 'claude-haiku-5-5') RETURNING id`, [s, conf, opts.gate ?? null])).id;
 }
 
 beforeAll(async () => {

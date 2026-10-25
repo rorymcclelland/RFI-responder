@@ -16,7 +16,7 @@ const statuses = async (q: (sql: string, p?: unknown[]) => Promise<{ rows: { id:
   new Map((await q(`SELECT id, status FROM rfi_questions WHERE session_id = $1`, [s])).rows.map((r) => [r.id, r.status]));
 
 describe('S7-1 bulk approval needs a "yes" verdict (F-33)', () => {
-  it('1, 2, 3 and 4: yes accepted; partly and no held and counted; no checker (similarity only) accepted as before', async () => {
+  it('1, 2 and 3: yes accepted; partly and no held and counted (similarity only: since Sprint 9 held too, see sprint9.test.ts)', async () => {
     const s = await session(await response(owner.id));
     const yes = await question(s, { verdict: 'yes', confidence: 0.85, text: 'Yes (S7-1)?' });
     const partly = await question(s, { verdict: 'partly', confidence: 0.875, text: 'Partly (S7-1)?' });
@@ -24,9 +24,9 @@ describe('S7-1 bulk approval needs a "yes" verdict (F-33)', () => {
     const simOnly = await question(s, { verdict: null, judgeModel: null, confidence: 0.9, text: 'Similarity only (S7-1)?' });
     await as(owner, async (q) => {
       const r = await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0.8)`, [s]);
-      expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 2, heldPartly: 2 });
+      expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 1, heldPartly: 2 });
       const st = await statuses(q, s);
-      expect([st.get(yes), st.get(partly), st.get(no), st.get(simOnly)]).toEqual(['accepted', 'pending', 'pending', 'accepted']);
+      expect([st.get(yes), st.get(partly), st.get(no), st.get(simOnly)]).toEqual(['accepted', 'pending', 'pending', 'pending']);
     });
   });
 
