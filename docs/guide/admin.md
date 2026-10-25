@@ -22,7 +22,7 @@ Drafts are written only from the knowledge base, so its quality is the quality o
 
 ![Importing a spreadsheet of questions and answers into the knowledge base](../screenshots/12-kb-import.png)
 
-New entries are indexed for meaning-based search straight away. If indexing fails (a provider problem, or your daily indexing limit), the app says so, and questions are not matched to those entries until they are indexed; the app tries again at the next sign-in or import.
+New entries are indexed for meaning-based search straight away. If indexing fails (a provider problem, or your daily indexing limit), the app says so. Entries without an index are indexed before questions are next matched, as far as the person's limit allows; a question matched while some are still missing says so and is not approved in bulk.
 
 Entries are also learned from responses when their export is recorded ([Running a response](running-a-response.md#what-the-knowledge-base-learns)).
 

@@ -53,7 +53,7 @@ The checker was unavailable while they were processed, or matching fell back to 
 
 ### A message says meaning-based search is unavailable
 
-Some knowledge-base entries could not be indexed, so questions are not matched to them until they are. The app tries again at the next sign-in or import. If it keeps happening, tell whoever runs the installation: the AI provider's key or limit, or your daily indexing limit, is the usual cause.
+Some knowledge-base entries could not be indexed. They are indexed before questions are next matched, as far as the daily limit allows; a question matched while some are still missing says so (**Some entries not searched**) and is not approved in bulk. If it keeps happening, tell whoever runs the installation: the AI provider's key or limit, or your daily indexing limit, is the usual cause.
 
 ## Review and approval
 

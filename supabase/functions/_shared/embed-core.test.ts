@@ -1,6 +1,6 @@
 // Sprint 1, stories S1-2 (test 5) and S1-3 (tests 2 to 4): request checks and filling missing vectors.
 import { describe, expect, it, vi } from 'vitest';
-import { validateEmbedRequest, embedPendingEntries, MAX_TEXTS, MAX_CHARS } from './embed-core';
+import { validateEmbedRequest, embedPendingEntries, indexBeforeMatching, MAX_TEXTS, MAX_CHARS } from './embed-core';
 import { EMBEDDING_DIMENSION, EmbeddingError, type EmbeddingProvider } from './embeddings.ts';
 
 describe('validateEmbedRequest (S1-2 test 5)', () => {
@@ -112,5 +112,52 @@ describe('embedPendingEntries (S1-3)', () => {
     const db = fakeDb(Array.from({ length: 50 }, (_, i) => ({ id: String(i), question: 'Q', answer: 'A', embedding_model: null })));
     const r = await embedPendingEntries({ db, provider: fakeProvider(), batchSize: 2, maxBatches: 3 });
     expect(r.embedded).toBe(6);
+  });
+});
+
+describe('indexBeforeMatching (Sprint 11, S11-2)', () => {
+  const store = (pending: number, opts: { failSave?: boolean; failFetch?: boolean } = {}) => {
+    let left = pending;
+    const saved: string[] = [];
+    const db = {
+      async fetchPending(_model: string, limit: number) {
+        if (opts.failFetch) throw new Error('db down');
+        return Array.from({ length: Math.min(left, limit) }, (_, i) => ({ id: `e${pending - left + i}`, question: 'Q', answer: 'A' }));
+      },
+      async save(updates: { id: string }[]) {
+        if (opts.failSave) throw new Error('save failed');
+        saved.push(...updates.map((u) => u.id));
+        left -= updates.length;
+      },
+    };
+    return { db, saved };
+  };
+
+  it('1. does nothing when every entry is indexed', async () => {
+    const p = fakeProvider('voyage-4');
+    const { db } = store(0);
+    expect(await indexBeforeMatching({ db, provider: p })).toEqual({ indexed: 0, remaining: 0, failed: false });
+    expect(p.calls).toEqual([]);
+  });
+
+  it('2. indexes the missing entries first, so they can be matched', async () => {
+    const { db, saved } = store(3);
+    expect(await indexBeforeMatching({ db, provider: fakeProvider('voyage-4') })).toEqual({ indexed: 3, remaining: 0, failed: false });
+    expect(saved).toEqual(['e0', 'e1', 'e2']);
+  });
+
+  it('3. when the cap refuses, or indexing fails, reports what remains rather than failing', async () => {
+    const refused = store(5);
+    expect(await indexBeforeMatching({ db: refused.db, provider: fakeProvider('voyage-4'), reserve: async () => 0 })).toEqual({ indexed: 0, remaining: 5, failed: false });
+    const broken = store(4, { failSave: true });
+    expect(await indexBeforeMatching({ db: broken.db, provider: fakeProvider('voyage-4') })).toMatchObject({ indexed: 0, remaining: 4, failed: true });
+    const unreadable = store(2, { failFetch: true });
+    expect(await indexBeforeMatching({ db: unreadable.db, provider: fakeProvider('voyage-4') })).toMatchObject({ remaining: 1, failed: true });
+  });
+
+  it('indexes at most two batches before matching (latency), leaving the rest counted', async () => {
+    const { db } = store(200);
+    const r = await indexBeforeMatching({ db, provider: fakeProvider('voyage-4') });
+    expect(r).toEqual({ indexed: 128, remaining: 72, failed: false });
   });
 });

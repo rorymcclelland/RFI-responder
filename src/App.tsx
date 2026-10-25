@@ -80,7 +80,7 @@ function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void;
     try {
       const r = await addEntry(supabase, { question, answer, tags: parseTags(tags), source });
       const indexed = await indexNewEntries();
-      onDone(`${r.ref} added.${r.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}${indexed.ok ? '' : ` It could not be indexed yet (${indexed.reason}), so questions are not matched to it until it is (it is tried again at the next sign-in or import).`}`);
+      onDone(`${r.ref} added.${r.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}${indexed.ok ? '' : ` It could not be indexed yet (${indexed.reason}), so it is indexed before the next questions are matched, if your daily limit allows.`}`);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -251,7 +251,7 @@ export default function App() {
     setAuthLoading(false);
     // Fill any gaps in the meaning-based index (existing entries, or after a model change). Quiet unless it fails.
     void indexNewEntries().then((r) => {
-      if (!r.ok) showToast(`Some knowledge-base entries could not be indexed (${r.reason}); questions are not matched to them until they are.`, 'error');
+      if (!r.ok) showToast(`Some knowledge-base entries could not be indexed (${r.reason}); they are indexed before questions are next matched, if the limit allows, and any question matched without them says so.`, 'error');
     });
   }
 
@@ -290,7 +290,7 @@ export default function App() {
       if (indexed.ok) {
         showToast(describeImport(result));
       } else {
-        showToast(`${describeImport(result)} Not yet indexed for meaning-based search (${indexed.reason}), so questions are not matched to them until they are; they are tried again at the next sign-in or import.`, 'error');
+        showToast(`${describeImport(result)} Not yet indexed for meaning-based search (${indexed.reason}), so they are indexed before questions are next matched, if the limit allows, and any question matched without them says so.`, 'error');
       }
       return true;
     } catch (err) {

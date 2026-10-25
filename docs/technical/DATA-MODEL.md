@@ -120,7 +120,7 @@ Created in [`20260430145610_create_rfi_workflow_tables.sql`](../../supabase/migr
 | `generated_answer`, `draft_kind` | Service role | The draft, and how it was made: `generated`, `assembled`, `insufficient_evidence` (no draft, a placeholder) or `person_required` (pricing, a placeholder) |
 | `confidence`, `retrieval_score`, `answerability`, `calibration_set` | Service role | Calibrated confidence (0 to 1) and the raw scores behind it |
 | `verdict`, `judge_reason`, `judge_best_ref` | Service role | The checker's verdict (`yes`, `partly`, `no`), its reason (at most 300 characters) and the entry it judged best |
-| `gate`, `gate_reason` | Service role; source gates also by `bulk_accept` and the entry-review trigger | Why the question is never bulk-approved: `pricing`, `legal`, `translation`, `unchecked`, `unreviewed_source`, `stale_source` |
+| `gate`, `gate_reason` | Service role; source gates also by `bulk_accept` and the entry-review trigger | Why the question is never bulk-approved: `pricing`, `legal`, `translation`, `unchecked`, `unreviewed_source`, `stale_source`, `unindexed_entries` (Sprint 11) |
 | `language` | Service role | `en` or `ja` |
 | `sources_json`, `cited_refs` | Service role | The matched entries with scores, and the entry refs the draft cites |
 | `embedding_model`, `judge_model`, `draft_model`, `prompt_version` | Service role | Provenance of the draft |
@@ -381,7 +381,7 @@ The service role may also execute each of these, but those that check `is_admin(
 
 **What `record_export` learns**, for each accepted question not learned before (the outcome is stored in `learn_outcome`):
 
-- Not learned: a pricing gate (`not_learned_pricing`); never processed by the server, or a gate other than legal, `unreviewed_source` or `stale_source` (`not_learned_unchecked`); not English (`not_learned_japanese`); an empty answer (`not_learned_empty`).
+- Not learned: a pricing gate (`not_learned_pricing`); never processed by the server, or a gate other than legal, `unreviewed_source`, `stale_source` or `unindexed_entries` (`not_learned_unchecked`); not English (`not_learned_japanese`); an empty answer (`not_learned_empty`).
 - An unedited `generated` or `assembled` draft confirms the entries it cites (`last_reviewed_at`, audited `kb.confirmed`). If the approver was not an admin and a cited entry is unreviewed, overdue or replaced, nothing is confirmed (`not_confirmed_source`).
 - Anything else becomes a new entry with origin `response` and its provenance in `origin_ref`. If it matches a current entry (same question, or a near duplicate: the top match at or above the model's learning threshold, verdict `yes` or `partly`, and the checker's best entry is that same entry), an admin's approval replaces that entry at once (`superseded`) and anyone else's becomes a proposal for an admin to review (`proposed`). With no match it is `added`.
 - The approver is whoever made the latest approval of that question, or the caller if there is none. A learned entry starts reviewed only when the approver is an admin.

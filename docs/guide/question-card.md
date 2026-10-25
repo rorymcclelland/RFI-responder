@@ -45,6 +45,7 @@ These badges mean a question is never approved in bulk. Hover over the badge, or
 | Translated draft | The question is in Japanese, and the draft is translated from English entries. |
 | Cites an unreviewed entry | The draft relies on a knowledge-base entry an admin has not reviewed yet. |
 | Cites an entry overdue for review | The draft relies on an entry overdue for its periodic review, or one that has since been replaced. |
+| Some entries not searched | Some knowledge-base entries were not yet indexed when the question was matched, so the best match may have been missed (the processing could not index them first, for example because of your daily limit). |
 
 Pricing and legal questions are found two ways, by rules (words such as "price" or "indemnity") and by a language model, and a question is held if either finds it.
 

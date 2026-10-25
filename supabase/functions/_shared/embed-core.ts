@@ -78,3 +78,34 @@ export async function embedPendingEntries(opts: {
   }
   return { embedded, model: provider.model, limited };
 }
+
+/**
+ * Sprint 11 (S11-2, F-43): before matching, index entries that have no vector from the model, up to
+ * `maxBatches` batches under the caller's indexing cap, then count what is still missing (at most
+ * 500 are counted). Indexing that is refused or fails is not an error here: the questions are still
+ * processed, and the remaining count tells them they were matched against an incomplete index.
+ */
+export async function indexBeforeMatching(opts: {
+  db: EntryStore;
+  provider: EmbeddingProvider;
+  reserve?: (n: number) => Promise<number>;
+  maxBatches?: number;
+}): Promise<{ indexed: number; remaining: number; failed: boolean }> {
+  const { db, provider, reserve, maxBatches = 2 } = opts;
+  let indexed = 0;
+  let failed = false;
+  try {
+    const first = await db.fetchPending(provider.model, 1);
+    if (first.length === 0) return { indexed: 0, remaining: 0, failed: false };
+    indexed = (await embedPendingEntries({ db, provider, reserve, maxBatches })).embedded;
+  } catch {
+    failed = true;
+  }
+  try {
+    const remaining = (await db.fetchPending(provider.model, 500)).length;
+    return { indexed, remaining, failed };
+  } catch {
+    // Unknown: say so as if some remain, so the questions are held rather than trusted.
+    return { indexed, remaining: 1, failed: true };
+  }
+}

@@ -238,3 +238,17 @@ describe('S11-10 who skipped a question is recorded (F-54)', () => {
     });
   });
 });
+
+describe('S11-2 a question matched against an incomplete index (F-43)', () => {
+  it('3. is held from bulk approval, can be accepted on its own, and is learned at export', async () => {
+    const s = await session(await response(owner.id));
+    const id = await question(s, { gate: 'unindexed_entries', confidence: 0.95, text: `Incomplete index ${Math.random()}?` });
+    await as(owner, async (q) => {
+      const r = (await q(`SELECT bulk_accept($1, 0.8) AS b`, [s])).rows[0].b as { accepted: number; heldGated: number };
+      expect(r).toMatchObject({ accepted: 0, heldGated: 1 });
+      await q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Checked by a person.' WHERE id = $1`, [id]);
+      await q(`SELECT record_export($1)`, [s]);
+      expect((await q(`SELECT learn_outcome FROM rfi_questions WHERE id = $1`, [id])).rows[0].learn_outcome).toBe('added');
+    });
+  });
+});

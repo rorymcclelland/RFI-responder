@@ -18,7 +18,7 @@ import { HttpError } from './errors.ts';
 import { gateQuestion } from './gates.ts';
 import { selectDraftSources, type MatchRow, type Source } from './sources.ts';
 
-export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source';
+export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source' | 'unindexed_entries';
 export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
 
 export interface QuestionIn {
@@ -68,6 +68,12 @@ export interface ProcessDeps {
    * treated as unreviewed. Throwing marks the question unchecked. Omitted: no review gates.
    */
   sourceStatus?: (refs: string[]) => Promise<Map<string, { reviewed: boolean; overdueSince: string | null; replacedBy?: string | null }>>;
+  /**
+   * Sprint 11 (S11-2, F-43): how many current knowledge-base entries still have no vector from the
+   * embedding model after process-questions tried to index them. Matching by meaning cannot find
+   * them, so a question matched that way says so and is held from bulk approval. Omitted: 0.
+   */
+  unindexed?: number;
   /** How many questions are worked on at once (provider rate limits). */
   concurrency?: number;
   now?: () => string;
@@ -225,6 +231,17 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       } catch {
         gateValue = 'unchecked';
         gateReason = 'The review status of the cited entries could not be read, so it is reviewed individually.';
+      }
+    }
+
+    // Sprint 11 (S11-2): entries without a vector were not searched when matching by meaning.
+    if (vector && (deps.unindexed ?? 0) > 0) {
+      const n = deps.unindexed!;
+      const what = `${n}${n >= 500 ? ' or more' : ''} knowledge-base ${n === 1 ? 'entry was' : 'entries were'} not yet indexed and ${n === 1 ? 'was' : 'were'} not searched, so the best match may have been missed.`;
+      notes.push(what);
+      if (!gateValue) {
+        gateValue = 'unindexed_entries';
+        gateReason = `${what} It is reviewed individually.`;
       }
     }
 

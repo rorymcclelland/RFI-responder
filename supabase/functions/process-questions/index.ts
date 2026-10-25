@@ -21,6 +21,8 @@ import { DEFAULT_CHECKER, providerFromEnv } from '../_shared/embeddings.ts';
 import { HttpError, json, requireUser, serve } from '../_shared/http.ts';
 import { finishUsage, meteredClaude, meteredEmbedder, meteredFetch, quotaMessage, reserveQuota, type UsageRow } from '../_shared/usage.ts';
 import { processQuestions, validateProcessRequest } from '../_shared/process-core.ts';
+import { indexBeforeMatching } from '../_shared/embed-core.ts';
+import { serviceEntryStore } from '../_shared/entry-store.ts';
 import type { MatchRow } from '../_shared/sources.ts';
 
 /**
@@ -67,6 +69,7 @@ serve(async (req) => {
   const limit = reason ? quotaMessage(reason) : null;
   const held = questions.slice(allowed).map((q) => ({ id: q.id, saved: false, note: limit }));
   const usage: UsageRow[] = [];
+  const reservations: (string | null)[] = [reservation];
 
   // Everything that spends goes inside try; usage is recorded in finally, even after an error.
   let saved: Record<string, unknown>[] = [];
@@ -80,7 +83,27 @@ serve(async (req) => {
     })();
     const claude = env.ANTHROPIC_API_KEY ? claudeClient({ apiKey: env.ANTHROPIC_API_KEY }) : null;
     const embedder = provider ? meteredEmbedder(provider, usage) : null;
+    // Sprint 11 (S11-2, F-43): entries with no vector cannot be matched by meaning. Index them first
+    // (two batches at most, under the caller's indexing cap); questions are told about any left.
+    let unindexed = 0;
+    if (embedder) {
+      const indexing = await indexBeforeMatching({
+        db: serviceEntryStore(admin),
+        provider: embedder,
+        async reserve(n) {
+          try {
+            const r = await reserveQuota(admin, user.id, 'embed', n);
+            reservations.push(r.reservation);
+            return r.allowed;
+          } catch {
+            return 0;
+          }
+        },
+      });
+      unindexed = indexing.remaining;
+    }
     const results = await processQuestions(toProcess, {
+      unindexed,
       embed: embedder ? (texts) => embedder.embed(texts, 'query') : null,
       async match(text, vector, model) {
         const { data, error } = await asCaller.rpc('match_kb_entries', {
@@ -123,7 +146,7 @@ serve(async (req) => {
       saved.push({ id, saved: !saveError, gate: r.gate, draftKind: r.draft_kind, confidence: r.confidence, note: r.processing_note });
     }
   } finally {
-    await finishUsage(admin, user.id, 'process-questions', sessionId, usage, [reservation]);
+    await finishUsage(admin, user.id, 'process-questions', sessionId, usage, reservations);
   }
   return json(req, 200, { processed: [...saved, ...held, ...skipped], limit });
 });

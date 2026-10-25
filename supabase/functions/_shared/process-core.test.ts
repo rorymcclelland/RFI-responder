@@ -320,3 +320,30 @@ describe('Sprint 4: the entries a draft cites, and holding drafts on unreviewed 
     expect(r.gate).toBe('unreviewed_source');
   });
 });
+
+describe('Sprint 11 (S11-2, F-43): matching against an incomplete index', () => {
+  it('1. with every entry indexed nothing changes', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ unindexed: 0 }));
+    expect(r.gate).toBeNull();
+    expect(r.processing_note ?? '').not.toMatch(/not yet indexed/);
+  });
+
+  it('3. entries still unindexed: the question says so and is held from bulk approval', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ unindexed: 3 }));
+    expect(r.gate).toBe('unindexed_entries');
+    expect(r.gate_reason).toMatch(/3 knowledge-base entries were not yet indexed/);
+    expect(r.processing_note).toMatch(/not searched/);
+  });
+
+  it('an earlier gate is kept, with the note added', async () => {
+    const [r] = await processQuestions([q('What is the price for 200 users?')], deps({ unindexed: 1 }));
+    expect(r.gate).toBe('pricing');
+    expect(r.processing_note).toMatch(/1 knowledge-base entry was not yet indexed/);
+  });
+
+  it('when matching fell back to keywords (no vector), every entry was searched, so nothing is added', async () => {
+    const [r] = await processQuestions([q('How do you encrypt data at rest?')], deps({ unindexed: 5, embed: null }));
+    expect(r.gate).not.toBe('unindexed_entries');
+    expect(r.processing_note ?? '').not.toMatch(/not yet indexed/);
+  });
+});
