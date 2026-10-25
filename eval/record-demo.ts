@@ -68,6 +68,10 @@ async function main() {
   const holds = partlyHolds(plan, recording);
   if (!holds.bluefin?.length) {
     console.error('No Bluefin question was judged only "partly" at 80% or more in this run, so the demo would not show that hold. Nothing written: run npm run demo:record again.');
+    console.error('What this run gave, per Bluefin question (verdict, confidence, kind of draft, gate):');
+    for (const q of recording.results.bluefin ?? []) {
+      console.error(`  ${q.id.replace('bluefin-', '')}: ${q.verdict ?? 'no verdict'}, ${q.confidence === null ? 'no confidence' : `${Math.round(q.confidence * 1000) / 10}%`}, ${q.draft_kind}${q.gate ? `, gate ${q.gate}` : ''}`);
+    }
     process.exit(1);
   }
   console.log(`  "partly" held from bulk approval in Bluefin: ${holds.bluefin.join(', ')}`);
