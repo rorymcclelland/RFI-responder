@@ -272,3 +272,20 @@ describe('S11-4 a refused embedding request uses none of the day (F-44)', () => 
     }
   });
 });
+
+describe('S11-6 unpriced usage is named, and the rerankers are priced (F-48)', () => {
+  it('1. a call to a model with no price is counted and named in the report', async () => {
+    const u = await createUser();
+    await asSuperuser(`INSERT INTO ai_usage (user_id, function, kind, provider, model, input_tokens) VALUES ($1, 'process-questions', 'judge', 'anthropic', 'claude-unknown-9', 10)`, [u.id]);
+    await as(admin, async (q) => {
+      const r = (await q(`SELECT usage_report() AS r`)).rows[0].r as { unpricedCalls: number; unpricedModels: string[] };
+      expect(r.unpricedCalls).toBeGreaterThanOrEqual(1);
+      expect(r.unpricedModels).toContain('anthropic claude-unknown-9');
+    });
+  });
+
+  it('2. every model a default or documented setting can choose has a price', async () => {
+    const rows = (await asSuperuser<{ k: string }>(`SELECT provider || ' ' || model AS k FROM ai_prices`)).rows.map((r) => r.k);
+    for (const m of ['anthropic claude-haiku-5-5', 'voyage voyage-4', 'voyage rerank-2.5', 'voyage rerank-3']) expect(rows, m).toContain(m);
+  });
+});

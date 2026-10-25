@@ -14,6 +14,8 @@ export interface UsageReport {
   byUser: { userId: string | null; name: string | null; calls: number; spentGbp: number }[];
   byModel: { provider: string; model: string; kind: string; calls: number; inputTokens: number; outputTokens: number; spentGbp: number }[];
   unpricedCalls: number;
+  /** Sprint 11 (S11-6): the models those calls used, as 'provider model'. */
+  unpricedModels: string[];
   /** F-29: questions processed this month and the measured processing cost per question (dollars). */
   questionsProcessed: number;
   avgUsdPerQuestion: number | null;
@@ -55,6 +57,7 @@ export async function loadUsageAdmin(client: SupabaseClient): Promise<{ report: 
       byUser: r.byUser.map((u) => ({ ...u, spentGbp: num(u.spentGbp) })),
       byModel: r.byModel.map((m) => ({ ...m, spentGbp: num(m.spentGbp), inputTokens: num(m.inputTokens), outputTokens: num(m.outputTokens) })),
       unpricedCalls: num(r.unpricedCalls),
+      unpricedModels: Array.isArray(r.unpricedModels) ? (r.unpricedModels as unknown[]).map(String) : [],
       questionsProcessed: num(r.questionsProcessed ?? 0),
       avgUsdPerQuestion: r.avgUsdPerQuestion === null || r.avgUsdPerQuestion === undefined ? null : num(r.avgUsdPerQuestion),
     },

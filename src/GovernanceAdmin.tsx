@@ -120,7 +120,7 @@ function UsageTab() {
           Estimated from the token counts each provider reported and the prices below, converted at £{Number(settings.gbp_per_usd).toFixed(2)} to the dollar.
           {status.exhausted ? ' The budget is reached: processing is stopped for everyone.' : status.alert ? ' Past the warning point.' : ''}
           {report.avgUsdPerQuestion !== null && ` Measured this month: $${report.avgUsdPerQuestion.toFixed(4)} per question over ${report.questionsProcessed} processed; each question reserves $${Number(settings.est_usd_per_question).toFixed(4)}.`}
-          {report.unpricedCalls > 0 && ` ${report.unpricedCalls} call${report.unpricedCalls === 1 ? '' : 's'} used a model with no price, so the figure is too low.`}
+          {report.unpricedCalls > 0 && ` ${report.unpricedCalls} call${report.unpricedCalls === 1 ? '' : 's'} used a model with no price (${report.unpricedModels.join(', ') || 'unknown'}), so the figure is too low until its price is added to the ai_prices table.`}
         </p>
       </div>
 
