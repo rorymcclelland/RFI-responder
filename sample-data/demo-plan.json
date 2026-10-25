@@ -27,8 +27,8 @@
       "stage": "in_review",
       "bulkAt": 0.8,
       "assign": [
-        { "ref": "A6", "to": "james.okafor@example.com", "status": "in_review" },
-        { "ref": "A9", "to": "lisa.huang@example.com", "status": "pending" }
+        { "ref": "A9", "to": "james.okafor@example.com", "status": "in_review" },
+        { "ref": "A8", "to": "lisa.huang@example.com", "status": "pending" }
       ],
       "questions": [
         { "ref": "A1", "text": "How do you protect data at rest in your platform?" },

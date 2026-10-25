@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { ProcessedQuestion } from '../../functions/_shared/process-core';
-import { demoSeedSql, type DemoPlan, type DemoRecording } from '../../../eval/demo-seed';
+import { demoSeedSql, replaceSection, type DemoPlan, type DemoRecording } from '../../../eval/demo-seed';
 import { asSuperuser, buildDatabase, closePool } from './harness';
 
 const plan = JSON.parse(readFileSync(new URL('../../../sample-data/demo-plan.json', import.meta.url), 'utf8')) as DemoPlan;
@@ -31,7 +31,10 @@ const recording: DemoRecording = {
 };
 
 beforeAll(async () => {
-  await buildDatabase({ seed: true });
+  // The seed's users and knowledge base, without its recorded demo, then the stand-in demo.
+  await buildDatabase();
+  const seed = readFileSync(new URL('../../seed.sql', import.meta.url), 'utf8');
+  await asSuperuser(replaceSection(seed, 'DEMO RESPONSES', '-- (replaced by the stand-in demo in this test)'));
   await asSuperuser(demoSeedSql(plan, recording));
 });
 afterAll(closePool);
