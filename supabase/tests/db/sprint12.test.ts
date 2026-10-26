@@ -260,3 +260,35 @@ describe('Sprint 12 security review: learning across languages', () => {
     });
   });
 });
+
+describe('Sprint 13 (S13-2): import duplicates are judged per language', () => {
+  type R = { inserted: number; duplicates: number; invalid: number };
+  const imp = (u: TestUser, entries: object[]) => as(u, async (q) =>
+    (await q(`SELECT import_kb_entries($1::jsonb, 'import'::kb_origin, 'f.csv') AS r`, [JSON.stringify(entries)])).rows[0].r as R);
+
+  it('1. the same question twice in one file, both English: one imported, one duplicate', async () => {
+    expect(await imp(member, [{ question: 'Dup (S13-2 t1)?', answer: 'One.' }, { question: 'Dup (S13-2 t1)?', answer: 'Two.' }]))
+      .toEqual({ inserted: 1, duplicates: 1, invalid: 0 });
+  });
+
+  it('2. a question already held in English, imported with a Japanese answer, is imported as a Japanese entry', async () => {
+    await one(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('Is there a DPO (S13-2 t2)?', 'Yes, a DPO is appointed.', '{}', 'seed') RETURNING id`);
+    const r = await as(member, async (q) => {
+      const res = (await q(`SELECT import_kb_entries($1::jsonb, 'import'::kb_origin, 'f.csv') AS r`, [JSON.stringify([{ question: 'Is there a DPO (S13-2 t2)?', answer: 'はい、データ保護責任者を任命しています。' }])])).rows[0].r as R;
+      const langs = (await q(`SELECT language FROM kb_entries WHERE question = 'Is there a DPO (S13-2 t2)?' ORDER BY language`)).rows.map((x) => x.language);
+      return { res, langs };
+    });
+    expect(r.res).toEqual({ inserted: 1, duplicates: 0, invalid: 0 });
+    expect(r.langs).toEqual(['en', 'ja']);
+  });
+
+  it('3 and 4. the same Japanese question as an existing Japanese entry, even with other case and spacing, is a duplicate', async () => {
+    await one(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('SOC2 レポートはありますか（S13-2 t3）？', 'あります。', '{}', 'seed') RETURNING id`);
+    expect(await imp(member, [{ question: '  soc2   レポートはありますか（S13-2 t3）？ ', answer: 'あります。最新版を提供できます。' }]))
+      .toEqual({ inserted: 0, duplicates: 1, invalid: 0 });
+  });
+
+  it('5. anonymous callers still cannot import', async () => {
+    await refused(as(null, (q) => q(`SELECT import_kb_entries('[]'::jsonb, 'import'::kb_origin, 'f.csv')`)));
+  });
+});
