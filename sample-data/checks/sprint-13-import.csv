@@ -1,0 +1,4 @@
+﻿Question,Answer
+How does your organization encrypt data at rest?,保存データはすべてAES-256で暗号化しています。
+保存データはどのように暗号化していますか？,保存データはAES-256で暗号化しています。
+How does your organization encrypt data at rest?,All data at rest is encrypted with AES-256.
