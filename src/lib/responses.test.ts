@@ -36,6 +36,10 @@ describe('responses', () => {
     expect(describeLearning({ accepted: 2, skipped: 0, proposed: 1, not_confirmed_source: 1 })).toBe(
       "Knowledge base: 1 proposed as replacements for existing entries, waiting for an admin to review; 1 did not confirm their entries (the entries need an admin's review).",
     );
+    // Sprint 12 (S12-3).
+    expect(describeLearning({ accepted: 1, skipped: 0, translated: 1 })).toBe(
+      'Knowledge base: 1 added as translations of existing entries, waiting for an admin to review.',
+    );
   });
 
   it('expert suggestions map reasons; a failure gives none rather than an error', async () => {

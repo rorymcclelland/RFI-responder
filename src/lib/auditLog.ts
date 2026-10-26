@@ -64,7 +64,7 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
   const d = r.details;
   switch (r.action) {
     case 'response.exported': {
-      const learned = ['added', 'superseded', 'proposed', 'confirmed'].filter((k) => d[k]).map((k) => `${d[k]} ${k}`).join(', ');
+      const learned = ['added', 'superseded', 'proposed', 'translated', 'confirmed'].filter((k) => d[k]).map((k) => `${d[k]} ${k}`).join(', ');
       return `${d.re_export === true ? 'Recorded the export again after changes' : 'Recorded the export'}: ${str(d.accepted) || 0} accepted, ${str(d.skipped) || 0} skipped${learned ? `; learned ${learned}` : ''}.`;
     }
     case 'question.changed_after_export':

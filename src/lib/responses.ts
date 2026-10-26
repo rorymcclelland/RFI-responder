@@ -70,6 +70,8 @@ export interface ExportSummary {
   accepted: number; skipped: number; added?: number; superseded?: number; confirmed?: number;
   not_learned_pricing?: number; not_learned_japanese?: number; not_learned_empty?: number;
   not_learned_unchecked?: number; proposed?: number; not_confirmed_source?: number;
+  /** Sprint 12 (S12-3): learned as translations, waiting for an admin's review. */
+  translated?: number;
 }
 
 export async function recordExport(client: SupabaseClient, sessionId: string): Promise<ExportSummary> {
@@ -85,9 +87,11 @@ export function describeLearning(s: ExportSummary): string {
   add(s.added, 'added as new entries');
   add(s.superseded, 'replaced an older entry for the same question');
   add(s.proposed, 'proposed as replacements for existing entries, waiting for an admin to review');
+  add(s.translated, 'added as translations of existing entries, waiting for an admin to review');
   add(s.confirmed, 'confirmed existing entries unchanged');
   add(s.not_learned_pricing, 'not learned (pricing)');
-  add(s.not_learned_japanese, 'not learned (Japanese, until the knowledge base is multilingual)');
+  // Only exports recorded before Sprint 12 report this; Japanese answers are learned since.
+  add(s.not_learned_japanese, 'not learned (Japanese, before the knowledge base was multilingual)');
   add(s.not_learned_empty, 'not learned (no answer)');
   add(s.not_learned_unchecked, 'not learned (not fully checked)');
   add(s.not_confirmed_source, 'did not confirm their entries (the entries need an admin\'s review)');

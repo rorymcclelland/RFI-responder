@@ -94,3 +94,12 @@ describe('the overdue report (S4-4)', () => {
     await expect(loadOverdueEntries({ rpc } as never)).rejects.toThrow(/could not be read: Only an admin/);
   });
 });
+
+describe('describeOrigin for a translation (Sprint 12, S12-3 test 5)', () => {
+  it('names what it was translated from and its language, whoever approved it', () => {
+    expect(describeOrigin({ origin: 'response', originRef: null, addedBy: 'Sarah Chen', translatedFrom: ['KB-0001'], language: 'ja' }))
+      .toBe('Translated from KB-0001 (English) in a response; answer approved by Sarah Chen. A translation is reviewed before it is trusted, whoever approved it');
+    expect(describeOrigin({ origin: 'response', originRef: null, addedBy: 'Priya Sharma' })).toMatch(/who is not an admin/);
+  });
+});
+

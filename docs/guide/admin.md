@@ -48,7 +48,7 @@ Entries are also learned from responses when their export is recorded ([Running 
 
 ### Entries to review
 
-Entries added by members, imported by members, or learned from an answer a member approved, wait here. They are in the knowledge base already, but a draft that cites one is never approved in bulk until an admin reviews it.
+Entries added by members, imported by members, learned from an answer a member approved, or learned from a translated draft (whoever approved it), wait here. A translation says which entries it was translated from and from which language; check the translation itself, not only the facts. They are in the knowledge base already, but a draft that cites one is never approved in bulk until an admin reviews it.
 
 For each entry choose **Approve**, or **Correct** to fix the question or answer first and then **Save corrections and approve**. If approving it would replace an existing entry, the card shows the entry it replaces and what that entry says now. Approving releases the questions waiting on it in open responses, unless they also cite another entry still waiting.
 

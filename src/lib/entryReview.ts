@@ -48,6 +48,8 @@ export interface EntryForReview {
   recentCitations?: number;
   /** Sprint 12 (S12-1). */
   language?: 'en' | 'ja';
+  /** Sprint 12 (S12-3): the entries this one was translated from. */
+  translatedFrom?: string[] | null;
 }
 
 const toEntry = (r: Record<string, unknown>): EntryForReview => ({
@@ -56,6 +58,7 @@ const toEntry = (r: Record<string, unknown>): EntryForReview => ({
   originRef: (r.origin_ref as string | null) ?? null,
   addedBy: typeof r.added_by === 'string' ? r.added_by : ((r.added_by as { display_name?: string } | null)?.display_name) ?? null,
   createdAt: r.created_at as string,
+  translatedFrom: Array.isArray(r.translated_from) ? (r.translated_from as string[]) : null,
   ...(r.language === 'ja' || r.language === 'en' ? { language: r.language } : {}),
   replaces: (r.replaces as { ref: string; answer: string } | null) ?? null,
   ...(r.review_due ? { dueSince: r.review_due as string, recentCitations: Number(r.recent_citations ?? 0) } : {}),
@@ -76,7 +79,7 @@ export async function loadOverdueEntries(client: SupabaseClient): Promise<EntryF
 export async function loadEntriesToReview(client: SupabaseClient): Promise<EntryForReview[]> {
   const { data, error } = await client
     .from('kb_entries')
-    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, language, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:proposed_replacement_of(ref, answer)')
+    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, language, translated_from, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:proposed_replacement_of(ref, answer)')
     .is('reviewed_at', null)
     .is('superseded_by', null)
     .order('created_at', { ascending: true });
@@ -94,8 +97,13 @@ export async function reviewEntry(client: SupabaseClient, id: string, edits: { q
   if (error) throw new Error(`The review was not saved: ${error.message}`);
 }
 
-export function describeOrigin(e: Pick<EntryForReview, 'origin' | 'originRef' | 'addedBy'>): string {
+export function describeOrigin(e: Pick<EntryForReview, 'origin' | 'originRef' | 'addedBy'> & Partial<Pick<EntryForReview, 'translatedFrom' | 'language'>>): string {
   const who = e.addedBy ?? 'a former team member';
+  // Sprint 12 (S12-3): a translation waits for review whoever approved it, so it says so first.
+  if (e.translatedFrom?.length) {
+    const from = e.language === 'ja' ? 'English' : 'Japanese';
+    return `Translated from ${e.translatedFrom.join(', ')} (${from}) in a response; answer approved by ${who}. A translation is reviewed before it is trusted, whoever approved it`;
+  }
   switch (e.origin) {
     case 'manual': return `Added by hand by ${who}`;
     case 'import': return `Imported by ${who}${e.originRef ? ` from ${e.originRef}` : ''}`;

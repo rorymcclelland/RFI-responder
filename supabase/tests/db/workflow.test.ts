@@ -291,7 +291,8 @@ describe('S3-4 learning at export', () => {
     });
   });
 
-  it('4. pricing and Japanese answers are never learned; legal answers are', async () => {
+  // Sprint 12 (S12-3, C-1): Japanese answers are now learned; pricing answers still never are.
+  it('4. pricing answers are never learned; legal and (since Sprint 12) Japanese answers are', async () => {
     const opp = await response();
     const s = await session(opp);
     const pricing = await question(s, { text: 'What is the price? (t4)', gate: 'pricing', final: '£10 per seat.', kind: 'person_required', confidence: 0.1 });
@@ -300,9 +301,9 @@ describe('S3-4 learning at export', () => {
     await as(owner, async (q) => {
       for (const id of [pricing, ja, legal]) await accept(q, id);
       const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
-      expect(r.rows[0].record_export).toMatchObject({ not_learned_pricing: 1, not_learned_japanese: 1, added: 1 });
-      const k = await q(`SELECT 1 FROM kb_entries WHERE question IN ('What is the price? (t4)', '価格は？(t4)')`);
-      expect(k.rowCount).toBe(0);
+      expect(r.rows[0].record_export).toMatchObject({ not_learned_pricing: 1, added: 2 });
+      expect((await q(`SELECT 1 FROM kb_entries WHERE question = 'What is the price? (t4)'`)).rowCount).toBe(0);
+      expect((await q(`SELECT language FROM kb_entries WHERE question = '価格は？(t4)'`)).rows[0].language).toBe('ja');
     });
   });
 
@@ -413,7 +414,8 @@ describe('Sprint 3 security review findings', () => {
     expect((await as(member, (q) => q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Poison' WHERE id = $1`, [target]))).rowCount).toBe(0);
   });
 
-  it('2. learning is an allow list: unprocessed, unchecked and Japanese-text questions are not learned', async () => {
+  // Sprint 12 (S12-3): Japanese text is no longer a reason not to learn.
+  it('2. learning is an allow list: unprocessed and unchecked questions are not learned', async () => {
     const opp = await response();
     const s = await session(opp);
     const unprocessed = (await one<{ id: string }>(
@@ -423,8 +425,8 @@ describe('Sprint 3 security review findings', () => {
     await as(owner, async (q) => {
       for (const id of [unprocessed, unchecked, jaText]) await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
       const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
-      expect(r.rows[0].record_export).toMatchObject({ not_learned_unchecked: 2, not_learned_japanese: 1 });
-      expect(r.rows[0].record_export.added).toBeUndefined();
+      expect(r.rows[0].record_export).toMatchObject({ not_learned_unchecked: 2, added: 1 });
+      expect(r.rows[0].record_export.not_learned_japanese).toBeUndefined();
     });
   });
 
