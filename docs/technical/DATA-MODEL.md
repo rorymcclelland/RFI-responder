@@ -248,10 +248,11 @@ Created and access rules set in [`20261022120000_access_control.sql`](../../supa
 Columns: `at`, `actor`, `action`, `target_id`, `details`. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`, and since Sprint 11 `question.changed_after_export`, `prices.changed`, `kb.changed` and `kb.deleted`. Admins read it on the governance page's **Audit log** tab ([`src/lib/auditLog.ts`](../../src/lib/auditLog.ts), whose test fails if an action has no wording).
 
 - **Member:** no access.
-- **Admin:** read; no insert, update or delete. (The service role, which the Edge Functions use, has full rights.)
+- **Admin:** read; no insert, update or delete.
+- **Service role** (the Edge Functions): read and insert only; since Sprint 14 it cannot update, delete or truncate ([`20261102100000`](../../supabase/migrations/20261102100000_audit_log_append_only.sql), F-57).
 - **Written only** by `SECURITY DEFINER` functions and triggers (`set_user_admin`, `archive_response`, `delete_response`, `record_export`, `review_entry`, `bulk_accept`, `private.release_source_gates`, `stamp_settings_change`, `note_change_after_export`, `audit_price_change`).
 
-Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts).
+Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts), [`sprint14.test.ts`](../../supabase/tests/db/sprint14.test.ts).
 
 ### `public.ai_settings`
 
