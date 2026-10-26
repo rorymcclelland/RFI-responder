@@ -46,9 +46,9 @@ Several responses are normally in flight at once. An overview shows every respon
 
 The heart of the product. Every entry records who added it, from where (manual, import, or a named response), when, which entry it superseded, and when it was last reviewed. Because it learns automatically, it is also the main governance risk: it can learn mistakes, stale facts and contradictions, and it is the obvious target for deliberately bad answers. Provenance, versioning, review dates and the never-learn rule for pricing are the controls.
 
-## Later: multilingual
+## Multilingual (Sprint 12)
 
-Knowledge may be captured, and RFIs received and answered, in different languages. The aim is that knowledge captured in any supported language is usable in all of them, with drafts written in the RFI's own language and machine-translated answers reviewed by a person before they are learned. Starting languages: English and Japanese. Backlog candidate C-1.
+Knowledge may be captured, and RFIs received and answered, in different languages. Knowledge captured in English or Japanese is usable in both: each entry knows its language, drafts are written in the RFI's own language, a draft written across languages is labelled and reviewed individually, and an answer learned from a translation waits for an admin's review. Built in Sprint 12 (C-1); other languages later.
 
 ## Scope and non-goals
 
@@ -68,3 +68,4 @@ Knowledge may be captured, and RFIs received and answered, in different language
 | 22 Oct 2026 | Spreadsheet and Word ingestion first; PDF and pasted text later |
 | 22 Oct 2026 | Multilingual knowledge base added as a backlog candidate, English and Japanese first; the AI-route spike must assess multilingual capability |
 | 22 Oct 2026 | Overview of in-flight responses with due dates; archive, never delete (admin hard delete for errors only); outcome recorded |
+| 26 Oct 2026 | Multilingual knowledge base built (Sprint 12): an entry's language is detected from its text; Japanese drafts from Japanese entries are still reviewed individually until a native reader has checked the Japanese; a translated answer waits for an admin's review whoever approved it |

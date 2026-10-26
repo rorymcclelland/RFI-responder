@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in ten sprints (Sprints 0 to 9). Synthetic data only; runs locally.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in thirteen sprints (Sprints 0 to 12). Synthetic data only; runs locally.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -11,9 +11,9 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 - **Reads the questions** from a spreadsheet or a Word questionnaire. Files are opened in the browser with size and decompression limits. For a Word document the text is then sent to the server, where Claude finds the questions; each is kept only if it appears in the document word for word, with the customer's own numbering, and a person checks the list before anything is saved.
 - **Drafts each answer from the knowledge base**, on the server. The question is matched by meaning (voyage-4 embeddings, or a local model); Claude Haiku 5.5 checks whether the matched entries actually answer it, then drafts only from those entries and cites them. Code rejects a draft that cites an entry it was not given, or contains a figure, link or email address not in its sources; the question is then left without a draft, with a note saying why, for a person to answer. When nothing answers the question, or it asks for a price, there is no draft.
 - **Says how confident it is, and why.** Confidence is calibrated on an evaluation set: the measured chance that the knowledge base answers the question. The card shows the checker's verdict and its one-sentence reason.
-- **Lets the owner approve in bulk, within limits the database enforces.** A question qualifies only if it was processed on the server, has a draft, has calibrated confidence at or above the chosen threshold, and the checker said "yes" (a reranker's score, or similarity alone when no checker is configured, does not count). Pricing, legal and translated questions, questions whose checks could not run, and drafts citing an entry that is unreviewed, overdue for review or replaced, are always decided by a person, and a question with no draft cannot be accepted until a person has written its answer. Every approval records who, when and how.
+- **Lets the owner approve in bulk, within limits the database enforces.** A question qualifies only if it was processed on the server, has a draft, has calibrated confidence at or above the chosen threshold, and the checker said "yes" (a reranker's score, or similarity alone when no checker is configured, does not count). Pricing, legal, translated and Japanese questions, questions whose checks could not run, and drafts citing an entry that is unreviewed, overdue for review or replaced, are always decided by a person, and a question with no draft cannot be accepted until a person has written its answer. Every approval records who, when and how.
 - **Routes specialist questions** to colleagues, suggesting who from stated expertise and who wrote or approved similar answers, with an inbox for each.
-- **Learns from each exported response.** Recording the export turns edited and person-written answers into knowledge-base entries linked to the response they came from. A member's addition, or an answer that would replace an existing entry, waits for an admin's review; pricing answers are never learned; entries fall due for review after 12 months.
+- **Learns from each exported response.** Recording the export turns edited and person-written answers into knowledge-base entries linked to the response they came from. A member's addition, an answer that would replace an existing entry, or an answer learned from a translation, waits for an admin's review; pricing answers are never learned; entries fall due for review after 12 months.
 - **Exports** to Excel, CSV and Word, each file recording how every answer was produced (drafted by a model, edited or written by a person), with which model and prompt version, and who approved it, when and how.
 - **Caps spend.** Every AI call is recorded and priced. Processing stops for a person who reaches the daily limit, and for everyone when the month's estimated spend reaches the budget.
 
@@ -65,6 +65,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 9 | Bulk approval needs the checker's "yes" in every set-up; the faithfulness judge tested on planted claims |
 | 10 | A user guide for every role, shown in the app under Help; an introduction on first sign-in; the technical reference |
 | 11 | What reading the code turned up: changes after an export recorded and re-exported, an audit-log screen, matching never silently incomplete, local mode calibrated |
+| 12 | A knowledge base in English and Japanese: each entry knows its language, translation is decided by the languages on both sides, Japanese answers are learned and translated ones reviewed first, measured per language pair |
 
 Each sprint followed the same cycle:
 

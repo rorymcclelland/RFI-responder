@@ -554,19 +554,43 @@ Refinement: `docs/refinement/sprint-12.md`.
 
 | ID | Story | Status |
 |---|---|---|
-| S12-1 | Every entry knows its language (detected by the database) | Ready, Sprint 12 |
-| S12-2 | "Translated" means the answer crosses languages, in either direction | Ready, Sprint 12 |
-| S12-3 | Japanese answers are learned; translated ones wait for an admin's review | Ready, Sprint 12 |
-| S12-4 | Japanese entries to measure against, and the measurements per language pair | Ready, Sprint 12 |
-| S12-5 | Japanese entries in the demo, and the guide | Ready, Sprint 12 |
+| S12-1 | Every entry knows its language (detected by the database) | Done, Sprint 12 |
+| S12-2 | "Translated" means the answer crosses languages, in either direction | Done, Sprint 12 (the label is added by code rather than named in the prompt; see the refinement) |
+| S12-3 | Japanese answers are learned; translated ones wait for an admin's review | Done, Sprint 12 |
+| S12-4 | Japanese entries to measure against, and the measurements per language pair | Done, Sprint 12, with a residual: both recall bars met, the near-miss bar missed by one (F-59) |
+| S12-5 | Japanese entries in the demo, and the guide | Done, Sprint 12 |
+
+### Sprint 12 review (26 October 2026)
+
+**Checks, with evidence.** 856 unit and 284 database tests on `sprint-12`; lint, type check and `deno check` clean. The language evaluation, run on Rory's PC (`docs/evals/languages-2026-10-26.md`, 157 checker calls): recall@5 English-to-Japanese 98.3% (59 of 60), Japanese-to-Japanese 100.0% (30 of 30, likely optimistic: both sides are Claude's translations of the same originals), so both Q4 recall bars are met; the near-miss bar is not, 1 of 33 at the 80% line (the English BYOK question, judged "partly" at 81%, so never bulk-approved). Rory ran the first test pack (`docs/testing/sprint-12-test-pack.md`): all nine cases passed, covering the language label, the seeded translations waiting for review, Japanese and translated drafts held with the right reasons, translations learned unreviewed though an admin approved them, approval making one trusted, and the introduction.
+
+An independent security review found no high issues, three medium (an uncited Japanese entry could get a Japanese draft past the gate; an unreviewed machine translation could become reviewed knowledge by being cited; a translated draft could be learned as reviewed when its answer was mostly Japanese) and seven low; all fixed and tested before the check (details in the refinement).
+
+**Process.** From this sprint every hand test comes as a test pack, a Markdown file and a PDF with setup, user and credential, flow and expected outcome per case (Rory, 26 October; added to the sprint-close skill).
+
+### Where every Sprint 12 review item now lives
+
+| Item | Now |
+|---|---|
+| C-1 multilingual knowledge base | Done in Sprint 12 |
+| Three medium and seven low security review findings | Done in Sprint 12 (review) |
+| F-58 The translation label stays in the exported answer | Backlog, from Sprint 12 review |
+| F-59 Calibration is fitted on English entries only (one near miss at 81%, English-to-Japanese calibration error 0.104) | Backlog, from Sprint 12 review |
+| F-60 Keyword matching uses English word stems, so does little for Japanese | Backlog, from Sprint 12 review |
+| F-61 The import's duplicate rule ignores language | Backlog, from Sprint 12 review |
+| F-14 Japanese items unreviewed by a native reader | Still in the backlog; now also covers the 30 Japanese entries |
+
+**Not yet in a sprint, ranked at the Sprint 12 review.** 1. F-58 the translation label in exports (small; it decides what reaches a customer). 2. F-59 calibration with Japanese entries (measure first: refit on both corpora, or per pair, and check the bars). 3. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer; until then the `japanese` gate stays). 4. F-61 import duplicates by language (small). 5. F-60 Japanese keyword matching (only matters when vectors are missing). 6. F-20 rerankers. 7. F-34 review during processing (fails safe). 8. F-57 audit log append-only for the service role. 9. F-8 leaked-password protection, with a hosted sprint. 10. F-2 generated database types. 11. F-3 invite screen. 12. F-4 Tailwind 4.
+
+**Proposed next.** A short Sprint 13 to finish the languages work: F-58 (strip only the app's label and reference list from exports, exactly as learning now does), F-61 (duplicates per language), and F-59 (calibration across languages, measured on Rory's PC and refitted only if the bars hold). F-14 needs a person, not a sprint. Alternatively a hosted sprint (F-8, F-57, a public demo), or pausing here.
 
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
 |---|---|---|---|
-| C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later Refined as Sprint 12 (26 October 2026) |
+| C-1 | Done, Sprint 12. Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later Refined as Sprint 12 (26 October 2026) |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 onwards from Sprint 11; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 from Sprint 11, F-58 onwards from Sprint 12; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -582,7 +606,7 @@ Refinement: `docs/refinement/sprint-12.md`.
 | F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Done, Sprint 7 (S7-4). Found in the end-to-end run |
 | F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Done, Sprint 3. Found in the end-to-end run; Sprint 3, with supersession |
 | F-13 | Right Japanese matches score about 77% (similarity around 0.52), so a Japanese RFI can never be bulk-approved: calibration is pooled across languages | Done, Sprint 2. From the Sprint 1 review; check per-language calibration once confidence combines similarity with the answerability check |
-| F-14 | Japanese evaluation items are machine translations of the original questions, unreviewed | From the Sprint 1 review; reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
+| F-14 | Japanese evaluation items, and since Sprint 12 the 30 Japanese entries, are machine translations, unreviewed | From the Sprint 1 review; until a native reader has checked them the `japanese` gate stays (Sprint 12, Q2); reworded items checked by a native reader would test Japanese rewording, not just crossing languages |
 | F-15 | The near-miss set is 34 items written by Claude | From the Sprint 1 review; small and unreviewed, so the abstention figures have wide error bars |
 | F-16 | Calibration moved noticeably when one item was removed (near misses at the bulk line, similarity alone: 1 of 34, then 9 of 33) | Done, Sprint 8 (S8-2). From the Sprint 2 review; about 180 items per split. A larger set, cross-validated fitting, and an interval rather than a single figure |
 | F-17 | High confidence is shown as "100%" | Done, Sprint 3. From the Sprint 2 review; the top calibration bin is all-correct on a small sample, which is not certainty |
@@ -627,6 +651,10 @@ Refinement: `docs/refinement/sprint-12.md`.
 | F-56 | `npm run dev` serves on `localhost`; the README and Supabase's `site_url` use `127.0.0.1`, which may not answer on every machine | Done, Sprint 11 (S11-11). From the Sprint 10 accuracy review |
 | BUG-33 | The workspace breadcrumb is squeezed to one letter of the response name at 1,280 px, now that Help sits beside it | Done, Sprint 11 (S11-11). From the Sprint 10 screenshots |
 | F-57 | The service role, which the Edge Functions hold, has full rights on `audit_log`, so the log is append-only for admins but not for a compromised function key | From the Sprint 11 security review (low 4). Revoke update and delete from the service role, or move the log to a schema it cannot write |
+| F-58 | The translation label ("[Translated from English knowledge-base entries. …]") stays in the exported answer, so it reaches the customer unless removed by hand; and the export removes any bracketed "[References: …]" anywhere in an answer, not only the reference list the app adds | From the Sprint 12 build and review (L1, the same pattern in learning, fixed there). Strip exactly the app's label and reference list, at the end, as `private.learnable_text` does |
+| F-59 | The calibration table is fitted on English entries only. With 30 entries in Japanese, 1 of 33 near misses reached the bulk line (81%, a "partly"; never bulk-approved) and calibration error for English questions against Japanese entries was 0.104 | From the Sprint 12 language evaluation. Refit on both corpora, or per language pair, and check the Sprint 2 and Sprint 8 bars |
+| F-60 | Keyword matching (used when a question or entry has no vector) uses English word stems, so finds little for Japanese | From the Sprint 12 build. Consider a trigram or `simple` configuration for Japanese |
+| F-61 | The knowledge-base import treats the same question as a duplicate whatever its language, while the database allows one current entry per question in each language | From the Sprint 12 security review (info). Compare the question and its language |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked

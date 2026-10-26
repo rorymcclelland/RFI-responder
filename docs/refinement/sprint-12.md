@@ -120,3 +120,7 @@ An independent review of `main..sprint-12` found no high-severity issue, three m
 Also from the review: the language report now says Japanese-to-Japanese is likely optimistic (both sides are Claude's translations of the same originals) and counts near misses with unreadable checks.
 
 **Changed from the refinement.** S12-2 said the drafting prompt would name the direction of the translation. The label is instead added by code after the checks, from the languages of the question and the cited entries, which an entry's text cannot change (k006); the prompt is unchanged, so the drafting evaluation still holds. **Left for the backlog:** the knowledge-base import still treats the same question as a duplicate whatever the language, while the database now allows one current entry per question in each language.
+
+## Review and close (26 October 2026)
+
+Every story is done. The language evaluation (`docs/evals/languages-2026-10-26.md`, run on Rory's PC) met both recall bars (English-to-Japanese 98.3%, Japanese-to-Japanese 100.0%) and missed the near-miss bar by one: the English BYOK near miss reached 81% on a "partly" verdict, which is never bulk-approved. Recorded as a residual (S12-4 test 4) and as F-59. Rory ran the first test pack (`docs/testing/sprint-12-test-pack.md`); all nine cases passed. New backlog rows: F-58 to F-61. Test counts at the close: 856 unit, 284 database.
