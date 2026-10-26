@@ -16,8 +16,24 @@ function stem(filename: string) {
   return filename.replace(/\.[^.]+$/, '') || 'rfi-responses';
 }
 
-function stripKbReferences(answer: string) {
-  return answer.replace(/\[References?:.*?\]\s*/gi, '').trimEnd();
+/**
+ * The translation labels the drafter writes (supabase/functions/_shared/drafting.ts; a test checks
+ * they are the same), by the language the entries were in.
+ */
+export const TRANSLATION_LABELS = {
+  en: '[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]',
+  ja: '[Translated from Japanese knowledge-base entries. Someone who reads Japanese should check it against them before it is sent.]',
+} as const;
+
+/**
+ * Sprint 13 (S13-1, F-58): the answer without the notes the app adds to a draft, the translation
+ * label and the reference list, each only exactly as the app writes it and only at the very end
+ * (the rule `private.learnable_text` applies before learning), so nothing a person wrote is removed.
+ */
+export function exportedAnswer(answer: string): string {
+  let t = answer.trimEnd();
+  for (const label of Object.values(TRANSLATION_LABELS)) if (t.endsWith(label)) t = t.slice(0, -label.length).trimEnd();
+  return t.replace(/\[References: KB-[0-9]+(?:, KB-[0-9]+)*\]$/, '').trim();
 }
 
 /** Shown for a question the owner chose to skip (Sprint 3, Q2). */
@@ -35,7 +51,7 @@ export function exportRows(questions: RFIQuestion[]) {
     .map((q, i) => ({
       number: q.customerRef || String(i + 1),
       question: q.question,
-      answer: q.status === 'accepted' ? stripKbReferences(q.finalAnswer) : NOT_ANSWERED,
+      answer: q.status === 'accepted' ? exportedAnswer(q.finalAnswer) : NOT_ANSWERED,
       edited: q.status === 'accepted' && q.finalAnswer !== q.generatedAnswer,
     }));
 }
@@ -67,7 +83,18 @@ export function answerOrigin(q: RFIQuestion): AnswerOrigin {
 
 const modelDrafted = (o: AnswerOrigin) => o.startsWith('model-drafted');
 
-export interface ProvenanceRow { number: string; origin: AnswerOrigin; model: string; promptVersion: string; approvedBy: string; approvedAt: string; approval: string }
+export interface ProvenanceRow { number: string; origin: AnswerOrigin; model: string; promptVersion: string; approvedBy: string; approvedAt: string; approval: string; translation: Translation }
+
+/** Sprint 13 (S13-1): the label leaves the exported answer, so the provenance says a draft was translated. */
+export type Translation = 'drafted from English entries' | 'drafted from Japanese entries' | 'translated draft' | '';
+
+/** From the stored gate (language gates are never released) and the label the drafter added. */
+export function translationOf(q: RFIQuestion): Translation {
+  if (q.gate !== 'translation' || q.status !== 'accepted') return '';
+  if (q.generatedAnswer.includes(TRANSLATION_LABELS.en)) return 'drafted from English entries';
+  if (q.generatedAnswer.includes(TRANSLATION_LABELS.ja)) return 'drafted from Japanese entries';
+  return 'translated draft';
+}
 
 /** One row per exported question, in the RFI's order. */
 export function provenanceRows(questions: RFIQuestion[], names: Map<string, string> = new Map()): ProvenanceRow[] {
@@ -85,6 +112,7 @@ export function provenanceRows(questions: RFIQuestion[], names: Map<string, stri
       // Sprint 11 (S11-10): a skip is a decision too; say who made it and when.
       approval: q.status === 'accepted' && q.approval ? approvalLabel(q.approval) || 'individual'
         : q.status === 'skipped' && q.skip ? `skipped by ${q.skip.by ? names.get(q.skip.by) ?? 'a team member' : 'a team member'}, ${q.skip.at}` : '',
+      translation: translationOf(q),
     };
   });
 }
@@ -104,9 +132,9 @@ const modelsUsed = (rows: ProvenanceRow[]) => [...new Set(rows.map((r) => r.mode
 export function buildCsvExport(questions: RFIQuestion[], names: Map<string, string> = new Map()): string {
   const prov = provenanceRows(questions, names);
   return buildCsv(
-    ['#', 'Question', 'Answer', 'answer_origin', 'model', 'prompt_version', 'approved_by', 'approved_at', 'approval'],
+    ['#', 'Question', 'Answer', 'answer_origin', 'model', 'prompt_version', 'approved_by', 'approved_at', 'approval', 'translation'],
     exportRows(questions).map((r, i) => [r.number, r.question, r.answer, prov[i].origin, prov[i].model, prov[i].promptVersion,
-      prov[i].approvedBy, prov[i].approvedAt, prov[i].approval]),
+      prov[i].approvedBy, prov[i].approvedAt, prov[i].approval, prov[i].translation]),
   );
 }
 
@@ -125,8 +153,8 @@ export async function buildExcelExport(questions: RFIQuestion[], names: Map<stri
   return buildWorkbook([
     { name: 'RFI Responses', headers: ['#', 'Question', 'Answer', 'Was Edited'],
       rows: exportRows(questions).map((r) => [r.number, r.question, r.answer, r.edited ? 'Yes' : 'No']), columnWidths: [5, 60, 80, 12] },
-    { name: 'Provenance', headers: ['#', 'Answer origin', 'Model', 'Prompt version', 'Approved by', 'Approved at', 'Approval'],
-      rows: prov.map((r) => [r.number, r.origin, r.model, r.promptVersion, r.approvedBy, r.approvedAt, r.approval]), columnWidths: [8, 48, 20, 22, 22, 26, 20] },
+    { name: 'Provenance', headers: ['#', 'Answer origin', 'Model', 'Prompt version', 'Approved by', 'Approved at', 'Approval', 'Translation'],
+      rows: prov.map((r) => [r.number, r.origin, r.model, r.promptVersion, r.approvedBy, r.approvedAt, r.approval, r.translation]), columnWidths: [8, 48, 20, 22, 22, 26, 20, 28] },
   ], {
     creator: 'RFI Respond',
     keywords: `ai-generated: ${aiGenerated(prov)}; generator: RFI Respond`,
@@ -147,7 +175,7 @@ export async function exportExcel(questions: RFIQuestion[], sourceFileName = 'ex
 export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export', names: Map<string, string> = new Map()): string {
   const exported = exportRows(questions);
   const prov = provenanceRows(questions, names);
-  const provRows = prov.map((r) => `<tr><td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.model)}</td><td>${escapeHtml(r.promptVersion)}</td><td>${escapeHtml(r.approvedBy)}</td><td>${escapeHtml(r.approvedAt)}</td><td>${escapeHtml(r.approval)}</td></tr>`).join('');
+  const provRows = prov.map((r) => `<tr><td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.origin)}</td><td>${escapeHtml(r.model)}</td><td>${escapeHtml(r.promptVersion)}</td><td>${escapeHtml(r.approvedBy)}</td><td>${escapeHtml(r.approvedAt)}</td><td>${escapeHtml(r.approval)}</td><td>${escapeHtml(r.translation)}</td></tr>`).join('');
   const answered = exported.filter((r) => r.answer !== NOT_ANSWERED).length;
   const date     = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -202,7 +230,7 @@ export function wordHtml(questions: RFIQuestion[], sourceFileName = 'export', na
       </table>
       <h2 style="font-size:14px;color:#0f172a;margin:32px 0 8px;">How each answer was produced</h2>
       <table class="provenance">
-        <thead><tr><th>#</th><th>Origin</th><th>Model</th><th>Prompt version</th><th>Approved by</th><th>Approved at</th><th>Approval</th></tr></thead>
+        <thead><tr><th>#</th><th>Origin</th><th>Model</th><th>Prompt version</th><th>Approved by</th><th>Approved at</th><th>Approval</th><th>Translation</th></tr></thead>
         <tbody>${provRows}</tbody>
       </table>
     </body>

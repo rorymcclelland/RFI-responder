@@ -1,6 +1,6 @@
 // Sprint 3: what goes into the exported response.
 import { describe, expect, it } from 'vitest';
-import { exportRows, NOT_ANSWERED, wordHtml } from '../exportUtils';
+import { buildCsvExport, buildExcelExport, exportRows, NOT_ANSWERED, provenanceRows, wordHtml } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
 const q = (position: number, status: RFIQuestion['status'], final = `Answer ${position}`, generated = final): RFIQuestion => ({
@@ -35,5 +35,62 @@ describe('exportRows', () => {
     const [row] = exportRows([q(1, 'accepted', 'We use AES-256.\n\n[References: KB-0001]', 'Old draft')]);
     expect(row.answer).toBe('We use AES-256.');
     expect(row.edited).toBe(true);
+  });
+});
+
+describe('Sprint 13 (S13-1): exports send only the answer', () => {
+  const LABEL_EN = '[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]';
+  const LABEL_JA = '[Translated from Japanese knowledge-base entries. Someone who reads Japanese should check it against them before it is sent.]';
+  const translated = (final: string, generated = final, label = LABEL_EN): RFIQuestion =>
+    ({ ...q(1, 'accepted', final, generated), gate: 'translation', language: label === LABEL_EN ? 'ja' : 'en' });
+
+  it('1. a translated draft accepted unedited loses the label and the reference list; provenance records the translation', () => {
+    const draft = `鍵は90日ごとに更新しています。\n\n[References: KB-0004]\n\n${LABEL_EN}`;
+    const qs = [translated(draft)];
+    expect(exportRows(qs)[0].answer).toBe('鍵は90日ごとに更新しています。');
+    expect(provenanceRows(qs)[0].translation).toBe('drafted from English entries');
+    const ja = [translated(`Keys rotate every 90 days.\n\n[References: KB-0102]\n\n${LABEL_JA}`, undefined, LABEL_JA)];
+    expect(exportRows(ja)[0].answer).toBe('Keys rotate every 90 days.');
+    expect(provenanceRows(ja)[0].translation).toBe('drafted from Japanese entries');
+  });
+
+  it('2. an English draft loses only its reference list', () => {
+    expect(exportRows([q(1, 'accepted', 'We use AES-256.\n\n[References: KB-0001, KB-0002]\n')])[0].answer).toBe('We use AES-256.');
+  });
+
+  it('3. an approver\'s own bracketed text is kept', () => {
+    for (const text of ['Reports are shared [References: on request] under NDA.', 'We follow it. [Translated from our parent company\'s policy]']) {
+      expect(exportRows([q(1, 'accepted', text, 'Old draft')])[0].answer).toBe(text);
+    }
+  });
+
+  it('4. an edited translation keeps what the person wrote, and the provenance still records the translation', () => {
+    const generated = `鍵は更新しています。\n\n[References: KB-0004]\n\n${LABEL_EN}`;
+    const [p] = provenanceRows([translated('鍵は90日ごとに自動で更新しています。', generated)]);
+    expect(exportRows([translated('鍵は90日ごとに自動で更新しています。', generated)])[0].answer).toBe('鍵は90日ごとに自動で更新しています。');
+    expect(p.translation).toBe('drafted from English entries');
+  });
+
+  it('5. a Japanese draft from Japanese entries, and an English one, have no translation recorded', () => {
+    expect(provenanceRows([{ ...q(1, 'accepted', '回答です。'), gate: 'japanese', language: 'ja' }])[0].translation).toBe('');
+    expect(provenanceRows([q(1, 'accepted')])[0].translation).toBe('');
+  });
+
+  it('6. every export format carries the field', async () => {
+    const qs = [translated(`回答です。\n\n[References: KB-0004]\n\n${LABEL_EN}`)];
+    expect(buildCsvExport(qs).split('\n')[0]).toContain('translation');
+    expect(buildCsvExport(qs)).toContain('drafted from English entries');
+    expect(wordHtml(qs)).toContain('<th>Translation</th>');
+    expect(wordHtml(qs)).toContain('drafted from English entries');
+    expect(wordHtml(qs)).not.toContain('Translated from English knowledge-base entries');
+    const xlsx = await buildExcelExport(qs);
+    expect(xlsx).toBeTruthy();
+  });
+
+  it('the labels are exactly the ones the drafter writes', async () => {
+    const { TRANSLATION_LABEL, TRANSLATION_LABEL_FROM_JA } = await import('../../supabase/functions/_shared/drafting');
+    expect([TRANSLATION_LABEL, TRANSLATION_LABEL_FROM_JA]).toEqual([LABEL_EN, LABEL_JA]);
+    const { TRANSLATION_LABELS } = await import('../exportUtils');
+    expect(TRANSLATION_LABELS).toEqual({ en: LABEL_EN, ja: LABEL_JA });
   });
 });

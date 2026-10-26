@@ -91,7 +91,7 @@ When every question is accepted or skipped, choose **Record export** on the bulk
 - closes its open assignments;
 - lets the knowledge base learn from it (below).
 
-Then download the answers: **Excel (.xlsx)**, **CSV (.csv)** or **Word (.doc)**. Each file records how every answer was produced (drafted by a model, edited, or written by a person, with the model and prompt version) and who approved it, when and how: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV. Skipped questions are exported as "Not answered", the reference list at the end of a draft is left out of the exported answer, and the customer's own question numbers are kept.
+Then download the answers: **Excel (.xlsx)**, **CSV (.csv)** or **Word (.doc)**. Each file records how every answer was produced (drafted by a model, edited, or written by a person, with the model and prompt version) and who approved it, when and how: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV. Skipped questions are exported as "Not answered", and the customer's own question numbers are kept. The reference list and the translation label the app adds at the end of a draft are left out of the exported answer, exactly as the app wrote them; anything a person wrote stays. Instead, each file records which answers were drafted from entries in another language, under **Translation** in the provenance.
 
 The app never sends anything to the customer: you send the files.
 

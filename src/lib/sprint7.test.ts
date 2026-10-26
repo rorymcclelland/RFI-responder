@@ -37,8 +37,8 @@ describe('S7-3 provenance rows', () => {
   it('give the number, origin, model, prompt version, approver and time, in the RFI\'s order', () => {
     const rows = provenanceRows([q({ customerRef: '2(a)' }, 1), q({ finalAnswer: 'Changed.', approval: { by: 'u9', at: '2026-10-24T11:00:00Z', kind: 'bulk', threshold: 0.8 } }, 0)], names);
     expect(rows).toEqual([
-      { number: '1', origin: 'model-drafted, edited by a person', model: 'claude-haiku-5-5', promptVersion: 'draft-2026-10-23.1', approvedBy: 'a team member', approvedAt: '2026-10-24T11:00:00Z', approval: 'bulk at 80%' },
-      { number: '2(a)', origin: 'model-drafted, approved unedited', model: 'claude-haiku-5-5', promptVersion: 'draft-2026-10-23.1', approvedBy: 'Sarah Chen', approvedAt: '2026-10-24T10:00:00Z', approval: 'individual' },
+      { number: '1', origin: 'model-drafted, edited by a person', model: 'claude-haiku-5-5', promptVersion: 'draft-2026-10-23.1', approvedBy: 'a team member', approvedAt: '2026-10-24T11:00:00Z', approval: 'bulk at 80%', translation: '' },
+      { number: '2(a)', origin: 'model-drafted, approved unedited', model: 'claude-haiku-5-5', promptVersion: 'draft-2026-10-23.1', approvedBy: 'Sarah Chen', approvedAt: '2026-10-24T10:00:00Z', approval: 'individual', translation: '' },
     ]);
   });
   it('leave the model empty for a person-written answer', () => {
@@ -57,7 +57,7 @@ describe('S7-3 test 2: Excel', () => {
     expect(wb.keywords).toBe('ai-generated: yes; generator: RFI Respond');
     expect(wb.description).toMatch(/1 of 1 answered questions were drafted by a model \(claude-haiku-5-5\)/);
     const sheet = wb.getWorksheet('Provenance')!;
-    expect(sheet.getRow(1).values).toEqual([undefined, '#', 'Answer origin', 'Model', 'Prompt version', 'Approved by', 'Approved at', 'Approval']);
+    expect(sheet.getRow(1).values).toEqual([undefined, '#', 'Answer origin', 'Model', 'Prompt version', 'Approved by', 'Approved at', 'Approval', 'Translation']);
     expect(sheet.rowCount).toBe(3);
     expect(sheet.getRow(3).getCell(2).value).toBe('not answered');
   });
@@ -82,7 +82,7 @@ describe('S7-3 tests 4 and 5: CSV', () => {
   it('has an answer_origin column, and neutralises formula-like values', () => {
     const csv = buildCsvExport([q({}, 0), q({ question: '=HYPERLINK("x")' }, 1)], names);
     const [head, first, second] = csv.trim().split(/\r?\n/);
-    expect(head).toBe('"#","Question","Answer","answer_origin","model","prompt_version","approved_by","approved_at","approval"');
+    expect(head).toBe('"#","Question","Answer","answer_origin","model","prompt_version","approved_by","approved_at","approval","translation"');
     expect(first).toContain('"model-drafted, approved unedited","claude-haiku-5-5","draft-2026-10-23.1","Sarah Chen","2026-10-24T10:00:00Z","individual"');
     expect(second).toMatch(/^"2","'=HYPERLINK/);
   });
