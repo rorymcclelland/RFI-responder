@@ -617,6 +617,20 @@ An independent security review found no high issues, one medium (a translated dr
 
 **Proposed next.** The language work is finished as far as code can take it; what remains needs people (F-14, F-15). The choice is a hosted sprint (F-8, F-57, a public demo), the rerankers (F-20, needs a Voyage payment method), or pausing here.
 
+## Sprint 14: a hosted demo (chosen by Rory 26 October 2026, refined and answered the same day)
+
+Refinement: `docs/refinement/sprint-14.md`. Supabase Free plan in London, the app on Vercel, invite-only with reviewers as members, invitations by custom SMTP.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S14-1 | The audit log cannot be changed by the service role | F-57 | Ready, Sprint 14 |
+| S14-2 | Demo data a hosted project can load, with no sign-in for the fictional people | | Ready, Sprint 14 |
+| S14-3 | Ready to host: single-page routing, security headers, a build that refuses a local address, the go-live runbook and pack | | Ready, Sprint 14 |
+| S14-4 | Go live (Rory's steps from the go-live pack, Claude checking) | | Ready, Sprint 14 |
+| S14-5 | Say what is hosted, and how (README, data handling, providers, risk register) | | Ready, Sprint 14 |
+
+F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual (Rory, Q1).
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
