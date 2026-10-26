@@ -548,11 +548,23 @@ An independent security review found no high issues, three medium (a source gate
 
 **Proposed next.** Nothing small is left that affects what the app claims or how it decides. The choice is between C-1 (multilingual knowledge base, a large feature, its own refined sprint), a hosted sprint (F-8, F-57, a public demo), or pausing here.
 
+## Sprint 12: a multilingual knowledge base (C-1; chosen by Rory 26 October 2026, refined and answered the same day)
+
+Refinement: `docs/refinement/sprint-12.md`.
+
+| ID | Story | Status |
+|---|---|---|
+| S12-1 | Every entry knows its language (detected by the database) | Ready, Sprint 12 |
+| S12-2 | "Translated" means the answer crosses languages, in either direction | Ready, Sprint 12 |
+| S12-3 | Japanese answers are learned; translated ones wait for an admin's review | Ready, Sprint 12 |
+| S12-4 | Japanese entries to measure against, and the measurements per language pair | Ready, Sprint 12 |
+| S12-5 | Japanese entries in the demo, and the guide | Ready, Sprint 12 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
 |---|---|---|---|
-| C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
+| C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later Refined as Sprint 12 (26 October 2026) |
 
 ## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 onwards from Sprint 11; ranked at each review; see "Where every review item now lives")
 
