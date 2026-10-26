@@ -113,3 +113,14 @@ The development server listens on `127.0.0.1`, matching the README and Supabase'
 ## The sprint as a whole
 
 Order: quick wins first (S11-3, S11-11, S11-8, S11-5), then the database stories (S11-1, S11-7, S11-10), then S11-2, S11-4, S11-6, S11-9. Sizes: one L, three M and seven S, about four days. No spike. Then the independent security review, Rory's check on his PC, and the close.
+
+## Close (26 October 2026)
+
+**Delivered.** All eleven stories, done: F-42 to F-56 and BUG-33.
+
+**Evidence.** CI green on `sprint-11` (two runs failed while starting the Supabase stack, before any migration ran; the next passed unchanged, and Rory's local reset applied every migration); 810 unit and 263 database tests; `deno check` on the four Edge Functions. Rory checked on his PC: a revised answer on an exported response shows **Changed since export**, the export recorded again learns only the correction, the audit log lists every step, the new limit field, who skipped a question, and the screenshots (16 views, all fitting 768 px, taken with the Edge Functions running).
+
+**Deviations.** Rory chose, against the recommendation, to allow changes after an export (Q1), so S11-1 grew from M to L. BUG-33's first fix overlapped Help and was redone after the screenshot run. The S11-2 commit message mentions a change that landed in S11-4.
+
+**Back to the backlog.** Nothing unfinished. One new row: F-57 (the service role can change the audit log).
+

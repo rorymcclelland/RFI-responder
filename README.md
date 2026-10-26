@@ -64,6 +64,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 8 | Honest figures: 95% intervals on every published figure, cross-validated calibration |
 | 9 | Bulk approval needs the checker's "yes" in every set-up; the faithfulness judge tested on planted claims |
 | 10 | A user guide for every role, shown in the app under Help; an introduction on first sign-in; the technical reference |
+| 11 | What reading the code turned up: changes after an export recorded and re-exported, an audit-log screen, matching never silently incomplete, local mode calibrated |
 
 Each sprint followed the same cycle:
 

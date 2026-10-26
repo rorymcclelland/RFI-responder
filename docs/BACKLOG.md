@@ -497,10 +497,10 @@ An independent security review found no high or medium issues and four low ones 
 | Four security review findings and two notes | Done in Sprint 10 (review) |
 | 28 accuracy review findings | Done in Sprint 10 (review) |
 | BUG-29 to BUG-32 | Done in Sprint 10 |
-| BUG-33 The breadcrumb is squeezed to one letter beside the Help button | Backlog, from Sprint 10 review |
-| F-42 to F-56, found reading the code for the reference and by the accuracy review | Backlog, from Sprint 10 review |
+| BUG-33 The breadcrumb is squeezed to one letter beside the Help button | Backlog, from Sprint 10 review; done in Sprint 11 |
+| F-42 to F-56, found reading the code for the reference and by the accuracy review | Backlog, from Sprint 10 review; done in Sprint 11 |
 
-**Not yet in a sprint, ranked at the Sprint 10 review.** 1. Proposed Sprint 11 (below). 2. C-1 multilingual knowledge base. 3. F-14 and F-15 reviewed Japanese and near-miss items. 4. F-20 rerankers. 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4. 10. F-53 an audit-log screen.
+**Not yet in a sprint, ranked at the Sprint 10 review (superseded below).** 1. Proposed Sprint 11 (below). 2. C-1 multilingual knowledge base. 3. F-14 and F-15 reviewed Japanese and near-miss items. 4. F-20 rerankers. 5. F-34 review during processing (fails safe). 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4. 10. F-53 an audit-log screen.
 
 **Proposed Sprint 11: what reading the code turned up (for Rory to confirm).** F-42 (a decided question can be changed after export: correctness of the record), F-55 (the local default model has no calibration, so local mode never bulk-approves), F-43 (unindexed entries are invisible to matching), F-49 and F-50 (unaudited admin changes; owners set assignment fields), F-44 to F-46 (Edge Function limit and error messages), F-47 (`purge_old_usage` never runs), F-51 (`handle_new_user` search path), F-52 (decide the "no data in migrations" rule for configuration rows), BUG-33. All small, all in code the reference now describes, no spike.
 
@@ -516,17 +516,37 @@ Refinement: `docs/refinement/sprint-11.md`.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S11-1 | A change after an export is recorded, and the export recorded again (Rory, Q1) | F-42 | Ready, Sprint 11 |
-| S11-2 | No question is matched against an incomplete index without saying so; such questions are held from bulk approval | F-43 | Ready, Sprint 11 |
-| S11-3 | Local mode is calibrated: the Ollama default follows decision 0006 | F-55 | Ready, Sprint 11 |
-| S11-4 | Edge Function limits and errors say what happened | F-44, F-45, F-46 | Ready, Sprint 11 |
-| S11-5 | Old usage is deleted as stated | F-47 | Ready, Sprint 11 |
-| S11-6 | Unpriced usage is visible; rerankers priced from the published page | F-48 | Ready, Sprint 11 |
-| S11-7 | Admin changes all audited; assignments created as intended; empty search path | F-49, F-50, F-51 | Ready, Sprint 11 |
-| S11-8 | Configuration rows allowed in migrations, dated and sourced; sample data stays out | F-52 | Ready, Sprint 11 |
-| S11-9 | An audit-log screen for admins | F-53 | Ready, Sprint 11 |
-| S11-10 | Every setting on the governance page; who skipped a question is recorded | F-54 | Ready, Sprint 11 |
-| S11-11 | The development server on 127.0.0.1; a readable breadcrumb | F-56, BUG-33 | Ready, Sprint 11 |
+| S11-1 | A change after an export is recorded, and the export recorded again (Rory, Q1) | F-42 | Done, Sprint 11 |
+| S11-2 | No question is matched against an incomplete index without saying so; such questions are held from bulk approval | F-43 | Done, Sprint 11 |
+| S11-3 | Local mode is calibrated: the Ollama default follows decision 0006 | F-55 | Done, Sprint 11 |
+| S11-4 | Edge Function limits and errors say what happened | F-44, F-45, F-46 | Done, Sprint 11 |
+| S11-5 | Old usage is deleted as stated | F-47 | Done, Sprint 11 |
+| S11-6 | Unpriced usage is visible; rerankers priced from the published page | F-48 | Done, Sprint 11 |
+| S11-7 | Admin changes all audited; assignments created as intended; empty search path | F-49, F-50, F-51 | Done, Sprint 11 |
+| S11-8 | Configuration rows allowed in migrations, dated and sourced; sample data stays out | F-52 | Done, Sprint 11 |
+| S11-9 | An audit-log screen for admins | F-53 | Done, Sprint 11 |
+| S11-10 | Every setting on the governance page; who skipped a question is recorded | F-54 | Done, Sprint 11 |
+| S11-11 | The development server on 127.0.0.1; a readable breadcrumb | F-56, BUG-33 | Done, Sprint 11 |
+
+### Sprint 11 review (26 October 2026)
+
+**Checks, with evidence.** CI green on `sprint-11` (two earlier runs failed while starting the Supabase stack and the next passed with the same migrations; Rory's local reset applied them all); 810 unit and 263 database tests; the four Edge Functions pass `deno check`. Rory checked on his PC: an answer revised after export marks the response **Changed since export** and records it; the export recorded again learns only the correction (a proposal, as James is not an admin); the audit log lists each step in plain words; the new limit field; who skipped a question; and three screenshot runs, the last with all 16 views clean and fitting 768 px. Details in `docs/refinement/sprint-11.md`.
+
+An independent security review found no high issues, three medium (a source gate that a review would release could let an incompletely matched question into bulk approval; deleting an account broke the skip record or failed on archived responses) and eight low; all fixed and tested before the check.
+
+**Bugs found in the sprint.** BUG-33 came back: the first fix made the breadcrumb overlap **Help**; fixed again and checked in the screenshots.
+
+### Where every Sprint 11 review item now lives
+
+| Item | Now |
+|---|---|
+| F-42 to F-56, BUG-33 | Done in Sprint 11 |
+| Three medium and eight low security review findings | Done in Sprint 11 (review) |
+| F-57 The service role can change the audit log | Backlog, from Sprint 11 review |
+
+**Not yet in a sprint, ranked at the Sprint 11 review.** 1. C-1 multilingual knowledge base. 2. F-14 and F-15 reviewed Japanese and near-miss items (need a native reader and an outside reviewer). 3. F-20 rerankers (needs a Voyage payment method; prices now in place). 4. F-34 review during processing (fails safe). 5. F-57 audit log append-only for the service role. 6. F-8 leaked-password protection, with a hosted sprint. 7. F-2 generated database types. 8. F-3 invite screen. 9. F-4 Tailwind 4.
+
+**Proposed next.** Nothing small is left that affects what the app claims or how it decides. The choice is between C-1 (multilingual knowledge base, a large feature, its own refined sprint), a hosted sprint (F-8, F-57, a public demo), or pausing here.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -534,7 +554,7 @@ Refinement: `docs/refinement/sprint-11.md`.
 |---|---|---|---|
 | C-1 | Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 onwards from Sprint 10; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 onwards from Sprint 11; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -578,22 +598,23 @@ Refinement: `docs/refinement/sprint-11.md`.
 | F-39 | The screenshot script checks the app address is local, not the Supabase address in `.env` | Done, Sprint 8 (S8-5). From the Sprint 7 security review |
 | F-40 | With no checker configured (similarity only), 5 of 33 near misses reach the 80% bulk line, and bulk approval is allowed in that set-up | Done, Sprint 9 (S9-1). From the Sprint 8 calibration run; the fallback already missed the Sprint 2 bars. Consider holding similarity-only questions from bulk approval, as a reranker's are |
 | F-41 | A "yes" verdict with very low similarity (below about 0.45) is calibrated at about 85%, so is bulk-eligible; the lowest "yes" in the evaluation set has similarity 0.30 | Closed, Sprint 9 (S9-2): no floor (Rory, Q2); all six "yes" verdicts below similarity 0.40 were right, and below 0.45, 23 of 28 were (82%, against the 85% given); wrong ones occur in every band from 0.40 up, most often just above 0.40 (corrected after the security review). From the Sprint 8 security review; behaviour since Sprint 2 (the old table gave 87.5%). Consider a similarity floor for bulk approval |
-| F-42 | An assignee or the owner can still change a question on an exported, unarchived response; changing an accepted answer reopens it in a session already marked exported | From the Sprint 10 data model reference. `can_decide_question` ignores the export; consider refusing changes once the export is recorded |
-| F-43 | Entries not yet indexed are not matched at all while questions have vectors; indexing can stop at its daily cap or fail while questions still embed | From the Sprint 10 accuracy review. Consider a keyword fallback for unindexed entries, or holding processing until the index is complete |
-| F-44 | `embed` counts units against the daily cap even when it then refuses the request; reserved units are never given back | From the Sprint 10 Edge Functions reference |
-| F-45 | `embed-entries` can report the daily limit when the monthly budget is the cause, and returns raw database error text on two 500s | From the Sprint 10 Edge Functions reference |
-| F-46 | A missing Voyage key, or an unknown `EMBEDDING_PROVIDER`, gives "500 Unexpected error"; nothing in the app calls `embed` | From the Sprint 10 Edge Functions reference |
-| F-47 | `purge_old_usage` (13-month retention) is never scheduled | From the Sprint 10 data model reference; the data handling page states the retention |
-| F-48 | `rerank-3` and any non-default model have no `ai_prices` row, so their cost is recorded as unknown | From the Sprint 10 Edge Functions reference |
-| F-49 | Changes to `ai_prices`, and an admin setting `kb_entries.superseded_by` directly, are not audited; `opportunity_contributors` is not locked by archiving | From the Sprint 10 data model reference |
-| F-50 | Owners hold table-wide insert on `question_assignments`, so can set a new assignment's status (except closed), dates and question text | From the Sprint 10 data model reference |
-| F-51 | `handle_new_user` uses `search_path = public` rather than empty | From the Sprint 10 data model reference; low risk (members cannot create objects in `public`) |
-| F-52 | Migrations insert the settings, prices and learning thresholds, which the "no data in migrations" rule does not anticipate | From the Sprint 10 data model reference. A decision: allow configuration rows in migrations, or move them |
-| F-53 | No screen for the audit log; admins read it in the Supabase dashboard | From the Sprint 10 admin guide |
-| F-54 | `est_usd_per_embed_text` is not on the governance page; only who accepted is recorded, not who skipped or restored | From the Sprint 10 accuracy review |
-| F-55 | The Ollama default model in code is `bge-m3`, which has no calibration with the checker, while decision 0006 chose `qwen3-embedding:0.6b`; local mode therefore leaves every question uncalibrated | From the Sprint 10 accuracy review and configuration reference |
-| F-56 | `npm run dev` serves on `localhost`; the README and Supabase's `site_url` use `127.0.0.1`, which may not answer on every machine | From the Sprint 10 accuracy review |
-| BUG-33 | The workspace breadcrumb is squeezed to one letter of the response name at 1,280 px, now that Help sits beside it | From the Sprint 10 screenshots |
+| F-42 | An assignee or the owner can still change a question on an exported, unarchived response; changing an accepted answer reopens it in a session already marked exported | Done, Sprint 11 (S11-1). From the Sprint 10 data model reference. `can_decide_question` ignores the export; consider refusing changes once the export is recorded |
+| F-43 | Entries not yet indexed are not matched at all while questions have vectors; indexing can stop at its daily cap or fail while questions still embed | Done, Sprint 11 (S11-2). From the Sprint 10 accuracy review. Consider a keyword fallback for unindexed entries, or holding processing until the index is complete |
+| F-44 | `embed` counts units against the daily cap even when it then refuses the request; reserved units are never given back | Done, Sprint 11 (S11-4). From the Sprint 10 Edge Functions reference |
+| F-45 | `embed-entries` can report the daily limit when the monthly budget is the cause, and returns raw database error text on two 500s | Done, Sprint 11 (S11-4). From the Sprint 10 Edge Functions reference |
+| F-46 | A missing Voyage key, or an unknown `EMBEDDING_PROVIDER`, gives "500 Unexpected error"; nothing in the app calls `embed` | Done, Sprint 11 (S11-4). From the Sprint 10 Edge Functions reference |
+| F-47 | `purge_old_usage` (13-month retention) is never scheduled | Done, Sprint 11 (S11-5). From the Sprint 10 data model reference; the data handling page states the retention |
+| F-48 | `rerank-3` and any non-default model have no `ai_prices` row, so their cost is recorded as unknown | Done, Sprint 11 (S11-6). From the Sprint 10 Edge Functions reference |
+| F-49 | Changes to `ai_prices`, and an admin setting `kb_entries.superseded_by` directly, are not audited; `opportunity_contributors` is not locked by archiving | Done, Sprint 11 (S11-7). From the Sprint 10 data model reference |
+| F-50 | Owners hold table-wide insert on `question_assignments`, so can set a new assignment's status (except closed), dates and question text | Done, Sprint 11 (S11-7). From the Sprint 10 data model reference |
+| F-51 | `handle_new_user` uses `search_path = public` rather than empty | Done, Sprint 11 (S11-7). From the Sprint 10 data model reference; low risk (members cannot create objects in `public`) |
+| F-52 | Migrations insert the settings, prices and learning thresholds, which the "no data in migrations" rule does not anticipate | Done, Sprint 11 (S11-8). From the Sprint 10 data model reference. A decision: allow configuration rows in migrations, or move them |
+| F-53 | No screen for the audit log; admins read it in the Supabase dashboard | Done, Sprint 11 (S11-9). From the Sprint 10 admin guide |
+| F-54 | `est_usd_per_embed_text` is not on the governance page; only who accepted is recorded, not who skipped or restored | Done, Sprint 11 (S11-10). From the Sprint 10 accuracy review |
+| F-55 | The Ollama default model in code is `bge-m3`, which has no calibration with the checker, while decision 0006 chose `qwen3-embedding:0.6b`; local mode therefore leaves every question uncalibrated | Done, Sprint 11 (S11-3). From the Sprint 10 accuracy review and configuration reference |
+| F-56 | `npm run dev` serves on `localhost`; the README and Supabase's `site_url` use `127.0.0.1`, which may not answer on every machine | Done, Sprint 11 (S11-11). From the Sprint 10 accuracy review |
+| BUG-33 | The workspace breadcrumb is squeezed to one letter of the response name at 1,280 px, now that Help sits beside it | Done, Sprint 11 (S11-11). From the Sprint 10 screenshots |
+| F-57 | The service role, which the Edge Functions hold, has full rights on `audit_log`, so the log is append-only for admins but not for a compromised function key | From the Sprint 11 security review (low 4). Revoke update and delete from the service role, or move the log to a schema it cannot write |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked
