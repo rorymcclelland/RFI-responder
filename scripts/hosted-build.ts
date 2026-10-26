@@ -19,6 +19,8 @@ export function hostedBuildProblems(env: Record<string, string | undefined>): st
     else if (isLocalUrl(url) || ['localhost', '127.0.0.1', '[::1]'].includes(u.hostname)) problems.push('VITE_SUPABASE_URL points at this machine; a hosted build needs the hosted project.');
     else if (u.protocol !== 'https:') problems.push('VITE_SUPABASE_URL must use https.');
     else if (u.username || u.password) problems.push('VITE_SUPABASE_URL must not contain a user name or password.');
+    // Security review, L5: the content security policy allows only Supabase's hosts, so anything else fails at run time.
+    else if (!/^https:\/\/[a-z0-9]{20}\.supabase\.co\/?$/.test(url)) problems.push('VITE_SUPABASE_URL must be a hosted Supabase project address, https://<project-ref>.supabase.co.');
   }
   if (!key) problems.push('VITE_SUPABASE_ANON_KEY is not set: give the hosted project\'s anon (publishable) key.');
   else if (keyRole(key) === 'service_role' || /^sb_secret_/.test(key)) problems.push('VITE_SUPABASE_ANON_KEY holds the secret (service-role) key, which must never reach the browser.');

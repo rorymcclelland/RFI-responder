@@ -3,8 +3,11 @@ import { createRoot } from 'react-dom/client';
 import { readConfig } from './lib/config';
 import './index.css';
 
+// Sprint 14 security review (M2): only these two are read, so only these two are built into the
+// bundle; passing import.meta.env whole would publish every VITE_ variable the host defines.
+const appEnv = { VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY };
 const root = createRoot(document.getElementById('root')!);
-const config = readConfig(import.meta.env);
+const config = readConfig(appEnv);
 
 if (!config.ok) {
   root.render(
@@ -29,8 +32,15 @@ if (!config.ok) {
     </main>,
   );
 } else {
+  // Security review, L4: after a redeployment, a tab left open asks for chunks that no longer exist;
+  // reload once to get the new ones rather than failing.
+  window.addEventListener('vite:preloadError', () => {
+    try { if (sessionStorage.getItem('rfi-reloaded')) return; sessionStorage.setItem('rfi-reloaded', '1'); } catch { /* reload anyway */ }
+    window.location.reload();
+  });
   // Loaded only once the configuration is known to be complete.
   import('./App.tsx').then(({ default: App }) => {
+    try { sessionStorage.removeItem('rfi-reloaded'); } catch { /* not needed */ }
     root.render(
       <StrictMode>
         <App />

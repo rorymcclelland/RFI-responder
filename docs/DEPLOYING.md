@@ -7,7 +7,9 @@ Until Sprint 14 RFI Respond ran only locally. Sprint 14 sets up an invite-only h
 | Step | Why | Risk |
 |---|---|---|
 | Turn on leaked-password protection in the hosted Supabase project (Authentication settings) | Weak or leaked passwords are the main risk to a public sign-in page; the setting is not available on the local stack, and on Supabase's Free plan it is greyed out: the Sprint 14 demo runs on Free, so F-8 stays a residual there (Rory, Q1) | R-15 |
-| Keep sign-up off; invite users from the dashboard | Accounts are invite-only by design | R-08 |
+| Keep sign-up off, and turn it off as soon as the project exists, before the app is public; invite users from the dashboard | Accounts are invite-only by design; a new project allows sign-up until told otherwise | R-08 |
+| Two-factor sign-in on every account behind the deployment (Supabase, the static host, GitHub, the email provider, Anthropic, Voyage) | Anyone in one of those accounts controls the deployment, whatever the app does | R-06, R-08 |
+| Keys made for the deployment, each with its own spend limit, set from a file git ignores (`.env.hosted.local` beside `supabase/functions/.env.hosted.example`, copied from it) | The deployment's spend is capped on its own, its key can be revoked alone, and no key is typed on a command line | R-06, R-07 |
 | Set spending limits in the Anthropic and Voyage consoles | The app's own caps are estimates from dated prices; a provider limit stops a bug from spending past them | R-07 |
 | Switch on Voyage's zero-retention opt-out (dashboard, `Organization`, `Terms of Service`), or use local embeddings | Until then Voyage may keep and use embedded text | R-11 |
 | Put the API keys in the hosted project's Edge Function secrets, never in the app's environment | Anything in the app's `.env` is built into the browser bundle; the app refuses to start with a service-role key | R-06 |

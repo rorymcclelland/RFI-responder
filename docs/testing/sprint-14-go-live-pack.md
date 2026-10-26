@@ -2,7 +2,7 @@
 
 **Your accounts, your keys.** Every step here happens in your own Supabase, Vercel, Resend, Anthropic and Voyage accounts. No key, password or token goes into this file, the chat or the repository. Where a step needs one, it says where you keep it.
 
-Branch `main`, after Sprint 14's security review is merged (it holds `vercel.json`, the hosted build check and the demo data). About 90 minutes, most of it waiting for DNS and deployments. Do the steps in order: later ones need values from earlier ones.
+Branch `main`, after Sprint 14's security review is merged (it holds `vercel.json`, the hosted build checks, the demo data and `supabase/functions/.env.hosted.example`). About 90 minutes, most of it waiting for DNS and deployments. Do the steps in order: later ones need values from earlier ones.
 
 Two values you will note as you go (they are not secret):
 - **Project ref**: the Supabase project's ID (in its address, `https://<project-ref>.supabase.co`).
@@ -11,7 +11,8 @@ Two values you will note as you go (they are not secret):
 ## Before you start
 
 - A **Resend** account (or another SMTP provider) with a sending domain you own verified. Resend shows the DNS records to add; verification can take a while, so start it first.
-- The **Anthropic** and **Voyage** keys you use locally (in `supabase/functions/.env` on your PC).
+- **Two new keys for the demo**, one from Anthropic and one from Voyage, each in its own workspace or project with a monthly spend limit. Not the keys you use locally, so the demo's spend is capped on its own and its key can be revoked alone.
+- **Two-factor sign-in** on every account involved: Supabase (and, under the organisation's settings, require it for all members), Vercel, GitHub, Resend, Anthropic and Voyage. Anyone who gets into one of these gets the demo, whatever the app does.
 - Docker Desktop is not needed for these steps.
 
 ## Steps
@@ -22,8 +23,12 @@ Two values you will note as you go (they are not secret):
 
 1. In the Supabase dashboard, choose **New project**: name `rfi-respond-demo`, region **London (eu-west-2)**, plan **Free**.
 2. Generate a database password and save it in your password manager.
+3. Straight away, before anything is public (security review, M4), under **Authentication**:
+   - **Sign In / Providers**: turn **Allow new users to sign up** off. Keep **Email** on, with **Confirm email** on.
+   - Set **Password requirements**: minimum length `12`, **Letters and digits**. Leaked-password protection is greyed out on the Free plan (agreed, Q1).
+   - **Rate Limits**: set emails sent per hour to `10`. This limits how much mail anyone can make the project send, for example password-reset requests for the demo's fictional addresses.
 
-**Expected outcome:** the project is ready, and its address is `https://<project-ref>.supabase.co`.
+**Expected outcome:** the project is ready, its address is `https://<project-ref>.supabase.co`, and sign-up is off.
 
 **Result:** ☐ Done. Project ref:
 
@@ -47,10 +52,11 @@ Two values you will note as you go (they are not secret):
 
 **Flow**
 
-1. `npx supabase secrets set --env-file supabase/functions/.env`. This reads your keys from the file, so they never appear on the command line.
-2. `npx supabase secrets list`
+1. Copy `supabase\functions\.env.hosted.example` to `supabase\functions\.env.hosted.local`, and put the two demo keys in it. Git ignores `*.local` files.
+2. `npx supabase secrets set --env-file supabase/functions/.env.hosted.local`. This reads the keys from the file, so they never appear on the command line or in your shell history. It sets only the four values in that file, not everything in your local `.env`.
+3. `npx supabase secrets list`
 
-**Expected outcome:** the list shows `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, `EMBEDDING_PROVIDER` and `EMBEDDING_MODEL`, with their values hidden. `APP_ORIGIN` comes in step 5.
+**Expected outcome:** the list shows `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`, `EMBEDDING_PROVIDER` and `EMBEDDING_MODEL`, with their values hidden, and nothing else of yours. `APP_ORIGIN` comes in step 5.
 
 **Result:** ☐ Done. Notes:
 
@@ -60,14 +66,15 @@ Two values you will note as you go (they are not secret):
 
 1. In Supabase, open **Project Settings**, then **API**, and copy the **Project URL** and the **anon** (or **publishable**) key. Never copy the `service_role` or secret key.
 2. In Vercel, choose **Add New**, then **Project**, and import `rorymcclelland/RFI-responder`.
-3. Under **Environment Variables**, add `VITE_SUPABASE_URL` (the Project URL) and `VITE_SUPABASE_ANON_KEY` (the anon key). Leave the build settings as `vercel.json` sets them.
+3. Under **Environment Variables**, add `VITE_SUPABASE_URL` (the Project URL) and `VITE_SUPABASE_ANON_KEY` (the anon key), for Production and Preview. Add nothing else: the build refuses a secret key, and stops if a provider key ends up in the built app. Leave the build settings as `vercel.json` sets them.
 4. Choose **Deploy**.
+5. In the project's **Settings**, then **Deployment Protection**, keep **Vercel Authentication** on for preview deployments, so only you can open builds of other branches.
 
 **Expected outcome**
 
 - The build log shows `npm run build:hosted` passing, then the deployment is ready.
 - Opening the app address shows the RFI Respond sign-in page.
-- If the build stops with "The hosted build stopped", the message names the variable to fix.
+- If the build stops with "The hosted build stopped", or "The built app contains what must never reach a browser", the message names what to fix.
 
 **Result:** ☐ Done. App address:
 
@@ -82,18 +89,16 @@ Two values you will note as you go (they are not secret):
 
 **Result:** ☐ Done. Notes:
 
-### 6. Sign-in settings and email
+### 6. Email
 
 **Flow**
 
-1. **Authentication**, then **Sign In / Providers**:
-   - turn **Allow new users to sign up** off;
-   - keep **Email** on, with **Confirm email** on.
-2. In the same place, set **Password requirements**: minimum length `12`, **Letters and digits**. Leaked-password protection is greyed out on the Free plan (agreed, Q1).
-3. **Authentication**, then **Emails**, then **SMTP Settings**: turn on custom SMTP.
+1. **Authentication**, then **Emails**, then **SMTP Settings**: turn on custom SMTP.
    - Host `smtp.resend.com`, port `465`, user `resend`.
    - Password: a Resend API key with send access only (create it in Resend).
    - Sender: an address on your verified domain, with the sender name `RFI Respond demo`.
+
+2. Check **Authentication**, then **Rate Limits** still says `10` emails an hour: turning on custom SMTP can reset it to its default (30).
 
 **Expected outcome:** all settings saved; Supabase accepts the SMTP settings.
 
@@ -105,13 +110,14 @@ Two values you will note as you go (they are not secret):
 
 1. In Supabase, open the **SQL Editor** and start a new query.
 2. Paste the whole of `supabase\demo-hosted.sql` and choose **Run**.
-3. Run `select count(*) from kb_entries;` and `select name from opportunities;`
+3. Run `select count(*) from kb_entries;`, `select name from opportunities;` and `select email from auth.users;`
 
 **Expected outcome**
 
 - The first run reports success.
 - There are 132 entries: 130 seeded and 2 learned by the demo's exported response.
 - There are four responses, each marked "(fictional)".
+- `auth.users` holds only the eight fictional people, all at `@example.invalid`. Any other address means someone signed up before step 1 took effect: delete it under **Authentication**, then **Users**.
 
 **Result:** ☐ Done. Notes:
 
@@ -121,14 +127,25 @@ Two values you will note as you go (they are not secret):
 
 1. **Authentication**, then **Users**, then **Invite user**, with your own email address.
 2. Open the email, follow the link, and set a password (12 characters or more, letters and digits). Save it in your password manager.
-3. In the SQL Editor, replacing the address with yours: `update public.user_profiles set is_admin = true where id = (select id from auth.users where email = 'you@yourdomain');`
-4. Sign out of the app and back in.
+3. In the SQL Editor, run this, with your address in both places. It makes you the first admin and records that in the audit log:
+
+   ```sql
+   update public.user_profiles set is_admin = true
+    where id = (select id from auth.users where lower(email) = lower('you@yourdomain'))
+    returning id, display_name, is_admin;
+   insert into public.audit_log (actor, action, target_id, details)
+   select id, 'user.admin_granted', id, '{"by": "go-live step 8 (first admin)"}'::jsonb
+     from auth.users where lower(email) = lower('you@yourdomain');
+   ```
+
+4. Sign out of the app and back in, and wait a minute on the overview. The first sign-in indexes the 132 entries with Voyage (a few pence, well inside the daily limit).
 
 **Expected outcome**
 
 - The email arrives from your sending domain.
 - The link opens the app's **Welcome: choose a password** page.
-- After signing in again you see **Governance** in the menu.
+- The update returns one row, with `is_admin` true. If it returns none, the address does not match the invitation's.
+- After signing in again you see **Governance** in the menu, and no indexing error appears.
 
 **Result:** ☐ Done. Notes:
 
@@ -154,7 +171,7 @@ Two values you will note as you go (they are not secret):
 1. For each reviewer: **Authentication**, then **Users**, then **Invite user**, with their address.
 2. Tell them to expect the email, and that the demo holds synthetic data only.
 
-**Expected outcome:** each appears under **Users** as invited; they are members, not admins.
+**Expected outcome:** each appears under **Users** as invited; they are members, not admins. `select email from auth.users;` lists only you, your reviewers and the eight fictional people.
 
 **Result:** ☐ Done. Notes:
 
@@ -164,7 +181,7 @@ On the Free plan Supabase pauses a project after a period without use. Before a 
 
 ## To reset the demo
 
-Paste the whole of `supabase\demo-hosted-reset.sql` into the SQL Editor and run it. It removes every response and knowledge-base entry, including what reviewers added, and loads the demo again. Accounts, roles, limits, usage and the audit log are kept.
+Paste the whole of `supabase\demo-hosted-reset.sql` into the SQL Editor and run it. It removes every response and knowledge-base entry, including what reviewers added, and loads the demo again. Accounts, roles, limits, real people's usage and the audit log are kept; the demo's own recorded usage is replaced, not added to. The next sign-in indexes the entries again (a few pence).
 
 ## When you have finished
 

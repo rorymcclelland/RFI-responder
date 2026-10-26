@@ -186,6 +186,7 @@ Columns: `question_id`, `session_id`, `opportunity_id`, `decided_by`, `kind` (`i
 
 - **Member:** read all; no insert, update or delete.
 - **Admin:** the same as a member.
+- **Service role:** read and insert; since Sprint 14 it cannot update, delete or truncate approvals ([`20261102100000`](../../supabase/migrations/20261102100000_audit_log_append_only.sql)).
 - **Written only** by the `rfi_questions_record_approval` trigger. `record_export` reads the latest `decided_by` to decide whose approval a learned answer carries.
 
 Tests: [`processing.test.ts`](../../supabase/tests/db/processing.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts) (S3-2), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts), [`demo-seed.test.ts`](../../supabase/tests/db/demo-seed.test.ts).
@@ -245,11 +246,11 @@ Privileged and consequential changes.
 
 Created and access rules set in [`20261022120000_access_control.sql`](../../supabase/migrations/20261022120000_access_control.sql).
 
-Columns: `at`, `actor`, `action`, `target_id`, `details`. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`, and since Sprint 11 `question.changed_after_export`, `prices.changed`, `kb.changed` and `kb.deleted`. Admins read it on the governance page's **Audit log** tab ([`src/lib/auditLog.ts`](../../src/lib/auditLog.ts), whose test fails if an action has no wording).
+Columns: `at`, `actor`, `action`, `target_id`, `details`, and since Sprint 14 `actor_ref`: the same id as `actor`, with no link to the profile, so it survives the profile's deletion (when `actor` becomes NULL) and shows that one person did those things without naming them. `at` is always the time of insertion. The actions written today: `user.admin_granted`, `user.admin_removed`, `response.archived`, `response.deleted`, `response.exported`, `kb.reviewed`, `kb.confirmed`, `question.held`, `question.released`, `settings.changed`, and since Sprint 11 `question.changed_after_export`, `prices.changed`, `kb.changed` and `kb.deleted`. Admins read it on the governance page's **Audit log** tab ([`src/lib/auditLog.ts`](../../src/lib/auditLog.ts), whose test fails if an action has no wording).
 
 - **Member:** no access.
 - **Admin:** read; no insert, update or delete.
-- **Service role** (the Edge Functions): read and insert only; since Sprint 14 it cannot update, delete or truncate ([`20261102100000`](../../supabase/migrations/20261102100000_audit_log_append_only.sql), F-57).
+- **Service role** (the Edge Functions): read and insert only; since Sprint 14 it cannot update, delete or truncate the log, nor the approvals ([`20261102100000`](../../supabase/migrations/20261102100000_audit_log_append_only.sql), F-57).
 - **Written only** by `SECURITY DEFINER` functions and triggers (`set_user_admin`, `archive_response`, `delete_response`, `record_export`, `review_entry`, `bulk_accept`, `private.release_source_gates`, `stamp_settings_change`, `note_change_after_export`, `audit_price_change`).
 
 Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts), [`sprint14.test.ts`](../../supabase/tests/db/sprint14.test.ts).
@@ -429,6 +430,7 @@ Run only by the triggers named in the table sections; they cannot be called dire
 | `check_assignment_session` | `question_assignments_session_matches` | [`20261022140000`](../../supabase/migrations/20261022140000_access_control_hardening.sql) |
 | `check_assignment_question` | `question_assignments_question_matches` | [`20261023150000`](../../supabase/migrations/20261023150000_sprint3_review_fixes.sql) |
 | `guard_closed_assignments` | `question_assignments_guard_closed` | [`20261025130000`](../../supabase/migrations/20261025130000_sprint5_review_fixes.sql) |
+| `private.stamp_audit_row` | `audit_log_stamp`: every new audit row is dated now, whatever it claims, and `actor_ref` copies `actor` (Sprint 14) | [`20261102100000`](../../supabase/migrations/20261102100000_audit_log_append_only.sql) |
 | `set_entry_review_on_insert` | `kb_entries_review_on_insert` | [`20261031130000`](../../supabase/migrations/20261031130000_learning_across_languages.sql) |
 | `stamp_settings_change` | `ai_settings_stamp` | [`20261024110000`](../../supabase/migrations/20261024110000_usage_and_caps.sql) |
 | `price_usage` | `ai_usage_price` | [`20261024140000`](../../supabase/migrations/20261024140000_sprint4_review_fixes.sql) |

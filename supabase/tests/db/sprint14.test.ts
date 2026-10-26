@@ -48,6 +48,33 @@ describe('S14-1 the audit log cannot be changed by the service role (F-57)', () 
   });
 });
 
+describe('Sprint 14 security review (M3): the record cannot be rewritten, backdated or orphaned', () => {
+  it('the service role cannot change approvals either', async () => {
+    for (const sql of [`UPDATE approvals SET kind = 'bulk'`, `DELETE FROM approvals`, `TRUNCATE approvals`]) await refused(asServiceRole((q) => q(sql)));
+  });
+
+  it('an added row is stamped now, whatever time it claims', async () => {
+    const r = await asServiceRole(async (q) => (await q(`INSERT INTO audit_log (actor, action, target_id, details, at) VALUES (NULL, 'test.backdate', NULL, '{}', '2000-01-01') RETURNING at`)).rows[0]);
+    expect(new Date(r.at as string).getFullYear()).toBeGreaterThan(2025);
+  });
+
+  it('who acted survives the deletion of their profile, without naming them', async () => {
+    const gone = await createUser();
+    await one(`INSERT INTO audit_log (actor, action, target_id, details) VALUES ($1, 'test.orphan', NULL, '{}') RETURNING id`, [gone.id]);
+    await one(`DELETE FROM user_profiles WHERE id = $1 RETURNING id`, [gone.id]);
+    const r = await one<{ actor: string | null; actor_ref: string }>(`SELECT actor, actor_ref FROM audit_log WHERE action = 'test.orphan'`);
+    expect(r).toEqual({ actor: null, actor_ref: gone.id });
+  });
+
+  it('a definer function still writes its row with the right actor', async () => {
+    const r = await as(admin, async (q) => {
+      await q(`UPDATE ai_settings SET monthly_budget_gbp = monthly_budget_gbp`);
+      return (await q(`SELECT actor, actor_ref FROM audit_log ORDER BY at DESC, id DESC LIMIT 1`)).rows[0];
+    });
+    expect(r.actor_ref).toBe(r.actor);
+  });
+});
+
 describe('S14-2 hosted demo data loads on a hosted-like database', () => {
   const load = (file: string) => asSuperuser(readFileSync(join(ROOT, file), 'utf8'));
   const counts = () => one<{ kb: number; ja: number; opps: number; users: number; signable: number }>(
@@ -73,8 +100,12 @@ describe('S14-2 hosted demo data loads on a hosted-like database', () => {
     const real = await one<{ id: string }>(`INSERT INTO opportunities (name, created_by, owner_id) VALUES ('Reviewer response (S14-2)', $1, $1) RETURNING id`, [member.id]);
     await one(`INSERT INTO kb_entries (question, answer, tags, origin, created_by) VALUES ('Reviewer entry (S14-2)?', 'Yes.', '{}', 'manual', $1) RETURNING id`, [member.id]);
     expect(real.id).toBeTruthy();
+    const usage = async () => (await one<{ n: number }>(`SELECT count(*)::int AS n FROM ai_usage`)).n;
+    const before = await usage();
     await load('supabase/demo-hosted-reset.sql');
     expect(await counts()).toEqual({ kb: 132, ja: 30, opps: 4, users: 8, signable: 0 });
+    // Security review, L2: the demo's recorded usage is replaced, not added to.
+    expect(await usage()).toBe(before);
     const kept = await one<{ n: number; admin: boolean }>(`SELECT count(*)::int AS n, bool_or(is_admin) AS admin FROM user_profiles WHERE id IN ($1, $2)`, [member.id, admin.id]);
     expect(kept).toEqual({ n: 2, admin: true });
   });

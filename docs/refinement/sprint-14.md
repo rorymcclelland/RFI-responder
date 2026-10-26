@@ -111,3 +111,24 @@ Order: S14-6 first (a quick fix that also matters for the hosted app), then S14-
 | Q2 | Who can use the demo | Invite-only: Rory is the admin; reviewers he names are members (they can do everything an owner can on their own responses, but cannot change limits or the budget) **Rory: agreed** |
 | Q3 | How reviewers get in | A custom SMTP provider (for example Resend, sending from a domain Rory owns), so invitations and password resets work. The alternative is creating each account by hand in the dashboard and sending the password separately **Rory: agreed (custom SMTP)** |
 | Q4 | Where it runs | Supabase in Europe (Ireland, `eu-west-1`) and the app on Vercel, deployed from GitHub's main branch **Rory: Supabase in London (`eu-west-2`), the app on Vercel** |
+
+## Security review (27 October 2026)
+
+An independent review of `main..sprint-14` before the first public deployment found no high issue, four medium and nine low; all are fixed, or written into the go-live pack, before go-live.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | After a profile load that failed (for example while a Free project wakes), signing in again did nothing: the app thought the profile was loaded | A profile counts as loaded only once it is on screen; a failed load is retried at the next sign-in |
+| M2 | The app passed its whole environment to the configuration, so every `VITE_` value on the host would be built into the bundle (confirmed with a planted key) | The app reads only its two settings; the hosted build searches the bundle for provider keys, hosts and the secret key and stops the deployment if it finds one |
+| M3 | The service role could still erase who did what (deleting a profile nulls `actor`), backdate audit rows, and change approvals | Approvals are append-only for the service role too; every audit row is dated at insertion; `actor_ref` keeps who acted after a profile is deleted. Remaining: the service role can add a row in anyone's name (R-09) |
+| M4 | The go-live order left sign-up open between deploying the app and changing the settings | Sign-up off and the password rules in step 1, and a check that `auth.users` holds only expected accounts |
+| L1 | A slow profile result could show the previous person after a switch; signing out left their open response on screen; a changed role showed only after a reload | Results for someone no longer signed in are ignored; signing out resets every per-person view; the same person reported again refreshes the profile quietly |
+| L2 | Each demo reset added the demo's recorded usage again, counting towards the budget | The reset replaces it |
+| L3 | Setting secrets from the local `.env` would push every local setting | A hosted-only file, `.env.hosted.local`, from `.env.hosted.example`, with keys made for the demo |
+| L4 | A missing chunk after a redeploy was answered with the page, failing as a script; the favicon and `bolt.new` preview tags were left from the prototype | Assets are no longer rewritten; an open tab reloads once on a missing chunk; favicon and description fixed |
+| L5 | The build check accepted any https address, which the content security policy would then block | It requires a hosted Supabase project address. The policy allows any Supabase project rather than this one: the app only talks to its own, and the project address is not known when the file is written |
+| L6 | The host installed whatever npm 11 was newest | Pinned to one version |
+| L7 | Missing from the pack: two-factor sign-in, preview protection, the email rate limit, the cost of indexing on first sign-in | Added |
+| L8 | The first-admin SQL wrote no audit row and failed silently on a different case | It matches case-insensitively, returns the row and writes the audit row |
+| L9 | Anyone can ask for password-reset mail to the fictional addresses | The project's email rate limit is lowered to 10 an hour; a CAPTCHA is left for the backlog |
+

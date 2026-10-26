@@ -4,7 +4,7 @@ import {
   Plus, ChevronLeft, Briefcase,
   Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
-import { authEventAction } from './lib/authEvents';
+import { authEventAction, type AuthState } from './lib/authEvents';
 import { loadKnowledgeBase, importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
@@ -203,21 +203,26 @@ export default function App() {
   const [introOpen, setIntroOpen]                 = useState(false);
   const [settingPassword, setSettingPassword]     = useState(ARRIVED_FOR);
 
-  // Sprint 14 (S14-6, BUG-34): whose profile is loaded (or loading), so a session reported again for
-  // the same person (on refocus, or a renewed token) keeps everything on screen.
-  const loadedFor = useRef<string | null>(null);
+  // Sprint 14 (S14-6, BUG-34): whose profile is on screen, and whose is loading, so a session reported
+  // again for the same person (on refocus, or a renewed token) keeps everything on screen.
+  const auth = useRef<AuthState>({ loaded: null, loading: null });
 
   useEffect(() => {
     const onSession = (event: string, s: Session | null) => {
       setSession(s);
-      const action = authEventAction(event, loadedFor.current, s?.user.id ?? null);
-      if (action === 'load' && s) {
-        loadedFor.current = s.user.id;
-        void loadUserProfile(s.user.id);
+      const action = authEventAction(event, auth.current, s?.user.id ?? null);
+      if ((action === 'load' || action === 'refresh') && s) {
+        void loadUserProfile(s.user.id, action === 'refresh');
       } else if (action === 'clear') {
-        loadedFor.current = null;
+        // Security review, L1: nothing of the previous person's stays on screen.
+        auth.current = { loaded: null, loading: null };
         setCurrentUser(null);
         setAllUsers([]);
+        setActiveOpportunity(null);
+        setView('opportunities');
+        setHelpAt(null);
+        setIntroOpen(false);
+        setUsage(null);
         setAuthLoading(false);
       }
     };
@@ -240,13 +245,22 @@ export default function App() {
     loadUsageStatus(supabase).then(setUsage).catch(() => setUsage(null));
   }, [currentUser, view, activeOpportunity]);
 
-  async function loadUserProfile(userId: string) {
-    // Only when the person changes (S14-6): the full-page loading screen unmounts the app.
-    setAuthLoading(true);
+  async function loadUserProfile(userId: string, quiet = false) {
+    // The loading screen only when the person changes (S14-6): it unmounts the app. A quiet refresh
+    // (the same person reported again) updates the profile in place.
+    if (!quiet) { auth.current = { loaded: null, loading: userId }; setAuthLoading(true); }
     const [{ data }, onboardedAt] = await Promise.all([
       supabase.from('user_profiles').select(PROFILE_COLUMNS).eq('id', userId).maybeSingle(),
       loadOnboardedAt(supabase),
     ]);
+    // Security review, L1: a result for someone who is no longer signed in is ignored.
+    if (quiet ? auth.current.loaded !== userId : auth.current.loading !== userId) return;
+    if (quiet) {
+      if (data) setCurrentUser((u) => (u && u.id === userId ? { ...u, displayName: data.display_name, jobTitle: data.job_title ?? '', department: data.department ?? '', expertiseTags: data.expertise_tags ?? [], isAdmin: data.is_admin } : u));
+      return;
+    }
+    // Security review, M1: only a loaded profile counts as on screen; a failed load is retried at the next sign-in.
+    auth.current = { loaded: data ? userId : null, loading: null };
     if (data) {
       setCurrentUser({
         id: data.id, displayName: data.display_name,
