@@ -8,8 +8,10 @@
  * - no links or email addresses unless a cited entry contains them;
  * - no trace of the system prompt (the canary).
  *
- * Japanese questions get Japanese drafts, labelled as translated from English entries (Sprint 2,
- * Q1); they are kept out of bulk approval until the Japanese evaluation items are reviewed.
+ * A draft is written in the question's language. Since Sprint 12 the label is decided in code from
+ * the languages of the question and the cited entries, either way round (translated from English or
+ * from Japanese), not by the prompt; translated and Japanese drafts are kept out of bulk approval until
+ * the Japanese evaluation items are reviewed.
  */
 import { PROMPT_CANARY, type ClaudeClient } from './claude.ts';
 import { LINK_PATTERN, safeNote } from './safe-text.ts';

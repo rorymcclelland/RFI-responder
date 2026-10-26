@@ -16,7 +16,7 @@ import type { ClaudeClient } from './claude.ts';
 import { draftGrounded } from './drafting.ts';
 import { HttpError } from './errors.ts';
 import { gateQuestion } from './gates.ts';
-import { selectDraftSources, translatedFrom, type MatchRow, type Source } from './sources.ts';
+import { draftBody, selectDraftSources, textLanguage, translatedFrom, type Language, type MatchRow, type Source } from './sources.ts';
 
 export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'japanese' | 'unreviewed_source' | 'stale_source' | 'unindexed_entries';
 export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
@@ -95,11 +95,11 @@ export function validateProcessRequest(body: unknown): { sessionId: string; ques
   return { sessionId: b.sessionId, questionIds: [...new Set(b.questionIds as string[])] };
 }
 
-/** Japanese if it contains kana or kanji, after folding half-width katakana (NFKC, security review). */
 /** The entries an assembled draft is built from (as draftAnswer uses them). */
 const assembledFrom = (sources: Source[]) => sources.filter((s) => s.score > 0).map((s) => s.entry.id);
 
-export const languageOf = (text: string): 'en' | 'ja' => (/[぀-ヿ一-鿿]/.test(text.normalize('NFKC')) ? 'ja' : 'en');
+/** A question's language: the database's rule for entries (Sprint 12 security review, L3). */
+export const languageOf = (text: string): Language => textLanguage(text);
 
 /** Run `fn` over `items`, at most `limit` at a time, keeping order. */
 async function pool<T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
@@ -217,9 +217,16 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
     if (!gateValue) {
       const from = translatedFrom(language, cited.length ? sources.filter((s) => cited.includes(s.entry.id)).map((s) => s.entry) : sources.map((s) => s.entry));
       const name = (l: string) => (l === 'ja' ? 'Japanese' : 'English');
+      // Security review, M1: a draft in the other language is translated whatever it cites (an entry's
+      // text could ask for the other language while the draft cites only same-language entries).
+      const drafted = kind === 'generated' || kind === 'assembled' ? textLanguage('', draftBody(text)) : language;
       if (from) {
         gateValue = 'translation';
         gateReason = `${name(language)} question, answered from ${name(from)} entries: the draft is translated, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.`;
+      } else if (drafted !== language) {
+        gateValue = 'translation';
+        gateReason = `${name(language)} question, but the draft is in ${name(drafted)}: it is reviewed individually, and should be rewritten in ${name(language)} before it is sent.`;
+        notes.push(`The draft is not in the question's language (${name(drafted)}, not ${name(language)}).`);
       } else if (language === 'ja') {
         gateValue = 'japanese';
         gateReason = 'Japanese question, answered from Japanese entries: nothing is translated, but the Japanese drafting is unverified, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.';
@@ -243,7 +250,11 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
 
     // Sprint 4: a draft resting on an entry nobody has reviewed, or one overdue for review, is
     // never bulk-approved. An earlier gate (pricing, legal, translation, unchecked) is kept.
-    if (!gateValue && cited.length > 0 && deps.sourceStatus) {
+    // Security review, L5: a language gate is never released, so it is kept, but what the source check
+    // finds is added to its reason, so the card still says an entry needs an admin's review.
+    const languageGate = gateValue === 'translation' || gateValue === 'japanese';
+    if ((!gateValue || languageGate) && cited.length > 0 && deps.sourceStatus) {
+      const held = { value: gateValue, reason: gateReason };
       try {
         const states = await deps.sourceStatus(cited);
         const unreviewed = cited.filter((r) => !states.get(r)?.reviewed);
@@ -259,6 +270,10 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       } catch {
         gateValue = 'unchecked';
         gateReason = 'The review status of the cited entries could not be read, so it is reviewed individually.';
+      }
+      if (languageGate && gateValue !== held.value) {
+        gateReason = gateValue === 'unchecked' ? `${held.reason} The review status of the cited entries could not be read either.` : `${held.reason} Also: ${gateReason}`;
+        gateValue = held.value;
       }
     }
 

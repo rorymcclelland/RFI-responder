@@ -18,7 +18,7 @@ The bar at the top of every screen has:
 - **Assignments**: questions colleagues have asked you to answer or check, and the ones you have sent to others.
 - **Team**: everyone in your organisation's workspace, with their job titles and areas of expertise.
 - **Governance** (admins only): spend, limits, and knowledge-base entries waiting for review.
-- **KB**: the knowledge base, with the number of entries. Open it to search entries, add one, or import a spreadsheet of questions and answers. Entries can be in English or Japanese; a question in one language finds entries in the other.
+- **KB**: the knowledge base, with the number of entries. Open it to search entries, add one, or import a spreadsheet of questions and answers. Entries can be in English or Japanese; matching is by meaning, so a question can match an entry in the other language.
 - **Help**: this guide, and the introduction.
 - Your name, and **Sign out** (the arrow icon).
 

@@ -301,7 +301,8 @@ describe('S3-4 learning at export', () => {
     await as(owner, async (q) => {
       for (const id of [pricing, ja, legal]) await accept(q, id);
       const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
-      expect(r.rows[0].record_export).toMatchObject({ not_learned_pricing: 1, added: 2 });
+      // Sprint 12 security review (M3): a draft gated as translated is learned as a translation.
+      expect(r.rows[0].record_export).toMatchObject({ not_learned_pricing: 1, added: 1, translated: 1 });
       expect((await q(`SELECT 1 FROM kb_entries WHERE question = 'What is the price? (t4)'`)).rowCount).toBe(0);
       expect((await q(`SELECT language FROM kb_entries WHERE question = '価格は？(t4)'`)).rows[0].language).toBe('ja');
     });

@@ -110,7 +110,7 @@ Recording the export turns edited and person-written answers into knowledge-base
 - a draft accepted unedited confirms the entries it cited, so their review date moves on;
 - a member's answer that would replace an entry, or a member's new entry, waits for an admin's review;
 - Japanese answers are learned like English ones, and an answer only ever replaces an entry in its own language;
-- an answer accepted from a translated draft, edited or not, is learned as a new entry that names the entries it was translated from, and waits for an admin's review even when an admin approved it: approving an answer to send is not the same as approving a translation for every future response;
+- an answer accepted from a translated draft, or from a draft citing a translation no admin has reviewed yet, edited or not, is learned as a new entry that names the entries it was translated from, and waits for an admin's review even when an admin approved it: approving an answer to send is not the same as approving a translation for every future response;
 - pricing answers and unchecked questions are never learned.
 
 ## 6. Finish

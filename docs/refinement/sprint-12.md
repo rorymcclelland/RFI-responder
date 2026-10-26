@@ -99,3 +99,24 @@ Languages beyond English and Japanese. A native reader's review of the Japanese 
 ## The sprint as a whole
 
 Order: S12-1, S12-2, S12-3 (each builds on the one before), S12-4 (needs S12-1 for the language of the new entries), S12-5. Sizes: four M and one S, about four days, then the independent security review, Rory's evaluation run and check on his PC, and the close.
+
+## Security review (26 October 2026)
+
+An independent review of `main..sprint-12` found no high-severity issue, three medium and seven low; all are fixed, each with a test.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | An English question could get a Japanese draft with no gate: an uncited Japanese entry asked for Japanese, and only cited entries were compared | A draft not in the question's language is gated `translation` whatever it cites (`process-core.ts`); red-team entry k006 added |
+| M2 | Citing an unreviewed machine translation, an admin's answer was learned as reviewed knowledge and replaced it, with its provenance lost | `record_export` treats a draft citing an unreviewed translation as translated and carries its `translated_from` forward |
+| M3 | A `translation`-gated draft whose accepted answer was mostly Japanese was learned as reviewed and replaced its Japanese source | Translated is decided against the question's language and the stored gate, not the answer's language |
+| L1 | Bracketed text anywhere in an answer was stripped before learning, which could reverse its meaning | `private.learnable_text` removes only the app's exact label and reference list, at the end |
+| L2 | Trailing line breaks were kept, so removing the reference line counted as an edit | Trimmed at both ends |
+| L3 | The language rules disagreed (a question with one kanji was Japanese; NFKC only in TypeScript) | One rule everywhere: a fifth of the question or answer in kana or kanji, after NFKC folding; a test checks the SQL and TypeScript agree |
+| L4 | A translation named every cited entry, including ones in its own language | Only the entries in the other language |
+| L5 | A language gate hid that a cited entry needed review | The source check's finding is added to the reason |
+| L6 | Wording: "a question finds entries in the other language" before the English-to-Japanese figure existed; the card said every translated draft carries a label (assembled drafts do not) | Reworded |
+| L7 | The evaluation's checker cache could reuse a verdict after a Japanese entry was corrected | A Japanese entry's cache key includes a hash of its text |
+
+Also from the review: the language report now says Japanese-to-Japanese is likely optimistic (both sides are Claude's translations of the same originals) and counts near misses with unreadable checks.
+
+**Changed from the refinement.** S12-2 said the drafting prompt would name the direction of the translation. The label is instead added by code after the checks, from the languages of the question and the cited entries, which an entry's text cannot change (k006); the prompt is unchanged, so the drafting evaluation still holds. **Left for the backlog:** the knowledge-base import still treats the same question as a duplicate whatever the language, while the database now allows one current entry per question in each language.

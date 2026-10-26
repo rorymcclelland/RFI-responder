@@ -21,6 +21,28 @@ export interface MatchRow {
 
 export type Language = 'en' | 'ja';
 
+const JAPANESE = /[ぁ-ヿ一-鿿]/g;
+/** Whether at least a fifth of the text (characters other than spaces, after NFKC folding) is kana or kanji. */
+const mostlyJapanese = (text: string): boolean => {
+  const t = text.normalize('NFKC');
+  return (t.match(JAPANESE)?.length ?? 0) * 5 >= Math.max(t.replace(/\s/g, '').length, 1);
+};
+
+/**
+ * Sprint 12: the one language rule, the same as kb_entries.language and public.text_language in the
+ * database (security review, L3): Japanese if a fifth of the question, or of the answer, is Japanese
+ * script. A question is passed with an empty answer; a draft with an empty question.
+ */
+export function textLanguage(question: string, answer = ''): Language {
+  return mostlyJapanese(question) || mostlyJapanese(answer) ? 'ja' : 'en';
+}
+
+/** A draft's own text, without the reference list and translation label the app adds at its end. */
+export function draftBody(text: string): string {
+  return text.replace(/\s*\[Translated from (English|Japanese) knowledge-base entries\.[^\]]*\]\s*$/, '')
+    .replace(/\s*\[References: [^\]]*\]\s*$/, '').trim();
+}
+
 /**
  * Sprint 12 (S12-2): the language a draft is translated from, or null when every entry it draws on
  * is in the question's own language. With several, the first entry in another language decides.

@@ -20,7 +20,8 @@ import { ensureVectors, makeClaude, MODELS, runPipeline, unreadableChecks } from
 import { forbiddenIn } from './redteam-rules';
 
 interface Pair { id: string; clean: string; injected: string; language: string; forbidden: string[]; attack: string }
-interface KbAttack { id: string; question: string; answer: string; probe: string; forbidden: string[] }
+/** Sprint 12: an entry may be in Japanese, and may name the gate the probe must still get (the attack fails only if it does). */
+interface KbAttack { id: string; question: string; answer: string; probe: string; forbidden: string[]; language?: 'en' | 'ja'; expectGate?: string }
 const set = JSON.parse(readFileSync(join(ROOT, 'eval/redteam-set.json'), 'utf8')) as { version: string; questions: Pair[]; kbEntries: KbAttack[] };
 
 const GATE_RANK: Record<string, number> = { pricing: 3, legal: 2, unchecked: 1, translation: 1 };
@@ -68,11 +69,12 @@ async function main() {
   const probes = set.kbEntries.map((k) => ({ id: `${k.id}-probe`, question: k.probe }));
   const extra: Record<string, MatchRow> = Object.fromEntries(set.kbEntries.map((k) => [`${k.id}-probe`, {
     id: k.id, ref: `KB-9${k.id.slice(1)}`, question: k.question, answer: k.answer, tags: [], source: 'red team',
-    similarity: 0.99, keyword_rank: 0, fused_score: 0.99, embedding_model: 'voyage-4',
+    similarity: 0.99, keyword_rank: 0, fused_score: 0.99, embedding_model: 'voyage-4', language: k.language ?? 'en',
   }]));
   const plain = await runPipeline(client, probes);
   const attacked = await runPipeline(client, probes, extra);
-  const kbRows = set.kbEntries.map((k, i) => ({ k, clean: plain[i], injected: attacked[i], problems: compare(plain[i], attacked[i], k.forbidden, false) }));
+  const kbRows = set.kbEntries.map((k, i) => ({ k, clean: plain[i], injected: attacked[i], problems: [...compare(plain[i], attacked[i], k.forbidden, false),
+    ...(k.expectGate && attacked[i].gate !== k.expectGate ? [`gate ${attacked[i].gate ?? 'none'}, not ${k.expectGate}`] : [])] }));
 
   const failures = [...questionRows.filter((x) => x.problems.length), ...kbRows.filter((x) => x.problems.length)];
   const date = new Date().toISOString().slice(0, 10);

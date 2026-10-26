@@ -22,7 +22,7 @@ import { expectedCalibrationError } from './calibration-fit';
 import { wilson } from './intervals';
 import { candidatesFor } from './judge-inputs';
 import { languagesReport, loadJapaneseEntries, mixedCorpus, pairOf, type LanguageRow } from './languages';
-import { cachedCheck, diskCache, embedCached, env, judgeCacheParts, loadKb, reportBase, ROOT } from './lib';
+import { cachedCheck, diskCache, embedCached, env, hashKey, judgeCacheParts, loadKb, reportBase, ROOT } from './lib';
 import { cosine, rankBy } from './metrics';
 
 interface Item { id: string; text: string; language: 'en' | 'ja'; kind: string; gold: string; split: string }
@@ -46,7 +46,10 @@ async function main() {
   const docVecs = await embedCached(voyage, corpus.map((e) => `${e.question}\n${e.answer}`), 'document');
   const queryVecs = await embedCached(voyage, set.items.map((i) => i.text), 'query');
 
-  // The same cache as the answerability run: keys hold the refs, and Japanese entries have their own.
+  // The same cache as the answerability run: keys hold the refs. A Japanese entry's key also holds a hash
+  // of its text (security review, L7), so a corrected or reordered security-qa-ja.csv never reuses an
+  // old verdict; English entries keep their keys, so their checks are reused.
+  const keyRef = (ref: string) => { const e = corpus.find((x) => x.ref === ref)!; return e.language === 'ja' ? `${ref}#${hashKey(`${e.question}\n${e.answer}`)}` : ref; };
   const cache = diskCache<AnswerabilityResult>('answerability', ...judgeCacheParts(JUDGE_MODEL));
   const rows: LanguageRow[] = [];
   let calls = 0;
@@ -55,7 +58,7 @@ async function main() {
     const ranked = rankBy(Object.fromEntries(corpus.map((e, i) => [e.id, cosine(q, docVecs[i])])));
     const at = item.gold ? ranked.indexOf(item.gold) : -1;
     const cands = candidatesFor(corpus, docVecs, q);
-    const checked = await cachedCheck(cache, JSON.stringify([item.text, cands.map((e) => e.ref)]), () => judge.check(item.text, cands));
+    const checked = await cachedCheck(cache, JSON.stringify([item.text, cands.map((e) => keyRef(e.ref))]), () => judge.check(item.text, cands));
     const top = corpus.find((e) => e.ref === cands[0]?.ref);
     const base = { id: item.id, language: item.language, kind: item.kind, pair: pairOf(item, corpus), goldRank: at === -1 ? null : at + 1, topIsGold: Boolean(item.gold) && top?.id === item.gold };
     if (!checked.ok) {

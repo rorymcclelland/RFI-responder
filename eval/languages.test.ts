@@ -33,13 +33,16 @@ describe('S12-4 Japanese entries', () => {
     expect(30 - calibrate).toBeGreaterThanOrEqual(10);
   });
 
-  it('the TypeScript language rule says what the database rule says', () => {
-    const sql = readFileSync(join(ROOT, 'supabase/migrations/20261031100000_entry_language.sql'), 'utf8');
-    expect(sql).toContain("question ~ '[ぁ-ヿ一-鿿]'");
-    expect(sql).toMatch(/\* 5 >= greatest\(length\(answer\), 1\)/);
+  it('the TypeScript language rule says what the database rule says (security review, L3)', () => {
+    const one = (m: string) => readFileSync(join(ROOT, m), 'utf8').replace(/\s+/g, ' ');
+    const rule = (x: string) => `length(regexp_replace(normalize(${x}, NFKC), '[^ぁ-ヿ一-鿿]', '', 'g')) * 5 >= greatest(length(regexp_replace(normalize(${x}, NFKC), '\\s', '', 'g')), 1)`;
+    expect(one('supabase/migrations/20261031100000_entry_language.sql')).toContain(`${rule('question')} OR ${rule('answer')}`);
+    expect(one('supabase/migrations/20261031130000_learning_across_languages.sql')).toContain(`${rule('p_question')} OR ${rule('p_answer')}`);
     expect(textLanguage('How?', 'An answer naming 東京 once, in an otherwise English sentence.')).toBe('en');
+    expect(textLanguage('Do you have a data centre in 東京?', 'Yes.')).toBe('en');
     expect(textLanguage('How?', '日本語の回答です。')).toBe('ja');
     expect(textLanguage('どう？', 'x')).toBe('ja');
+    expect(textLanguage('ｶﾀｶﾅﾃﾞｽ?', 'x')).toBe('ja');
   });
 
   it('stops on a row whose number is missing or out of range, rather than mismatching it', () => {
@@ -114,7 +117,8 @@ describe('S12-4 report', () => {
 
   it('counts unreadable checks and leaves them out of the calibration', () => {
     const { markdown } = report([...good, row({ confidence: null, unreadable: true })]);
-    expect(markdown).toContain('Checks unreadable after one retry: 1');
+    expect(markdown).toContain('Checks unreadable after one retry: 1, of which 0 near misses');
+    expect(markdown).toContain('Japanese-to-Japanese is likely optimistic');
     expect(markdown).toContain('| English to English | 10 | 10 | 10 of 10 | 0.050 |');
   });
 });

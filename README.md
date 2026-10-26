@@ -22,7 +22,7 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 - **It is not a hosted product.** It runs on a local PC against a local Supabase stack. A hosted deployment would need the steps in [`docs/DEPLOYING.md`](docs/DEPLOYING.md) first.
 - **Its figures come from small synthetic sets** (363 questions written by Claude, unreviewed by anyone outside the project). Read them as estimates: [`docs/evals/README.md`](docs/evals/README.md).
 - **The checker is not perfectly consistent.** Asked again, it changed its verdict for 7.2% of test questions, mostly between "yes" and "partly".
-- **English and Japanese only.** Entries and questions can be in either, and a question finds entries in the other. A draft written across languages is labelled as translated; translated and Japanese drafts are always reviewed individually, and an answer learned from a translation waits for an admin's review. The app's Japanese has not been checked by a native reader.
+- **English and Japanese only.** Entries and questions can be in either, and matching is by meaning, so a question can match an entry in the other language. A draft written across languages is labelled as translated; translated and Japanese drafts are always reviewed individually, and an answer learned from a translation waits for an admin's review. The app's Japanese has not been checked by a native reader.
 - **It is not a compliance product.** The [governance pack](docs/governance/) maps the controls to the EU AI Act and the NIST AI Risk Management Framework, but makes no claim of compliance.
 - **No PDF or pasted-email input yet**, and users are invited through the Supabase dashboard, not the app.
 

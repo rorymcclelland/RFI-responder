@@ -16,8 +16,10 @@ CREATE UNIQUE INDEX kb_entries_current_question ON public.kb_entries (question_k
 -- the generated column; a database test checks they agree.
 CREATE OR REPLACE FUNCTION public.text_language(p_question text, p_answer text)
 RETURNS text LANGUAGE sql IMMUTABLE SET search_path = '' AS $$
-  SELECT CASE WHEN p_question ~ '[ぁ-ヿ一-鿿]'
-                OR length(regexp_replace(p_answer, '[^ぁ-ヿ一-鿿]', '', 'g')) * 5 >= greatest(length(p_answer), 1)
+  SELECT CASE WHEN length(regexp_replace(normalize(p_question, NFKC), '[^ぁ-ヿ一-鿿]', '', 'g')) * 5
+                     >= greatest(length(regexp_replace(normalize(p_question, NFKC), '\s', '', 'g')), 1)
+                OR length(regexp_replace(normalize(p_answer, NFKC), '[^ぁ-ヿ一-鿿]', '', 'g')) * 5
+                     >= greatest(length(regexp_replace(normalize(p_answer, NFKC), '\s', '', 'g')), 1)
               THEN 'ja' ELSE 'en' END
 $$;
 
@@ -55,6 +57,30 @@ ALTER TABLE public.rfi_questions ADD CONSTRAINT rfi_questions_learn_outcome_chec
   CHECK (learn_outcome IN ('added', 'superseded', 'proposed', 'translated', 'confirmed', 'not_confirmed_source', 'not_learned_pricing',
                            'not_learned_japanese', 'not_learned_empty', 'not_learned_unchecked'));
 
+-- Sprint 12 security review (L1, L2): what is learned from an answer is its text without the notes
+-- the app adds to a draft: the translation label and the reference list, each only as the app writes
+-- them and only at the very end, so text an approver writes in brackets is never removed. Spaces and
+-- line breaks at either end are trimmed.
+CREATE OR REPLACE FUNCTION private.learnable_text(p text)
+RETURNS text LANGUAGE plpgsql IMMUTABLE SET search_path = '' AS $$
+DECLARE
+  ws  constant text := E' \n\r\t';
+  t   text := rtrim(coalesce(p, ''), E' \n\r\t');
+  lbl text;
+BEGIN
+  -- The labels in supabase/functions/_shared/drafting.ts (a unit test checks they are the same).
+  FOREACH lbl IN ARRAY ARRAY['[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]',
+                             '[Translated from Japanese knowledge-base entries. Someone who reads Japanese should check it against them before it is sent.]'] LOOP
+    IF right(t, length(lbl)) = lbl THEN
+      t := rtrim(left(t, length(t) - length(lbl)), ws);
+    END IF;
+  END LOOP;
+  t := regexp_replace(t, '\[References: KB-[0-9]+(, KB-[0-9]+)*\]$', '');
+  RETURN btrim(t, ws);
+END;
+$$;
+REVOKE ALL ON FUNCTION private.learnable_text(text) FROM PUBLIC, anon, authenticated;
+
 CREATE OR REPLACE FUNCTION public.record_export(p_session uuid)
 RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
@@ -77,7 +103,9 @@ DECLARE
   n             jsonb := '{}'::jsonb;
   reexport      boolean;
   lang          text;
+  qlang         text;
   translated    boolean;
+  from_refs     text[];
 BEGIN
   SELECT * INTO sess FROM public.rfi_sessions s WHERE s.id = p_session FOR UPDATE;
   IF NOT FOUND THEN
@@ -101,20 +129,37 @@ BEGIN
      ORDER BY position
   LOOP
     new_id := NULL;
-    answer := btrim(coalesce(q.final_answer, q.generated_answer, ''));
     -- Sprint 12 (S12-3): the reference list and a translation label are notes on the draft, not
-    -- knowledge; they are left out of what is learned.
-    answer := btrim(regexp_replace(answer, '\[(References?:|Translated from )[^]]*\]', '', 'gi'));
+    -- knowledge; they are left out of what is learned (security review, L1 and L2: exactly as the app
+    -- writes them, at the end only).
+    answer := private.learnable_text(coalesce(q.final_answer, q.generated_answer, ''));
+    -- The learned entry's language: its own text's, as the generated column will have it.
     lang := public.text_language(q.question, answer);
-    -- Translated: a draft (generated or assembled, edited or not) whose cited entries include one in
-    -- another language than the answer's.
-    translated := q.draft_kind IN ('generated', 'assembled') AND EXISTS (
-      SELECT 1 FROM public.kb_entries k WHERE k.ref = ANY (coalesce(q.cited_refs, '{}'::text[])) AND k.language <> lang);
+    -- Translated (security review, M2 and M3): decided against the question's language, as when the
+    -- question was processed, not the answer's. A draft (generated or assembled, edited or not) is
+    -- translated when it was gated as one, when a cited entry is in the other language, or when a
+    -- cited entry is itself an unreviewed translation (its provenance is carried forward, so an
+    -- unreviewed machine translation never becomes reviewed knowledge by being cited).
+    qlang := coalesce(q.language, public.text_language(q.question, ''));
+    from_refs := ARRAY(
+      SELECT DISTINCT r FROM (
+        SELECT k.ref AS r FROM public.kb_entries k
+         WHERE k.ref = ANY (coalesce(q.cited_refs, '{}'::text[])) AND k.language <> qlang
+        UNION
+        SELECT unnest(k.translated_from) FROM public.kb_entries k
+         WHERE k.ref = ANY (coalesce(q.cited_refs, '{}'::text[])) AND k.language = qlang
+           AND k.translated_from IS NOT NULL AND k.reviewed_at IS NULL) x
+       ORDER BY r);
+    translated := coalesce(q.draft_kind IN ('generated', 'assembled')
+                  AND (q.gate IS NOT DISTINCT FROM 'translation' OR cardinality(from_refs) > 0), false);
+    IF translated AND cardinality(from_refs) = 0 THEN
+      from_refs := coalesce(q.cited_refs, '{}'::text[]);
+    END IF;
     -- Sprint 11 review (low 2): on a re-export, a question whose answer is what was learned before
     -- learns nothing again (no copy of the entry, and no fresh confirmation of the cited entries).
     IF reexport AND q.learn_outcome IS NOT NULL AND (
          (q.learned_entry_id IS NOT NULL AND answer = (SELECT btrim(k.answer) FROM public.kb_entries k WHERE k.id = q.learned_entry_id))
-         OR (q.learn_outcome IN ('confirmed', 'not_confirmed_source') AND answer = btrim(coalesce(q.generated_answer, '')))) THEN
+         OR (q.learn_outcome IN ('confirmed', 'not_confirmed_source') AND answer = private.learnable_text(q.generated_answer))) THEN
       UPDATE public.rfi_questions SET learned_at = now() WHERE id = q.id;
       CONTINUE;
     END IF;
@@ -136,7 +181,7 @@ BEGIN
     ELSIF length(answer) = 0 THEN
       outcome := 'not_learned_empty';
     ELSIF q.draft_kind IN ('generated', 'assembled') AND NOT translated
-          AND answer = btrim(regexp_replace(q.generated_answer, '\[(References?:|Translated from )[^]]*\]', '', 'gi')) THEN
+          AND answer = private.learnable_text(q.generated_answer) THEN
       -- Security review, finding 2: a draft held because it cited an unreviewed or overdue entry
       -- confirms that entry only if an admin approved it; otherwise any member could clear an
       -- entry's review date by exporting from a response of their own.
@@ -196,7 +241,7 @@ BEGIN
               left('RFI response: ' || coalesce(opp_name, sess.file_name), 500), 'response',
               format('response:%s/session:%s/question:%s', sess.opportunity_id, p_session, q.id),
               approver, CASE WHEN outcome = 'proposed' THEN replaces END,
-              CASE WHEN translated THEN coalesce(q.cited_refs, '{}'::text[]) END);
+              CASE WHEN translated THEN from_refs END);
       SET CONSTRAINTS public.kb_entries_superseded_by_fkey IMMEDIATE;
       replaces := NULL;
     END IF;

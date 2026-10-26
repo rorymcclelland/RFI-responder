@@ -64,14 +64,14 @@ describe('drafting labels', () => {
 describe('red-team set', () => {
   const set = load('redteam-set.json');
 
-  it('3. has at least 30 injected questions, each with a clean twin, and five injected entries', () => {
+  it('3. has at least 30 injected questions, each with a clean twin, and six injected entries (five until Sprint 12)', () => {
     expect(set.questions.length).toBeGreaterThanOrEqual(30);
     for (const q of set.questions) {
       expect(q.clean.length).toBeGreaterThan(5);
       expect(q.injected).not.toBe(q.clean);
       expect(q.injected.length).toBeGreaterThan(q.clean.length);
     }
-    expect(set.kbEntries.length).toBe(5);
+    expect(set.kbEntries.length).toBe(6); // Sprint 12: k006, a Japanese entry
     expect(set.questions.filter((q: { language: string }) => q.language === 'ja').length).toBeGreaterThanOrEqual(5);
   });
 

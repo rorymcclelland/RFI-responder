@@ -15,16 +15,13 @@ import Papa from 'papaparse';
 import type { KnowledgeEntry } from '../src/types';
 import { ROOT } from './lib';
 
-export type Language = 'en' | 'ja';
+import type { Language } from '../supabase/functions/_shared/sources';
+export type { Language };
 export interface JapaneseEntry { number: number; question: string; answer: string; tags: string[]; source: string }
 export type CorpusEntry = KnowledgeEntry & { ref: string; language: Language };
 
-/** The database's rule for kb_entries.language (S12-1), kept the same: a test checks the SQL says this. */
-export function textLanguage(question: string, answer: string): Language {
-  const japanese = /[ぁ-ヿ一-鿿]/;
-  const count = (answer.match(/[ぁ-ヿ一-鿿]/g) ?? []).length;
-  return japanese.test(question) || count * 5 >= Math.max(answer.length, 1) ? 'ja' : 'en';
-}
+/** The one language rule, shared with the app and the database (a test checks the SQL says the same). */
+export { textLanguage } from '../supabase/functions/_shared/sources';
 
 /** An English entry's number (1 to 100); anything else stops the run rather than mismatching silently. */
 function entryNumber(raw: string | undefined, row: number): number {
@@ -131,6 +128,7 @@ export function languagesReport(x: ReportInputs): { markdown: string; met: boole
   const nearRows = [['English', near('en')], ['Japanese', near('ja')], ['All', near()]] as const;
   const unreadable = x.rows.filter((r) => r.unreadable).length;
   const nearOver = near().filter((r) => r.confidence! >= LANGUAGE_BARS.bulkLine).length;
+  const nearUnreadable = x.rows.filter((r) => r.kind === 'near-miss' && r.unreadable).length;
 
   const bars = [
     ...BARRED.map((pair) => {
@@ -167,7 +165,9 @@ export function languagesReport(x: ReportInputs): { markdown: string; met: boole
       return `| ${label} | ${items.length} | ${k} of ${items.length} | ${items.length ? range(x.wilson(k, items.length)) : 'n/a'} |`;
     }),
     '',
-    `Checks unreadable after one retry: ${unreadable} (left out above; in the app such a question is never bulk-approved).`,
+    `Checks unreadable after one retry: ${unreadable}, of which ${nearUnreadable} near misses (left out above; in the app such a question is never bulk-approved).`,
+    '',
+    '**Japanese-to-Japanese is likely optimistic**: the Japanese questions and the Japanese entries are both Claude\'s translations of the same English originals, so they may share wording a real customer would not use.',
     '',
     '## Bars (Sprint 12, Q4)',
     '',
