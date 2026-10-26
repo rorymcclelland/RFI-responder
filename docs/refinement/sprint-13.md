@@ -96,4 +96,8 @@ An independent review of `main..sprint-13` found no high issue, one medium and s
 | L5 | The "no keys, no calls" note printed when only one key was missing, and embedding calls were not counted | The note needs both keys absent; embedding calls are counted |
 | L6 | If a pooled table were ever adopted, intervals would treat a question's two copies as independent | Intervals resample questions and count a near miss once |
 
-**Left for the backlog.** The import trims only spaces from a question, so a tab or line break at either end (possible only by calling the database directly; the app trims cells) makes a different key; two imports at the same moment can collide on the unique index and roll back. Both predate this sprint.
+**Left for the backlog (F-62).** The import trims only spaces from a question, so a tab or line break at either end (possible only by calling the database directly; the app trims cells) makes a different key; two imports at the same moment can collide on the unique index and roll back. Both predate this sprint.
+
+## Review and close (26 October 2026)
+
+All three stories done. S13-3 ended as the rule agreed (Q2) foresaw: the fit across both knowledge bases missed the near-miss bar, so it was not adopted and F-59 stays as a residual. Rory ran the test pack (`docs/testing/sprint-13-test-pack.md`); all four cases passed. New backlog row: F-62. Test counts at the close: 887 unit, 288 database.

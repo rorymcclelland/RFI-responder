@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in thirteen sprints (Sprints 0 to 12). Synthetic data only; runs locally.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in fourteen sprints (Sprints 0 to 13). Synthetic data only; runs locally.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -66,6 +66,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 10 | A user guide for every role, shown in the app under Help; an introduction on first sign-in; the technical reference |
 | 11 | What reading the code turned up: changes after an export recorded and re-exported, an audit-log screen, matching never silently incomplete, local mode calibrated |
 | 12 | A knowledge base in English and Japanese: each entry knows its language, translation is decided by the languages on both sides, Japanese answers are learned and translated ones reviewed first, measured per language pair |
+| 13 | Exports send only the answer and record translation in the provenance; import duplicates judged per language; calibration measured across languages (not adopted: one near miss still reaches the bulk line) |
 
 Each sprint followed the same cycle:
 
