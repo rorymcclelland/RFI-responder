@@ -10,7 +10,6 @@
  * so reruns are free. Writes docs/evals/retrieval-<date>.md and .json; the JSON keeps
  * per-question scores, which the calibration script (S1-6) reuses.
  */
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,14 +20,11 @@ import {
   ollamaProvider,
   voyageProvider,
   type EmbeddingProvider,
-  type EmbedKind,
 } from '../supabase/functions/_shared/embeddings';
 import { auroc, cosine, meanReciprocalRank, rankBy, recallAt, reciprocalRankFusion, type Ranking } from './metrics';
-import { reportBase } from './lib';
+import { embedCached, reportBase } from './lib';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-/** Small batches keep each request under low-tier token-per-minute limits. */
-const BATCH = 16;
 
 /** Kinds with no right answer in the knowledge base: off-topic questions and on-topic near misses. */
 const UNANSWERABLE = new Set(['unanswerable', 'near-miss']);
@@ -77,38 +73,7 @@ const kb: KnowledgeEntry[] = kbRows.map((r) => ({
 const set = JSON.parse(readFileSync(join(ROOT, 'eval/retrieval-set.json'), 'utf8')) as { version: string; items: Item[] };
 const documentText = (e: KnowledgeEntry) => `${e.question}\n${e.answer}`;
 
-// ─── Embedding with a disk cache ────────────────────────────────────────────
-
-/** A dropped connection ("terminated") mid-run should not lose the candidate: retry the batch. */
-async function embedWithRetry(p: EmbeddingProvider, batch: string[], kind: EmbedKind, attempts = 4) {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      return await p.embed(batch, kind);
-    } catch (err) {
-      if (attempt >= attempts) throw err;
-      console.log(`\n  ${p.model}: ${(err as Error).message}; retrying in ${5 * attempt}s`);
-      await new Promise((r) => setTimeout(r, 5000 * attempt));
-    }
-  }
-}
-
-async function embedCached(p: EmbeddingProvider, texts: string[], kind: EmbedKind): Promise<number[][]> {
-  const dir = join(ROOT, 'eval/.cache', p.name, p.model.replace(/[^a-z0-9.-]/gi, '_'));
-  mkdirSync(dir, { recursive: true });
-  const file = join(dir, `${kind}.json`);
-  const cache: Record<string, number[]> = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
-  const key = (t: string) => createHash('sha256').update(t).digest('hex').slice(0, 24);
-  const missing = [...new Set(texts.filter((t) => !cache[key(t)]))];
-  for (let i = 0; i < missing.length; i += BATCH) {
-    const batch = missing.slice(i, i + BATCH);
-    const { vectors } = await embedWithRetry(p, batch, kind);
-    batch.forEach((t, j) => (cache[key(t)] = vectors[j]));
-    writeFileSync(file, JSON.stringify(cache));
-    process.stdout.write(`  ${p.model} ${kind}: ${Math.min(i + BATCH, missing.length)}/${missing.length}\r`);
-  }
-  if (missing.length) process.stdout.write('\n');
-  return texts.map((t) => cache[key(t)]);
-}
+// Embedding with a disk cache: embedCached in eval/lib.ts (shared with the language run, Sprint 12).
 
 // ─── Scoring ─────────────────────────────────────────────────────────────────
 

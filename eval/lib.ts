@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Papa from 'papaparse';
 import type { KnowledgeEntry } from '../src/types';
+import type { EmbedKind, EmbeddingProvider } from '../supabase/functions/_shared/embeddings';
 import { JUDGE_MAX_TOKENS, JUDGE_PROMPT_VERSION, UnreadableReplyError } from '../supabase/functions/_shared/answerability';
 import { GATE_MAX_TOKENS, GATE_PROMPT_VERSION } from '../supabase/functions/_shared/gates';
 
@@ -139,3 +140,28 @@ export function newestReport(kind: string, files: string[]): string | null {
   return found.length ? found[found.length - 1] : null;
 }
 
+
+/** Small batches keep each request under low-tier token-per-minute limits. */
+const EMBED_BATCH = 16;
+
+/**
+ * Vectors from the disk cache under eval/.cache/<provider>/<model>/, embedding only the texts not
+ * there yet (moved here from run-retrieval in Sprint 12, so the language run shares the cache).
+ * A dropped connection retries the batch rather than losing the run.
+ */
+export async function embedCached(p: EmbeddingProvider, texts: string[], kind: EmbedKind): Promise<number[][]> {
+  const dir = join(ROOT, 'eval/.cache', p.name, p.model.replace(/[^a-z0-9.-]/gi, '_'));
+  mkdirSync(dir, { recursive: true });
+  const file = join(dir, `${kind}.json`);
+  const cache: Record<string, number[]> = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+  const missing = [...new Set(texts.filter((t) => !cache[hashKey(t)]))];
+  for (let i = 0; i < missing.length; i += EMBED_BATCH) {
+    const batch = missing.slice(i, i + EMBED_BATCH);
+    const { vectors } = await withRetry(p.model, () => p.embed(batch, kind));
+    batch.forEach((t, j) => (cache[hashKey(t)] = vectors[j]));
+    writeFileSync(file, JSON.stringify(cache));
+    process.stdout.write(`  ${p.model} ${kind}: ${Math.min(i + EMBED_BATCH, missing.length)}/${missing.length}\r`);
+  }
+  if (missing.length) process.stdout.write('\n');
+  return texts.map((t) => cache[hashKey(t)]);
+}

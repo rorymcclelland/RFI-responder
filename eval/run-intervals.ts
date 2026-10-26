@@ -160,6 +160,20 @@ const proportion = (measure: string, figure: string, k: number, n: number, basis
   proportion('Planted unsupported claims caught by the faithfulness judge', figure, k, n, `${n} planted claims in 37 drafts, four rules`, report);
 }
 
+// Languages (Sprint 12, S12-4): the new pairs against the Japanese corpus variant, once it has been run.
+if (files.some((f) => /^languages-.*\.json$/.test(f))) {
+  const report = newest('languages', 'json');
+  const r = json<{ rows: { pair: string | null; kind: string; goldRank: number | null; confidence: number | null }[] }>(report).rows;
+  for (const pair of ['English to Japanese', 'Japanese to Japanese']) {
+    const items = r.filter((x) => x.pair === pair);
+    const k = items.filter((x) => x.goldRank !== null && x.goldRank <= 5).length;
+    proportion(`Retrieval, ${pair.replace(' to ', '-to-')} recall@5 (voyage-4)`, pct(k, items.length), k, items.length, `${k} of ${items.length} questions`, report.replace(/\.json$/, '.md'));
+  }
+  const near = r.filter((x) => x.kind === 'near-miss' && x.confidence !== null);
+  const k = near.filter((x) => x.confidence! >= 0.8).length;
+  proportion('Near misses at or above the 80% bulk line, with Japanese entries', `${k} of ${near.length}`, k, near.length, `${near.length} near misses`, report.replace(/\.json$/, '.md'));
+}
+
 const date = new Date().toISOString().slice(0, 10);
 const base = reportBase('intervals', date);
 const lines = [

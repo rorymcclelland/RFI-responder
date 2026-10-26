@@ -40,5 +40,6 @@ What has been measured, on what, and the latest figure for each measure. A test 
 | Gates | Are pricing and legal questions always caught, and how many lookalikes are caught by mistake? | `npm run eval:gates` |
 | Drafting | Are drafts faithful to their sources, citing the right entry, and absent when nothing answers the question? | `npm run eval:drafting` |
 | Red team | Can text in a question or an entry change a decision, leak the prompt or plant a claim? | `npm run eval:redteam` |
+| Languages | With some entries in Japanese, does the right entry still come back for English and Japanese questions, and does the confidence still keep near misses below the bulk line? | `npm run eval:languages` |
 | Duplicates | At what similarity may a learned answer replace an entry, keeping wrong replacements at 2% or below? | `npm run eval:duplicates` |
 | Word extraction | Are the questions in a Word document found, word for word, and can planted text change that? | `npm run eval:extraction` |

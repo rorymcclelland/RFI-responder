@@ -63,6 +63,7 @@ The local mail viewer (usually `http://127.0.0.1:54324`) catches the emails Supa
 | `npm run eval:duplicates` | The similarity at which a learned answer replaces an entry |
 | `npm run eval:extraction` | Finding questions in Word documents |
 | `npm run eval:consistency` | How much the checker's verdict and the confidence move between runs |
+| `npm run eval:languages` | Recall@5 for each language pair, and the checker with the app's calibration, with 30 entries in Japanese (Sprint 12) |
 | `npm run demo:record` | Records the demo drafts from a real run |
 | `npm run demo:seed` | Regenerates the seed's knowledge base and demo sections |
 | `npm run screenshots` | The screenshots for the README and the guide, and the 768 px layout check |
