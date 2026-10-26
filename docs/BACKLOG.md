@@ -628,6 +628,7 @@ Refinement: `docs/refinement/sprint-14.md`. Supabase Free plan in London, the ap
 | S14-3 | Ready to host: single-page routing, security headers, a build that refuses a local address, the go-live runbook and pack | | Ready, Sprint 14 |
 | S14-4 | Go live (Rory's steps from the go-live pack, Claude checking) | | Ready, Sprint 14 |
 | S14-5 | Say what is hosted, and how (README, data handling, providers, risk register) | | Ready, Sprint 14 |
+| S14-6 | Switching away and back keeps your place: a session check on refocus no longer reloads the app | BUG-34 | Ready, Sprint 14 |
 
 F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual (Rory, Q1).
 
@@ -703,6 +704,7 @@ F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual
 | F-60 | Keyword matching (used when a question or entry has no vector) uses English word stems, so finds little for Japanese | From the Sprint 12 build. Consider a trigram or `simple` configuration for Japanese |
 | F-61 | Done, Sprint 13 (S13-2). The knowledge-base import treats the same question as a duplicate whatever its language, while the database allows one current entry per question in each language | From the Sprint 12 security review (info). Compare the question and its language |
 | F-62 | The import trims only spaces from a question, so a tab or line break at either end gives a different key (only through a direct database call; the app trims cells); two imports at the same moment can collide on the unique index and roll back | From the Sprint 13 security review (info); both predate Sprint 13. Trim all whitespace; retry or lock on conflict |
+| BUG-34 | Switching to another application and back collapses an expanded question, closes modals and resets other state: the session check on refocus is treated as a new sign-in, which shows the full-page loading screen | Reported by Rory, 26 October 2026; added to Sprint 14 (S14-6) |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked

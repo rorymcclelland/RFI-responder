@@ -71,6 +71,21 @@ Refined 26 October 2026, after Rory chose at the Sprint 13 review to "make it ho
 
 **Test cases.** 1. The docs tests pass: every provider row has a source and a date; no page claims a control that is not switched on. 2. The README names no credential.
 
+### S14-6 Switching away and back keeps your place (BUG-34, reported by Rory 26 October). S
+
+**The bug.** Expand a question, switch to another application, switch back: the question has collapsed. Open modals close too, and other state resets.
+
+**The cause, found in refinement.** When the browser tab regains focus, Supabase's client checks the session again and reports it (`SIGNED_IN`, or `TOKEN_REFRESHED` when the token is renewed). `App.tsx` treats every such report as a new sign-in: it reloads the profile, and while it does so shows the full-page loading screen, which unmounts the whole app. Every expanded card, open modal, filter and half-written answer is lost, the knowledge base is reloaded, and indexing is started again. A hosted demo, where tokens are renewed, would make it worse.
+
+**What changes.** The profile is loaded only when the signed-in person changes (a different user id) or after signing out; a session report for the same person only updates the stored session. The full-page loading screen is shown only before the first load, never once the app is on screen. A small pure function decides what an auth event should do, so it can be tested.
+
+**Test cases.**
+1. The same person's `SIGNED_IN` (on refocus) and `TOKEN_REFRESHED`: the profile is not reloaded and the loading screen is not shown.
+2. A different person signing in: the profile is loaded.
+3. `SIGNED_OUT`: the user is cleared and the sign-in page shows.
+4. `PASSWORD_RECOVERY` still opens the set-password page.
+5. By hand (test pack): an expanded question, an open modal and a half-written answer survive switching applications and back, and a token renewal.
+
 ## Not in this sprint
 
 A custom domain (the Vercel address will do). Automatic deployment of the database and functions from CI (it would put the service key in GitHub; Rory deploys them from his PC). Real organisations' data: the hosted demo holds synthetic data only (rule 2).
@@ -86,7 +101,7 @@ A custom domain (the Vercel address will do). Automatic deployment of the databa
 
 **On the Free plan** the project pauses after a period without use; the go-live pack and the README say how Rory wakes it before a demo.
 
-Order: S14-1, S14-2 and S14-3 (Claude, independent), then S14-4 (Rory with the go-live pack, Claude checking), then S14-5. Sizes: two S and three M, about three days, then the security review, the hosted check and the close.
+Order: S14-6 first (a quick fix that also matters for the hosted app), then S14-1, S14-2 and S14-3 (Claude, independent), then S14-4 (Rory with the go-live pack, Claude checking), then S14-5. Sizes: three S and three M, about three and a half days, then the security review, the hosted check and the close.
 
 ## Questions for Rory (answered 26 October 2026)
 
