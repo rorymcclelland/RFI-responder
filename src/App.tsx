@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Database, X, BookOpen, Tag, CheckCircle2,
   Plus, ChevronLeft, Briefcase,
   Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
+import { authEventAction } from './lib/authEvents';
 import { loadKnowledgeBase, importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
@@ -202,22 +203,29 @@ export default function App() {
   const [introOpen, setIntroOpen]                 = useState(false);
   const [settingPassword, setSettingPassword]     = useState(ARRIVED_FOR);
 
+  // Sprint 14 (S14-6, BUG-34): whose profile is loaded (or loading), so a session reported again for
+  // the same person (on refocus, or a renewed token) keeps everything on screen.
+  const loadedFor = useRef<string | null>(null);
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    const onSession = (event: string, s: Session | null) => {
       setSession(s);
-      if (s) loadUserProfile(s.user.id);
-      else setAuthLoading(false);
-    });
+      const action = authEventAction(event, loadedFor.current, s?.user.id ?? null);
+      if (action === 'load' && s) {
+        loadedFor.current = s.user.id;
+        void loadUserProfile(s.user.id);
+      } else if (action === 'clear') {
+        loadedFor.current = null;
+        setCurrentUser(null);
+        setAllUsers([]);
+        setAuthLoading(false);
+      }
+    };
+    supabase.auth.getSession().then(({ data: { session: s } }) => onSession('INITIAL_SESSION', s));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === 'PASSWORD_RECOVERY') setSettingPassword('recovery');
-      setSession(s);
-      if (s) {
-        (async () => { await loadUserProfile(s.user.id); })();
-      } else {
-        setCurrentUser(null);
-        setAllUsers([]);
-      }
+      onSession(event, s);
     });
 
     return () => subscription.unsubscribe();
@@ -233,6 +241,7 @@ export default function App() {
   }, [currentUser, view, activeOpportunity]);
 
   async function loadUserProfile(userId: string) {
+    // Only when the person changes (S14-6): the full-page loading screen unmounts the app.
     setAuthLoading(true);
     const [{ data }, onboardedAt] = await Promise.all([
       supabase.from('user_profiles').select(PROFILE_COLUMNS).eq('id', userId).maybeSingle(),
