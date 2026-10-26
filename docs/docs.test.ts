@@ -48,6 +48,10 @@ function tables(markdown: string): { header: string[]; rows: string[][] }[] {
 const WHERE: Record<string, { row: string[]; column: string }> = {
   'Retrieval, English recall@5 (voyage-4)': { row: ['voyage-4'], column: 'EN recall@5' },
   'Retrieval, Japanese-to-English recall@5 (voyage-4)': { row: ['voyage-4'], column: 'JA recall@5' },
+  // Sprint 12 (S12-4): the language report.
+  'Retrieval, English-to-Japanese recall@5 (voyage-4)': { row: ['English to Japanese'], column: 'Recall@5' },
+  'Retrieval, Japanese-to-Japanese recall@5 (voyage-4)': { row: ['Japanese to Japanese'], column: 'Recall@5' },
+  'Near misses at or above the 80% bulk line, with Japanese entries': { row: ['All'], column: 'At or above 80%' },
   'Checker, separating near misses from answerable questions (AUROC, voyage-4 + checker)': { row: ['voyage-4 + claude-haiku-5-5'], column: 'AUROC, near misses' },
   'Checker replies unreadable after one retry': { row: ['voyage-4 + claude-haiku-5-5'], column: 'Unreadable checks after one retry' },
   'Calibration error, voyage-4 + checker (cross-validated)': { row: ['voyage-4 + claude-haiku-5-5'], column: 'Calibration error (cross-validated)' },

@@ -1,0 +1,3275 @@
+{
+ "date": "2026-10-26",
+ "setVersion": "2026-10-22.3",
+ "method": "voyage-4 + claude-haiku-5-5",
+ "met": false,
+ "rows": [
+  {
+   "id": "e001-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e001-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e001-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e002-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e002-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e002-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e003-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e003-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e003-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e004-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.6351316955849977
+  },
+  {
+   "id": "e004-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e004-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e005-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e005-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e005-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e006-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e006-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e006-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e007-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e007-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e007-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e008-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.4
+  },
+  {
+   "id": "e008-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.75
+  },
+  {
+   "id": "e008-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e009-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e009-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e009-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e010-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e010-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e010-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e011-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e011-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e011-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8570234803085579
+  },
+  {
+   "id": "e012-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e012-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e012-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e013-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e013-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e013-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e014-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e014-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e014-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e015-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e015-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e015-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e016-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e016-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.39594371879384166
+  },
+  {
+   "id": "e016-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e017-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e017-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.4
+  },
+  {
+   "id": "e017-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e018-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e018-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e018-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e019-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e019-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e019-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e020-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e020-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e020-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e021-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e021-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e021-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e022-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e022-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.75
+  },
+  {
+   "id": "e022-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e023-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e023-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.401234452789584
+  },
+  {
+   "id": "e023-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e024-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e024-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e024-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e025-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e025-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e025-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e026-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e026-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e026-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e027-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e027-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e027-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e028-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e028-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9894258396016865
+  },
+  {
+   "id": "e028-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e029-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e029-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e029-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e030-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e030-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e030-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e031-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e031-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e031-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e032-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e032-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e032-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e033-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e033-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e033-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e034-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e034-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e034-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e035-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e035-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e035-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e036-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e036-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e036-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e037-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e037-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e037-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e038-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e038-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e038-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e039-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "e039-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e039-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e040-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e040-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e040-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e041-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e041-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e041-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e042-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9468971685113453
+  },
+  {
+   "id": "e042-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e042-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e043-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e043-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e043-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e044-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e044-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.7498309207949927
+  },
+  {
+   "id": "e044-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e045-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e045-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e045-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e046-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e046-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e046-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e047-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e047-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e047-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e048-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e048-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.75
+  },
+  {
+   "id": "e048-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e049-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e049-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e049-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e050-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e050-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e050-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e051-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e051-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e051-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e052-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e052-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e052-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e053-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e053-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e053-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e054-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e054-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e054-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e055-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e055-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e055-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e056-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e056-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e056-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e057-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e057-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e057-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e058-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9532561326452372
+  },
+  {
+   "id": "e058-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 1
+  },
+  {
+   "id": "e058-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e059-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e059-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e059-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e060-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e060-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e060-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e061-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e061-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e061-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e062-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e062-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e062-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e063-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e063-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e063-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e064-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e064-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e064-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e065-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e065-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e065-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e066-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e066-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e066-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e067-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e067-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e067-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e068-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e068-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e068-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e069-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e069-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e069-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e070-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e070-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e070-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e071-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e071-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e071-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e072-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e072-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e072-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e073-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e073-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.4
+  },
+  {
+   "id": "e073-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e074-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e074-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e074-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e075-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e075-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e075-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e076-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e076-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 31,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "e076-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e077-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e077-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e077-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e078-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e078-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e078-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e079-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e079-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e079-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e080-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e080-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e080-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e081-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e081-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e081-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e082-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e082-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e082-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9928987058355798
+  },
+  {
+   "id": "e083-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e083-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e083-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e084-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e084-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e084-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e085-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e085-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e085-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e086-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e086-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e086-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e087-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e087-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e087-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e088-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e088-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8571
+  },
+  {
+   "id": "e088-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to Japanese",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e089-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e089-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9603502315100041
+  },
+  {
+   "id": "e089-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e090-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e090-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e090-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e091-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e091-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e091-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e092-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e092-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e092-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e093-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e093-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e093-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e094-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e094-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e094-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e095-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e095-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e095-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e096-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8529
+  },
+  {
+   "id": "e096-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e096-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e097-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e097-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 3,
+   "topIsGold": false,
+   "confidence": 0.8588565784483457
+  },
+  {
+   "id": "e097-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 2,
+   "topIsGold": false,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e098-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e098-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.8125
+  },
+  {
+   "id": "e098-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e099-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9529
+  },
+  {
+   "id": "e099-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.96
+  },
+  {
+   "id": "e099-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "e100-en1",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e100-en2",
+   "language": "en",
+   "kind": "paraphrase",
+   "pair": "English to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 0.9114
+  },
+  {
+   "id": "e100-ja",
+   "language": "ja",
+   "kind": "translation",
+   "pair": "Japanese to English",
+   "goldRank": 1,
+   "topIsGold": true,
+   "confidence": 1
+  },
+  {
+   "id": "u001",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u002",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u003",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u004",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u005",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u006",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u007",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u008",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0.4
+  },
+  {
+   "id": "u009",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u010",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u011",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u012",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u013",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u014",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u015",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u016",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u017",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u018",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u019",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u020",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u021",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u022",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u023",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u024",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u025",
+   "language": "en",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u026",
+   "language": "ja",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u027",
+   "language": "ja",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u028",
+   "language": "ja",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u029",
+   "language": "ja",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "u030",
+   "language": "ja",
+   "kind": "unanswerable",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n001",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n002",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n003",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0.8125
+  },
+  {
+   "id": "n004",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n005",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0.000010816186774421913
+  },
+  {
+   "id": "n006",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0.4
+  },
+  {
+   "id": "n007",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n008",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n009",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n010",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n011",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n012",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n013",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n014",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n015",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n016",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n017",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n018",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n019",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n020",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n021",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n022",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n023",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n024",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n025",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n026",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n027",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n028",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n029",
+   "language": "en",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n030",
+   "language": "ja",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n031",
+   "language": "ja",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n032",
+   "language": "ja",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  },
+  {
+   "id": "n033",
+   "language": "ja",
+   "kind": "near-miss",
+   "pair": null,
+   "goldRank": null,
+   "topIsGold": false,
+   "confidence": 0
+  }
+ ]
+}
