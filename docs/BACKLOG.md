@@ -584,6 +584,18 @@ An independent security review found no high issues, three medium (an uncited Ja
 
 **Proposed next.** A short Sprint 13 to finish the languages work: F-58 (strip only the app's label and reference list from exports, exactly as learning now does), F-61 (duplicates per language), and F-59 (calibration across languages, measured on Rory's PC and refitted only if the bars hold). F-14 needs a person, not a sprint. Alternatively a hosted sprint (F-8, F-57, a public demo), or pausing here.
 
+## Sprint 13: finishing the language work (chosen by Rory 26 October 2026, refined and answered the same day)
+
+Refinement: `docs/refinement/sprint-13.md`.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S13-1 | Exports send only the answer: the app's label and reference list removed exactly, the translation recorded in the provenance | F-58 | Ready, Sprint 13 |
+| S13-2 | Import duplicates are judged per language | F-61 | Ready, Sprint 13 |
+| S13-3 | Calibration across languages, adopted only if every bar holds | F-59 | Ready, Sprint 13 |
+
+F-60 (Japanese keyword matching) stays in the backlog (Rory, Q4).
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
