@@ -66,6 +66,7 @@ The local mail viewer (usually `http://127.0.0.1:54324`) catches the emails Supa
 | `npm run eval:languages` | Recall@5 for each language pair, and the checker with the app's calibration, with 30 entries in Japanese (Sprint 12) |
 | `npm run demo:record` | Records the demo drafts from a real run |
 | `npm run demo:seed` | Regenerates the seed's knowledge base and demo sections |
+| `npm run demo:hosted` | Writes the hosted demo data and its reset (`supabase/demo-hosted.sql`, `supabase/demo-hosted-reset.sql`) from the seed, with the fictional people unable to sign in (Sprint 14) |
 | `npm run screenshots` | The screenshots for the README and the guide, and the 768 px layout check |
 
 [Evaluations](../evals/README.md) has what each evaluation found and how its report is laid out. Evaluations call the AI providers and cost a little; the keys come from `.env` in `supabase/functions/`.
@@ -108,7 +109,7 @@ npm run demo:record      # processes the demo questions as the app does; writes 
 npm run db:reset
 ```
 
-`npm run demo:seed` rebuilds the seed's sections from [`sample-data/`](../../sample-data) and the last recording, with no API calls.
+`npm run demo:seed` rebuilds the seed's sections from [`sample-data/`](../../sample-data) and the last recording, with no API calls. Run `npm run demo:hosted` after it, so the hosted demo data matches; a test fails if they differ.
 
 ## Screenshots
 

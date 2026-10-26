@@ -1,7 +1,11 @@
 // Sprint 14. Test numbers refer to docs/refinement/sprint-14.md. Role matrix: decision 0003.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asServiceRole, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
+import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
 import { one } from './fixtures';
+
+const ROOT = join(__dirname, '../../..');
 
 let member: TestUser;
 let admin: TestUser;
@@ -41,5 +45,37 @@ describe('S14-1 the audit log cannot be changed by the service role (F-57)', () 
       await refused(as(u, (q) => q(`UPDATE audit_log SET action = 'forged'`)));
       await refused(as(u, (q) => q(`DELETE FROM audit_log`)));
     }
+  });
+});
+
+describe('S14-2 hosted demo data loads on a hosted-like database', () => {
+  const load = (file: string) => asSuperuser(readFileSync(join(ROOT, file), 'utf8'));
+  const counts = () => one<{ kb: number; ja: number; opps: number; users: number; signable: number }>(
+    `SELECT (SELECT count(*)::int FROM kb_entries) AS kb, (SELECT count(*)::int FROM kb_entries WHERE language = 'ja') AS ja,
+            (SELECT count(*)::int FROM opportunities) AS opps,
+            (SELECT count(*)::int FROM auth.users WHERE email LIKE '%@example.invalid') AS users,
+            (SELECT count(*)::int FROM auth.users WHERE email LIKE '%@example.invalid'
+               AND (coalesce(encrypted_password, '') <> '' OR banned_until IS NULL OR banned_until < now()
+                    OR EXISTS (SELECT 1 FROM auth.identities i WHERE i.user_id = auth.users.id))) AS signable`);
+
+  // 130 seeded entries and 2 learned when the demo's exported responses record their export, as locally.
+  it('2. gives the knowledge base and responses of the local seed, with fictional people who cannot sign in', async () => {
+    await load('supabase/demo-hosted.sql');
+    expect(await counts()).toEqual({ kb: 132, ja: 30, opps: 4, users: 8, signable: 0 });
+  });
+
+  it('3. loading it twice changes nothing', async () => {
+    await load('supabase/demo-hosted.sql');
+    expect(await counts()).toEqual({ kb: 132, ja: 30, opps: 4, users: 8, signable: 0 });
+  });
+
+  it('3. the reset removes what a real account added, keeps the account and its role, and restores the demo', async () => {
+    const real = await one<{ id: string }>(`INSERT INTO opportunities (name, created_by, owner_id) VALUES ('Reviewer response (S14-2)', $1, $1) RETURNING id`, [member.id]);
+    await one(`INSERT INTO kb_entries (question, answer, tags, origin, created_by) VALUES ('Reviewer entry (S14-2)?', 'Yes.', '{}', 'manual', $1) RETURNING id`, [member.id]);
+    expect(real.id).toBeTruthy();
+    await load('supabase/demo-hosted-reset.sql');
+    expect(await counts()).toEqual({ kb: 132, ja: 30, opps: 4, users: 8, signable: 0 });
+    const kept = await one<{ n: number; admin: boolean }>(`SELECT count(*)::int AS n, bool_or(is_admin) AS admin FROM user_profiles WHERE id IN ($1, $2)`, [member.id, admin.id]);
+    expect(kept).toEqual({ n: 2, admin: true });
   });
 });

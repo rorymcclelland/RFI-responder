@@ -49,7 +49,8 @@ create table if not exists auth.users (
   confirmation_token varchar(255),
   recovery_token varchar(255),
   email_change_token_new varchar(255),
-  email_change varchar(255)
+  email_change varchar(255),
+  banned_until timestamptz
 );
 
 create table if not exists auth.identities (

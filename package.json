@@ -28,6 +28,7 @@
     "eval:extraction": "tsx eval/run-extraction.ts",
     "eval:consistency": "tsx eval/run-consistency.ts",
     "eval:languages": "tsx eval/run-languages.ts",
+    "demo:hosted": "tsx eval/run-demo-hosted.ts",
     "demo:seed": "tsx eval/run-demo-seed.ts",
     "demo:record": "tsx eval/record-demo.ts",
     "screenshots": "tsx scripts/screenshots.ts"
