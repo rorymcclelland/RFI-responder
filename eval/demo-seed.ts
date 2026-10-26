@@ -2,7 +2,8 @@
  * Demo data for a fresh install (Sprint 7, S7-5). Two generated sections of supabase/seed.sql:
  *
  * - the knowledge base: the 100 synthetic entries in sample-data/security-qa.csv, in file order, so
- *   their refs (KB-0001 to KB-0100) match the evaluations and the recorded drafts;
+ *   their refs (KB-0001 to KB-0100) match the evaluations and the recorded drafts, then (Sprint 12)
+ *   the 30 Japanese entries in sample-data/security-qa-ja.csv as KB-0101 onwards, unreviewed;
  * - the demo responses: sample-data/demo-plan.json, with the processed questions taken from a
  *   recording of the real pipeline (supabase/demo-recording.json, made by `npm run demo:record`).
  *
@@ -75,8 +76,24 @@ export const lit = (s: string | null | undefined): string => {
 const num = (n: number | null | undefined) => (n === null || n === undefined || !Number.isFinite(n) ? 'NULL' : String(n));
 const arr = (xs: string[]) => `ARRAY[${xs.map(lit).join(', ')}]::text[]`;
 
-export function kbSeedSql(rows: KbRow[]): string {
+/** A Japanese entry for the demo (Sprint 12, S12-5): the number of the English entry it translates. */
+export interface JaKbRow extends KbRow { number: number }
+
+export function kbSeedSql(rows: KbRow[], ja: JaKbRow[] = []): string {
   const values = rows.map((r, i) => `      (${i + 1}, ${lit(r.question)}, ${lit(r.answer)}, ${arr(r.tags)}, ${lit(r.source)})`).join(',\n');
+  for (const r of ja) if (!(Number.isInteger(r.number) && r.number >= 1 && r.number <= rows.length)) throw new Error(`Japanese entry ${r.number} translates no English entry`);
+  const ref = (n: number) => `KB-${String(n).padStart(4, '0')}`;
+  const jaValues = ja.map((r, i) => `      (${i + 1}, ${lit(r.question)}, ${lit(r.answer)}, ${arr(r.tags)}, ${lit(r.source)}, ${lit(ref(r.number))})`).join(',\n');
+  const japanese = ja.length ? `
+  -- Sprint 12 (S12-5): the ${ja.length} Japanese entries in sample-data/security-qa-ja.csv, after the English
+  -- ones (KB-${String(rows.length + 1).padStart(4, '0')} onwards), so the recorded drafts keep their references. Machine
+  -- translations written by Claude: each names the entry it translates and waits for an admin's review.
+  INSERT INTO public.kb_entries (question, answer, tags, source, origin, origin_ref, created_by, translated_from)
+  SELECT v.q, v.a, v.t, v.s, 'seed', 'sample-data/security-qa-ja.csv', admin, ARRAY[v.f]
+    FROM (VALUES
+${jaValues}
+    ) AS v(ord, q, a, t, s, f)
+   ORDER BY v.ord;` : '';
   return `-- The knowledge base: the ${rows.length} synthetic entries in sample-data/security-qa.csv, in file order,
 -- so their refs (KB-0001 onwards) match the evaluations and the recorded demo drafts. Added and
 -- reviewed by the admin. Skipped if the knowledge base already has entries.
@@ -89,7 +106,7 @@ BEGIN
     FROM (VALUES
 ${values}
     ) AS v(ord, q, a, t, s)
-   ORDER BY v.ord;
+   ORDER BY v.ord;${japanese}
 END $kb$;`;
 }
 

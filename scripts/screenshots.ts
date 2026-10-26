@@ -131,7 +131,8 @@ async function main() {
   await openResponse(page, 'Larkspur Health (fictional): data platform RFI');
   await shoot(page, '6-export-and-learning.png', 'exported response');
 
-  // Sarah is the admin: governance, and James's edit waiting for review.
+  // Sarah is the admin: governance, and the entries waiting for review (the seeded Japanese translations
+  // come first, oldest first; James's learned edit is further down).
   page = await signIn(browser, 'sarah.chen@example.com');
   await nav(page, 'Governance');
   await shoot(page, '7-governance-usage.png', 'governance usage');

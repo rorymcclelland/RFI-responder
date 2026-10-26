@@ -22,7 +22,7 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 - **It is not a hosted product.** It runs on a local PC against a local Supabase stack. A hosted deployment would need the steps in [`docs/DEPLOYING.md`](docs/DEPLOYING.md) first.
 - **Its figures come from small synthetic sets** (363 questions written by Claude, unreviewed by anyone outside the project). Read them as estimates: [`docs/evals/README.md`](docs/evals/README.md).
 - **The checker is not perfectly consistent.** Asked again, it changed its verdict for 7.2% of test questions, mostly between "yes" and "partly".
-- **Japanese questions** get Japanese drafts, labelled as translations and always reviewed individually. A knowledge base that works across languages is on the backlog, not built.
+- **English and Japanese only.** Entries and questions can be in either, and a question finds entries in the other. A draft written across languages is labelled as translated; translated and Japanese drafts are always reviewed individually, and an answer learned from a translation waits for an admin's review. The app's Japanese has not been checked by a native reader.
 - **It is not a compliance product.** The [governance pack](docs/governance/) maps the controls to the EU AI Act and the NIST AI Risk Management Framework, but makes no claim of compliance.
 - **No PDF or pasted-email input yet**, and users are invited through the Supabase dashboard, not the app.
 
@@ -90,7 +90,7 @@ npx supabase functions serve         # the Edge Functions, in a second window
 npm run dev                          # http://127.0.0.1:5173
 ```
 
-Sign in as any seeded user (for example `sarah.chen@example.com`, the admin, or `priya.sharma@example.com`, who owns a response in review) with the local development password in `supabase/seed.sql`. The seed loads 100 synthetic knowledge-base entries and four fictional responses, one at each stage.
+Sign in as any seeded user (for example `sarah.chen@example.com`, the admin, or `priya.sharma@example.com`, who owns a response in review) with the local development password in `supabase/seed.sql`. The seed loads 100 synthetic knowledge-base entries, then 30 of them again in Japanese (machine translations, waiting for an admin's review), and four fictional responses, one at each stage.
 
 ## Scripts
 

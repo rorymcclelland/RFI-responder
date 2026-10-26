@@ -28,7 +28,8 @@ CREATE OR REPLACE FUNCTION public.set_entry_review_on_insert()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
   IF auth.uid() IS NULL THEN
-    IF NEW.origin = 'seed' AND NEW.reviewed_at IS NULL THEN
+    -- A seeded translation (the demo's Japanese entries) waits for review like any other.
+    IF NEW.origin = 'seed' AND NEW.reviewed_at IS NULL AND NEW.translated_from IS NULL THEN
       NEW.reviewed_at := NEW.created_at;
     END IF;
     RETURN NEW;

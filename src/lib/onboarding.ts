@@ -56,6 +56,7 @@ export const INTRO_STEPS: IntroStep[] = [
     title: 'How a draft is made',
     body: [
       'Each question is matched against the knowledge base. A checker reads the best entries and says whether they answer it: **Yes**, **Partly** or **No**, with a reason. A draft is written from those entries only, and checked against them.',
+      'Questions and entries can be in English or Japanese. A draft written from entries in the other language is labelled as translated, and is always reviewed one at a time.',
       '**Confidence** is the measured chance that the knowledge base answers the question, from tests on questions with known answers. Questions without a measured confidence come first, then the lowest.',
     ],
     image: '3-draft-and-checker.png',

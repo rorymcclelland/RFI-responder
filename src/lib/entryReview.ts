@@ -102,6 +102,7 @@ export function describeOrigin(e: Pick<EntryForReview, 'origin' | 'originRef' | 
   // Sprint 12 (S12-3): a translation waits for review whoever approved it, so it says so first.
   if (e.translatedFrom?.length) {
     const from = e.language === 'ja' ? 'English' : 'Japanese';
+    if (e.origin !== 'response') return `Machine translation of ${e.translatedFrom.join(', ')} (${from}) in the demo data${e.originRef ? `, from ${e.originRef}` : ''}. A translation is reviewed before it is trusted`;
     return `Translated from ${e.translatedFrom.join(', ')} (${from}) in a response; answer approved by ${who}. A translation is reviewed before it is trusted, whoever approved it`;
   }
   switch (e.origin) {

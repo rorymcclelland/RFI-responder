@@ -1,6 +1,6 @@
 /**
  * Regenerates the knowledge-base and demo sections of supabase/seed.sql (Sprint 7, S7-5), from
- * sample-data/security-qa.csv, sample-data/demo-plan.json and supabase/demo-recording.json if it
+ * sample-data/security-qa.csv, sample-data/security-qa-ja.csv (Sprint 12), sample-data/demo-plan.json and supabase/demo-recording.json if it
  * exists. No API calls.
  *
  *   npm run demo:seed
@@ -8,6 +8,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { demoSeedSql, kbSeedSql, replaceSection, type DemoPlan, type DemoRecording } from './demo-seed';
+import { loadJapaneseEntries } from './languages';
 import { loadKb, ROOT } from './lib';
 
 export function writeSeed(): void {
@@ -16,7 +17,10 @@ export function writeSeed(): void {
   const recording = existsSync(recPath) ? (JSON.parse(readFileSync(recPath, 'utf8')) as DemoRecording) : null;
   const seedPath = join(ROOT, 'supabase/seed.sql');
   let seed = readFileSync(seedPath, 'utf8');
-  seed = replaceSection(seed, 'KNOWLEDGE BASE', kbSeedSql(loadKb().map((e) => ({ question: e.question, answer: e.answer, tags: e.tags, source: e.source ?? '' }))));
+  seed = replaceSection(seed, 'KNOWLEDGE BASE', kbSeedSql(
+    loadKb().map((e) => ({ question: e.question, answer: e.answer, tags: e.tags, source: e.source ?? '' })),
+    loadJapaneseEntries(),
+  ));
   seed = replaceSection(seed, 'DEMO RESPONSES', demoSeedSql(plan, recording));
   writeFileSync(seedPath, seed);
   console.log(`Written: supabase/seed.sql (${recording ? `demo recorded ${recording.recordedAt.slice(0, 10)}` : 'no recording yet: only the new response'})`);

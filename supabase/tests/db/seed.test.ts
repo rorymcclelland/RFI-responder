@@ -29,9 +29,19 @@ describe('dev seed (supabase/seed.sql)', () => {
       `SELECT count(*) AS n, array_agg(DISTINCT origin::text) AS origins, count(DISTINCT created_by) AS owners,
               count(*) FILTER (WHERE reviewed_at IS NULL) AS unreviewed,
               (SELECT question FROM kb_entries WHERE ref = 'KB-0001') AS first
-         FROM kb_entries WHERE origin = 'seed'`,
+         FROM kb_entries WHERE origin = 'seed' AND language = 'en'`,
     );
     expect(r.rows[0]).toEqual({ n: '100', origins: ['seed'], owners: '1', unreviewed: '0', first: 'How does your organization encrypt data at rest?' });
+  });
+
+  it('S12-5: then the 30 Japanese entries, KB-0101 onwards, each naming the entry it translates and waiting for review', async () => {
+    const r = await asSuperuser<{ n: string; unreviewed: string; first: string; last: string; bad: string }>(
+      `SELECT count(*) AS n, count(*) FILTER (WHERE reviewed_at IS NULL) AS unreviewed, min(ref) AS first, max(ref) AS last,
+              count(*) FILTER (WHERE translated_from IS NULL
+                OR NOT EXISTS (SELECT 1 FROM kb_entries o WHERE o.ref = ANY (kb_entries.translated_from) AND o.language = 'en')) AS bad
+         FROM kb_entries WHERE language = 'ja'`,
+    );
+    expect(r.rows[0]).toEqual({ n: '30', unreviewed: '30', first: 'KB-0101', last: 'KB-0130', bad: '0' });
   });
 
   it('adds the demo responses in seed.sql, each owned by its creator', async () => {

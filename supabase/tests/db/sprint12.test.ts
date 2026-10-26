@@ -137,6 +137,13 @@ describe('S12-3 Japanese answers are learned; translated ones wait for review', 
     }
   });
 
+  it('S12-5: a seeded translation waits for review; other seed entries count as reviewed', async () => {
+    const t = await one<{ reviewed_at: string | null }>(`INSERT INTO kb_entries (question, answer, tags, origin, translated_from) VALUES ('種（S12-5）？', '回答です。', '{}', 'seed', '{KB-0001}') RETURNING reviewed_at`);
+    expect(t.reviewed_at).toBeNull();
+    const e = await one<{ reviewed_at: string | null }>(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('Seed (S12-5)?', 'Yes.', '{}', 'seed') RETURNING reviewed_at`);
+    expect(e.reviewed_at).not.toBeNull();
+  });
+
   it('text_language is for record_export only', async () => {
     for (const u of [member, admin]) await refused(as(u, (q) => q(`SELECT public.text_language('a', 'b')`)));
   });

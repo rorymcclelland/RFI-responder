@@ -101,5 +101,9 @@ describe('describeOrigin for a translation (Sprint 12, S12-3 test 5)', () => {
       .toBe('Translated from KB-0001 (English) in a response; answer approved by Sarah Chen. A translation is reviewed before it is trusted, whoever approved it');
     expect(describeOrigin({ origin: 'response', originRef: null, addedBy: 'Priya Sharma' })).toMatch(/who is not an admin/);
   });
+  it('S12-5: a seeded Japanese entry says it is a machine translation in the demo data', () => {
+    expect(describeOrigin({ origin: 'seed', originRef: 'sample-data/security-qa-ja.csv', addedBy: 'Sarah Chen', translatedFrom: ['KB-0004'], language: 'ja' }))
+      .toBe('Machine translation of KB-0004 (English) in the demo data, from sample-data/security-qa-ja.csv. A translation is reviewed before it is trusted');
+  });
 });
 
