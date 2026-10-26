@@ -18,6 +18,7 @@ import { addEntry, parseTags } from './lib/entryReview';
 import { supabase } from './lib/supabase';
 import HelpView from './help/HelpView';
 import SetPassword from './SetPassword';
+import LanguageLabel from './LanguageLabel';
 import { linkPurpose } from './lib/passwordLink';
 import Introduction from './help/Introduction';
 import { startPage } from './lib/guide';
@@ -40,6 +41,7 @@ function KBEntry({ entry }: { entry: KnowledgeEntry }) {
               <BookOpen size={9} />{entry.source}
             </span>
           )}
+          <LanguageLabel language={entry.language} />
           {entry.reviewed === false && (
             <span className="text-2xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full" title="Added by a team member and not yet reviewed by an admin. Drafts citing it are not bulk-approved.">
               Not yet reviewed

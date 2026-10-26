@@ -8,6 +8,8 @@ export interface KnowledgeEntry {
   source?: string;
   /** Sprint 4: false until an admin has reviewed an entry a member added. */
   reviewed?: boolean;
+  /** Sprint 12 (S12-1): the language it is written in, detected by the database. */
+  language?: 'en' | 'ja';
 }
 
 export interface RetrievedSource {

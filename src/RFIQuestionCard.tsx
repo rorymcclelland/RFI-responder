@@ -6,6 +6,7 @@ import { CALIBRATION_TABLES } from '../supabase/functions/_shared/calibration-ta
 import { answerSource, ANSWER_HEADING, ANSWER_TIP } from './lib/answerLabel';
 import { suggestExperts, type ExpertSuggestion } from './lib/responses';
 import { supabase } from './lib/supabase';
+import LanguageLabel from './LanguageLabel';
 
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
@@ -467,6 +468,7 @@ export default function RFIQuestionCard({
                     className="flex items-center gap-2 text-xs bg-ink-50 border border-ink-200 text-ink-700 px-3 py-1.5 rounded-xl hover:bg-ink-900 hover:text-white hover:border-ink-900 transition-all cursor-pointer group font-semibold"
                   >
                     <span className="font-black">{s.entry.id}</span>
+                    <LanguageLabel language={s.entry.language} />
                     <span className="text-ink-400 group-hover:text-white/60 truncate max-w-[160px] transition-colors">{s.entry.question}</span>
                     <span className="font-bold opacity-60" title="Similarity to the question; not a probability">({Math.round(s.score * 100)}%)</span>
                     <ExternalLink size={10} className="opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" />

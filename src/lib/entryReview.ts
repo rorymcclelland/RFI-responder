@@ -46,6 +46,8 @@ export interface EntryForReview {
   /** S4-4: when the entry fell due for review, and how often drafts cited it in the last 90 days. */
   dueSince?: string;
   recentCitations?: number;
+  /** Sprint 12 (S12-1). */
+  language?: 'en' | 'ja';
 }
 
 const toEntry = (r: Record<string, unknown>): EntryForReview => ({
@@ -54,6 +56,7 @@ const toEntry = (r: Record<string, unknown>): EntryForReview => ({
   originRef: (r.origin_ref as string | null) ?? null,
   addedBy: typeof r.added_by === 'string' ? r.added_by : ((r.added_by as { display_name?: string } | null)?.display_name) ?? null,
   createdAt: r.created_at as string,
+  ...(r.language === 'ja' || r.language === 'en' ? { language: r.language } : {}),
   replaces: (r.replaces as { ref: string; answer: string } | null) ?? null,
   ...(r.review_due ? { dueSince: r.review_due as string, recentCitations: Number(r.recent_citations ?? 0) } : {}),
 });
@@ -73,7 +76,7 @@ export async function loadOverdueEntries(client: SupabaseClient): Promise<EntryF
 export async function loadEntriesToReview(client: SupabaseClient): Promise<EntryForReview[]> {
   const { data, error } = await client
     .from('kb_entries')
-    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:proposed_replacement_of(ref, answer)')
+    .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, language, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:proposed_replacement_of(ref, answer)')
     .is('reviewed_at', null)
     .is('superseded_by', null)
     .order('created_at', { ascending: true });

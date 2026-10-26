@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, BarChart3, CheckCircle2, Pencil, RefreshCw, Save } from 'lucide-react';
 import { supabase } from './lib/supabase';
+import LanguageLabel from './LanguageLabel';
 import {
   formatGbp, loadUsageAdmin, loadUsageStatus, saveSettings,
   type AiPrice, type AiSettings, type SettingsChange, type UsageReport, type UsageStatus,
@@ -260,6 +261,7 @@ function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e
     <div className="card p-5 space-y-2">
       <div className="flex items-center gap-2 text-xs text-ink-500">
         <span className="font-bold text-ink-700 bg-ink-50 border border-ink-100 px-2 py-0.5 rounded-full">{entry.ref}</span>
+        <LanguageLabel language={entry.language} />
         <span>{describeOrigin(entry)}, {new Date(entry.createdAt).toLocaleDateString()}</span>
         {entry.dueSince && (
           <span className="text-amber-700 font-bold">
