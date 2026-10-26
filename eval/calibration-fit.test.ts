@@ -1,7 +1,7 @@
 // Sprint 1, story S1-6: fitting and checking a calibration curve.
 import { describe, expect, it } from 'vitest';
 import { isotonicFit, expectedCalibrationError, toBreakpoints, reliabilityBins } from './calibration-fit';
-import { calibrationBands, crossValidate, leaveOneOut, stratifiedFolds } from './calibration-fit';
+import { adoptionCheck, calibrationBands, crossValidate, leaveOneOut, stratifiedFolds } from './calibration-fit';
 
 describe('isotonicFit (pool adjacent violators)', () => {
   it('leaves an already increasing sequence alone', () => {
@@ -110,5 +110,38 @@ describe('S8-3 bands: how many evaluation questions sit behind each calibrated f
     expect(b[1].low).toBeLessThan(0.5);
     expect(b[1].high).toBeGreaterThan(0.5);
     expect(b[2].high).toBe(1);
+  });
+});
+
+describe('Sprint 13 (S13-3): calibration across languages', () => {
+  const rows = Array.from({ length: 40 }, (_, i) => ({ id: `q${i % 20}${i >= 20 ? '@ja-corpus' : ''}`, kind: i % 5 === 0 ? 'near-miss' : 'paraphrase', topScore: (i % 20) / 10, topIsGold: i % 5 !== 0 }));
+  const base = (id: string) => id.replace(/@ja-corpus$/, '');
+
+  it('1. keeps the two copies of a question in the same fold, and the folds are stable', () => {
+    const folds = stratifiedFolds(rows, 5, (r) => r.kind, 7, (r) => base(r.id));
+    for (const f of folds) for (const r of f) expect(f.some((x) => x !== r && base(x.id) === base(r.id))).toBe(true);
+    expect(stratifiedFolds(rows, 5, (r) => r.kind, 7, (r) => base(r.id))).toEqual(folds);
+  });
+
+  it('without a group, folds are exactly as before', () => {
+    const one = rows.slice(0, 20);
+    expect(stratifiedFolds(one, 5, (r) => r.kind, 7, (r) => r.id)).toEqual(stratifiedFolds(one, 5, (r) => r.kind, 7));
+  });
+
+  it('leave one out removes a question with its copy', () => {
+    const r = leaveOneOut(rows, 0.8, (x) => base(x.id));
+    expect(r.mostInfluential === null || !r.mostInfluential.endsWith('@ja-corpus')).toBe(true);
+  });
+
+  it('3. the adoption check refuses a table that misses any bar', () => {
+    const good = { ece: 0.05, unanswerableBelowFloor: 0.9, nearBelowFloor: 0.9, answerableBelowFloor: 0.05, nearAtBulk: 0, mostInFold: 0, looChange: 0, nearAtBulkByCorpus: { english: 0, japanese: 0 } };
+    expect(adoptionCheck(good)).toEqual({ adopt: true, failures: [] });
+    const bad: [keyof typeof good, unknown][] = [['ece', 0.11], ['unanswerableBelowFloor', 0.7], ['nearBelowFloor', 0.7], ['answerableBelowFloor', 0.2],
+      ['nearAtBulk', 1], ['mostInFold', 2], ['looChange', 2], ['nearAtBulkByCorpus', { english: 0, japanese: 1 }]];
+    for (const [k, v] of bad) {
+      const r = adoptionCheck({ ...good, [k]: v });
+      expect(r.adopt, k).toBe(false);
+      expect(r.failures.length, k).toBe(1);
+    }
   });
 });

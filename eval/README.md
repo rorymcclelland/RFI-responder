@@ -24,7 +24,7 @@ To change the set, edit `source/*.json` and run `node eval/build-retrieval-set.m
 npm run eval:languages      # recall@5 per pair, and the checker with the app's calibration on the variant
 ```
 
-Needs `VOYAGE_API_KEY` and `ANTHROPIC_API_KEY` in `supabase/functions/.env`, and the question vectors cached by `npm run eval:retrieval`. The bars (Sprint 12, Q4) are recall@5 of at least 80% for English-to-Japanese and Japanese-to-Japanese, and no near miss at or above the 80% bulk line; the report says plainly when one is not met. `languages.test.ts` checks the Japanese entries and the variant on every test run.
+Needs `VOYAGE_API_KEY` and `ANTHROPIC_API_KEY` in `supabase/functions/.env`, and the question vectors cached by `npm run eval:retrieval`. The bars (Sprint 12, Q4) are recall@5 of at least 80% for English-to-Japanese and Japanese-to-Japanese, and no near miss at or above the 80% bulk line; the report says plainly when one is not met. `languages.test.ts` checks the Japanese entries and the variant on every test run. Since Sprint 13 the run can be rebuilt from the cache with no keys set, and `npm run eval:calibrate` also fits the app's method on both knowledge bases together (each question's two copies in one fold), adopting that table only if every bar holds.
 
 ## Word questionnaires (`word-set.ts`, Sprint 5)
 

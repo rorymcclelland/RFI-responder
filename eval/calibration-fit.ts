@@ -102,13 +102,18 @@ function seededShuffle<T>(xs: T[], seed: number): T[] {
  * k folds, stratified: each stratum (for example question kind and split) is shuffled and dealt
  * round the folds in turn, so every fold holds near misses, which are few (33 of 363).
  */
-export function stratifiedFolds<T>(rows: T[], k: number, stratum: (r: T) => string, seed: number): T[][] {
+export function stratifiedFolds<T>(rows: T[], k: number, stratum: (r: T) => string, seed: number, group?: (r: T) => string): T[][] {
+  // Sprint 13 (S13-3): rows of one group (a question asked against two knowledge bases) are dealt
+  // together, so a question is never predicted by a fit that saw its own copy. Without a group each
+  // row is its own unit, and the folds are exactly as before.
+  const units = new Map<string, T[]>();
+  rows.forEach((r, i) => { const g = group ? group(r) : `#${i}`; units.set(g, [...(units.get(g) ?? []), r]); });
   const folds: T[][] = Array.from({ length: k }, () => []);
-  const groups = new Map<string, T[]>();
-  for (const r of rows) groups.set(stratum(r), [...(groups.get(stratum(r)) ?? []), r]);
+  const strata = new Map<string, T[][]>();
+  for (const u of units.values()) strata.set(stratum(u[0]), [...(strata.get(stratum(u[0])) ?? []), u]);
   let turn = 0;
-  for (const key of [...groups.keys()].sort()) {
-    for (const r of seededShuffle(groups.get(key)!, seed)) folds[turn++ % k].push(r);
+  for (const key of [...strata.keys()].sort()) {
+    for (const u of seededShuffle(strata.get(key)!, seed)) folds[turn++ % k].push(...u);
   }
   return folds;
 }
@@ -127,8 +132,8 @@ export interface FoldResult { n: number; ece: number; nearMisses: number; nearAt
  * Each question predicted by a table fitted without its fold. Returns every out-of-fold prediction
  * and, per fold, its calibration error and near misses at or above the bulk line.
  */
-export function crossValidate<T extends CalRow>(rows: T[], k: number, stratum: (r: T) => string, seed: number, bulkLine = 0.8) {
-  const folds = stratifiedFolds(rows, k, stratum, seed);
+export function crossValidate<T extends CalRow>(rows: T[], k: number, stratum: (r: T) => string, seed: number, bulkLine = 0.8, group?: (r: T) => string) {
+  const folds = stratifiedFolds(rows, k, stratum, seed, group);
   const predictions: { row: T; p: number }[] = [];
   const results: FoldResult[] = folds.map((held, i) => {
     const train = folds.filter((_, j) => j !== i).flat();
@@ -150,7 +155,7 @@ export function crossValidate<T extends CalRow>(rows: T[], k: number, stratum: (
  * The fit on every question, then again without each question in turn: how many near misses
  * reach the bulk line, and the largest change a single question makes (the F-16 symptom).
  */
-export function leaveOneOut(rows: CalRow[], bulkLine = 0.8): { full: number; largestChange: number; mostInfluential: string | null } {
+export function leaveOneOut<T extends CalRow>(rows: T[], bulkLine = 0.8, group: (r: T) => string = (r) => r.id): { full: number; largestChange: number; mostInfluential: string | null } {
   const count = (rs: CalRow[]) => {
     const conf = confidenceUnder(fitTable(rs, 'loo', 'loo'));
     return rs.filter((r) => r.kind === 'near-miss' && conf(r) >= bulkLine).length;
@@ -158,9 +163,10 @@ export function leaveOneOut(rows: CalRow[], bulkLine = 0.8): { full: number; lar
   const full = count(rows);
   let largestChange = 0;
   let mostInfluential: string | null = null;
-  for (const r of rows) {
-    const change = Math.abs(count(rows.filter((x) => x !== r)) - full);
-    if (change > largestChange) { largestChange = change; mostInfluential = r.id; }
+  // A question is removed with its copies (Sprint 13); by default each row is its own question.
+  for (const g of [...new Set(rows.map(group))]) {
+    const change = Math.abs(count(rows.filter((x) => group(x) !== g)) - full);
+    if (change > largestChange) { largestChange = change; mostInfluential = g; }
   }
   return { full, largestChange, mostInfluential };
 }
@@ -183,3 +189,29 @@ export function calibrationBands(points: XY[]): CalibrationBand[] {
   return bands.map((b) => ({ probability: round(b.probability), n: b.n, ...roundInterval(wilson(Math.round(b.k), b.n)) }));
 }
 const roundInterval = (i: { low: number; high: number }) => ({ low: round(i.low), high: round(i.high) });
+
+/** What the adoption check needs: the measures of a refitted table, as the calibration report gives them. */
+export interface AdoptionInput {
+  ece: number; unanswerableBelowFloor: number; nearBelowFloor: number; answerableBelowFloor: number;
+  nearAtBulk: number; mostInFold: number; looChange: number; nearAtBulkByCorpus: Record<string, number>;
+}
+
+/**
+ * Sprint 13 (S13-3; Rory, Q2): a table refitted across languages replaces the app's only if every
+ * existing bar holds (Sprint 1, 2 and 8) and no near miss reaches the bulk line in either knowledge base.
+ */
+const misses = (n: number) => `${n} near ${n === 1 ? 'miss' : 'misses'}`;
+
+export function adoptionCheck(x: AdoptionInput): { adopt: boolean; failures: string[] } {
+  const failures = [
+    x.ece > 0.1 && `calibration error ${x.ece.toFixed(3)} above 0.1`,
+    x.unanswerableBelowFloor < 0.8 && 'fewer than 80% of unanswerable questions below the floor',
+    x.nearBelowFloor < 0.8 && 'fewer than 80% of near misses below the floor',
+    x.answerableBelowFloor > 0.1 && 'more than 10% of answerable questions below the floor',
+    x.nearAtBulk > 0 && `${misses(x.nearAtBulk)} at or above the bulk line`,
+    x.mostInFold > 1 && `${misses(x.mostInFold)} at the bulk line in one fold`,
+    x.looChange > 1 && `one question changes the near misses at the bulk line by ${x.looChange}`,
+    ...Object.entries(x.nearAtBulkByCorpus).map(([c, n]) => n > 0 && `${misses(n)} at the bulk line against the ${c} knowledge base`),
+  ].filter((f): f is string => Boolean(f));
+  return { adopt: failures.length === 0, failures };
+}

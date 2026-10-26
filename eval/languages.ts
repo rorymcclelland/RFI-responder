@@ -83,6 +83,8 @@ export interface LanguageRow {
   confidence: number | null;
   /** The checker ran but its reply was unreadable after one retry. */
   unreadable?: boolean;
+  /** Sprint 13 (S13-3): the raw score the calibration is fitted on (the verdict plus the top similarity). */
+  score?: number | null;
   topIsGold: boolean;
 }
 

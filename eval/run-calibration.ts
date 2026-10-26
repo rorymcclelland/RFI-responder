@@ -16,7 +16,7 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { calibratedConfidence, NO_MATCH_FLOOR, type CalibrationTable } from '../supabase/functions/_shared/calibration';
-import { calibrationBands, crossValidate, expectedCalibrationError, fitTable, leaveOneOut, reliabilityBins, usableForCalibration } from './calibration-fit';
+import { adoptionCheck, calibrationBands, crossValidate, expectedCalibrationError, fitTable, leaveOneOut, reliabilityBins, usableForCalibration, type AdoptionInput } from './calibration-fit';
 import { newestReport, reportBase } from './lib';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -57,6 +57,36 @@ const SEED = 20261025;
 
 // Vector-only methods: the app calibrates on the top cosine similarity.
 const models = [...new Set(data.results.map((r) => r.method))].filter((m) => !m.includes('keyword'));
+
+// Sprint 13 (S13-3, F-59): the app's method refitted across both knowledge bases. The language report
+// asked every question again against the variant with 30 entries in Japanese; those checks join the
+// English ones as a second copy of each question (ids suffixed @ja-corpus), kept in the same fold.
+const METHOD = 'voyage-4 + claude-haiku-5-5';
+const POOLED = `${METHOD} (both knowledge bases)`;
+const VARIANT = '@ja-corpus';
+const baseId = (id: string) => id.replace(VARIANT, '');
+const languagesFile = latestReport('languages');
+const items = new Map((JSON.parse(readFileSync(join(ROOT, 'eval/retrieval-set.json'), 'utf8')) as { items: { id: string; split: string }[] }).items.map((i) => [i.id, i.split]));
+const variantRows: ItemResult[] = [];
+if (languagesFile) {
+  const l = JSON.parse(readFileSync(join(ROOT, 'docs/evals', languagesFile), 'utf8')) as { setVersion: string; method: string; rows: { id: string; kind: string; language: string; topIsGold: boolean; score?: number | null; unreadable?: boolean }[] };
+  if (l.setVersion !== data.setVersion || l.method !== METHOD) {
+    console.error(`${languagesFile} used set ${l.setVersion} and ${l.method}; expected ${data.setVersion} and ${METHOD}.`);
+    process.exit(1);
+  }
+  if (l.rows.some((r) => r.score === undefined)) {
+    console.error(`${languagesFile} has no raw scores; rerun npm run eval:languages (from the cache, no calls).`);
+    process.exit(1);
+  }
+  for (const r of l.rows) {
+    variantRows.push({ id: `${r.id}${VARIANT}`, kind: r.kind, split: items.get(r.id) ?? 'test', method: POOLED, topScore: r.score ?? null, topIsGold: r.topIsGold, language: r.language, unreadable: r.unreadable });
+  }
+}
+const runs = models.map((m) => ({ label: m, rows: data.results.filter((r) => r.method === m), group: undefined as ((r: ItemResult) => string) | undefined }));
+if (variantRows.length) {
+  runs.push({ label: POOLED, rows: [...data.results.filter((r) => r.method === METHOD).map((r) => ({ ...r, method: POOLED })), ...variantRows], group: (r) => baseId(r.id) });
+}
+const measures: Record<string, AdoptionInput> = {};
 const date = new Date().toISOString().slice(0, 10);
 const base = reportBase('calibration', date);
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
@@ -77,11 +107,12 @@ const droppedNotes: string[] = [];
 
 const saved: Record<string, { id: string; kind: string; language: string; p: number; correct: boolean }[]> = {};
 const foldLines: string[] = [];
+const perCorpus: string[] = [];
 const strata = (r: { kind: string; split: string }) => `${r.kind}/${r.split}`;
 
-for (const model of models) {
+for (const { label: model, rows: runRows, group } of runs) {
   // Sprint 6: an unreadable check leaves a question uncalibrated in the app, so it is not fitted on.
-  const { usable: rows, dropped } = usableForCalibration(data.results.filter((r) => r.method === model));
+  const { usable: rows, dropped } = usableForCalibration(runRows);
   if (dropped) droppedNotes.push(`${model}: ${dropped} questions left out because the check was unreadable (they are never bulk-approved in the app).`);
   // The app's table: every usable question (Rory, Q2).
   const table: CalibrationTable = {
@@ -90,7 +121,7 @@ for (const model of models) {
   };
   const tables = { [model]: table };
   // How it performs: each question predicted by a table fitted without its fold.
-  const cv = crossValidate<(typeof rows)[number]>(rows, FOLDS, strata, SEED, BULK_LINE);
+  const cv = crossValidate<(typeof rows)[number]>(rows, FOLDS, strata, SEED, BULK_LINE, group);
   const predictions = cv.predictions.map((x) => ({ p: x.p, correct: x.row.topIsGold, kind: x.row.kind, language: x.row.language ?? 'en', id: x.row.id }));
   saved[model] = predictions.map(({ id, kind, language, p, correct }) => ({ id, kind, language, p: Math.round(p * 10000) / 10000, correct }));
   const ece = expectedCalibrationError(predictions);
@@ -112,9 +143,26 @@ for (const model of models) {
   // Sprint 8: out of fold, the most in any one fold, and the largest change one question makes.
   const nearCv = near.filter((p) => p.p >= BULK_LINE).length;
   const mostInFold = Math.max(...cv.folds.map((f) => f.nearAtBulk));
-  const loo = leaveOneOut(rows, BULK_LINE);
+  const loo = leaveOneOut(rows, BULK_LINE, group ?? ((r) => r.id));
   const meetsS8 = mostInFold <= S8_BARS.nearAtBulkPerFold && loo.largestChange <= S8_BARS.looChange;
   lines.push(`| ${model} | ${ece.toFixed(3)} | ${pct(unansBelow)} | ${near.length ? pct(nearBelow) : 'n/a'} | ${pct(ansBelow)} | ${meets ? 'yes' : 'no'} | ${nearOver} of ${nearAll.length} | ${wrongOver} of ${over.length} | ${meetsS2 ? 'yes' : 'no'} | ${nearCv} of ${near.length} | ${mostInFold} | ${loo.largestChange}${loo.mostInfluential ? ` (${loo.mostInfluential})` : ''} | ${meetsS8 ? 'yes' : 'no'} |`);
+  measures[model] = {
+    ece, unanswerableBelowFloor: unansBelow, nearBelowFloor: nearBelow, answerableBelowFloor: ansBelow, nearAtBulk: nearOver, mostInFold, looChange: loo.largestChange,
+    nearAtBulkByCorpus: group
+      ? { English: nearAll.filter((r) => !r.id.endsWith(VARIANT) && conf(r) >= BULK_LINE).length, 'Japanese-variant': nearAll.filter((r) => r.id.endsWith(VARIANT) && conf(r) >= BULK_LINE).length }
+      : {},
+  };
+  if (group) {
+    // Per knowledge base and language pair, out of fold (the pooled set only).
+    for (const corpus of ['English', 'Japanese-variant']) {
+      const mine = predictions.filter((x) => x.id.endsWith(VARIANT) === (corpus !== 'English'));
+      for (const lang of ['en', 'ja']) {
+        const p = mine.filter((x) => x.language === lang);
+        const n = p.filter((x) => x.kind === 'near-miss');
+        perCorpus.push(`| ${corpus} | ${lang === 'en' ? 'English' : 'Japanese'} | ${p.length} | ${expectedCalibrationError(p).toFixed(3)} | ${n.filter((x) => x.p >= BULK_LINE).length} of ${n.length} |`);
+      }
+    }
+  }
   foldLines.push(`| ${model} | ${cv.folds.map((f) => `${f.ece.toFixed(3)}; ${f.nearAtBulk} of ${f.nearMisses}`).join(' | ')} |`);
 
   // F-13: the same table fitted on both languages, checked per language (out of fold).
@@ -131,6 +179,33 @@ for (const model of models) {
     '| Predicted | Questions | Mean predicted | Observed right |', '|---|---|---|---|',
     ...reliabilityBins(predictions).filter((b) => b.count > 0)
       .map((b) => `| ${b.range} | ${b.count} | ${pct(b.meanPredicted)} | ${pct(b.observed)} |`),
+  );
+}
+
+// Sprint 13 (S13-3; Rory, Q2): the pooled table replaces the app's only if every bar holds.
+const pooledSection: string[] = [];
+if (measures[POOLED]) {
+  const decision = adoptionCheck(measures[POOLED]);
+  const nVariant = variantRows.filter((r) => !r.unreadable).length;
+  if (decision.adopt) {
+    allTables[METHOD] = { ...allTables[POOLED], model: METHOD, evaluationSet: `${data.setVersion} against the English knowledge base and the Japanese variant (${nVariant + data.results.filter((r) => r.method === METHOD && !r.unreadable).length} checks; checked by ${FOLDS}-fold cross-validation, each question's two copies in one fold)` };
+    saved[`${METHOD} (English knowledge base only)`] = saved[METHOD];
+    saved[METHOD] = saved[POOLED];
+  }
+  delete allTables[POOLED];
+  pooledSection.push(
+    '', '## Across both knowledge bases (Sprint 13, F-59)', '',
+    `The app's method fitted on the English knowledge base and on the Japanese variant together (\`${languagesFile}\`: the same questions asked again with 30 entries in Japanese). Each question appears twice, so this is not twice the evidence; a question's two copies are always in the same fold, and leaving one question out removes both. The row "${POOLED}" in the table above gives every bar for it.`,
+    '',
+    '| Knowledge base | Question language | Questions (out of fold) | Calibration error | Near misses at or above 80% (cross-validated) |',
+    '|---|---|---|---|---|',
+    ...perCorpus,
+    '',
+    `Near misses at or above 80% with the pooled table (all): English knowledge base ${measures[POOLED].nearAtBulkByCorpus.English}, Japanese variant ${measures[POOLED].nearAtBulkByCorpus['Japanese-variant']}.`,
+    '',
+    decision.adopt
+      ? `**Adopted** (Rory, Q2: only if every bar holds): the app's table for ${METHOD} is now the pooled fit, and the figures for ${METHOD} in this report's JSON are the pooled ones.`
+      : `**Not adopted** (Rory, Q2: only if every bar holds). Missed: ${decision.failures.join('; ')}. The app keeps the table fitted on the English knowledge base.`,
   );
 }
 
@@ -156,6 +231,7 @@ lines.push(
   '|---|---|---|---|---|',
   ...perLanguage,
 );
+lines.push(...pooledSection);
 if (droppedNotes.length) lines.push('', '**Left out of the fit and the checks:**', '', ...droppedNotes.map((n) => `- ${n}`));
 lines.push('', '"Answerable below floor" is the cost of the floor: answerable questions sent to a person although the knowledge base had the answer.', '', `The last two columns are the safety check for bulk approval: questions an owner could approve in bulk at ${pct(BULK_LINE)} although the top entry does not answer them. Pricing and legal questions are never bulk-approved whatever their score (project rule 4).`, ...details, '');
 writeFileSync(join(ROOT, `docs/evals/${base}.md`), lines.join('\n'));
