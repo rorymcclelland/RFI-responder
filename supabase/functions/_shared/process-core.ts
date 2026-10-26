@@ -16,9 +16,9 @@ import type { ClaudeClient } from './claude.ts';
 import { draftGrounded } from './drafting.ts';
 import { HttpError } from './errors.ts';
 import { gateQuestion } from './gates.ts';
-import { selectDraftSources, type MatchRow, type Source } from './sources.ts';
+import { selectDraftSources, translatedFrom, type MatchRow, type Source } from './sources.ts';
 
-export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source' | 'unindexed_entries';
+export type Gate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'japanese' | 'unreviewed_source' | 'stale_source' | 'unindexed_entries';
 export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
 
 export interface QuestionIn {
@@ -174,10 +174,6 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
 
     let gateValue: Gate | null = gate.category;
     let gateReason: string | null = gate.category ? gate.reason : null;
-    if (!gateValue && language === 'ja') {
-      gateValue = 'translation';
-      gateReason = 'Japanese question: the draft is translated from English entries, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.';
-    }
 
     let text: string;
     let kind: DraftKind;
@@ -212,6 +208,22 @@ export async function processQuestions(questions: QuestionIn[], deps: ProcessDep
       text = draftAnswer(sources);
       kind = 'assembled';
       cited = assembledFrom(sources);
+    }
+
+    // Sprint 12 (S12-2): a draft that crosses languages, in either direction, is translated and
+    // reviewed individually; a Japanese draft from Japanese entries is not translated, but is held too
+    // until a native reader has checked the Japanese evaluation items (Rory, Q2; F-14). Decided from
+    // the entries the draft cites, or, with no draft, from the matched entries.
+    if (!gateValue) {
+      const from = translatedFrom(language, cited.length ? sources.filter((s) => cited.includes(s.entry.id)).map((s) => s.entry) : sources.map((s) => s.entry));
+      const name = (l: string) => (l === 'ja' ? 'Japanese' : 'English');
+      if (from) {
+        gateValue = 'translation';
+        gateReason = `${name(language)} question, answered from ${name(from)} entries: the draft is translated, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.`;
+      } else if (language === 'ja') {
+        gateValue = 'japanese';
+        gateReason = 'Japanese question, answered from Japanese entries: nothing is translated, but the Japanese drafting is unverified, so it is reviewed individually until the Japanese evaluation items have been checked by a native reader.';
+      }
     }
 
     // Sprint 11 (S11-2): entries without a vector were not searched when matching by meaning. Checked

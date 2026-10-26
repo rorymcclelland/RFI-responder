@@ -101,6 +101,8 @@ const GATE_BADGE: Record<NonNullable<RFIQuestion['gate']>, { label: string; cls:
   legal:       { label: 'Legal: review individually', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
   unchecked:   { label: 'Not fully checked', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   translation: { label: 'Translated draft', cls: 'bg-sky-50 text-sky-700 border-sky-200' },
+  // Sprint 12 (S12-2): Japanese from Japanese entries, not translated, but unverified (Q2).
+  japanese: { label: 'Japanese: review individually', cls: 'bg-sky-50 text-sky-700 border-sky-200' },
   unreviewed_source: { label: 'Cites an unreviewed entry', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   stale_source: { label: 'Cites an entry overdue for review', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
   // Sprint 11 (S11-2): matched while some entries had no vector, so the best match may be missing.

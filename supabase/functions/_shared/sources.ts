@@ -15,11 +15,24 @@ export interface MatchRow {
   keyword_rank: number | null;
   fused_score: number;
   embedding_model: string | null;
+  /** Sprint 12 (S12-2): the entry's language; absent from rows read before Sprint 12. */
+  language?: string | null;
+}
+
+export type Language = 'en' | 'ja';
+
+/**
+ * Sprint 12 (S12-2): the language a draft is translated from, or null when every entry it draws on
+ * is in the question's own language. With several, the first entry in another language decides.
+ */
+export function translatedFrom(questionLanguage: Language, entries: { language?: Language }[]): Language | null {
+  const other = entries.find((e) => (e.language ?? 'en') !== questionLanguage);
+  return other ? other.language ?? 'en' : null;
 }
 
 /** A matched entry as drafting and the screen see it; `entry.id` is the entry's ref (KB-0001). */
 export interface Source {
-  entry: { id: string; question: string; answer: string; tags: string[]; source?: string };
+  entry: { id: string; question: string; answer: string; tags: string[]; source?: string; language?: Language };
   score: number;
 }
 
@@ -34,7 +47,7 @@ const MAX_SOURCES = 3;
 export function selectDraftSources(rows: MatchRow[]): Source[] {
   if (rows.length === 0) return [];
   const toSource = (r: MatchRow): Source => ({
-    entry: { id: r.ref, question: r.question, answer: r.answer, tags: r.tags ?? [], source: r.source || undefined },
+    entry: { id: r.ref, question: r.question, answer: r.answer, tags: r.tags ?? [], source: r.source || undefined, language: r.language === 'ja' ? 'ja' : 'en' },
     score: r.similarity ?? r.fused_score,
   });
   const withSimilarity = rows.filter((r) => r.similarity !== null);

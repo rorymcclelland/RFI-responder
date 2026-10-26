@@ -42,7 +42,8 @@ These badges mean a question is never approved in bulk. Hover over the badge, or
 | Pricing: a person answers | It asks about price, cost or commercial terms. No draft is written, and the answer is never learned automatically. |
 | Legal: review individually | It touches contract terms, liability, indemnity, warranties and similar. A draft may be written, but a person checks it. |
 | Not fully checked | The pricing and legal classifier could not run, so only simple rules were applied; or the review status of the cited entries could not be read. |
-| Translated draft | The question is in Japanese, and the draft is translated from English entries. |
+| Translated draft | The question and the entries the draft is written from are in different languages, English and Japanese, either way round. The draft carries a label saying which way it was translated. |
+| Japanese: review individually | A Japanese question answered from Japanese entries. Nothing is translated, but the app's Japanese has not yet been checked by a native reader, so these are reviewed one at a time. |
 | Cites an unreviewed entry | The draft relies on a knowledge-base entry an admin has not reviewed yet. |
 | Cites an entry overdue for review | The draft relies on an entry overdue for its periodic review, or one that has since been replaced. |
 | Some entries not searched | Some knowledge-base entries were not yet indexed when the question was matched, so the best match may have been missed (the processing could not index them first, for example because of your daily limit). |

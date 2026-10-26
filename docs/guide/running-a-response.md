@@ -37,7 +37,7 @@ Each question is processed on the server, in batches of ten (**Matching and draf
 
 1. Any knowledge-base entries not yet indexed are indexed first, as far as your daily limit allows; then the question is matched by meaning against the knowledge base.
 2. A checker (Claude) reads the best entries and says whether they answer the question: yes, partly or no, with a one-sentence reason.
-3. It is checked for pricing and legal content, and Japanese questions are marked as translations.
+3. It is checked for pricing and legal content. A draft written across languages (an English question from Japanese entries, or the other way round) is marked as translated, and every Japanese question is reviewed one at a time.
 4. Unless nothing close enough was found, a draft is written from the matched entries only, citing them; the drafting model writes none if the entries do not answer the question. Code then rejects a draft that cites an entry it was not given, or contains a figure, link or email address that is not in its sources; the question is left without a draft, with a note saying why.
 5. Pricing questions, and questions the knowledge base does not answer, get no draft: a person writes those. [The question card](question-card.md#when-there-is-no-draft) lists the reasons.
 
@@ -67,7 +67,7 @@ Every acceptance records who made it, when, and how (one at a time or in bulk), 
 
 The bulk bar approves every pending draft at or above a confidence in one step: **High ≥80%**, **Medium ≥60%**, or **All eligible**. Only the owner or an admin can use it, and the database decides what it includes. It never includes a question that is:
 
-- pricing, legal or translated, or matched while some entries were not yet indexed;
+- pricing, legal, translated or Japanese, or matched while some entries were not yet indexed;
 - not fully checked (the classifier or the review check could not run);
 - citing a knowledge-base entry that is unreviewed, overdue for review, or replaced;
 - judged only partly answered, or not answered, by the checker, or not checked by a checker at all;

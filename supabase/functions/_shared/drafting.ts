@@ -13,7 +13,7 @@
  */
 import { PROMPT_CANARY, type ClaudeClient } from './claude.ts';
 import { LINK_PATTERN, safeNote } from './safe-text.ts';
-import type { Source } from './sources.ts';
+import { translatedFrom, type Source } from './sources.ts';
 
 export const DRAFT_PROMPT_VERSION = 'draft-2026-10-23.1';
 
@@ -31,6 +31,8 @@ export interface DraftResult {
 }
 
 export const TRANSLATION_LABEL = '[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]';
+/** Sprint 12 (S12-2): the other direction, an English answer written from Japanese entries. */
+export const TRANSLATION_LABEL_FROM_JA = '[Translated from Japanese knowledge-base entries. Someone who reads Japanese should check it against them before it is sent.]';
 
 const SYSTEM = `You draft answers to questions from a customer's security questionnaire (an RFI), on behalf of the company answering it.
 
@@ -148,6 +150,8 @@ export async function draftGrounded(opts: {
   if (problem) {
     return { ...result, kind: 'insufficient_evidence', text: insufficientText(`a draft was written but rejected because ${problem}`), citations: [], rejected: problem };
   }
-  const label = opts.language === 'ja' ? `\n\n${TRANSLATION_LABEL}` : '';
+  // Sprint 12 (S12-2): labelled when the cited entries are in another language, in either direction.
+  const from = translatedFrom(opts.language, opts.sources.filter((s) => citations.includes(s.entry.id)).map((s) => s.entry));
+  const label = from === 'en' ? `\n\n${TRANSLATION_LABEL}` : from === 'ja' ? `\n\n${TRANSLATION_LABEL_FROM_JA}` : '';
   return { ...result, kind: 'generated', text: `${answer}\n\n[References: ${citations.join(', ')}]${label}`, citations };
 }

@@ -91,7 +91,7 @@ export interface RFIQuestion {
   checker: { verdict: 'yes' | 'partly' | 'no' | null; bestRef: string | null; reason: string | null };
 }
 
-export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'unreviewed_source' | 'stale_source' | 'unindexed_entries';
+export type QuestionGate = 'pricing' | 'legal' | 'unchecked' | 'translation' | 'japanese' | 'unreviewed_source' | 'stale_source' | 'unindexed_entries';
 export type DraftKind = 'generated' | 'assembled' | 'insufficient_evidence' | 'person_required';
 
 export interface RFISession {

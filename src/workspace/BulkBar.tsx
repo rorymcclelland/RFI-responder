@@ -48,7 +48,7 @@ export default function BulkBar({ canApprove, eligible, held, showFinish, finish
       </div>
       {held > 0 && (
         <p className="text-xs text-ink-500 font-medium">
-          {held} pending question{held !== 1 ? 's are' : ' is'} never included in bulk approval (pricing, legal, translated, not fully checked, matched before every entry was indexed, citing an unreviewed, overdue or replaced entry, judged
+          {held} pending question{held !== 1 ? 's are' : ' is'} never included in bulk approval (pricing, legal, translated or Japanese, not fully checked, matched before every entry was indexed, citing an unreviewed, overdue or replaced entry, judged
           only partly answered or not answered by the checker, or not checked by one, without calibrated confidence, or with no draft) and must be accepted individually.
         </p>
       )}

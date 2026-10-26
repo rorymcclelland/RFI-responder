@@ -80,7 +80,7 @@ describe('the guide covers the app', () => {
   it('explains every reason bulk approval holds a question', () => {
     // A new field in BulkResult needs a line here and a line in the guide.
     const WHERE: Record<string, string> = {
-      heldGated: 'pricing, legal or translated',
+      heldGated: 'pricing, legal, translated or Japanese',
       heldUncalibrated: 'without calibrated confidence',
       heldNoDraft: 'without a draft',
       heldPartly: 'judged only partly answered, or not answered, by the checker',
