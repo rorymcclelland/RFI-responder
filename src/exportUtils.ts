@@ -25,15 +25,18 @@ export const TRANSLATION_LABELS = {
   ja: '[Translated from Japanese knowledge-base entries. Someone who reads Japanese should check it against them before it is sent.]',
 } as const;
 
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
- * Sprint 13 (S13-1, F-58): the answer without the notes the app adds to a draft, the translation
- * label and the reference list, each only exactly as the app writes it and only at the very end
- * (the rule `private.learnable_text` applies before learning), so nothing a person wrote is removed.
+ * Sprint 13 (S13-1, F-58): the answer without the notes the app adds to a draft. The translation
+ * label is the app's own exact sentence, so it is removed wherever it is (security review, L3: a
+ * person may have written after it); the reference list only exactly as the app writes it and only
+ * at the very end, so nothing a person wrote is removed.
  */
 export function exportedAnswer(answer: string): string {
-  let t = answer.trimEnd();
-  for (const label of Object.values(TRANSLATION_LABELS)) if (t.endsWith(label)) t = t.slice(0, -label.length).trimEnd();
-  return t.replace(/\[References: KB-[0-9]+(?:, KB-[0-9]+)*\]$/, '').trim();
+  let t = answer;
+  for (const label of Object.values(TRANSLATION_LABELS)) t = t.replace(new RegExp(`\\s*${escapeRegExp(label)}`, 'g'), '');
+  return t.trimEnd().replace(/\[References: KB-[0-9]+(?:, KB-[0-9]+)*\]$/, '').trim();
 }
 
 /** Shown for a question the owner chose to skip (Sprint 3, Q2). */
@@ -88,12 +91,17 @@ export interface ProvenanceRow { number: string; origin: AnswerOrigin; model: st
 /** Sprint 13 (S13-1): the label leaves the exported answer, so the provenance says a draft was translated. */
 export type Translation = 'drafted from English entries' | 'drafted from Japanese entries' | 'translated draft' | '';
 
-/** From the stored gate (language gates are never released) and the label the drafter added. */
+/**
+ * From the label the drafter added, whatever the gate (security review, M1: a legal or unchecked gate
+ * takes precedence over the translation gate, but the draft is still translated), or the translation
+ * gate on a draft without one (a draft written in the other language). Only drafts: an answer a
+ * person wrote is never called a translation (review, L2).
+ */
 export function translationOf(q: RFIQuestion): Translation {
-  if (q.gate !== 'translation' || q.status !== 'accepted') return '';
+  if (q.status !== 'accepted' || (q.draftKind !== 'generated' && q.draftKind !== 'assembled')) return '';
   if (q.generatedAnswer.includes(TRANSLATION_LABELS.en)) return 'drafted from English entries';
   if (q.generatedAnswer.includes(TRANSLATION_LABELS.ja)) return 'drafted from Japanese entries';
-  return 'translated draft';
+  return q.gate === 'translation' ? 'translated draft' : '';
 }
 
 /** One row per exported question, in the RFI's order. */

@@ -1,6 +1,6 @@
 // Sprint 3: what goes into the exported response.
 import { describe, expect, it } from 'vitest';
-import { buildCsvExport, buildExcelExport, exportRows, NOT_ANSWERED, provenanceRows, wordHtml } from '../exportUtils';
+import { buildCsvExport, buildExcelExport, exportedAnswer, exportRows, NOT_ANSWERED, provenanceRows, wordHtml } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
 const q = (position: number, status: RFIQuestion['status'], final = `Answer ${position}`, generated = final): RFIQuestion => ({
@@ -92,5 +92,48 @@ describe('Sprint 13 (S13-1): exports send only the answer', () => {
     expect([TRANSLATION_LABEL, TRANSLATION_LABEL_FROM_JA]).toEqual([LABEL_EN, LABEL_JA]);
     const { TRANSLATION_LABELS } = await import('../exportUtils');
     expect(TRANSLATION_LABELS).toEqual({ en: LABEL_EN, ja: LABEL_JA });
+  });
+});
+
+describe('Sprint 13 security review', () => {
+  const LABEL_EN = '[Translated from English knowledge-base entries. A Japanese speaker should review it before it is sent.]';
+  const LABEL_JA = '[Translated from Japanese knowledge-base entries. Someone who reads Japanese should check it against them before it is sent.]';
+  const accepted = (o: Partial<RFIQuestion>): RFIQuestion => ({ ...q(1, 'accepted'), ...o });
+
+  it('M1: a translated draft under a legal or unchecked gate still records the translation', () => {
+    for (const gate of ['legal', 'unchecked'] as const) {
+      const text = `回答です。\n\n[References: KB-0001]\n\n${LABEL_EN}`;
+      const qs = [accepted({ gate, generatedAnswer: text, finalAnswer: text, language: 'ja' })];
+      expect(exportRows(qs)[0].answer).toBe('回答です。');
+      expect(provenanceRows(qs)[0].translation).toBe('drafted from English entries');
+    }
+  });
+
+  it('M1: a draft gated translated with no label (written in the other language) is a translated draft', () => {
+    expect(provenanceRows([accepted({ gate: 'translation', generatedAnswer: '回答です。', finalAnswer: '回答です。' })])[0].translation).toBe('translated draft');
+  });
+
+  it('L2: an answer a person wrote is never called a translation', () => {
+    for (const draftKind of ['insufficient_evidence', 'person_required'] as const) {
+      expect(provenanceRows([accepted({ gate: 'translation', draftKind, generatedAnswer: 'No draft.', finalAnswer: 'Written by a person.' })])[0].translation).toBe('');
+    }
+  });
+
+  it('L3: the label never reaches the customer, wherever a person left it, and both labels go', () => {
+    expect(exportedAnswer(`回答です。\n\n[References: KB-0001]\n\n${LABEL_EN}\n\nKind regards.`)).toBe('回答です。\n\n[References: KB-0001]\n\nKind regards.');
+    expect(exportedAnswer(`Answer.\n\n[References: KB-0102]\n\n${LABEL_EN}\n\n${LABEL_JA}`)).toBe('Answer.');
+    expect(exportedAnswer(`Answer.\r\n\r\n[References: KB-0102]\r\n\r\n${LABEL_JA}\r\n`)).toBe('Answer.');
+  });
+
+  it('S13-1 test 6: the Excel Provenance sheet carries the Translation column and value', async () => {
+    const { default: ExcelJS } = await import('exceljs');
+    const text = `回答です。\n\n[References: KB-0001]\n\n${LABEL_EN}`;
+    const bytes = await buildExcelExport([accepted({ gate: 'translation', generatedAnswer: text, finalAnswer: text })]);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(bytes.buffer as ArrayBuffer);
+    const prov = wb.getWorksheet('Provenance')!;
+    expect(prov.getRow(1).getCell(8).value).toBe('Translation');
+    expect(prov.getRow(2).getCell(8).value).toBe('drafted from English entries');
+    expect(String(wb.getWorksheet('RFI Responses')!.getRow(2).getCell(3).value)).toBe('回答です。');
   });
 });

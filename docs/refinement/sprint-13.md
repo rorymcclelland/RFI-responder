@@ -81,3 +81,19 @@ Order: S13-1 and S13-2 (independent, small), then S13-3. Sizes: two S and one M,
 | Q2 | When to adopt a calibration refitted across both knowledge bases | Only if every existing bar holds on the pooled set and no near miss reaches 80% in either knowledge base; otherwise keep the current table and record the residual **Rory: agreed** |
 | Q3 | Import duplicates | The same question counts as a duplicate only in the same language **Rory: agreed** |
 | Q4 | F-60, Japanese keyword matching | Not in this sprint; it matters only when vectors are missing, and those questions are already held **Rory: agreed** |
+
+## Security review (26 October 2026)
+
+An independent review of `main..sprint-13` found no high issue, one medium and six low; all are fixed, each with a test where code changed.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | A translated draft held for a legal or unchecked reason (which takes precedence over the translation gate) lost its label in the export with nothing in the provenance | The Translation field is decided from the drafter's label whatever the gate, and from the translation gate for a draft with no label |
+| L1 | The evaluations page compared different populations (0.104 on 60 questions with the current table, 0.044 on 254 with the pooled one) and quoted n003 at 81%, its score with the current table | The calibration report gives each language pair like for like (English-to-Japanese: 0.104 current, 0.096 pooled, out of fold) and n003's score under each table (86.5% pooled, out of fold); the page cites those |
+| L2 | A person-written answer to a question gated as translated was recorded as a translated draft | Only drafts are recorded as translations |
+| L3 | Text written after the label kept the label in the export, and with both labels only one was removed | The label, the app's own exact sentence, is removed wherever it is; the reference list still only at the end |
+| L4 | The adoption check passed a measure that was not a number | Such a measure fails; the bars are shared by the report and the check |
+| L5 | The "no keys, no calls" note printed when only one key was missing, and embedding calls were not counted | The note needs both keys absent; embedding calls are counted |
+| L6 | If a pooled table were ever adopted, intervals would treat a question's two copies as independent | Intervals resample questions and count a near miss once |
+
+**Left for the backlog.** The import trims only spaces from a question, so a tab or line break at either end (possible only by calling the database directly; the app trims cells) makes a different key; two imports at the same moment can collide on the unique index and roll back. Both predate this sprint.

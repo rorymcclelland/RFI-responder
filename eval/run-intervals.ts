@@ -69,12 +69,16 @@ const proportion = (measure: string, figure: string, k: number, n: number, basis
 // Calibration: out-of-fold predictions (Sprint 8, S8-2).
 {
   const report = newest('calibration', 'json');
-  const preds = json<{ predictions: Record<string, { kind: string; p: number; correct: boolean }[]> }>(report).predictions[METHOD];
-  const ece = (s: typeof preds) => expectedCalibrationError(s);
-  rows.push({ measure: 'Calibration error, voyage-4 + checker (cross-validated)', figure: ece(preds).toFixed(3),
-    interval: formatInterval(bootstrap(preds, ece, { seed: SEED }), 'number'), method: 'Bootstrap', basis: `${preds.length} out-of-fold predictions`, report });
-  const near = preds.filter((x) => x.kind === 'near-miss');
-  const k = near.filter((x) => x.p >= 0.8).length;
+  const preds = json<{ predictions: Record<string, { id: string; kind: string; p: number; correct: boolean }[]> }>(report).predictions[METHOD];
+  // Sprint 13 security review (L6): if the app's table is ever fitted on both knowledge bases, a
+  // question has two predictions; resample questions, not copies, and count a near miss once.
+  const question = (id: string) => id.replace(/@ja-corpus$/, '');
+  const groups = [...preds.reduce((m, x) => m.set(question(x.id), [...(m.get(question(x.id)) ?? []), x]), new Map<string, typeof preds>()).values()];
+  const ece = (g: typeof groups) => expectedCalibrationError(g.flat());
+  rows.push({ measure: 'Calibration error, voyage-4 + checker (cross-validated)', figure: ece(groups).toFixed(3),
+    interval: formatInterval(bootstrap(groups, ece, { seed: SEED }), 'number'), method: 'Bootstrap', basis: `${preds.length} out-of-fold predictions${groups.length < preds.length ? `, ${groups.length} questions` : ''}`, report });
+  const near = groups.filter((g) => g[0].kind === 'near-miss');
+  const k = near.filter((g) => g.some((x) => x.p >= 0.8)).length;
   proportion('Near misses at or above the 80% bulk line (cross-validated)', `${k} of ${near.length}`, k, near.length, `${near.length} near misses`, report);
 }
 

@@ -144,4 +144,13 @@ describe('Sprint 13 (S13-3): calibration across languages', () => {
       expect(r.failures.length, k).toBe(1);
     }
   });
+
+  it('security review, L4: a measure that is not a number fails the check', () => {
+    const good = { ece: 0.05, unanswerableBelowFloor: 0.9, nearBelowFloor: 0.9, answerableBelowFloor: 0.05, nearAtBulk: 0, mostInFold: 0, looChange: 0, nearAtBulkByCorpus: { english: 0 } };
+    for (const k of ['ece', 'mostInFold', 'nearBelowFloor'] as const) {
+      expect(adoptionCheck({ ...good, [k]: Number.NaN }).adopt, k).toBe(false);
+      expect(adoptionCheck({ ...good, [k]: -Infinity }).adopt, k).toBe(false);
+    }
+    expect(adoptionCheck({ ...good, nearAtBulkByCorpus: { english: Number.NaN } }).adopt).toBe(false);
+  });
 });

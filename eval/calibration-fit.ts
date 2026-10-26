@@ -202,15 +202,31 @@ export interface AdoptionInput {
  */
 const misses = (n: number) => `${n} near ${n === 1 ? 'miss' : 'misses'}`;
 
+/** The bars every calibration must meet (Sprint 1, 2 and 8), shared by the report and the adoption check. */
+export const CALIBRATION_BARS = {
+  ece: 0.1, unanswerableBelowFloor: 0.8, nearBelowFloor: 0.8, answerableBelowFloor: 0.1, nearAtBulk: 0, nearAtBulkPerFold: 1, looChange: 1,
+} as const;
+
+/**
+ * Sprint 13 (S13-3; Rory, Q2): a table refitted across languages replaces the app's only if every
+ * existing bar holds (Sprint 1, 2 and 8) and no near miss reaches the bulk line in either knowledge
+ * base. A measure that is not a finite number fails (security review, L4).
+ */
 export function adoptionCheck(x: AdoptionInput): { adopt: boolean; failures: string[] } {
+  const b = CALIBRATION_BARS;
+  const values: [string, number][] = [['calibration error', x.ece], ['unanswerable below the floor', x.unanswerableBelowFloor], ['near misses below the floor', x.nearBelowFloor],
+    ['answerable below the floor', x.answerableBelowFloor], ['near misses at the bulk line', x.nearAtBulk], ['most in one fold', x.mostInFold], ['change from one question', x.looChange],
+    ...Object.entries(x.nearAtBulkByCorpus).map(([c, n]) => [`near misses against the ${c} knowledge base`, n] as [string, number])];
+  const notNumbers = values.filter(([, v]) => !Number.isFinite(v)).map(([k]) => `${k} could not be measured`);
+  if (notNumbers.length) return { adopt: false, failures: notNumbers };
   const failures = [
-    x.ece > 0.1 && `calibration error ${x.ece.toFixed(3)} above 0.1`,
-    x.unanswerableBelowFloor < 0.8 && 'fewer than 80% of unanswerable questions below the floor',
-    x.nearBelowFloor < 0.8 && 'fewer than 80% of near misses below the floor',
-    x.answerableBelowFloor > 0.1 && 'more than 10% of answerable questions below the floor',
-    x.nearAtBulk > 0 && `${misses(x.nearAtBulk)} at or above the bulk line`,
-    x.mostInFold > 1 && `${misses(x.mostInFold)} at the bulk line in one fold`,
-    x.looChange > 1 && `one question changes the near misses at the bulk line by ${x.looChange}`,
+    x.ece > b.ece && `calibration error ${x.ece.toFixed(3)} above ${b.ece}`,
+    x.unanswerableBelowFloor < b.unanswerableBelowFloor && 'fewer than 80% of unanswerable questions below the floor',
+    x.nearBelowFloor < b.nearBelowFloor && 'fewer than 80% of near misses below the floor',
+    x.answerableBelowFloor > b.answerableBelowFloor && 'more than 10% of answerable questions below the floor',
+    x.nearAtBulk > b.nearAtBulk && `${misses(x.nearAtBulk)} at or above the bulk line`,
+    x.mostInFold > b.nearAtBulkPerFold && `${misses(x.mostInFold)} at the bulk line in one fold`,
+    x.looChange > b.looChange && `one question changes the near misses at the bulk line by ${x.looChange}`,
     ...Object.entries(x.nearAtBulkByCorpus).map(([c, n]) => n > 0 && `${misses(n)} at the bulk line against the ${c} knowledge base`),
   ].filter((f): f is string => Boolean(f));
   return { adopt: failures.length === 0, failures };

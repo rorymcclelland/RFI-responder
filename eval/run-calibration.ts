@@ -16,15 +16,16 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { calibratedConfidence, NO_MATCH_FLOOR, type CalibrationTable } from '../supabase/functions/_shared/calibration';
-import { adoptionCheck, calibrationBands, crossValidate, expectedCalibrationError, fitTable, leaveOneOut, reliabilityBins, usableForCalibration, type AdoptionInput } from './calibration-fit';
+import { CALIBRATION_TABLES } from '../supabase/functions/_shared/calibration-tables';
+import { adoptionCheck, CALIBRATION_BARS, calibrationBands, crossValidate, expectedCalibrationError, fitTable, leaveOneOut, reliabilityBins, usableForCalibration, type AdoptionInput } from './calibration-fit';
 import { newestReport, reportBase } from './lib';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BARS = { ece: 0.1, abstention: 0.8 };
+const BARS = { ece: CALIBRATION_BARS.ece, abstention: CALIBRATION_BARS.unanswerableBelowFloor };
 /** The bulk-approval line in the app (project rule 4): the confidence that matters most for safety. */
 const BULK_LINE = 0.8;
 
-interface ItemResult { id: string; kind: string; split: string; method: string; topScore: number | null; topIsGold: boolean; language?: string; unreadable?: boolean }
+interface ItemResult { id: string; kind: string; split: string; method: string; topScore: number | null; topIsGold: boolean; language?: string; unreadable?: boolean; pair?: string | null }
 
 /** Newest report of a kind, or null. */
 function latestReport(kind: string): string | null {
@@ -49,9 +50,9 @@ if (answerabilityFile) {
   data.results.push(...a.results);
 }
 /** Sprint 2 bars (S2-1): stricter, and about near misses specifically. */
-const S2_BARS = { nearBelow: 0.8, answerableBelow: 0.1, nearAtBulk: 0 };
+const S2_BARS = { nearBelow: CALIBRATION_BARS.nearBelowFloor, answerableBelow: CALIBRATION_BARS.answerableBelowFloor, nearAtBulk: CALIBRATION_BARS.nearAtBulk };
 /** Sprint 8 stability bar (Rory, Q3): per fold, and the largest change one question makes. */
-const S8_BARS = { nearAtBulkPerFold: 1, looChange: 1 };
+const S8_BARS = { nearAtBulkPerFold: CALIBRATION_BARS.nearAtBulkPerFold, looChange: CALIBRATION_BARS.looChange };
 const FOLDS = 5;
 const SEED = 20261025;
 
@@ -69,7 +70,7 @@ const languagesFile = latestReport('languages');
 const items = new Map((JSON.parse(readFileSync(join(ROOT, 'eval/retrieval-set.json'), 'utf8')) as { items: { id: string; split: string }[] }).items.map((i) => [i.id, i.split]));
 const variantRows: ItemResult[] = [];
 if (languagesFile) {
-  const l = JSON.parse(readFileSync(join(ROOT, 'docs/evals', languagesFile), 'utf8')) as { setVersion: string; method: string; rows: { id: string; kind: string; language: string; topIsGold: boolean; score?: number | null; unreadable?: boolean }[] };
+  const l = JSON.parse(readFileSync(join(ROOT, 'docs/evals', languagesFile), 'utf8')) as { setVersion: string; method: string; rows: { id: string; kind: string; language: string; topIsGold: boolean; score?: number | null; unreadable?: boolean; pair: string | null }[] };
   if (l.setVersion !== data.setVersion || l.method !== METHOD) {
     console.error(`${languagesFile} used set ${l.setVersion} and ${l.method}; expected ${data.setVersion} and ${METHOD}.`);
     process.exit(1);
@@ -79,7 +80,7 @@ if (languagesFile) {
     process.exit(1);
   }
   for (const r of l.rows) {
-    variantRows.push({ id: `${r.id}${VARIANT}`, kind: r.kind, split: items.get(r.id) ?? 'test', method: POOLED, topScore: r.score ?? null, topIsGold: r.topIsGold, language: r.language, unreadable: r.unreadable });
+    variantRows.push({ id: `${r.id}${VARIANT}`, kind: r.kind, split: items.get(r.id) ?? 'test', method: POOLED, topScore: r.score ?? null, topIsGold: r.topIsGold, language: r.language, unreadable: r.unreadable, pair: r.pair });
   }
 }
 const runs = models.map((m) => ({ label: m, rows: data.results.filter((r) => r.method === m), group: undefined as ((r: ItemResult) => string) | undefined }));
@@ -108,6 +109,8 @@ const droppedNotes: string[] = [];
 const saved: Record<string, { id: string; kind: string; language: string; p: number; correct: boolean }[]> = {};
 const foldLines: string[] = [];
 const perCorpus: string[] = [];
+const perPair: string[] = [];
+const nearOverList: string[] = [];
 const strata = (r: { kind: string; split: string }) => `${r.kind}/${r.split}`;
 
 for (const { label: model, rows: runRows, group } of runs) {
@@ -153,7 +156,20 @@ for (const { label: model, rows: runRows, group } of runs) {
       : {},
   };
   if (group) {
-    // Per knowledge base and language pair, out of fold (the pooled set only).
+    // Security review, L1: per language pair against the variant, like for like: the current table (not
+    // fitted on the variant) and the pooled table out of fold, on the same questions.
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const current = (r: ItemResult) => calibratedConfidence(r.topScore, METHOD, CALIBRATION_TABLES) ?? 0;
+    for (const pair of ['English to English', 'Japanese to English', 'English to Japanese', 'Japanese to Japanese']) {
+      const p = predictions.filter((x) => x.id.endsWith(VARIANT) && byId.get(x.id)?.pair === pair);
+      const cur = p.map((x) => ({ p: current(byId.get(x.id)!), correct: x.correct }));
+      perPair.push(`| ${pair} | ${p.length} | ${p.length ? expectedCalibrationError(cur).toFixed(3) : 'n/a'} | ${p.length ? expectedCalibrationError(p).toFixed(3) : 'n/a'} |`);
+    }
+    for (const x of predictions.filter((y) => y.kind === 'near-miss' && y.p >= BULK_LINE)) {
+      const r = byId.get(x.id)!;
+      nearOverList.push(`- ${x.id}: ${pct(x.p)} out of fold, ${pct(conf(r))} with the table fitted on all, ${pct(current(r))} with the current table${r.id.endsWith(VARIANT) ? '' : ' (English knowledge base)'}.`);
+    }
+    // Per knowledge base and question language, out of fold (the pooled set only).
     for (const corpus of ['English', 'Japanese-variant']) {
       const mine = predictions.filter((x) => x.id.endsWith(VARIANT) === (corpus !== 'English'));
       for (const lang of ['en', 'ja']) {
@@ -200,6 +216,16 @@ if (measures[POOLED]) {
     '| Knowledge base | Question language | Questions (out of fold) | Calibration error | Near misses at or above 80% (cross-validated) |',
     '|---|---|---|---|---|',
     ...perCorpus,
+    '',
+    'Per language pair against the variant: calibration error with the current table (fitted on the English knowledge base only, so not fitted on these questions) and with the pooled table (out of fold).',
+    '',
+    '| Pair | Questions | Current table | Pooled table (out of fold) |',
+    '|---|---|---|---|',
+    ...perPair,
+    '',
+    'Near misses at or above 80% with the pooled table:',
+    '',
+    ...(nearOverList.length ? nearOverList : ['- none']),
     '',
     `Near misses at or above 80% with the pooled table (all): English knowledge base ${measures[POOLED].nearAtBulkByCorpus.English}, Japanese variant ${measures[POOLED].nearAtBulkByCorpus['Japanese-variant']}.`,
     '',

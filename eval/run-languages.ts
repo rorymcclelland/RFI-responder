@@ -46,9 +46,12 @@ async function main() {
     ? claudeJudge({ client: claudeClient({ apiKey: env.ANTHROPIC_API_KEY, retry: patient }), model: JUDGE_MODEL })
     : { check: missing('ANTHROPIC_API_KEY') } as unknown as ReturnType<typeof claudeJudge>;
 
+  // Security review, L5: every embedding request is counted, as checker calls are.
+  let embedCalls = 0;
+  const counted = { ...voyage, embed: (texts: string[], kind: Parameters<typeof voyage.embed>[1]) => { embedCalls += 1; return voyage.embed(texts, kind); } } as typeof voyage;
   console.log('Embedding the corpus variant and the questions with voyage-4 (cached ones are reused)');
-  const docVecs = await embedCached(voyage, corpus.map((e) => `${e.question}\n${e.answer}`), 'document');
-  const queryVecs = await embedCached(voyage, set.items.map((i) => i.text), 'query');
+  const docVecs = await embedCached(counted, corpus.map((e) => `${e.question}\n${e.answer}`), 'document');
+  const queryVecs = await embedCached(counted, set.items.map((i) => i.text), 'query');
 
   // The same cache as the answerability run: keys hold the refs. A Japanese entry's key also holds a hash
   // of its text (security review, L7), so a corrected or reordered security-qa-ja.csv never reuses an
@@ -83,7 +86,7 @@ async function main() {
   const base = reportBase('languages', date);
   const { markdown, met } = languagesReport({
     date, setVersion: set.version, method: METHOD, rows, wilson, ece: expectedCalibrationError,
-    notes: [`New checker calls this run: ${calls}.`, ...(env.VOYAGE_API_KEY && env.ANTHROPIC_API_KEY ? [] : ['Rebuilt from the cached vectors and checks of an earlier run, with no keys set, so no call could go out (Sprint 13).']), `Calibration table: ${CALIBRATION_TABLES[METHOD].evaluationSet}.`],
+    notes: [`New checker calls this run: ${calls}.`, `New embedding calls this run: ${embedCalls}.`, ...(!env.VOYAGE_API_KEY && !env.ANTHROPIC_API_KEY ? ['Rebuilt from the cached vectors and checks of an earlier run, with no keys set, so no call could go out (Sprint 13).'] : []), `Calibration table: ${CALIBRATION_TABLES[METHOD].evaluationSet}.`],
   });
   mkdirSync(join(ROOT, 'docs/evals'), { recursive: true });
   writeFileSync(join(ROOT, `docs/evals/${base}.md`), markdown);
