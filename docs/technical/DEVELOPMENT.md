@@ -42,6 +42,7 @@ The local mail viewer (usually `http://127.0.0.1:54324`) catches the emails Supa
 |---|---|
 | `npm run dev` | The development server, at `http://127.0.0.1:5173` |
 | `npm run build` | The production build, in `dist/` |
+| `npm run build:hosted` | The build for a hosted deployment: refuses a local or missing Supabase address and the secret key, then builds (Vercel runs it, from `vercel.json`; Sprint 14) |
 | `npm run preview` | Serves the production build |
 | `npm run typecheck` | TypeScript, for the app |
 | `npm run lint` | ESLint; CI allows no warnings (`-- --max-warnings 0`) |
