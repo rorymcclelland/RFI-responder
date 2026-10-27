@@ -87,7 +87,7 @@ Tests: [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.t
 
 One uploaded file (spreadsheet or Word document) within a response.
 
-Created in [`20260430145610_create_rfi_workflow_tables.sql`](../../supabase/migrations/20260430145610_create_rfi_workflow_tables.sql); access rules last changed in [`20261023150000_sprint3_review_fixes.sql`](../../supabase/migrations/20261023150000_sprint3_review_fixes.sql).
+Created in [`20260430145610_create_rfi_workflow_tables.sql`](../../supabase/migrations/20260430145610_create_rfi_workflow_tables.sql); access rules last changed in [`20261103100000_policies_check_user_once.sql`](../../supabase/migrations/20261103100000_policies_check_user_once.sql), which dropped the prototype's update policy (no member has had an update grant since Sprint 3).
 
 | Column | Meaning |
 |---|---|
@@ -459,7 +459,6 @@ Tests: [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts) (release and
 
 Left over from earlier migrations; none of them grants access, but they can mislead a reader of the catalogue.
 
-- `rfi_sessions` still has the policy "Authenticated users can update sessions", but members hold no update grant on any of its columns, so no member can update a session.
 - Members hold a table-level update grant on `opportunity_contributors`, but there is no update policy, so an update changes no rows.
 - Members hold insert, update and delete grants on the `response_overview` view (from Supabase's default grants), but the view is not updatable, so every write fails.
 - The `ai_usage` insert policy for `service_role` has no effect, since the service role bypasses RLS.
@@ -471,7 +470,7 @@ From [decision 0003](../decisions/0003-access-control.md) and the project rules:
 1. **Write a new migration** with the table in `public` (or `private` if no API role should ever reach it). No data rows: synthetic data goes in `supabase/seed.sql`.
 2. **Turn on row-level security** (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY`).
 3. **Set the grants explicitly.** Supabase's default privileges give `authenticated` select, insert, update and delete on every new table in `public` (anonymous visitors' defaults are revoked by [`20261022120000_access_control.sql`](../../supabase/migrations/20261022120000_access_control.sql), and members' truncate, trigger and references by [`20261022140000_access_control_hardening.sql`](../../supabase/migrations/20261022140000_access_control_hardening.sql)). Revoke what members must not do, then grant insert and update on named columns only. Columns the server or a function sets (ids of who did something, dates, scores, flags) get no grant.
-4. **Write a policy for each command members need**, `TO authenticated`, using `auth.uid()`, `is_admin()` and `is_response_owner()`. Give an insert policy a check that the row is the caller's.
+4. **Write a policy for each command members need**, `TO authenticated`, using `(select auth.uid())` (evaluated once per query rather than once per row; a test checks every policy, Sprint 15), `is_admin()` and `is_response_owner()`. Give an insert policy a check that the row is the caller's.
 5. **Route privileged writes through a function**: `SECURITY DEFINER`, `SET search_path = ''`, check the caller inside it, `REVOKE ALL ... FROM PUBLIC, anon`, then `GRANT EXECUTE` to the roles that need it. Write to `audit_log` for privileged changes.
 6. **Decide whether archived responses lock it**, if its rows belong to a response (`refuse_if_archived` does this for sessions, questions and assignments).
 7. **Test every row of the role matrix** in `supabase/tests/db/`, with the helpers in [`harness.ts`](../../supabase/tests/db/harness.ts): anonymous refused, member, owner, assignee where it applies, admin, and the service role (`asServiceRole`). Test refusals with `refused`, and test that a column without a grant cannot be written.
