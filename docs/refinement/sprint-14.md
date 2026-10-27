@@ -142,3 +142,15 @@ An independent review of `main..sprint-14` before the first public deployment fo
 | L8 | The first-admin SQL wrote no audit row and failed silently on a different case | It matches case-insensitively, returns the row and writes the audit row |
 | L9 | Anyone can ask for password-reset mail to the fictional addresses | The project's email rate limit is lowered to 10 an hour; a CAPTCHA is left for the backlog |
 
+## Go-live (27 October 2026)
+
+Rory followed the go-live pack. Changes on the way, all recorded in the pack: the project went into his existing Free organisation once Campaign Studio's projects were paused (Campaign Studio is moving to Neon); Resend's domain verification had to finish before invitations could be sent; Voyage already had payment details. The app is at https://rfi-responder.vercel.app.
+
+**Checked by Claude, read-only, with the connected Supabase tools and the browser pane:**
+- 56 migrations applied, the latest `20261102110000`; 132 entries, all indexed; four demo responses; one real account (Rory, admin); the eight fictional people present and unable to sign in.
+- The service role cannot update the audit log or delete approvals; anonymous visitors can call only `keepalive()`; no public table without row-level security; limits as set in step 9.
+- The live site sends every header in `vercel.json`; a deep link loads the sign-in page; a missing asset is a 404; no policy violation on the sign-in page. The ping workflow ran and reached the database.
+- **Security advisors:** no errors. Warnings, all expected or already known: leaked-password protection off (F-8, the Free plan); 18 definer functions callable by signed-in users (by design: each checks its caller and is tested, but six are policy helpers that need not be callable through the API, F-64); `ai_quota` and `ai_reservations` have row-level security with no policy (by design: only the service role uses them). **Performance advisors:** nine policies call `auth.uid()` per row (F-65), unindexed foreign keys and unused indexes (information only at this size).
+
+**Found by Rory during go-live:** BUG-35, **Save limits** gave no sign it had worked (fixed in this sprint); F-63, a more elegant way to reset the demo (backlog).
+
