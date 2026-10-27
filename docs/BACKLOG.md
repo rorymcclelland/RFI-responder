@@ -623,15 +623,37 @@ Refinement: `docs/refinement/sprint-14.md`. Supabase Free plan in London, the ap
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S14-1 | The audit log cannot be changed by the service role | F-57 | Ready, Sprint 14 |
-| S14-2 | Demo data a hosted project can load, with no sign-in for the fictional people | | Ready, Sprint 14 |
-| S14-3 | Ready to host: single-page routing, security headers, a build that refuses a local address, the go-live runbook and pack | | Ready, Sprint 14 |
-| S14-4 | Go live (Rory's steps from the go-live pack, Claude checking) | | Ready, Sprint 14 |
-| S14-5 | Say what is hosted, and how (README, data handling, providers, risk register) | | Ready, Sprint 14 |
-| S14-6 | Switching away and back keeps your place: a session check on refocus no longer reloads the app | BUG-34 | Ready, Sprint 14 |
-| S14-7 | A regular ping (four times a day) keeps the hosted demo awake on the Free plan (Rory, 27 October) | | Ready, Sprint 14 |
+| S14-1 | The audit log cannot be changed by the service role | F-57 | Done, Sprint 14 |
+| S14-2 | Demo data a hosted project can load, with no sign-in for the fictional people | | Done, Sprint 14 |
+| S14-3 | Ready to host: single-page routing, security headers, a build that refuses a local address, the go-live runbook and pack | | Done, Sprint 14 |
+| S14-4 | Go live (Rory's steps from the go-live pack, Claude checking) | | Done, Sprint 14 |
+| S14-5 | Say what is hosted, and how (README, data handling, providers, risk register) | | Done, Sprint 14 |
+| S14-6 | Switching away and back keeps your place: a session check on refocus no longer reloads the app | BUG-34 | Done, Sprint 14 |
+| S14-7 | A regular ping (four times a day) keeps the hosted demo awake on the Free plan (Rory, 27 October) | | Done, Sprint 14 |
 
 F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual (Rory, Q1).
+
+### Sprint 14 review (27 October 2026)
+
+**Checks, with evidence.** 915 unit and 302 database tests on `sprint-14`; lint and type check clean. An independent security review before go-live found no high issue, four medium and nine low, and a second review of the ping (S14-7) found four small issues; all fixed. Rory followed the go-live pack (`docs/testing/sprint-14-go-live-pack.md`), all eleven steps done; Claude then checked the live project read-only (migrations, entries, accounts, grants, headers and the security advisors: no errors). Rory ran the hosted test pack (`docs/testing/sprint-14-test-pack.md`): all nine cases passed. The demo is at https://rfi-responder.vercel.app.
+
+**What it does not do.** Leaked-password protection is off, since the Free plan does not offer it (F-8, R-15). The demo is reset by pasting SQL (F-63). The service role can still add an audit row in anyone's name (R-09).
+
+### Where every Sprint 14 review item now lives
+
+| Item | Now |
+|---|---|
+| F-57, BUG-34, BUG-35 | Done in Sprint 14 |
+| F-8 Leaked-password protection | Residual on the Free plan (R-15); turn it on if the demo moves to Pro |
+| Four medium and nine low findings from the security review, four from the ping's review | Done in Sprint 14 (review) |
+| F-63 A more elegant demo reset | Backlog, asked for by Rory at go-live |
+| F-64 Six policy helpers callable through the API | Backlog, from the go-live advisor check |
+| F-65 `auth.uid()` evaluated per row in nine policies | Backlog, from the go-live advisor check |
+| BUG-36 The knowledge-base search ignores entry numbers | Backlog, found by Rory in the hosted check |
+
+**Not yet in a sprint, ranked at the Sprint 14 review.** 1. BUG-36 search by entry number (small; reviewers of the demo will try it). 2. F-63 a reset for admins in the app (the demo now has outside users). 3. F-64 policy helpers out of the API (small, removes advisor warnings). 4. F-65 `(select auth.uid())` in policies (small). 5. F-14 and F-15 reviewed Japanese and near-miss items (need people). 6. F-59 the near miss against Japanese entries. 7. F-20 rerankers. 8. F-34 review during processing. 9. F-60 Japanese keyword matching. 10. F-62 import edge cases. 11. F-2 generated database types. 12. F-3 invite screen. 13. F-4 Tailwind 4.
+
+**Proposed next.** A short Sprint 15 to polish the live demo for reviewers: BUG-36, F-63 (a confirmed, audited **Reset demo** for admins), F-64 and F-65, with the live project updated by `db push` at the close. Alternatively F-3 (an invite screen, so reviewers can be invited without the Supabase dashboard), or pausing here.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -639,7 +661,7 @@ F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual
 |---|---|---|---|
 | C-1 | Done, Sprint 12. Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later Refined as Sprint 12 (26 October 2026) |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 from Sprint 11, F-58 to F-61 from Sprint 12, F-62 from Sprint 13; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 from Sprint 11, F-58 to F-61 from Sprint 12, F-62 from Sprint 13, F-63 to F-65 from Sprint 14; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
@@ -650,7 +672,7 @@ F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual
 | F-5 | Split `RFIWorkspace.tsx` (870 lines) | Done, Sprint 2. Planned with Sprint 2's drafting rewrite |
 | F-6 | Validate `kb_entries.origin_ref` server-side | Done, Sprint 3. Free text until Sprint 3's learning at export sets it |
 | F-7 | Make questions within a session editable only by the owner, assignees and admins | Done, Sprint 3. Team-editable until Sprint 3's readiness workflow |
-| F-8 | Turn on leaked-password protection in the hosted project | The Bolt migration claiming to do this was a no-op (decision 0003) |
+| F-8 | Turn on leaked-password protection in the hosted project. Not available on the Free plan the demo uses (Sprint 14); a residual in R-15 | The Bolt migration claiming to do this was a no-op (decision 0003) |
 | F-9 | Single accept, edit and skip save without checking for errors, and the session's question inserts too | Done, Sprint 1 (`85b39b4`, found at the Sprint 6 refinement). Found in the end-to-end run; a failed save is silent. Remainder (a refused save affecting no rows) is S6-5 |
 | F-10 | Layout does not fit narrower windows (1,180 px wide in a 786 px pane) | Done, Sprint 7 (S7-4). Found in the end-to-end run |
 | F-11 | Near-duplicate knowledge-base entries make drafts repeat sentences (seed and import overlap) | Done, Sprint 3. Found in the end-to-end run; Sprint 3, with supersession |
@@ -699,18 +721,18 @@ F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual
 | F-55 | The Ollama default model in code is `bge-m3`, which has no calibration with the checker, while decision 0006 chose `qwen3-embedding:0.6b`; local mode therefore leaves every question uncalibrated | Done, Sprint 11 (S11-3). From the Sprint 10 accuracy review and configuration reference |
 | F-56 | `npm run dev` serves on `localhost`; the README and Supabase's `site_url` use `127.0.0.1`, which may not answer on every machine | Done, Sprint 11 (S11-11). From the Sprint 10 accuracy review |
 | BUG-33 | The workspace breadcrumb is squeezed to one letter of the response name at 1,280 px, now that Help sits beside it | Done, Sprint 11 (S11-11). From the Sprint 10 screenshots |
-| F-57 | The service role, which the Edge Functions hold, has full rights on `audit_log`, so the log is append-only for admins but not for a compromised function key | From the Sprint 11 security review (low 4). Revoke update and delete from the service role, or move the log to a schema it cannot write |
+| F-57 | Done, Sprint 14 (S14-1). The service role, which the Edge Functions hold, has full rights on `audit_log`, so the log is append-only for admins but not for a compromised function key | From the Sprint 11 security review (low 4). Revoke update and delete from the service role, or move the log to a schema it cannot write |
 | F-58 | Done, Sprint 13 (S13-1). The translation label ("[Translated from English knowledge-base entries. …]") stays in the exported answer, so it reaches the customer unless removed by hand; and the export removes any bracketed "[References: …]" anywhere in an answer, not only the reference list the app adds | From the Sprint 12 build and review (L1, the same pattern in learning, fixed there). Strip exactly the app's label and reference list, at the end, as `private.learnable_text` does |
 | F-59 | Measured in Sprint 13 (S13-3): a fit on both knowledge bases lowers English-to-Japanese calibration error only from 0.104 to 0.096 and still puts the BYOK near miss at the bulk line (86.5%), so it was not adopted. The calibration table is fitted on English entries only. With 30 entries in Japanese, 1 of 33 near misses reached the bulk line (81%, a "partly"; never bulk-approved) and calibration error for English questions against Japanese entries was 0.104 | From the Sprint 12 language evaluation. Refit on both corpora, or per language pair, and check the Sprint 2 and Sprint 8 bars |
 | F-60 | Keyword matching (used when a question or entry has no vector) uses English word stems, so finds little for Japanese | From the Sprint 12 build. Consider a trigram or `simple` configuration for Japanese |
 | F-61 | Done, Sprint 13 (S13-2). The knowledge-base import treats the same question as a duplicate whatever its language, while the database allows one current entry per question in each language | From the Sprint 12 security review (info). Compare the question and its language |
 | F-62 | The import trims only spaces from a question, so a tab or line break at either end gives a different key (only through a direct database call; the app trims cells); two imports at the same moment can collide on the unique index and roll back | From the Sprint 13 security review (info); both predate Sprint 13. Trim all whitespace; retry or lock on conflict |
-| BUG-34 | Switching to another application and back collapses an expanded question, closes modals and resets other state: the session check on refocus is treated as a new sign-in, which shows the full-page loading screen | Reported by Rory, 26 October 2026; added to Sprint 14 (S14-6) |
+| BUG-34 | Done, Sprint 14 (S14-6). Switching to another application and back collapses an expanded question, closes modals and resets other state: the session check on refocus is treated as a new sign-in, which shows the full-page loading screen | Reported by Rory, 26 October 2026; added to Sprint 14 (S14-6) |
 | F-63 | Resetting the hosted demo means pasting `supabase/demo-hosted-reset.sql` into the Supabase SQL Editor; Rory would like a more elegant way | Asked for by Rory at go-live, 27 October 2026. Options to weigh: a **Reset demo** button for admins on the governance page (a definer function, audited, confirmed by retyping a phrase); a manually run GitHub workflow; or a nightly automatic reset. Keep: real accounts, roles, limits and the audit log untouched, and the next sign-in re-indexing the entries |
 | F-64 | Six `SECURITY DEFINER` helpers used by access policies (`is_admin`, `is_response_owner`, `can_decide_question`, `response_of_session`, `current_operation`, `entry_review_due`) are callable through the API by any signed-in user; Supabase's advisor flags them. They reveal little (the caller's own rights), but need not be exposed | From the Sprint 14 go-live advisor check. Move them to the `private` schema, or revoke API execute where policies do not need it |
 | F-65 | Nine access policies call `auth.uid()` once per row rather than once per query; Supabase's performance advisor flags them | From the Sprint 14 go-live advisor check. Wrap as `(select auth.uid())`; no effect at demo scale |
 | BUG-36 | The knowledge-base search does not look at an entry's number, so searching for `KB-0101` finds nothing; it searches questions, answers and tags only. The Sprint 12 and 14 test packs wrongly told Rory to search by number | Found by Rory at the Sprint 14 hosted check, 27 October 2026. Match the number too (with or without the `KB-` prefix and leading zeros) |
-| BUG-35 | **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
+| BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
 ## Parked

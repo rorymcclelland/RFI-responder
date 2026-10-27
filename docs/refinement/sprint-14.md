@@ -154,3 +154,6 @@ Rory followed the go-live pack. Changes on the way, all recorded in the pack: th
 
 **Found by Rory during go-live:** BUG-35, **Save limits** gave no sign it had worked (fixed in this sprint); F-63, a more elegant way to reset the demo (backlog).
 
+## Review and close (27 October 2026)
+
+All seven stories done. The demo is live at https://rfi-responder.vercel.app, invite-only, on synthetic data. Rory ran the hosted test pack (`docs/testing/sprint-14-test-pack.md`): all nine cases passed. The README, data handling, providers and risk register now say what is hosted and how (S14-5); R-11 records the Voyage opt-out as on, and R-15 keeps leaked-password protection (F-8) as the residual of the Free plan. New backlog rows: F-63, F-64, F-65 and BUG-36; BUG-34 and BUG-35 fixed. Test counts at the close: 915 unit, 302 database.

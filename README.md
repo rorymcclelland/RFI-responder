@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in fourteen sprints (Sprints 0 to 13). Synthetic data only; runs locally.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in fifteen sprints (Sprints 0 to 14). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -19,7 +19,7 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 
 ## What it does not do
 
-- **It is not a hosted product.** It runs on a local PC against a local Supabase stack. A hosted deployment would need the steps in [`docs/DEPLOYING.md`](docs/DEPLOYING.md) first.
+- **It is a demo, not a hosted product.** Since Sprint 14 there is an invite-only demo at https://rfi-responder.vercel.app, on synthetic data only: Supabase's Free plan (London) and Vercel. Access is by invitation from the product owner. On the Free plan Supabase's leaked-password protection is not available, so it is off (F-8). A deployment for real data would follow [`docs/DEPLOYING.md`](docs/DEPLOYING.md) and its open items.
 - **Its figures come from small synthetic sets** (363 questions written by Claude, unreviewed by anyone outside the project). Read them as estimates: [`docs/evals/README.md`](docs/evals/README.md).
 - **The checker is not perfectly consistent.** Asked again, it changed its verdict for 7.2% of test questions, mostly between "yes" and "partly".
 - **English and Japanese only.** Entries and questions can be in either, and matching is by meaning, so a question can match an entry in the other language. A draft written across languages is labelled as translated; translated and Japanese drafts are always reviewed individually, and an answer learned from a translation waits for an admin's review. The app's Japanese has not been checked by a native reader.
@@ -67,6 +67,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 11 | What reading the code turned up: changes after an export recorded and re-exported, an audit-log screen, matching never silently incomplete, local mode calibrated |
 | 12 | A knowledge base in English and Japanese: each entry knows its language, translation is decided by the languages on both sides, Japanese answers are learned and translated ones reviewed first, measured per language pair |
 | 13 | Exports send only the answer and record translation in the provenance; import duplicates judged per language; calibration measured across languages (not adopted: one near miss still reaches the bulk line) |
+| 14 | An invite-only hosted demo (Supabase Free in London, Vercel): the audit log append-only for the Edge Functions too, demo data the fictional people cannot sign in with, security headers and a build that refuses to ship a key, a ping that keeps the Free project awake, and no reset when you switch away and back |
 
 Each sprint followed the same cycle:
 

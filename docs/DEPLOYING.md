@@ -1,6 +1,6 @@
 # Deploying
 
-Until Sprint 14 RFI Respond ran only locally. Sprint 14 sets up an invite-only hosted demo on synthetic data: Supabase (Free plan, London) and the app on Vercel. This page lists what any hosted deployment needs; the step-by-step go-live, with each expected result, is [`docs/testing/sprint-14-go-live-pack.md`](testing/sprint-14-go-live-pack.md). What was actually done is recorded at the Sprint 14 close.
+Until Sprint 14 RFI Respond ran only locally. Sprint 14 sets up an invite-only hosted demo on synthetic data: Supabase (Free plan, London) and the app on Vercel. This page lists what any hosted deployment needs; the step-by-step go-live, with each expected result, is [`docs/testing/sprint-14-go-live-pack.md`](testing/sprint-14-go-live-pack.md). For the demo, on 27 October 2026, every step below was done except two: leaked-password protection (not available on the Free plan, F-8) and limiting direct database connections (the database password is only in the owner's password manager; network restrictions were not set).
 
 ## Before anything is hosted
 
