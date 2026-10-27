@@ -5,7 +5,7 @@ import {
   Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
 import { authEventAction, type AuthState } from './lib/authEvents';
-import { loadKnowledgeBase, importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
+import { loadKnowledgeBase, importEntries, describeImport, entryMatches, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
 import RFIWorkspace from './RFIWorkspace';
@@ -111,14 +111,7 @@ function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void;
 function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: KnowledgeEntry[]; onClose: () => void; onBulkUpload: () => void; onAdded: (message: string) => void }) {
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
-  const filtered = search
-    ? entries.filter(
-        (e) =>
-          e.question.toLowerCase().includes(search.toLowerCase()) ||
-          e.answer.toLowerCase().includes(search.toLowerCase()) ||
-          e.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
-      )
-    : entries;
+  const filtered = entries.filter((e) => entryMatches(e, search));
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
@@ -155,7 +148,7 @@ function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: Knowled
           <div className="relative">
             <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
             <input
-              type="text" placeholder="Search questions, answers, tags…" value={search}
+              type="text" placeholder="Search numbers, questions, answers, tags…" value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input pl-9"
             />

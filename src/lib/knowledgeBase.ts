@@ -37,6 +37,28 @@ export async function loadKnowledgeBase(): Promise<KnowledgeEntry[]> {
   }));
 }
 
+/** The digits of an entry number, without leading zeros ("KB-0101" -> "101"), or null. */
+function entryNumber(text: string): string | null {
+  const m = /^(?:kb[-\s]?)?(\d+)$/i.exec(text);
+  return m ? m[1].replace(/^0+(?=\d)/, '') : null;
+}
+
+/**
+ * Sprint 15 (S15-1, BUG-36): does an entry match what was typed in the knowledge-base search?
+ * By number ("KB-0101", "kb0101", "0101" or "101" all find KB-0101), or by the text of its
+ * question, answer or tags, ignoring case. Plain text comparison: nothing typed is a pattern.
+ */
+export function entryMatches(entry: Pick<KnowledgeEntry, 'id' | 'question' | 'answer' | 'tags'>, query: string): boolean {
+  const q = query.trim();
+  if (!q) return true;
+  const wanted = entryNumber(q);
+  if (wanted !== null && wanted === entryNumber(entry.id)) return true;
+  const lower = q.toLowerCase();
+  return entry.question.toLowerCase().includes(lower)
+    || entry.answer.toLowerCase().includes(lower)
+    || entry.tags.some((t) => t.toLowerCase().includes(lower));
+}
+
 export async function importEntries(entries: NewEntry[], origin: KbOrigin, originRef: string): Promise<ImportResult> {
   const { data, error } = await supabase.rpc('import_kb_entries', {
     entries: entries.map((e) => ({ question: e.question, answer: e.answer, tags: e.tags, source: e.source ?? '' })),

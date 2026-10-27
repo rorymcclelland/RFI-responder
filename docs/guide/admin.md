@@ -16,7 +16,7 @@ Under **Team**, choose **Edit** on anyone's card to change their name, job title
 
 Drafts are written only from the knowledge base, so its quality is the quality of the answers. Open it with **KB** in the top bar.
 
-- **Search** questions, answers and tags. Each entry shows its number (KB-0001 and so on), its source and its tags; entries waiting for an admin's review are marked **Not yet reviewed**. An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
+- **Search** by entry number (`KB-0101`, or just `101`), or by the words of questions, answers and tags. Each entry shows its number (KB-0001 and so on), its source and its tags; entries waiting for an admin's review are marked **Not yet reviewed**. An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
 - **Add entry** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
 - **Import Q&A** (or **Import KB** on the overview) adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are skipped, and so is any question already in the knowledge base in the same language (ignoring case and spacing): an English question imported with a Japanese answer is a new, Japanese entry.
 
