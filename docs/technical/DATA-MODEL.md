@@ -346,6 +346,16 @@ Created in [`20261103120000_reset_demo.sql`](../../supabase/migrations/202611031
 
 Tests: [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts) (S15-4).
 
+### `private.invitation_slots`
+
+One row per invitation an admin has sent (or is sending) through the app, so `reserve_invitation` can hold the daily limit under a lock (Sprint 15 security review). Columns: `id`, `admin`, `at`. Deleted with the admin's account.
+
+Created in [`20261103130000_invitation_slots.sql`](../../supabase/migrations/20261103130000_invitation_slots.sql).
+
+- **Every API role (anonymous, member, admin, service role):** no access; no grant and no policy. Written only by `reserve_invitation` and `release_invitation`.
+
+Tests: [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts).
+
 ## Views
 
 ### `public.response_overview`
@@ -385,7 +395,7 @@ The service role may also execute each of these, but those that check `is_admin(
 | `import_kb_entries(entries, entry_origin, entry_origin_ref)` | Adds up to 2,000 entries from a JSON array, skipping invalid ones and duplicates (the same question in the same language, within the file and against current entries; by language since Sprint 13). Returns counts inserted, duplicate and invalid | Any member | Signed in; origin `import` or `manual`; records the caller as `created_by` and the file name (trimmed, at most 255 characters) as `origin_ref`. Definer | [`20261101100000`](../../supabase/migrations/20261101100000_import_duplicates_by_language.sql) | [`knowledge-base.test.ts`](../../supabase/tests/db/knowledge-base.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts), [`sprint12.test.ts`](../../supabase/tests/db/sprint12.test.ts) |
 | `review_entry(p_entry, p_question, p_answer)` | Reviews an entry, optionally correcting its question or answer: sets `reviewed_at`, `reviewed_by` and `last_reviewed_at`; clears the embedding if the text changed; for a proposal, replaces the entry it proposed to replace. Audited (`kb.reviewed`, with the previous text when edited) | Admin | Refuses an entry already replaced, and a question that clashes with another current entry. Definer | [`20261024140000`](../../supabase/migrations/20261024140000_sprint4_review_fixes.sql) | [`knowledge-base.test.ts`](../../supabase/tests/db/knowledge-base.test.ts), [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts), [`sprint6.test.ts`](../../supabase/tests/db/sprint6.test.ts) |
 | `demo_status()` | Whether a demo is loaded, and when it was last reset; the governance page shows its **Demo** tab only when one is | Admin | Definer | [`20261103120000`](../../supabase/migrations/20261103120000_reset_demo.sql) | [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts) |
-| `reset_demo(p_confirm)` | Removes every response and knowledge-base entry and loads the stored demo again, with entry numbers from KB-0001; keeps accounts, roles, settings, real people's usage and the audit log; replaces the demo's recorded usage. Returns the counts loaded | Admin | The phrase `reset the demo` exactly; a demo is loaded; one reset at a time. Runs the reload with nobody signed in, as the SQL Editor does. Audited (`demo.reset`). Definer | [`20261103120000`](../../supabase/migrations/20261103120000_reset_demo.sql) | [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts) |
+| `reset_demo(p_confirm)` | Removes every response and knowledge-base entry and loads the stored demo again, with entry numbers from KB-0001; keeps accounts, roles, settings, real people's usage and the audit log; replaces the demo's recorded usage. Returns the counts loaded | Admin | The phrase `reset the demo` exactly; a demo is loaded; one reset at a time. Runs the reload with nobody signed in, as the SQL Editor does (both claim settings `auth.uid()` reads are cleared, then restored), under the same lock as `supabase/demo-hosted-reset.sql`. Audited (`demo.reset`). Definer | [`20261103130000`](../../supabase/migrations/20261103130000_invitation_slots.sql) | [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts) |
 | `overdue_entries()` | Current entries past their review date, oldest first, with how often each was cited in the last 90 days | Admin | Definer | [`20261024130000`](../../supabase/migrations/20261024130000_review_dates.sql) | [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) |
 | `set_user_admin(target, make_admin)` | Grants or removes admin rights | Admin | Locks the admin rows first; refuses to remove the last admin. Audited. Definer | [`20261022140000`](../../supabase/migrations/20261022140000_access_control_hardening.sql) | [`access.test.ts`](../../supabase/tests/db/access.test.ts), [`hardening.test.ts`](../../supabase/tests/db/hardening.test.ts) |
 | `mark_onboarded()` | Records that the caller finished or skipped the introduction | Any member | Signed in; sets only the caller's own `onboarded_at`, and only the first time. Definer | [`20261029100000`](../../supabase/migrations/20261029100000_onboarding.sql) | [`sprint10.test.ts`](../../supabase/tests/db/sprint10.test.ts) |
@@ -406,7 +416,7 @@ The service role may also execute each of these, but those that check `is_admin(
 
 ### Helpers in the `access` schema
 
-The access rules call these, so signed-in users and the service role may execute them, but the API does not expose the `access` schema, so nobody can call them as endpoints (Sprint 15, F-64; [`20261103110000`](../../supabase/migrations/20261103110000_policy_helpers_out_of_api.sql), which also renamed every call to them; tests in [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts)). Anonymous visitors have no use of the schema.
+The access rules call these, so signed-in users and the service role may execute them, but the API does not expose the `access` schema, and a function added to it later is executable by nobody until granted (default privileges, Sprint 15 security review), so nobody can call them as endpoints (Sprint 15, F-64; [`20261103110000`](../../supabase/migrations/20261103110000_policy_helpers_out_of_api.sql), which also renamed every call to them; tests in [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts)). Anonymous visitors have no use of the schema.
 
 | Function | What it does | Who may call | What it checks | Defined in | Tests |
 |---|---|---|---|---|---|
@@ -431,6 +441,8 @@ Members and admins cannot execute these.
 | `month_committed_usd()` | This month's recorded cost plus open reservations, in dollars | `reserve_quota`, `usage_status` | [`20261024140000`](../../supabase/migrations/20261024140000_sprint4_review_fixes.sql) | Not named in a test; exercised through `reserve_quota` and `usage_status` in [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) |
 | `month_spend_gbp()` | This month's recorded cost in pounds | `usage_status` | [`20261024110000`](../../supabase/migrations/20261024110000_usage_and_caps.sql) | Not named in a test; exercised through `usage_status` in [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) |
 | `text_language(p_question, p_answer)` | The language rule of `kb_entries.language` (`en` or `ja`), for text not yet in the table | `record_export`, `import_kb_entries` (Sprint 13) | [`20261031130000`](../../supabase/migrations/20261031130000_learning_across_languages.sql) | [`sprint12.test.ts`](../../supabase/tests/db/sprint12.test.ts) |
+| `reserve_invitation(p_admin, p_email, p_daily_limit)` | Under a lock per admin: refuses (`not_admin`) if the inviter is not an admin, (`exists`) if the address has any account, confirmed or not, and (`limit`) if they have sent the limit today (UTC); otherwise takes a slot and returns it | `invite-user`, before sending (Sprint 15) | [`20261103130000`](../../supabase/migrations/20261103130000_invitation_slots.sql) | [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts) |
+| `release_invitation(p_slot)` | Gives a slot back when the invitation was not sent | `invite-user` | [`20261103130000`](../../supabase/migrations/20261103130000_invitation_slots.sql) | [`sprint15.test.ts`](../../supabase/tests/db/sprint15.test.ts) |
 | `user_is_admin(p_user)` | Whether a given person is an admin | `record_export`, `set_entry_review_on_insert` | [`20261024120000`](../../supabase/migrations/20261024120000_entry_review.sql) | Not named in a test; exercised by the learned-entry review tests in [`sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) |
 
 ### Trigger functions

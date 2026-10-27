@@ -70,8 +70,9 @@ describe('S15-3 the policy helpers are no longer callable through the API (F-64)
       SELECT n.nspname || '.' || p.proname AS fn, p.prosrc AS src
         FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
        WHERE n.nspname IN ('public', 'private', 'access')`);
-    const pattern = new RegExp(`(^|[^\\w.])(public\\.)?(${HELPERS.join('|')})\\s*\\(`);
-    const offenders = rows.filter((r) => pattern.test(String(r.src).replace(/access\.(\w+)\s*\(/g, ''))).map((r) => r.fn);
+    // Bare, public.-qualified or quoted ("public"."is_admin") calls; calls into access are fine (security review, finding 11).
+    const pattern = new RegExp(`(^|[^\\w."])("?public"?\\.)?"?(${HELPERS.join('|')})"?\\s*\\(`);
+    const offenders = rows.filter((r) => pattern.test(String(r.src).replace(/"?access"?\."?\w+"?\s*\(/g, ''))).map((r) => r.fn);
     expect(offenders).toEqual([]);
   });
 
@@ -115,12 +116,14 @@ describe('S15-4 reset the demo from the app (F-63)', () => {
       'usage', (SELECT count(*) FROM ai_usage WHERE user_id IN (SELECT id FROM auth.users WHERE email LIKE '%@example.invalid'))
     ) AS s`)).rows[0].s;
   /** As the app does it: signed in, committed (the harness's as() always rolls back). */
-  const reset = async (u: TestUser | null, phrase: string | null = PHRASE) => {
+  const reset = async (u: TestUser | null, phrase: string | null = PHRASE, legacySub = false) => {
     const client = await getPool().connect();
     try {
       await client.query('BEGIN');
       await client.query(`SET LOCAL ROLE ${u ? 'authenticated' : 'anon'}`);
       await client.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify(u ? { sub: u.id, role: 'authenticated' } : { role: 'anon' })]);
+      // The older claim setting auth.uid() also reads (security review, finding 5).
+      if (legacySub && u) await client.query(`SELECT set_config('request.jwt.claim.sub', $1, true)`, [u.id]);
       const r = (await client.query(`SELECT public.reset_demo($1) AS r`, [phrase])).rows[0].r;
       await client.query('COMMIT');
       return r;
@@ -180,6 +183,13 @@ describe('S15-4 reset the demo from the app (F-63)', () => {
     expect(await state()).not.toEqual(before);
   });
 
+  it('2. the reload runs as nobody even when the older claim setting names the admin', async () => {
+    await reset(admin);
+    const expected = await state();
+    await reset(admin, PHRASE, true);
+    expect(await state()).toEqual(expected);
+  });
+
   it('4. twice in a row gives the same state, and the demo usage is not counted twice', async () => {
     await reset(admin);
     const once = await state();
@@ -203,5 +213,65 @@ describe('S15-4 reset the demo from the app (F-63)', () => {
     await refused(asServiceRole((q) => q(`UPDATE private.demo_reload SET script = 'SELECT 1'`)));
     await refused(as(admin, (q) => q(`SELECT public.reset_demo($1)`, [`reset the demo'; DROP TABLE kb_entries; --`])));
     expect(await one(`SELECT count(*)::int AS n FROM kb_entries`)).toEqual({ n: 132 });
+  });
+});
+
+describe('Sprint 15 security review: invitations are reserved before anything is sent (findings 2 and 3)', () => {
+  const reserve = (id: string, email: string, limit = 20) =>
+    asSuperuser(`SELECT public.reserve_invitation($1, $2, $3) AS r`, [id, email, limit]).then((x) => x.rows[0].r);
+
+  it('only the service role may reserve or release', async () => {
+    for (const u of [null, member, admin]) {
+      await refused(as(u, (q) => q(`SELECT public.reserve_invitation($1, 'x@y.co', 20)`, [admin.id])));
+      await refused(as(u, (q) => q(`SELECT public.release_invitation(1)`)));
+    }
+    const r = await asServiceRole(async (q) => (await q(`SELECT public.reserve_invitation($1, 'svc@y.co', 20) AS r`, [admin.id])).rows[0].r);
+    expect(r).toMatchObject({ outcome: 'ok' });
+  });
+
+  it('refuses a member as the inviter', async () => {
+    expect(await reserve(member.id, 'someone@y.co')).toEqual({ outcome: 'not_admin' });
+  });
+
+  it('refuses any address with an account, confirmed or not, in any case', async () => {
+    const unconfirmed = await one<{ email: string }>(`INSERT INTO auth.users (id, email, email_confirmed_at) VALUES (gen_random_uuid(), 'pending.reviewer@y.co', NULL) RETURNING email`);
+    expect(await reserve(admin.id, ' Pending.Reviewer@Y.CO ')).toEqual({ outcome: 'exists' });
+    expect(await reserve(admin.id, member.email.toUpperCase())).toEqual({ outcome: 'exists' });
+    expect(unconfirmed.email).toBe('pending.reviewer@y.co');
+  });
+
+  it('holds the daily limit, counting only slots kept; a released slot is given back', async () => {
+    const other = await createUser({ admin: true });
+    for (let i = 0; i < 3; i++) expect(await reserve(other.id, `n${i}@y.co`, 3)).toMatchObject({ outcome: 'ok' });
+    const over = await reserve(other.id, 'n3@y.co', 3);
+    expect(over).toEqual({ outcome: 'limit' });
+    const { rows } = await asSuperuser(`SELECT id FROM private.invitation_slots WHERE admin = $1 ORDER BY id DESC LIMIT 1`, [other.id]);
+    await asSuperuser(`SELECT public.release_invitation($1)`, [rows[0].id]);
+    expect(await reserve(other.id, 'n3@y.co', 3)).toMatchObject({ outcome: 'ok' });
+    expect(await reserve(admin.id, 'n4@y.co', 3)).toMatchObject({ outcome: 'ok' });
+  });
+
+  it('parallel reservations cannot pass the limit', async () => {
+    const busy = await createUser({ admin: true });
+    const results = await Promise.all(Array.from({ length: 8 }, (_, i) => reserve(busy.id, `p${i}@y.co`, 5)));
+    expect(results.filter((r) => r.outcome === 'ok')).toHaveLength(5);
+  });
+
+  it('no API role can read the slots', async () => {
+    for (const u of [member, admin]) await refused(as(u, (q) => q(`SELECT * FROM private.invitation_slots`)));
+    await refused(asServiceRole((q) => q(`SELECT * FROM private.invitation_slots`)));
+  });
+
+  it('functions added to the access schema later are not executable by everyone (finding 10)', async () => {
+    const client = await getPool().connect();
+    try {
+      await client.query('BEGIN');
+      await client.query('CREATE FUNCTION access.future_helper() RETURNS int LANGUAGE sql AS $$ SELECT 1 $$');
+      const r = await client.query(`SELECT has_function_privilege('authenticated', 'access.future_helper()', 'EXECUTE') AS ok`);
+      expect(r.rows[0].ok).toBe(false);
+    } finally {
+      await client.query('ROLLBACK');
+      client.release();
+    }
   });
 });

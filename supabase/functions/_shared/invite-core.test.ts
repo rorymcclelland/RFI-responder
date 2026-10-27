@@ -10,8 +10,8 @@ function deps(over: Partial<InviteDeps> = {}): InviteDeps & { sent: unknown[]; a
   const audited: unknown[] = [];
   return {
     sent, audited,
-    isAdmin: vi.fn(async () => true),
-    invitesToday: vi.fn(async () => 0),
+    reserve: vi.fn(async () => ({ outcome: 'ok' as const, slot: 7 })),
+    release: vi.fn(async () => undefined),
     sendInvite: vi.fn(async (email: string, displayName: string | null, redirectTo: string) => { sent.push({ email, displayName, redirectTo }); return { outcome: 'sent' as const, userId: 'new-user' }; }),
     audit: vi.fn(async (actor: string, invited: string) => { audited.push({ actor, invited }); }),
     ...over,
@@ -57,26 +57,36 @@ describe('inviteUser', () => {
   });
 
   it('2. refuses a member with 403, before anything else', async () => {
-    const d = deps({ isAdmin: vi.fn(async () => false) });
+    const d = deps({ reserve: vi.fn(async () => ({ outcome: 'not_admin' as const })) });
     await expect(inviteUser(d, 'member-1', { email: 'a@b.co' }, ORIGIN)).rejects.toMatchObject({ status: 403 });
-    expect(d.invitesToday).not.toHaveBeenCalled();
     expect(d.sent).toEqual([]);
   });
 
-  it('4. an address that already has an account: a plain message, no audit row', async () => {
-    const d = deps({ sendInvite: vi.fn(async () => ({ outcome: 'exists' as const })) });
+  it('4. an address that already has any account (confirmed or not): refused before sending, no audit row', async () => {
+    const d = deps({ reserve: vi.fn(async () => ({ outcome: 'exists' as const })) });
     await expect(inviteUser(d, ADMIN, { email: 'a@b.co' }, ORIGIN)).rejects.toMatchObject({ status: 409, message: 'a@b.co already has an account. Nothing was sent.' });
+    expect(d.sent).toEqual([]);
     expect(d.audited).toEqual([]);
+    // Supabase saying so at the last moment (an account created in between): the slot is given back.
+    const late = deps({ sendInvite: vi.fn(async () => ({ outcome: 'exists' as const })) });
+    await expect(inviteUser(late, ADMIN, { email: 'a@b.co' }, ORIGIN)).rejects.toMatchObject({ status: 409 });
+    expect(late.release).toHaveBeenCalledWith(7);
+  });
+
+  it('refuses reserved domains, so the demo\'s fictional people can never be sent a link (security review, finding 2)', async () => {
+    for (const email of ['sarah.chen@example.invalid', 'a@b.test', 'a@b.example', 'a@localhost.localhost', 'A@B.INVALID']) {
+      const d = deps();
+      await expect(inviteUser(d, ADMIN, { email }, ORIGIN)).rejects.toMatchObject({ status: 400 });
+      expect(d.reserve).not.toHaveBeenCalled();
+    }
   });
 
   it(`5. the ${MAX_INVITES_PER_DAY + 1}st invitation of the day is refused with 429, before sending`, async () => {
     expect(MAX_INVITES_PER_DAY).toBe(20);
-    const d = deps({ invitesToday: vi.fn(async () => MAX_INVITES_PER_DAY) });
+    const d = deps({ reserve: vi.fn(async () => ({ outcome: 'limit' as const })) });
     await expect(inviteUser(d, ADMIN, { email: 'a@b.co' }, ORIGIN)).rejects.toMatchObject({ status: 429, message: expect.stringMatching(/20 invitations a day/) });
     expect(d.sent).toEqual([]);
-    expect(d.invitesToday).toHaveBeenCalledWith(ADMIN);
-    const ok = deps({ invitesToday: vi.fn(async () => MAX_INVITES_PER_DAY - 1) });
-    await expect(inviteUser(ok, ADMIN, { email: 'a@b.co' }, ORIGIN)).resolves.toBeTruthy();
+    expect(d.reserve).toHaveBeenCalledWith(ADMIN, 'a@b.co', 20);
   });
 
   it('6. the email limit or the mail provider failing: a plain message and no audit row', async () => {
@@ -84,6 +94,7 @@ describe('inviteUser', () => {
       const d = deps({ sendInvite: vi.fn(async () => ({ outcome })) });
       await expect(inviteUser(d, ADMIN, { email: 'a@b.co' }, ORIGIN)).rejects.toMatchObject({ status, message: expect.stringMatching(text) });
       expect(d.audited).toEqual([]);
+      expect(d.release).toHaveBeenCalledWith(7);
     }
   });
 
@@ -96,7 +107,19 @@ describe('inviteUser', () => {
   it('bad input is refused before the admin check costs a database call', async () => {
     const d = deps();
     await expect(inviteUser(d, ADMIN, { email: 'nope' }, ORIGIN)).rejects.toMatchObject({ status: 400 });
-    expect(d.isAdmin).not.toHaveBeenCalled();
+    expect(d.reserve).not.toHaveBeenCalled();
+  });
+
+  it('gives the slot back if sending throws', async () => {
+    const d = deps({ sendInvite: vi.fn(async () => { throw new Error('network'); }) });
+    await expect(inviteUser(d, ADMIN, { email: 'a@b.co' }, ORIGIN)).rejects.toThrow('network');
+    expect(d.release).toHaveBeenCalledWith(7);
+  });
+
+  it('a sent invitation keeps its slot, so it counts towards the limit even if its audit row fails', async () => {
+    const d = deps({ audit: vi.fn(async () => { throw new Error('db down'); }) });
+    await inviteUser(d, ADMIN, { email: 'a@b.co' }, ORIGIN);
+    expect(d.release).not.toHaveBeenCalled();
   });
 
   it('says so when the invitation went but its audit row could not be written', async () => {

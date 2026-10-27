@@ -45,7 +45,7 @@ describe('resetDemo', () => {
       await expect(resetDemo({ rpc } as never, RESET_PHRASE)).rejects.toThrow(message);
     }
     const rpc = vi.fn().mockResolvedValue({ data: null, error: { message: 'relation "x" does not exist' } });
-    await expect(resetDemo({ rpc } as never, RESET_PHRASE)).rejects.toThrow('The demo was not reset. Nothing has changed; try again.');
+    await expect(resetDemo({ rpc } as never, RESET_PHRASE)).rejects.toThrow('The demo may not have been reset. Check Last reset (reload the page), then try again if it has not changed.');
     spy.mockRestore();
   });
 });

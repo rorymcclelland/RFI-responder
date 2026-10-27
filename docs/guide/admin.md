@@ -6,7 +6,7 @@ For admins: the people who look after the workspace. An admin can do everything 
 
 ### Inviting someone
 
-Accounts are by invitation only. On the **Team** page, under **Invite someone**, give the person's email address and, if you like, their name, and choose **Send invitation**. They get an email from the installation's mail settings with a link to the app, which asks them to choose a password. Everyone invited joins as a member; make them an admin afterwards if they need it (below). Each admin can send 20 invitations a day, and every invitation is recorded in the audit log. An address that already has an account is refused, and nothing is sent.
+Accounts are by invitation only. On the **Team** page, under **Invite someone**, give the person's email address and, if you like, their name, and choose **Send invitation**. They get an email from the installation's mail settings with a link to the app, which asks them to choose a password. Everyone invited joins as a member; make them an admin afterwards if they need it (below). Each admin can send 20 invitations a day. An address that already has an account, even one not yet accepted, is refused and nothing is sent: resend an invitation from Supabase instead. Addresses on reserved domains that cannot receive mail (such as `.invalid`, used by the demo's fictional people) are refused too. Each invitation is recorded in the audit log; if that record cannot be written, the message after sending says so.
 
 Supabase's dashboard (Studio) can still invite people, under Authentication, then Users, and is where an invitation is resent or withdrawn. On a local install Studio is at the address `npx supabase start` prints (usually `http://127.0.0.1:54323`); the invitation email itself is caught by the local mail viewer (usually `http://127.0.0.1:54324`).
 
@@ -66,7 +66,7 @@ Archive finished responses rather than deleting them: an archived response is th
 
 ## Resetting the demo
 
-Only where the demo data was loaded, as on the hosted demo. Under **Governance**, **Demo**, type `reset the demo` and choose **Reset the demo**. It removes every response and knowledge-base entry, including anything reviewers added, and loads the demo again, with entry numbers from KB-0001. Everyone's accounts and roles, the limits, real people's usage and the audit log are kept, and the reset itself is recorded in the audit log. The next sign-in indexes the entries again (a few pence). A local install or a real deployment without the demo has no **Demo** tab.
+Only where the demo data was loaded, as on the hosted demo. Under **Governance**, **Demo**, type `reset the demo` and choose **Reset the demo**. It removes every response and knowledge-base entry, including anything reviewers added, and loads the demo again, with entry numbers from KB-0001. Real people's accounts and roles, the limits, real people's usage and the audit log are kept, and the reset itself is recorded in the audit log; the demo's fictional people are put back as they were loaded. Older audit entries that name an entry number (KB-0042, say) refer to the entry that had that number before the reset. Do not reset while someone is processing questions: their run would fail and need starting again. The next sign-in indexes the entries again (a few pence). A local install or a real deployment without the demo has no **Demo** tab.
 
 ## The audit log
 

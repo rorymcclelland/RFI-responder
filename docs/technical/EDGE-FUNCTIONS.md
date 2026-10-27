@@ -235,7 +235,7 @@ Each batch has its own reservation. In `finally`, usage is recorded under `embed
 
 **Purpose.** Story S15-5 (F-3). An admin invites someone from the **Team** page instead of the Supabase dashboard. Inviting needs the service role, so it happens here. The person always joins as a member: an admin makes them an admin afterwards with `set_user_admin`, which is audited.
 
-**Request.** `POST` with `{ "email": string, "displayName"?: string }`, checked by `validateInvite` in [`_shared/invite-core.ts`](../../supabase/functions/_shared/invite-core.ts). Anything else in the body is ignored. The address is trimmed and lower-cased, and must look like an address, with at most 254 characters (64 before the `@`) and no control characters or line breaks; the name, optional, at most 100 characters, with none either. Every failure is `400`.
+**Request.** `POST` with `{ "email": string, "displayName"?: string }`, checked by `validateInvite` in [`_shared/invite-core.ts`](../../supabase/functions/_shared/invite-core.ts). Anything else in the body is ignored. The address is trimmed and lower-cased, and must look like an address, with at most 254 characters (64 before the `@`), no control characters or line breaks, and not on a reserved domain that cannot receive mail (`.invalid`, `.test`, `.example`, `.localhost`); the name, optional, at most 100 characters, with none either. Every failure is `400`.
 
 **Response.** `200` with `{ message }`: `Invitation sent to <address>. They join as a member.`, or, if the invitation went but its audit row could not be written, a message saying so.
 
@@ -245,13 +245,13 @@ Each batch has its own reservation. In `finally`, usage is recorded under `embed
 |---|---|
 | `400` | Validation |
 | `401` | No signed-in user |
-| `403` | The caller is not an admin (`user_is_admin`) |
-| `409` | The address already has an account; nothing is sent |
-| `429` | The admin has sent 20 invitations today (UTC), counted from the audit log; or Supabase's email limit for the project was reached |
+| `403` | The caller is not an admin |
+| `409` | The address already has an account, confirmed or not; nothing is sent |
+| `429` | The admin has sent 20 invitations today (UTC); or Supabase's email limit for the project was reached |
 | `502` | The mail service did not take the invitation (the detail is logged) |
 | `500` | `Unexpected error` |
 
-**Steps.** Authenticate, validate, check the caller is an admin, count their `user.invited` audit rows since midnight UTC, call Supabase Auth's `inviteUserByEmail` with the name as `display_name` and the first `APP_ORIGIN` as the link's destination, then write the audit row `user.invited` with the admin as actor and the new account as target, and no address, so deleting the person later leaves no address in the log. Two invitations sent at the same moment can both pass the count, so an admin could exceed 20 by one or two.
+**Steps.** Authenticate and validate. Then `reserve_invitation` (service role only), under a lock per admin: the caller must be an admin, the address must have no account at all (so the demo's fictional people and reviewers who have not yet accepted are never sent a fresh link), and the admin must have sent fewer than 20 today (UTC); it takes a slot. Then Supabase Auth's `inviteUserByEmail`, with the name as `display_name` and the first `APP_ORIGIN` as the link's destination; if nothing was sent, `release_invitation` gives the slot back. Last, the audit row `user.invited` with the admin as actor and the new account as target, and no address, so deleting the person later leaves no address in the log. A sent invitation keeps its slot even if the audit row fails, so the limit still holds. CORS limits which web pages can call it from a browser; the function itself requires a signed-in admin's token whatever the origin.
 
 ## Embedding and Claude clients
 

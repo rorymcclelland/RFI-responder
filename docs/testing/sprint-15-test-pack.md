@@ -4,7 +4,7 @@
 
 About 30 minutes. Use Chrome or Edge.
 
-Already checked by Claude: every database test (including the role matrix through the moved helpers), CI on the local stack (`invite-user` refuses the anon key, a malformed address and a member; `rpc/is_admin` is no longer an endpoint), and the independent security review with every finding fixed. After your update below, Claude checks the live project read-only: the migrations, the security advisors, and that `is_admin` cannot be called through the API.
+Already checked by Claude: every unit and database test (including the role matrix through the moved helpers, and a reset compared table by table with the SQL reset), and CI on the local stack (`invite-user` refuses the anon key, a malformed address, a member, an existing account and a fictional `.invalid` address; `rpc/is_admin` is no longer an endpoint). An independent security review found no high issue, two medium and seven low; all are fixed and listed in `docs/refinement/sprint-15.md`. After your update below, Claude checks the live project read-only: the migrations, the security advisors, and that `is_admin` cannot be called through the API.
 
 | User | Email | Password | Role |
 |---|---|---|---|
@@ -15,10 +15,11 @@ Already checked by Claude: every database test (including the role matrix throug
 
 `main` already has this sprint, and Vercel deploys it by itself. Your copy in `C:\Code\rfi-responder` is up to date. In PowerShell there:
 
-1. `npx supabase db push`, then answer `Y`. It lists three migrations, `20261103100000` to `20261103120000`, and applies them without an error.
+1. `npx supabase db push`, then answer `Y`. It lists four migrations, `20261103100000` to `20261103130000`, and applies them without an error.
 2. `npx supabase functions deploy invite-user`. It deploys `invite-user`.
-3. In Supabase, open the **SQL Editor**, paste the whole of `supabase\demo-hosted-reset.sql` and choose **Run**. This resets the demo once by the old route, which also stores the reload script the new button uses, and numbers the entries from KB-0001 again. Your `Hosted check` response from Sprint 14 goes with it.
-4. In Vercel, check the production deployment is the latest commit on `main`.
+3. `npx supabase secrets list` shows `APP_ORIGIN` among the secrets (set at go-live): invitations link to it.
+4. In Supabase, open the **SQL Editor**, paste the whole of `supabase\demo-hosted-reset.sql` and choose **Run**. This resets the demo once by the old route, which also stores the reload script the new button uses, and numbers the entries from KB-0001 again. Your `Hosted check` response from Sprint 14 goes with it.
+5. In Vercel, check the production deployment is the latest commit on `main`.
 
 **Expected outcome:** no errors. `select count(*) from kb_entries;` returns 132.
 
@@ -67,7 +68,7 @@ Then reply "updated", and I check the live project before you start the cases.
 - **Last reset** reads "never" at first (the SQL route does not set it).
 - While it runs the button reads **Resetting…**; then "The demo is reset: 132 knowledge-base entries and 4 responses. The reset is in the audit log." appears beside it, and **Last reset** shows now.
 - Your test entry is gone; KB-0101 is the Japanese entry; Bluefin is back as it was, with the question from case 2 pending again.
-- The audit log shows "Reset the demo: 132 knowledge-base entries and 4 responses loaded again; everything else removed." with your name.
+- The audit log shows "Reset the demo: 132 knowledge-base entries and 4 responses loaded again; all other responses and entries removed." with your name.
 - You are still signed in and still an admin; your limits are unchanged.
 
 **Result:** ☐ Pass ☐ Fail. Notes:
@@ -86,7 +87,7 @@ Then reply "updated", and I check the live project before you start the cases.
 - While sending the button reads **Sending…**; then "Invitation sent to <address>. They join as a member." The person appears on the **Team** page.
 - The email comes from your sending domain and opens **Welcome: choose a password**.
 - As them there is no **Governance** in the menu, and **Team** has no **Invite someone** form.
-- The audit log shows "Invited <their name> as a member." by you.
+- The audit log shows "Invited <their name> as a member." by you (or, until you reload the page, "Invited someone not in the team list loaded at sign-in").
 
 If you reuse the Sprint 14 reviewer's address, expect case 5's message instead; use a new address for this case.
 
@@ -98,11 +99,13 @@ If you reuse the Sprint 14 reviewer's address, expect case 5's message instead; 
 
 1. As you, on **Team**, invite the same address as in case 4 again.
 2. Invite `not-an-address@` (type it and choose **Send invitation**).
+3. Invite `sarah.chen@example.invalid`, the demo's fictional admin.
 
 **Expected outcome**
 
 - The first says "<address> already has an account. Nothing was sent." and no email arrives.
 - The second is stopped, either by the browser ("Please enter a part following '@'") or with "That is not an email address the app can invite."
+- The third says "That address is on a reserved domain that cannot receive mail, so the app does not invite it."
 
 **Result:** ☐ Pass ☐ Fail. Notes:
 

@@ -132,6 +132,11 @@ jobs:
             -d '{"email":"james.okafor@example.com","password":"LocalDev2026pw"}' | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
           code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/invite-user" -H "Authorization: Bearer $MEMBER" -H 'Content-Type: application/json' -d '{"email":"new@example.com"}')
           [ "$code" = "403" ] || fail "invite-user by a member should get 403" "got $code $(cat /tmp/r.json)"
+          # Security review, finding 2: an address with an account is refused before anything is sent, and reserved domains are refused.
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/invite-user" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"email":"James.Okafor@example.com"}')
+          [ "$code" = "409" ] || fail "invite-user for an existing account should get 409" "got $code $(cat /tmp/r.json)"
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/invite-user" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"email":"sarah.chen@example.invalid"}')
+          [ "$code" = "400" ] || fail "invite-user for a fictional .invalid address should get 400" "got $code $(cat /tmp/r.json)"
           # The policy helpers are not API endpoints (Sprint 15, S15-3, test 4).
           code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$API_URL/rest/v1/rpc/is_admin" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}')
           [ "$code" = "404" ] || fail "is_admin should not be callable through the API" "got $code $(cat /tmp/r.json)"

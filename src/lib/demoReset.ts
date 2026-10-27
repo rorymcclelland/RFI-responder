@@ -33,7 +33,8 @@ export async function resetDemo(client: SupabaseClient, typed: string): Promise<
   if (error) {
     if (PLAIN.some((p) => p.test(error.message))) throw new Error(error.message);
     console.error('reset_demo failed', error);
-    throw new Error('The demo was not reset. Nothing has changed; try again.');
+    // Security review, finding 8: a lost connection can hide a reset that did happen.
+    throw new Error('The demo may not have been reset. Check Last reset (reload the page), then try again if it has not changed.');
   }
   const d = data as { entries: number; responses: number };
   return `The demo is reset: ${d.entries} knowledge-base entries and ${d.responses} responses. The reset is in the audit log.`;

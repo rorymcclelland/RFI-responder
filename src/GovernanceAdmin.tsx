@@ -393,8 +393,8 @@ function DemoTab({ status, onReset }: { status: DemoStatus; onReset: () => void 
       <p className="section-label">Reset the demo</p>
       <div className="text-sm text-ink-600 space-y-2">
         <p>Puts the demo back as it was loaded: the four demo responses and the demo knowledge base, with entry numbers from KB-0001 again.</p>
-        <p><strong>Removed:</strong> every response and every knowledge-base entry, including anything reviewers added. <strong>Kept:</strong> everyone&apos;s accounts and roles, the limits, real people&apos;s usage, and the audit log, which records the reset.</p>
-        <p>The next sign-in indexes the entries again, which costs a few pence.</p>
+        <p><strong>Removed:</strong> every response and every knowledge-base entry, including anything reviewers added. <strong>Kept:</strong> real people&apos;s accounts and roles, the limits, real people&apos;s usage, and the audit log, which records the reset. The demo&apos;s fictional people are put back as they were loaded.</p>
+        <p>Do not reset while someone is processing questions: their run would fail. The next sign-in indexes the entries again, which costs a few pence.</p>
         <p className="text-xs text-ink-400">Last reset: {status.lastResetAt ? new Date(status.lastResetAt).toLocaleString() : 'never'}.</p>
       </div>
       <label className="block max-w-sm">

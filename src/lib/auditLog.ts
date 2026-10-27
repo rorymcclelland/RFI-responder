@@ -71,9 +71,9 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
     case 'question.changed_after_export':
       return `Changed a question after its export was recorded: ${d.answer_changed ? 'the answer' : 'the decision'}${d.status_from !== d.status_to ? ` (${str(d.status_from)} to ${str(d.status_to)})` : ''}.`;
     case 'demo.reset':
-      return `Reset the demo: ${str(d.entries)} knowledge-base entries and ${str(d.responses)} responses loaded again; everything else removed.`;
+      return `Reset the demo: ${str(d.entries)} knowledge-base entries and ${str(d.responses)} responses loaded again; all other responses and entries removed.`;
     case 'user.invited':
-      return `Invited ${names.get(str(r.targetId)) ?? 'someone (account since deleted)'} as a member.`;
+      return `Invited ${names.get(str(r.targetId)) ?? 'someone not in the team list loaded at sign-in (new since then, or deleted)'} as a member.`;
     case 'response.archived':
       return `Archived a response as ${str(d.outcome)}.`;
     case 'response.deleted':

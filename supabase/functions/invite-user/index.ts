@@ -1,12 +1,13 @@
 /**
  * POST { email, displayName? } -> { message }
  * Sprint 15 (S15-5, F-3): a signed-in admin invites someone, who joins as a member. Inviting needs the
- * service role key, which stays here, server-side (decision 0005). At most 20 invitations per admin per
- * day (UTC). Each invitation is in the audit log (user.invited), by account id only.
+ * service role key, which stays here, server-side (decision 0005). reserve_invitation checks the admin,
+ * refuses an address with any account and holds the daily limit (20, UTC) under a lock per admin before
+ * anything is sent. Each invitation is in the audit log (user.invited), by account id only.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { json, requireUser, serve } from '../_shared/http.ts';
-import { inviteUser, type SendOutcome } from '../_shared/invite-core.ts';
+import { inviteUser, type Reservation, type SendOutcome } from '../_shared/invite-core.ts';
 
 /** Where the invitation's link leads: the app, the first of the allowed origins. */
 const appOrigin = () => (Deno.env.get('APP_ORIGIN') ?? 'http://localhost:5173').split(',')[0].trim();
@@ -17,18 +18,14 @@ serve(async (req) => {
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 
   const result = await inviteUser({
-    async isAdmin(id) {
-      const { data, error } = await admin.rpc('user_is_admin', { p_user: id });
+    async reserve(id, email, dailyLimit) {
+      const { data, error } = await admin.rpc('reserve_invitation', { p_admin: id, p_email: email, p_daily_limit: dailyLimit });
       if (error) throw error;
-      return data === true;
+      return data as Reservation;
     },
-    async invitesToday(id) {
-      const startOfDay = new Date();
-      startOfDay.setUTCHours(0, 0, 0, 0);
-      const { count, error } = await admin.from('audit_log').select('id', { count: 'exact', head: true })
-        .eq('action', 'user.invited').eq('actor', id).gte('at', startOfDay.toISOString());
-      if (error) throw error;
-      return count ?? 0;
+    async release(slot) {
+      const { error } = await admin.rpc('release_invitation', { p_slot: slot });
+      if (error) console.error('release_invitation failed', error);
     },
     async sendInvite(email, displayName, redirectTo): Promise<SendOutcome> {
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {

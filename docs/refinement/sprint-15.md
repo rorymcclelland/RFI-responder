@@ -86,7 +86,7 @@ Refined 27 October 2026, after Rory asked to "run sprint 15", the sprint propose
 
 **Test cases.**
 1. An admin invites `new.reviewer@example.com`: the invitation is sent once, with the name passed as the display name, an audit row `user.invited` names the admin, and the person appears under **Users** as a member.
-2. Refused: a member (403); an anonymous caller (401); a call from another origin (CORS, as for the other functions).
+2. Refused: a member (403); an anonymous caller (401). A web page on another origin cannot read the answer (CORS, as for the other functions); that is the browser's protection, and the function itself requires a signed-in admin's token whatever the origin.
 3. Refused before anything is sent: an empty, malformed or overlong address (over 254 characters), a name over 100 characters, an address with a line break or control character.
 4. An address that already has an account: a plain message ("already has an account"), nothing sent, no audit row.
 5. The 21st invitation by one admin in a day is refused (429) with a plain message; another admin is unaffected.
@@ -115,6 +115,27 @@ Order: S15-1 and S15-2 (independent, small), then S15-3 (its migration rewrites 
 | Q4 | Anything else this sprint | No: keep it short; F-3 (an invite screen) stays next in line **Rory: add the invite screen (S15-5)** |
 | Q5 | Who an invitation makes the person | Always a member; an admin promotes them afterwards with the existing, audited control **Rory: agreed** |
 | Q6 | How many invitations an admin may send a day | 20, well under the SMTP provider's daily limit **Rory: agreed** |
+
+## Security review (27 October 2026)
+
+An independent review of `main..sprint-15` found no high issue, two medium and seven low, with five for information; all are fixed, each with a test where code changed. It compared the database before and after the sprint: apart from the rename, every policy, function body and execute right is unchanged.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | The draft test pack said the review's findings were fixed before the review had run | The pack states only what was checked, written after the fixes |
+| M2 | Supabase re-invites an account that exists but is unconfirmed, so an admin could send a fresh sign-in link for a fictional demo person (unconfirmed, at `.invalid`) or re-invite a pending reviewer, with another audit row | Before anything is sent, `reserve_invitation` refuses an address with any account, confirmed or not; reserved domains (`.invalid`, `.test`, `.example`, `.localhost`) are refused outright. CI invites an existing account (409) and a fictional address (400) |
+| L3 | Parallel invitations could all pass the daily count | Slots are reserved under a lock per admin before sending, and given back if nothing is sent; a test fires eight at once against a limit of five |
+| L4 | An invitation whose audit row failed was neither recorded nor counted, while the guide said every one is recorded | It keeps its slot, so it still counts; the message says the record is missing; the guide says so |
+| L5 | `auth.uid()` also reads the older `request.jwt.claim.sub`, which the reset left in place, so the reload could have run as the admin | Both settings are cleared during the reload and restored after; a test sets the older one |
+| L6 | "Everyone's accounts are kept" was too broad: the reload puts the fictional people back; and a real account at `.invalid` would lose its usage on every reset | The page and guide say real people's accounts are kept and the fictional people are put back; `.invalid` addresses cannot be invited |
+| L7 | Two audit descriptions misled: "everything else removed", and "account since deleted" for someone invited since sign-in | "All other responses and entries removed"; "not in the team list loaded at sign-in (new since then, or deleted)" |
+| L8 | "Nothing has changed" after any unexpected error, though a lost connection can hide a reset that happened | "The demo may not have been reset. Check Last reset" |
+| L9 | The SQL reset did not take the button's lock; a reset during processing makes that run fail | Both take the same lock; the page and guide say not to reset while questions are processing |
+| I10 | Functions added to `access` later would be executable by everyone by default | Default privileges revoke it; tested |
+| I11 | The rename check would miss quoted names | The test matches quoted names too |
+| I12 | The refinement called CORS a server refusal | Reworded: CORS protects in the browser; the function requires an admin's token whatever the origin |
+| I13 | The invitation link falls back to localhost if `APP_ORIGIN` is not set | The live update checks it is set |
+| I14 | After a reset, older audit entries that name an entry number refer to the entry that had it before | Said in the guide |
 
 ## What building found
 

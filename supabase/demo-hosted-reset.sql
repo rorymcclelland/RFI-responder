@@ -2,6 +2,8 @@
 -- and knowledge-base entry, including what reviewers added, then loads the demo data again. Real accounts,
 -- their roles, the settings, real people's usage and the audit log are kept; the demo's recorded usage is replaced. Run it in the SQL editor, as the project owner.
 BEGIN;
+-- One reset at a time: the same lock as the governance page's Reset the demo (Sprint 15 security review, finding 9).
+SELECT pg_advisory_xact_lock(hashtext('rfi_respond.reset_demo'));
 -- Entry numbers start again at KB-0001, so the demo responses cite the right entries (Sprint 15).
 TRUNCATE public.opportunities, public.kb_entries RESTART IDENTITY CASCADE;
 -- The demo's recorded usage is loaded again below; the earlier copy goes, so the budget is not counted twice (Sprint 14 review, L2).
