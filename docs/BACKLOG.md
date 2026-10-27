@@ -655,6 +655,19 @@ F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual
 
 **Proposed next.** A short Sprint 15 to polish the live demo for reviewers: BUG-36, F-63 (a confirmed, audited **Reset demo** for admins), F-64 and F-65, with the live project updated by `db push` at the close. Alternatively F-3 (an invite screen, so reviewers can be invited without the Supabase dashboard), or pausing here.
 
+## Sprint 15: polishing the live demo (asked for by Rory 27 October 2026, refined and answered the same day)
+
+Refinement: `docs/refinement/sprint-15.md`. Rory added the invite screen (F-3) at refinement.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S15-1 | Search the knowledge base by entry number | BUG-36 | Ready, Sprint 15 |
+| S15-2 | Policies check the signed-in user once per query; the prototype's dead session policy goes | F-65 | Ready, Sprint 15 |
+| S15-3 | The policy helpers are no longer callable through the API | F-64 | Ready, Sprint 15 |
+| S15-4 | Reset the demo from the app (admins, confirmed by a typed phrase, audited) | F-63 | Ready, Sprint 15 |
+| S15-5 | Admins invite people from the app (members only, 20 a day per admin, audited) | F-3 | Ready, Sprint 15 |
+| S15-6 | Update the live demo | | Ready, Sprint 15 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
