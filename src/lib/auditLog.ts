@@ -73,7 +73,7 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
     case 'demo.reset':
       return `Reset the demo: ${str(d.entries)} knowledge-base entries and ${str(d.responses)} responses loaded again; everything else removed.`;
     case 'user.invited':
-      return `Invited ${str(d.email)}${d.display_name ? ` (${str(d.display_name)})` : ''} as a member.`;
+      return `Invited ${names.get(str(r.targetId)) ?? 'someone (account since deleted)'} as a member.`;
     case 'response.archived':
       return `Archived a response as ${str(d.outcome)}.`;
     case 'response.deleted':

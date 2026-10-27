@@ -119,4 +119,6 @@ Order: S15-1 and S15-2 (independent, small), then S15-3 (its migration rewrites 
 ## What building found
 
 - **The Sprint 14 SQL reset would have renumbered the knowledge base** (BUG-37). Emptying `kb_entries` does not restart its numbering, so after a reset the demo's entries would have been KB-0135 onwards, while the demo responses cite KB-0001 to KB-0132 by number. The live demo had never been reset, so nothing was affected. Both the SQL reset and the button now restart the numbering, and a test checks the entries come back as KB-0001 to KB-0132 with the first Japanese entry at KB-0101.
-- **S15-3 test case 4** (calling a helper through the API is refused) cannot be shown without the API, which the database tests do not run; it moves to the live check (S15-6), where Claude calls the old endpoint with the public key.
+- **S15-3 test case 4** (calling a helper through the API is refused) cannot be shown without the API, which the database tests do not run; it moved to CI, which calls `rpc/is_admin` on the local stack and expects a 404, and to the live check (S15-6).
+- **S15-5 records invitations by account id only.** Writing the address into the append-only audit log would keep it after the person was deleted, against DATA-HANDLING; the row names the new account instead, and the audit screen shows their current name. The page is called **Team** in the app, not **Users**.
+- **S15-5 is also checked in CI:** `invite-user` refuses the anon key (401), a malformed address (400) and a member (403) on the local stack.

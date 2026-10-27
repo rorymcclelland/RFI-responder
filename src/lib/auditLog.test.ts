@@ -59,3 +59,14 @@ describe('the audit-log screen (Sprint 11, S11-9)', () => {
     await expect(loadAuditLog({ from: () => refusing } as never, null)).rejects.toThrow(/could not be read/);
   });
 });
+
+describe('Sprint 15 audit entries', () => {
+  it('describes a demo reset and an invitation (S15-4, S15-5)', () => {
+    expect(describeAudit({ action: 'demo.reset', details: { entries: 132, responses: 4 } }))
+      .toBe('Reset the demo: 132 knowledge-base entries and 4 responses loaded again; everything else removed.');
+    expect(describeAudit({ action: 'user.invited', details: {}, targetId: 'u2' }, new Map([['u2', 'Ana Lima']]))).toBe('Invited Ana Lima as a member.');
+    expect(describeAudit({ action: 'user.invited', details: {}, targetId: 'gone' })).toBe('Invited someone (account since deleted) as a member.');
+    expect(AUDIT_GROUPS.people.actions).toContain('user.invited');
+    expect(AUDIT_GROUPS.demo.actions).toEqual(['demo.reset']);
+  });
+});

@@ -19,11 +19,13 @@ flowchart LR
       RLS["Row-level security and column grants<br/>on every table"]
       Fns["Functions: bulk_accept, record_export,<br/>review_entry, reserve_quota, ..."]
       Private["private schema: markers and checks<br/>no signed-in user can reach"]
+      Access["access schema: the helpers policies call<br/>not exposed by the API"]
     end
     subgraph Edge["Edge Functions (Deno, service role)"]
       Process["process-questions"]
       Extract["extract-questions"]
       Embed["embed, embed-entries"]
+      Invite["invite-user<br/>(admins invite people)"]
     end
   end
 
@@ -39,6 +41,7 @@ flowchart LR
   API --> RLS --> Fns
   Fns --- Private
   Process & Extract & Embed -->|"service role, server side only"| DB
+  Invite -->|"service role, server side only"| Auth
   Process & Embed -->|"API key, server side only"| Voyage
   Process & Extract -->|"API key, server side only"| Claude
 ```

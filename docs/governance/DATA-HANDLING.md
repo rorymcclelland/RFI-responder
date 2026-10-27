@@ -21,7 +21,7 @@ Anonymous visitors can read nothing; the only function they can call, `public.ke
 
 ## The hosted demo (Sprint 14)
 
-The demo at https://rfi-responder.vercel.app holds the synthetic demo data and, as its only personal data, the name and email address of each person invited, with a hashed password (Supabase Auth). The database is in Supabase's London region (`eu-west-2`); invitation and password-reset emails go through Resend (Ireland); the app's files are served by Vercel, which keeps request logs as its terms describe. To remove a reviewer, delete them in Supabase under **Authentication**, **Users**: their profile goes with them, and audit rows keep only an unnamed id (`actor_ref`).
+The demo at https://rfi-responder.vercel.app holds the synthetic demo data and, as its only personal data, the name and email address of each person invited, with a hashed password (Supabase Auth). The database is in Supabase's London region (`eu-west-2`); invitation and password-reset emails go through Resend (Ireland); the app's files are served by Vercel, which keeps request logs as its terms describe. Admins invite reviewers from the app's **Team** page (Sprint 15) or from Supabase; the invitation is in the audit log by account id, never by address. To remove a reviewer, delete them in Supabase under **Authentication**, **Users**: their profile goes with them, and audit rows keep only an unnamed id (`actor_ref`).
 
 ## What leaves the database
 

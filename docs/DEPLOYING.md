@@ -24,7 +24,7 @@ Until Sprint 14 RFI Respond ran only locally. Sprint 14 sets up an invite-only h
 
 1. Create the hosted Supabase project and link it: `npx supabase link`.
 2. Apply the migrations: `npx supabase db push`.
-3. Deploy the Edge Functions and set their secrets: `npx supabase functions deploy` and `npx supabase secrets set`.
+3. Deploy the Edge Functions and set their secrets: `npx supabase functions deploy` (all five, including `invite-user` since Sprint 15) and `npx supabase secrets set`.
 4. Build the app with the hosted project's URL and anon key (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) using `npm run build:hosted`, which refuses a local or missing address and the secret key, and serve `dist/` with every path falling back to `index.html` and the security headers in [`vercel.json`](../vercel.json) (Vercel reads that file as it is).
 5. Invite the first admin, and set the limits on the Governance page.
 6. Load the organisation's own knowledge base through **Import KB**, and recalibrate on an evaluation set drawn from it: the calibration tables shipped here are fitted to the synthetic set and will not carry over ([`docs/evals/README.md`](evals/README.md)).

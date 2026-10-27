@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, Tag, X, Shield, Search, ChevronDown, Briefcase, Building2, SlidersHorizontal } from 'lucide-react';
+import { Users, Tag, X, Shield, Search, ChevronDown, Briefcase, Building2, SlidersHorizontal, Send } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { PROFILE_COLUMNS } from './lib/onboarding';
+import { inviteSomeone } from './lib/invite';
 import { UserProfile } from './types';
 
 const SUGGESTED_TAGS = [
@@ -304,6 +305,53 @@ function UserCard({ user, currentUserId, isAdmin, onEdit }: {
   );
 }
 
+// ─── Invite (Sprint 15, S15-5) ────────────────────────────────────────────────
+
+/** Admins invite someone by email; they join as a member. */
+function InviteForm({ onInvited }: { onInvited: () => void }) {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResult(null); setSending(true);
+    try {
+      setResult({ ok: true, text: await inviteSomeone(supabase, email, name) });
+      setEmail(''); setName('');
+      onInvited();
+    } catch (err) {
+      setResult({ ok: false, text: (err as Error).message });
+    } finally {
+      setSending(false);
+    }
+  };
+  return (
+    <form onSubmit={send} className="card p-5 space-y-3" aria-label="Invite someone">
+      <div>
+        <p className="section-label">Invite someone</p>
+        <p className="text-xs text-ink-400 mt-1">They get an email with a link to choose a password, and join as a member. Make them an admin afterwards if they need it.</p>
+      </div>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <label className="block">
+          <span className="text-sm font-bold text-ink-700">Email address</span>
+          <input type="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} className="input mt-1" autoComplete="off" />
+        </label>
+        <label className="block">
+          <span className="text-sm font-bold text-ink-700">Name (optional)</span>
+          <input type="text" maxLength={100} value={name} onChange={(e) => setName(e.target.value)} className="input mt-1" autoComplete="off" />
+        </label>
+      </div>
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={sending || !email.trim()} aria-busy={sending} className="btn-primary text-sm disabled:opacity-60">
+          <Send size={14} /> {sending ? 'Sending…' : 'Send invitation'}
+        </button>
+        <span role="status" aria-live="polite" className={`text-sm ${result?.ok ? 'text-emerald-700' : 'text-coral-600'}`}>{result?.text ?? ''}</span>
+      </div>
+    </form>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 interface Props { currentUserId: string; isAdmin: boolean; }
@@ -366,6 +414,8 @@ export default function UserManagement({ currentUserId, isAdmin }: Props) {
             <Users size={13} />{users.length} member{users.length !== 1 ? 's' : ''}
           </div>
         </div>
+
+        {isAdmin && <InviteForm onInvited={loadUsers} />}
 
         {/* Department pills */}
         {departments.length > 0 && (

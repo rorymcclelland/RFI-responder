@@ -6,7 +6,9 @@ For admins: the people who look after the workspace. An admin can do everything 
 
 ### Inviting someone
 
-Accounts are by invitation only, and invitations are sent from Supabase, not from the app: in the Supabase dashboard (Studio) open Authentication, then Users, and invite the person by email. On a local install Studio is at the address `npx supabase start` prints (usually `http://127.0.0.1:54323`). The person's profile is created when their account is. The link in the invitation brings them to the app, which asks them to choose a password. An in-app invite screen is on the backlog (F-3).
+Accounts are by invitation only. On the **Team** page, under **Invite someone**, give the person's email address and, if you like, their name, and choose **Send invitation**. They get an email from the installation's mail settings with a link to the app, which asks them to choose a password. Everyone invited joins as a member; make them an admin afterwards if they need it (below). Each admin can send 20 invitations a day, and every invitation is recorded in the audit log. An address that already has an account is refused, and nothing is sent.
+
+Supabase's dashboard (Studio) can still invite people, under Authentication, then Users, and is where an invitation is resent or withdrawn. On a local install Studio is at the address `npx supabase start` prints (usually `http://127.0.0.1:54323`); the invitation email itself is caught by the local mail viewer (usually `http://127.0.0.1:54324`).
 
 ### Roles and profiles
 

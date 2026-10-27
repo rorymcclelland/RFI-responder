@@ -1,6 +1,6 @@
 # Edge Functions reference
 
-The four Supabase Edge Functions (Deno) are the only place the app calls an AI provider. The browser calls them with the user's session; they read and write the database with the service role where members cannot, and they hold the provider keys ([decision 0005](../decisions/0005-where-the-ai-runs.md)). How they fit into the whole system is in [ARCHITECTURE.md](../ARCHITECTURE.md).
+The five Supabase Edge Functions (Deno) hold the keys the browser must never have: four are the only place the app calls an AI provider, and the fifth, `invite-user` (Sprint 15), sends invitations with the service role. The browser calls them with the user's session; they read and write the database with the service role where members cannot, and they hold the provider keys ([decision 0005](../decisions/0005-where-the-ai-runs.md)). How they fit into the whole system is in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 | Function | What it does | Called from |
 |---|---|---|
@@ -8,6 +8,7 @@ The four Supabase Edge Functions (Deno) are the only place the app calls an AI p
 | [`extract-questions`](../../supabase/functions/extract-questions/index.ts) | Finds the questions in a Word document's text blocks; saves nothing | `extractFromWord` in [`src/lib/wordExtraction.ts`](../../src/lib/wordExtraction.ts), used by [`src/RFIWorkspace.tsx`](../../src/RFIWorkspace.tsx) |
 | [`embed`](../../supabase/functions/embed/index.ts) | Returns embedding vectors for up to 128 texts | Nothing in `src/` or `eval/` calls it; only the CI job below does |
 | [`embed-entries`](../../supabase/functions/embed-entries/index.ts) | Embeds knowledge-base entries that have no vector from the configured model | `indexNewEntries` in [`src/lib/knowledgeBase.ts`](../../src/lib/knowledgeBase.ts), used by [`src/App.tsx`](../../src/App.tsx) and [`src/RFIWorkspace.tsx`](../../src/RFIWorkspace.tsx) |
+| [`invite-user`](../../supabase/functions/invite-user/index.ts) | An admin invites someone by email; they join as a member (Sprint 15) | `inviteSomeone` in [`src/lib/invite.ts`](../../src/lib/invite.ts), used by [`src/UserManagement.tsx`](../../src/UserManagement.tsx) |
 
 No function calls another; the browser calls each one through `supabase.functions.invoke`.
 
@@ -230,6 +231,28 @@ Each batch has its own reservation. In `finally`, usage is recorded under `embed
 
 **Provider calls.** The configured embedding provider, `document` input type.
 
+## invite-user
+
+**Purpose.** Story S15-5 (F-3). An admin invites someone from the **Team** page instead of the Supabase dashboard. Inviting needs the service role, so it happens here. The person always joins as a member: an admin makes them an admin afterwards with `set_user_admin`, which is audited.
+
+**Request.** `POST` with `{ "email": string, "displayName"?: string }`, checked by `validateInvite` in [`_shared/invite-core.ts`](../../supabase/functions/_shared/invite-core.ts). Anything else in the body is ignored. The address is trimmed and lower-cased, and must look like an address, with at most 254 characters (64 before the `@`) and no control characters or line breaks; the name, optional, at most 100 characters, with none either. Every failure is `400`.
+
+**Response.** `200` with `{ message }`: `Invitation sent to <address>. They join as a member.`, or, if the invitation went but its audit row could not be written, a message saying so.
+
+**Errors.**
+
+| Status | When |
+|---|---|
+| `400` | Validation |
+| `401` | No signed-in user |
+| `403` | The caller is not an admin (`user_is_admin`) |
+| `409` | The address already has an account; nothing is sent |
+| `429` | The admin has sent 20 invitations today (UTC), counted from the audit log; or Supabase's email limit for the project was reached |
+| `502` | The mail service did not take the invitation (the detail is logged) |
+| `500` | `Unexpected error` |
+
+**Steps.** Authenticate, validate, check the caller is an admin, count their `user.invited` audit rows since midnight UTC, call Supabase Auth's `inviteUserByEmail` with the name as `display_name` and the first `APP_ORIGIN` as the link's destination, then write the audit row `user.invited` with the admin as actor and the new account as target, and no address, so deleting the person later leaves no address in the log. Two invitations sent at the same moment can both pass the count, so an admin could exceed 20 by one or two.
+
 ## Embedding and Claude clients
 
 | Provider | Endpoint | Retries | Errors |
@@ -247,10 +270,10 @@ Set locally in a `.env` file in `supabase/functions/` (ignored by git, copied fr
 
 | Variable | Default | Read by | Notes |
 |---|---|---|---|
-| `SUPABASE_URL` | None | All four (`http.ts` and each `index.ts`) | Not in `.env.example`; the Supabase CLI and hosted platform supply it |
-| `SUPABASE_ANON_KEY` | None | All four (`requireUser`) | As above |
-| `SUPABASE_SERVICE_ROLE_KEY` | None | All four | As above. Secret |
-| `APP_ORIGIN` | `http://localhost:5173,http://127.0.0.1:5173` | All four (`http.ts`) | Comma-separated allowed browser origins |
+| `SUPABASE_URL` | None | All five (`http.ts` and each `index.ts`) | Not in `.env.example`; the Supabase CLI and hosted platform supply it |
+| `SUPABASE_ANON_KEY` | None | All five (`requireUser`) | As above |
+| `SUPABASE_SERVICE_ROLE_KEY` | None | All five | As above. Secret |
+| `APP_ORIGIN` | `http://localhost:5173,http://127.0.0.1:5173` | All five (`http.ts`); `invite-user` | Comma-separated allowed browser origins. `invite-user` sends the invitation's link to the first |
 | `EMBEDDING_PROVIDER` | `voyage` | `process-questions`, `embed`, `embed-entries` | `voyage` or `ollama` |
 | `EMBEDDING_MODEL` | `voyage-4` (Voyage), `qwen3-embedding:0.6b` (Ollama) | As above | |
 | `VOYAGE_API_KEY` | None | As above, and `process-questions` for a `rerank-...` checker | Secret. Required for Voyage |
@@ -273,6 +296,7 @@ All in [`supabase/functions/_shared/`](../../supabase/functions/_shared/). Most 
 | `errors.ts` | `HttpError`, an error with a status and a message safe to show |
 | `usage.ts` | Metering wrappers, `reserveQuota`, `quotaMessage`, `recordUsage`, `finishUsage` |
 | `embeddings.ts` | Voyage and Ollama providers, `providerFromEnv`, `EmbeddingError`, rate-limit retry, `EMBEDDING_DIMENSION` |
+| `invite-core.ts` | `validateInvite` and `inviteUser`, the logic of `invite-user` (Sprint 15) |
 | `embed-core.ts` | `validateEmbedRequest` and `embedPendingEntries`, the logic of `embed` and `embed-entries` |
 | `claude.ts` | The Claude client for structured output, and the prompt canary |
 | `process-core.ts` | `validateProcessRequest` and `processQuestions`, the batch pipeline |
@@ -300,11 +324,12 @@ All in [`supabase/functions/_shared/`](../../supabase/functions/_shared/). Most 
 | [`embed-core.test.ts`](../../supabase/functions/_shared/embed-core.test.ts) | `embed` validation; `embed-entries` batching, caps, failure part-way |
 | [`embeddings.test.ts`](../../supabase/functions/_shared/embeddings.test.ts) | Voyage and Ollama providers, vector checks, `providerFromEnv`, rate-limit retry |
 | [`usage.test.ts`](../../supabase/functions/_shared/usage.test.ts) | Metering, `reserveQuota` (`429`, `503`, size), `finishUsage` |
+| [`invite-core.test.ts`](../../supabase/functions/_shared/invite-core.test.ts) | `invite-user`: validation and hostile input, admins only, the daily limit, an existing account, mail failures, the audit row by id only |
 | [`calibration.test.ts`](../../supabase/functions/_shared/calibration.test.ts), [`sources.test.ts`](../../supabase/functions/_shared/sources.test.ts) | Calibration and source selection |
 
 The `index.ts` files themselves have no unit tests; CI type-checks them with `deno check`.
 
-**Client side:** [`src/lib/sessions.test.ts`](../../src/lib/sessions.test.ts) (`processInBatches`: batches of ten, progress, a `429` stopping later batches, held questions, the gateway's `503` when the functions server is not running) and [`src/lib/wordExtraction.test.ts`](../../src/lib/wordExtraction.test.ts) (`extractFromWord` passing on the server's reason). `indexNewEntries` has no unit test.
+**Client side:** [`src/lib/sessions.test.ts`](../../src/lib/sessions.test.ts) (`processInBatches`: batches of ten, progress, a `429` stopping later batches, held questions, the gateway's `503` when the functions server is not running) and [`src/lib/wordExtraction.test.ts`](../../src/lib/wordExtraction.test.ts) (`extractFromWord` passing on the server's reason), and [`src/lib/invite.test.ts`](../../src/lib/invite.test.ts) (`inviteSomeone` sending only the address and name, and passing on the server's reason). `indexNewEntries` has no unit test.
 
 **Database** (`npm run test:db`): `reserve_quota`, pricing and `settle_reservation` in [`supabase/tests/db/sprint4.test.ts`](../../supabase/tests/db/sprint4.test.ts) and [`supabase/tests/db/sprint5.test.ts`](../../supabase/tests/db/sprint5.test.ts); the columns only the service role may write in [`supabase/tests/db/processing.test.ts`](../../supabase/tests/db/processing.test.ts); `pending_embeddings` in [`supabase/tests/db/vectors.test.ts`](../../supabase/tests/db/vectors.test.ts); `match_kb_entries` in [`supabase/tests/db/hybrid.test.ts`](../../supabase/tests/db/hybrid.test.ts); `entry_review_status` in [`supabase/tests/db/sprint7.test.ts`](../../supabase/tests/db/sprint7.test.ts).
 
