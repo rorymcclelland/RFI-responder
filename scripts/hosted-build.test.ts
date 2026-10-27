@@ -76,7 +76,8 @@ describe('Sprint 14 security review (M2)', () => {
 describe('S14-7 the keep-alive workflow', () => {
   const wf = readFileSync(join(ROOT, '.github/workflows/keepalive.yml'), 'utf8');
   it('runs once a day and on demand, with no repository permissions', () => {
-    expect(wf).toMatch(/schedule:\n\s+- cron: '\d+ \d+ \* \* \*'/);
+    // Security review of S14-7: four times a day, as Supabase speaks of "a few user requests each day".
+    expect(wf).toMatch(/schedule:\n\s+- cron: '\d+ \*\/6 \* \* \*'/);
     expect(wf).toMatch(/workflow_dispatch:/);
     expect(wf).toMatch(/^permissions: \{\}$/m);
   });
@@ -84,8 +85,13 @@ describe('S14-7 the keep-alive workflow', () => {
     expect([...wf.matchAll(/\$URL\/rest\/v1\/[\w/]+/g)].map((m) => m[0])).toEqual(['$URL/rest/v1/rpc/keepalive']);
     expect(wf).toMatch(/sb_secret_\*\) echo "::error::/);
     expect(wf).toMatch(/\^https:\/\/\[a-z0-9\]\{20\}\\\.supabase\\\.co\$/);
-    expect(wf).not.toMatch(/service_role|SERVICE_ROLE/);
+    expect([...wf.matchAll(/secrets\.(\w+)/g)].map((m) => m[1])).toEqual(['DEMO_SUPABASE_ANON_KEY']);
   });
+  it('refuses a legacy service-role key (a JWT), and says so when Supabase cannot be reached', () => {
+    expect(wf).toMatch(/"role"\[\[:space:\]\]\*:\[\[:space:\]\]\*"service_role"/);
+    expect(wf).toMatch(/\|\| \{ echo "::error::The ping could not reach Supabase/);
+  });
+
   it('passes, saying so, until the owner has set it up', () => {
     expect(wf).toMatch(/nothing to ping\."\n\s+exit 0/);
   });

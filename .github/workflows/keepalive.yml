@@ -1,14 +1,15 @@
-# Sprint 14 (S14-7): keeps the hosted demo's Supabase project awake. Supabase pauses a Free project after a
-# week without database activity; this calls public.keepalive() once a day with the public anon key.
+# Sprint 14 (S14-7): meant to keep the hosted demo's Supabase project awake. Supabase pauses a Free project
+# after a week without enough database activity ("typically a few user requests to the database each day"),
+# without saying what it counts; this calls public.keepalive() four times a day with the public anon key.
 # Set up by the repository owner: the variable DEMO_SUPABASE_URL (https://<project-ref>.supabase.co) and
 # the secret DEMO_SUPABASE_ANON_KEY (the anon or publishable key; never the service-role or secret key).
-# Until both are set, the job says so and passes. GitHub stops scheduled workflows in a public repository
-# after 60 days without commits; re-enable it under Actions if that happens.
+# Until both are set, the job says so and passes. GitHub disables scheduled workflows in a public repository
+# after 60 days without repository activity; re-enable it under Actions if that happens.
 name: Keep the demo awake
 
 on:
   schedule:
-    - cron: '17 6 * * *'
+    - cron: '17 */6 * * *'
   workflow_dispatch:
 
 permissions: {}
@@ -31,8 +32,17 @@ jobs:
             echo "::error::DEMO_SUPABASE_URL must be https://<project-ref>.supabase.co"; exit 1
           fi
           case "$KEY" in sb_secret_*) echo "::error::DEMO_SUPABASE_ANON_KEY holds a secret key; use the anon (publishable) key"; exit 1 ;; esac
+          # A legacy key is a JWT: refuse one whose role is service_role (security review of S14-7).
+          if [[ "$KEY" == eyJ* ]]; then
+            payload=$(printf '%s' "$KEY" | cut -d. -f2 | tr '_-' '/+')
+            while [ $(( ${#payload} % 4 )) -ne 0 ]; do payload="$payload="; done
+            if printf '%s' "$payload" | base64 -d 2>/dev/null | grep -q '"role"[[:space:]]*:[[:space:]]*"service_role"'; then
+              echo "::error::DEMO_SUPABASE_ANON_KEY holds the service-role key; use the anon key"; exit 1
+            fi
+          fi
           body=$(curl -sS --max-time 60 --retry 3 --retry-delay 20 -X POST "$URL/rest/v1/rpc/keepalive" \
-            -H "apikey: $KEY" -H 'Content-Type: application/json' -d '{}' -w '\n%{http_code}')
+            -H "apikey: $KEY" -H 'Content-Type: application/json' -d '{}' -w '\n%{http_code}') \
+            || { echo "::error::The ping could not reach Supabase. If the project is paused, restore it in the Supabase dashboard."; exit 1; }
           code=$(echo "$body" | tail -n1)
           if [ "$code" != "200" ] || [ "$(echo "$body" | head -n1)" != "1" ]; then
             echo "::error::The ping failed (HTTP $code). If the project is paused, restore it in the Supabase dashboard."; exit 1

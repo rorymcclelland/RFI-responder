@@ -17,7 +17,7 @@ All data lives in one Supabase project (Postgres) per organisation. Access rules
 | AI usage (who, which model, tokens, estimated cost) | `ai_usage` | Their own rows; admins all | Nobody (written by the Edge Functions) |
 | Audit log (exports, archives, deletions, reviews, setting and admin changes) | `audit_log` | Admins | Nobody (written by functions) |
 
-Anonymous visitors can read nothing. Accounts are invite-only.
+Anonymous visitors can read nothing; the only function they can call, `public.keepalive()` (Sprint 14), returns 1 and reads nothing. Accounts are invite-only.
 
 ## What leaves the database
 

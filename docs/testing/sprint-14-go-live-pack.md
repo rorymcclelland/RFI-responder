@@ -184,13 +184,13 @@ Two values you will note as you go (they are not secret):
 3. Under **Secrets**, add `DEMO_SUPABASE_ANON_KEY` with the anon (publishable) key, the same one you gave Vercel. Never the service-role or secret key.
 4. Open **Actions**, choose **Keep the demo awake**, then **Run workflow**.
 
-**Expected outcome:** the run passes and its log ends "The demo database answered." From then on it runs once a day.
+**Expected outcome:** the run passes and its log ends "The demo database answered." From then on it runs four times a day.
 
 **Result:** ☐ Done. Notes:
 
 ## If the demo is paused anyway
 
-The daily ping keeps the project active. If it ever fails (its run turns red) or GitHub stops it (scheduled runs stop in a public repository after 60 days without commits), Supabase may pause the project after a week. Open the project in the dashboard and choose **Restore project**, wait until it is ready, load the app once, and re-enable the workflow under **Actions** if needed.
+The ping is meant to keep the project active: Supabase says "typically a few user requests to the database each day" are enough, but does not say what it counts, so about eight days after go-live check in the dashboard that the project is still active, and tell me if it was paused. If the ping ever fails (its run turns red) or GitHub disables it (scheduled workflows in a public repository stop after 60 days without repository activity), Supabase may pause the project after a week. Open the project in the dashboard and choose **Restore project**, wait until it is ready, load the app once, and re-enable the workflow under **Actions** if needed.
 
 ## To reset the demo
 

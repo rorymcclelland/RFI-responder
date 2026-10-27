@@ -629,7 +629,7 @@ Refinement: `docs/refinement/sprint-14.md`. Supabase Free plan in London, the ap
 | S14-4 | Go live (Rory's steps from the go-live pack, Claude checking) | | Ready, Sprint 14 |
 | S14-5 | Say what is hosted, and how (README, data handling, providers, risk register) | | Ready, Sprint 14 |
 | S14-6 | Switching away and back keeps your place: a session check on refocus no longer reloads the app | BUG-34 | Ready, Sprint 14 |
-| S14-7 | A daily ping keeps the hosted demo awake on the Free plan (Rory, 27 October) | | Ready, Sprint 14 |
+| S14-7 | A regular ping (four times a day) keeps the hosted demo awake on the Free plan (Rory, 27 October) | | Ready, Sprint 14 |
 
 F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual (Rory, Q1).
 

@@ -354,13 +354,13 @@ Tests: [`workflow.test.ts`](../../supabase/tests/db/workflow.test.ts) (S3-1 the 
 
 ## Functions
 
-Every function below sets `search_path` to empty and names its tables in full, except `handle_new_user`, which sets it to `public`. Anonymous visitors can execute none of them: the default grant to `PUBLIC` is revoked ([`20261022140000_access_control_hardening.sql`](../../supabase/migrations/20261022140000_access_control_hardening.sql)). "Definer" means `SECURITY DEFINER`: the function runs with its owner's rights, so it must check the caller itself; "invoker" means it runs under the caller's rights and the table rules.
+Every function below sets `search_path` to empty and names its tables in full, except `handle_new_user`, which sets it to `public`. Anonymous visitors can execute none of them except `keepalive()`, which returns 1 (Sprint 14): the default grant to `PUBLIC` is revoked ([`20261022140000_access_control_hardening.sql`](../../supabase/migrations/20261022140000_access_control_hardening.sql)). "Definer" means `SECURITY DEFINER`: the function runs with its owner's rights, so it must check the caller itself; "invoker" means it runs under the caller's rights and the table rules.
 
 ### Callable by anyone
 
 | Function | What it does | Who may call | What it checks | Defined in | Tests |
 |---|---|---|---|---|---|
-| `keepalive()` | Returns 1. A scheduled GitHub workflow calls it daily so a hosted Free project is not paused for inactivity (Sprint 14) | Anyone, signed in or not | Nothing: it takes no arguments and reads no table | [`20261102110000`](../../supabase/migrations/20261102110000_keepalive.sql) | [`sprint14.test.ts`](../../supabase/tests/db/sprint14.test.ts) |
+| `keepalive()` | Returns 1. A scheduled GitHub workflow calls it four times a day, meant to keep a hosted Free project from being paused for inactivity (Sprint 14) | Anyone, signed in or not | Nothing: it takes no arguments and reads no table | [`20261102110000`](../../supabase/migrations/20261102110000_keepalive.sql) | [`sprint14.test.ts`](../../supabase/tests/db/sprint14.test.ts) |
 
 ### Callable by signed-in users
 

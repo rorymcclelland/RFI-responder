@@ -23,7 +23,7 @@ Date: 22 October 2026, extended 23 October (Sprint 2: bulk approval and server-s
 | Edit another user's details | yes | no | no |
 | Grant or remove admin rights (`set_user_admin`, audited, last admin protected) | yes | no | no |
 | Invite users | yes, from the Supabase dashboard or CLI for now | no | no |
-| Anonymous visitors | no access to any table | | |
+| Anonymous visitors | no access to any table; since Sprint 14 they can call `public.keepalive()`, which returns 1 and reads nothing | | |
 
 Sessions and questions remain team-shared: any member adds questions and records review decisions; Sprint 3's readiness workflow tightens this. From Sprint 2 (`20261023100000_server_side_processing.sql`, tested in `supabase/tests/db/processing.test.ts`), members may insert only a question's text and update only its status and final answer, and the database refuses any update that accepts more than one question unless it comes from the response owner or an admin and contains no gated or uncalibrated question. A member could still accept questions one statement at a time; each of those is an individual decision, which is what rule 4 asks for. Privileged changes are written to `audit_log`, which only admins can read and only `SECURITY DEFINER` functions can write.
 

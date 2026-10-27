@@ -124,7 +124,7 @@ npm run db:reset
 2. The database tests, on Postgres with the shim.
 3. On the real Supabase stack: every migration and the seed applied from scratch, sign-up refused, the seeded admin able to sign in, and the Edge Functions refusing unsigned calls, enforcing their limits, and failing safely when a provider cannot be reached, without echoing a key. The Edge Functions are type-checked with Deno first.
 
-[`.github/workflows/keepalive.yml`](../../.github/workflows/keepalive.yml) (Sprint 14) calls the hosted demo's `public.keepalive()` once a day, so Supabase does not pause the Free project for inactivity. It needs the repository variable `DEMO_SUPABASE_URL` and the secret `DEMO_SUPABASE_ANON_KEY` (the public anon key); until both are set it passes and says so. GitHub stops scheduled workflows in a public repository after 60 days without commits.
+[`.github/workflows/keepalive.yml`](../../.github/workflows/keepalive.yml) (Sprint 14) calls the hosted demo's `public.keepalive()` four times a day, meant to keep Supabase from pausing the Free project for inactivity (Supabase does not say what activity it counts). It needs the repository variable `DEMO_SUPABASE_URL` and the secret `DEMO_SUPABASE_ANON_KEY` (the public anon key); until both are set it passes and says so. GitHub disables scheduled workflows in a public repository after 60 days without repository activity, and runs them only from the default branch.
 
 ## Logs
 
