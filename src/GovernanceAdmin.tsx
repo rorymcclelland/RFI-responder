@@ -67,6 +67,9 @@ function UsageTab() {
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  // BUG-35 (Sprint 14): the button shows it is saving, and the outcome appears beside it.
+  const [saving, setSaving] = useState(false);
+  const [saveResult, setSaveResult] = useState<{ ok: boolean; text: string } | null>(null);
 
   const load = useCallback(async () => {
     setError('');
@@ -84,7 +87,7 @@ function UsageTab() {
   useEffect(() => { load(); }, [load]);
 
   const save = async () => {
-    setError(''); setNotice('');
+    setError(''); setNotice(''); setSaveResult(null); setSaving(true);
     const change: SettingsChange = {};
     for (const f of SETTING_FIELDS) {
       const v = Number(draft[f.key]);
@@ -92,10 +95,12 @@ function UsageTab() {
     }
     try {
       await saveSettings(supabase, change);
-      setNotice('Saved. The change is in the audit log.');
       await load();
+      setSaveResult({ ok: true, text: 'Saved. The change is in the audit log.' });
     } catch (err) {
-      setError((err as Error).message);
+      setSaveResult({ ok: false, text: (err as Error).message });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -182,7 +187,14 @@ function UsageTab() {
         </div>
         <div className="flex items-center justify-between">
           <p className="text-xs text-ink-400">Last changed {new Date(settings.updated_at).toLocaleString()}.</p>
-          <button onClick={save} className="btn-primary text-sm"><Save size={14} /> Save limits</button>
+          <div className="flex items-center gap-3">
+            <span role="status" aria-live="polite" className={`text-sm ${saveResult?.ok ? 'text-emerald-700' : 'text-coral-600'}`}>
+              {saveResult?.text ?? ''}
+            </span>
+            <button onClick={save} disabled={saving} aria-busy={saving} className="btn-primary text-sm disabled:opacity-60">
+              <Save size={14} /> {saving ? 'Saving…' : 'Save limits'}
+            </button>
+          </div>
         </div>
       </div>
 
