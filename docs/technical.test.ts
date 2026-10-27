@@ -72,7 +72,7 @@ describe('docs/technical/DATA-MODEL.md', () => {
   /** Names created and not dropped afterwards: the last statement about each name decides. */
   function live(kind: string): string[] {
     const last = new Map<string, 'create' | 'drop'>();
-    const re = new RegExp(`(CREATE (?:OR REPLACE )?${kind} (?:IF NOT EXISTS )?|DROP ${kind} (?:IF EXISTS )?)(?:(?:public|private)\\.)?(\\w+)`, 'gi');
+    const re = new RegExp(`(CREATE (?:OR REPLACE )?${kind} (?:IF NOT EXISTS )?|DROP ${kind} (?:IF EXISTS )?)(?:(?:public|private|access)\\.)?(\\w+)`, 'gi');
     for (const m of sql.matchAll(re)) last.set(m[2], m[1].toUpperCase().startsWith('DROP') ? 'drop' : 'create');
     return [...last].filter(([, v]) => v === 'create').map(([k]) => k);
   }
@@ -81,7 +81,7 @@ describe('docs/technical/DATA-MODEL.md', () => {
     it(`documents every ${kind.toLowerCase()} the migrations leave in place`, () => {
       const names = live(kind);
       expect(names.length).toBeGreaterThan(0);
-      for (const n of names) expect(page, `${kind} ${n}`).toMatch(new RegExp(`\`(?:public\\.|private\\.)?${n}\\b`));
+      for (const n of names) expect(page, `${kind} ${n}`).toMatch(new RegExp(`\`(?:public\\.|private\\.|access\\.)?${n}\\b`));
     });
   }
 });

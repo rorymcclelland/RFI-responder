@@ -134,10 +134,11 @@ describe('finding 4: nothing is callable by anonymous visitors by default', () =
     }
   });
 
-  it.each(['set_updated_at()', 'handle_new_user()', 'set_user_admin(uuid, boolean)', 'is_admin()', 'import_kb_entries(jsonb, kb_origin, text)'])(
+  // is_admin() moved to the access schema in Sprint 15 (S15-3).
+  it.each(['public.set_updated_at()', 'public.handle_new_user()', 'public.set_user_admin(uuid, boolean)', 'access.is_admin()', 'public.import_kb_entries(jsonb, kb_origin, text)'])(
     'anon cannot execute %s',
     async (fn) => {
-      const r = await one<{ ok: boolean }>(`SELECT has_function_privilege('anon', 'public.${fn}', 'EXECUTE') AS ok`);
+      const r = await one<{ ok: boolean }>(`SELECT has_function_privilege('anon', '${fn}', 'EXECUTE') AS ok`);
       expect(r.ok).toBe(false);
     },
   );
