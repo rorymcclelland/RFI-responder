@@ -21,7 +21,8 @@ export const AUDIT_GROUPS: Record<string, { label: string; actions: string[] }> 
   knowledge: { label: 'Knowledge-base reviews and changes', actions: ['kb.reviewed', 'kb.confirmed', 'kb.changed', 'kb.deleted'] },
   holds: { label: 'Questions held and released', actions: ['question.held', 'question.released'] },
   settings: { label: 'Settings and prices', actions: ['settings.changed', 'prices.changed'] },
-  people: { label: 'Admin rights', actions: ['user.admin_granted', 'user.admin_removed'] },
+  people: { label: 'Admin rights and invitations', actions: ['user.admin_granted', 'user.admin_removed', 'user.invited'] },
+  demo: { label: 'Demo resets', actions: ['demo.reset'] },
 };
 
 export const AUDIT_LIMIT = 200;
@@ -69,6 +70,10 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
     }
     case 'question.changed_after_export':
       return `Changed a question after its export was recorded: ${d.answer_changed ? 'the answer' : 'the decision'}${d.status_from !== d.status_to ? ` (${str(d.status_from)} to ${str(d.status_to)})` : ''}.`;
+    case 'demo.reset':
+      return `Reset the demo: ${str(d.entries)} knowledge-base entries and ${str(d.responses)} responses loaded again; everything else removed.`;
+    case 'user.invited':
+      return `Invited ${str(d.email)}${d.display_name ? ` (${str(d.display_name)})` : ''} as a member.`;
     case 'response.archived':
       return `Archived a response as ${str(d.outcome)}.`;
     case 'response.deleted':

@@ -115,3 +115,8 @@ Order: S15-1 and S15-2 (independent, small), then S15-3 (its migration rewrites 
 | Q4 | Anything else this sprint | No: keep it short; F-3 (an invite screen) stays next in line **Rory: add the invite screen (S15-5)** |
 | Q5 | Who an invitation makes the person | Always a member; an admin promotes them afterwards with the existing, audited control **Rory: agreed** |
 | Q6 | How many invitations an admin may send a day | 20, well under the SMTP provider's daily limit **Rory: agreed** |
+
+## What building found
+
+- **The Sprint 14 SQL reset would have renumbered the knowledge base** (BUG-37). Emptying `kb_entries` does not restart its numbering, so after a reset the demo's entries would have been KB-0135 onwards, while the demo responses cite KB-0001 to KB-0132 by number. The live demo had never been reset, so nothing was affected. Both the SQL reset and the button now restart the numbering, and a test checks the entries come back as KB-0001 to KB-0132 with the first Japanese entry at KB-0101.
+- **S15-3 test case 4** (calling a helper through the API is refused) cannot be shown without the API, which the database tests do not run; it moves to the live check (S15-6), where Claude calls the old endpoint with the public key.

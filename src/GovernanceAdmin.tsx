@@ -1,7 +1,8 @@
 /**
  * Governance (admins only, Sprint 4): AI usage and caps (S4-1), entries waiting for review (S4-3)
  * and entries overdue for review (S4-4), and since Sprint 11 the audit log (S11-9). The database
- * enforces all of it; this page shows it and lets an admin change the settings.
+ * enforces all of it; this page shows it and lets an admin change the settings. Since Sprint 15
+ * (S15-4), where a demo is loaded, an admin can reset it here.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, BarChart3, CheckCircle2, Pencil, RefreshCw, Save } from 'lucide-react';
@@ -13,11 +14,18 @@ import {
 } from './lib/usage';
 import { describeOrigin, loadEntriesToReview, loadOverdueEntries, reviewEntry, type EntryForReview } from './lib/entryReview';
 import { AUDIT_GROUPS, AUDIT_LIMIT, describeAudit, loadAuditLog, type AuditRow } from './lib/auditLog';
+import { RESET_PHRASE, isConfirmed, loadDemoStatus, resetDemo, type DemoStatus } from './lib/demoReset';
 
-type Tab = 'usage' | 'review' | 'overdue' | 'audit';
+type Tab = 'usage' | 'review' | 'overdue' | 'audit' | 'demo';
 
-export default function GovernanceAdmin({ names = new Map() }: { names?: Map<string, string> }) {
+export default function GovernanceAdmin({ names = new Map(), onDemoReset }: { names?: Map<string, string>; onDemoReset?: () => void }) {
   const [tab, setTab] = useState<Tab>('usage');
+  // S15-4: the Demo tab appears only where a demo is loaded.
+  const [demo, setDemo] = useState<DemoStatus | null>(null);
+  const loadDemo = useCallback(async () => setDemo(await loadDemoStatus(supabase)), []);
+  useEffect(() => { loadDemo(); }, [loadDemo]);
+  const tabs: [Tab, string][] = [['usage', 'Usage and limits'], ['review', 'Entries to review'], ['overdue', 'Overdue for review'], ['audit', 'Audit log']];
+  if (demo?.loaded) tabs.push(['demo', 'Demo']);
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
@@ -25,7 +33,7 @@ export default function GovernanceAdmin({ names = new Map() }: { names?: Map<str
         <p className="text-sm text-ink-500 mt-1">What the AI costs and what limits it, and the state of the knowledge base. Admins only.</p>
       </div>
       <div className="flex gap-2 border-b border-ink-100" role="tablist">
-        {([['usage', 'Usage and limits'], ['review', 'Entries to review'], ['overdue', 'Overdue for review'], ['audit', 'Audit log']] as [Tab, string][]).map(([key, label]) => (
+        {tabs.map(([key, label]) => (
           <button
             key={key}
             role="tab"
@@ -41,6 +49,7 @@ export default function GovernanceAdmin({ names = new Map() }: { names?: Map<str
       {tab === 'review' && <ReviewTab mode="unreviewed" />}
       {tab === 'overdue' && <ReviewTab mode="overdue" />}
       {tab === 'audit' && <AuditTab names={names} />}
+      {tab === 'demo' && demo?.loaded && <DemoTab status={demo} onReset={() => { loadDemo(); onDemoReset?.(); }} />}
     </div>
   );
 }
@@ -362,3 +371,42 @@ function AuditTab({ names }: { names: Map<string, string> }) {
   );
 }
 
+/** S15-4 (F-63): put the demo back as it was loaded, confirmed by typing a phrase. */
+function DemoTab({ status, onReset }: { status: DemoStatus; onReset: () => void }) {
+  const [typed, setTyped] = useState('');
+  const [resetting, setResetting] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const reset = async () => {
+    setResult(null); setResetting(true);
+    try {
+      setResult({ ok: true, text: await resetDemo(supabase, typed) });
+      setTyped('');
+      onReset();
+    } catch (err) {
+      setResult({ ok: false, text: (err as Error).message });
+    } finally {
+      setResetting(false);
+    }
+  };
+  return (
+    <div className="card p-5 space-y-4">
+      <p className="section-label">Reset the demo</p>
+      <div className="text-sm text-ink-600 space-y-2">
+        <p>Puts the demo back as it was loaded: the four demo responses and the demo knowledge base, with entry numbers from KB-0001 again.</p>
+        <p><strong>Removed:</strong> every response and every knowledge-base entry, including anything reviewers added. <strong>Kept:</strong> everyone&apos;s accounts and roles, the limits, real people&apos;s usage, and the audit log, which records the reset.</p>
+        <p>The next sign-in indexes the entries again, which costs a few pence.</p>
+        <p className="text-xs text-ink-400">Last reset: {status.lastResetAt ? new Date(status.lastResetAt).toLocaleString() : 'never'}.</p>
+      </div>
+      <label className="block max-w-sm">
+        <span className="text-sm font-bold text-ink-700">Type <code>{RESET_PHRASE}</code> to confirm</span>
+        <input className="input mt-1" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" spellCheck={false} />
+      </label>
+      <div className="flex items-center gap-3">
+        <button onClick={reset} disabled={!isConfirmed(typed) || resetting} aria-busy={resetting} className="btn-primary text-sm disabled:opacity-60">
+          <RefreshCw size={14} /> {resetting ? 'Resetting…' : 'Reset the demo'}
+        </button>
+        <span role="status" aria-live="polite" className={`text-sm ${result?.ok ? 'text-emerald-700' : 'text-coral-600'}`}>{result?.text ?? ''}</span>
+      </div>
+    </div>
+  );
+}

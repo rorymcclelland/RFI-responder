@@ -24,13 +24,14 @@ describe('S14-2 hosted demo data', () => {
 
   it('keeps the same people, knowledge base and responses as the local seed', () => {
     expect(demoUsersFromSeed(seed)).toHaveLength(8);
-    expect(hosted.match(/'sample-data\/security-qa(-ja)?\.csv'/g)).toHaveLength(2);
+    // Twice: the load itself, then the same load kept as the reload script (Sprint 15, S15-4).
+    expect(hosted.match(/'sample-data\/security-qa(-ja)?\.csv'/g)).toHaveLength(4);
     for (const name of [...seed.matchAll(/WHERE name = '([^']+)'/g)].map((m) => m[1])) expect(hosted).toContain(name);
   });
 
   it('the reset removes responses and entries only, inside one transaction', () => {
     expect(reset).toMatch(/^BEGIN;$/m);
-    expect(reset).toMatch(/^TRUNCATE public\.opportunities, public\.kb_entries CASCADE;$/m);
+    expect(reset).toMatch(/^TRUNCATE public\.opportunities, public\.kb_entries RESTART IDENTITY CASCADE;$/m);
     expect(reset).toMatch(/^COMMIT;$/m);
     expect(reset).not.toMatch(/TRUNCATE[^;]*(audit_log|user_profiles|auth\.users|ai_settings|ai_usage)/);
   });
@@ -40,5 +41,19 @@ describe('S14-2 hosted demo data', () => {
     expect(() => check("'LocalDev2026pw'")).toThrow(/password/);
     expect(() => check('sarah.chen@example.com')).toThrow(/example\.com/);
     expect(() => check('INSERT INTO auth.identities')).toThrow(/identities/);
+  });
+});
+
+describe('S15-4 the demo keeps its own reload script', () => {
+  const stored = (f: string) => f.match(/\$demo_reload\$\n([\s\S]*?)\n\$demo_reload\$/)?.[1];
+  it('both files store exactly the load they run', () => {
+    const load = stored(hosted);
+    expect(load).toBeTruthy();
+    expect(hosted).toContain(`${load}\n\n-- Keep this load`);
+    expect(stored(reset)).toBe(load);
+  });
+
+  it('the store is skipped, not failed, on a database without the Sprint 15 migration', () => {
+    expect(hosted).toMatch(/IF to_regclass\('private\.demo_reload'\) IS NULL THEN[\s\S]*?RETURN;/);
   });
 });

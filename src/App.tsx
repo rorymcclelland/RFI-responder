@@ -618,7 +618,7 @@ export default function App() {
         ) : view === 'users' ? (
           <UserManagement currentUserId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : view === 'governance' && currentUser.isAdmin ? (
-          <GovernanceAdmin names={new Map(allUsers.map((u) => [u.id, u.displayName]))} />
+          <GovernanceAdmin names={new Map(allUsers.map((u) => [u.id, u.displayName]))} onDemoReset={() => { setActiveOpportunity(null); refreshKB(); }} />
         ) : view === 'help' ? (
           <HelpView
             page={helpAt?.page ?? startPage(currentUser.isAdmin)}

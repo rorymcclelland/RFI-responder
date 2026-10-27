@@ -28,7 +28,7 @@ Entries are also learned from responses when their export is recorded ([Running 
 
 ## Governance
 
-**Governance** has four tabs; the fourth, the audit log, is described [below](#the-audit-log).
+**Governance** has four tabs; the fourth, the audit log, is described [below](#the-audit-log). Where a demo is loaded (the hosted demo), a fifth, **Demo**, resets it ([below](#resetting-the-demo)).
 
 ![The governance page: usage and limits](../screenshots/7-governance-usage.png)
 
@@ -62,8 +62,12 @@ Entries not reviewed or confirmed within the review interval. A draft that cites
 
 Archive finished responses rather than deleting them: an archived response is the record of what was sent. Only a response created in error should be deleted. On its card on the overview, choose the bin icon (**Delete a response created in error**), give a reason of at least ten characters, and choose **Delete permanently**. It removes the response, its sessions and questions, and records the deletion and your reason in the audit log. It cannot be undone.
 
+## Resetting the demo
+
+Only where the demo data was loaded, as on the hosted demo. Under **Governance**, **Demo**, type `reset the demo` and choose **Reset the demo**. It removes every response and knowledge-base entry, including anything reviewers added, and loads the demo again, with entry numbers from KB-0001. Everyone's accounts and roles, the limits, real people's usage and the audit log are kept, and the reset itself is recorded in the audit log. The next sign-in indexes the entries again (a few pence). A local install or a real deployment without the demo has no **Demo** tab.
+
 ## The audit log
 
-Exports (and exports recorded again), changes after an export, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices and admin changes are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.
+Exports (and exports recorded again), changes after an export, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices, admin changes, invitations and demo resets are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.
 
 ![The audit log on the governance page](../screenshots/16-audit-log.png)
