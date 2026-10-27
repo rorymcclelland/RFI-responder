@@ -2,7 +2,7 @@
 
 **Your accounts, your keys.** Every step here happens in your own Supabase, Vercel, Resend, Anthropic and Voyage accounts. No key, password or token goes into this file, the chat or the repository. Where a step needs one, it says where you keep it.
 
-Branch `main`, after Sprint 14's security review is merged (it holds `vercel.json`, the hosted build checks, the demo data and `supabase/functions/.env.hosted.example`). About 90 minutes, most of it waiting for DNS and deployments. Do the steps in order: later ones need values from earlier ones.
+Branch `main` (it holds `vercel.json`, the hosted build checks, the demo data, the daily ping and `supabase/functions/.env.hosted.example`). About 90 minutes, most of it waiting for deployments. Do the steps in order: later ones need values from earlier ones.
 
 Two values you will note as you go (they are not secret):
 - **Project ref**: the Supabase project's ID (in its address, `https://<project-ref>.supabase.co`).
@@ -12,7 +12,7 @@ Two values you will note as you go (they are not secret):
 
 - A **Resend** account (or another SMTP provider) with a sending domain you own verified. Resend shows the DNS records to add; verification can take a while, so start it first.
 - **Two new keys for the demo**, one from Anthropic and one from Voyage, each in its own workspace or project with a monthly spend limit. Not the keys you use locally, so the demo's spend is capped on its own and its key can be revoked alone.
-- **Two-factor sign-in** on every account involved: Supabase (and, under the organisation's settings, require it for all members), Vercel, GitHub, Resend, Anthropic and Voyage. Anyone who gets into one of these gets the demo, whatever the app does.
+- **Two-factor sign-in** on every account involved: Supabase (and, under the organisation's settings, require it for all members), Vercel, GitHub, Resend, Anthropic and Voyage (which already has payment details, so its rate limit will not stall processing). Anyone who gets into one of these gets the demo, whatever the app does.
 - Docker Desktop is not needed for these steps.
 
 ## Steps
@@ -21,7 +21,7 @@ Two values you will note as you go (they are not secret):
 
 **Flow**
 
-1. In the Supabase dashboard, choose **New project**: name `rfi-respond-demo`, region **London (eu-west-2)**, plan **Free**.
+1. In the Supabase dashboard, choose **New project** in your Free organisation (with Campaign Studio paused, it has a free slot): name `rfi-respond-demo`, region **London (eu-west-2)**.
 2. Generate a database password and save it in your password manager.
 3. Straight away, before anything is public (security review, M4), under **Authentication**:
    - **Sign In / Providers**: turn **Allow new users to sign up** off. Keep **Email** on, with **Confirm email** on.
@@ -43,7 +43,7 @@ Two values you will note as you go (they are not secret):
 
 **Expected outcome**
 
-- `db push` lists the migrations from `20260430145610` (the prototype's) to `20261102100000` and applies them all without an error.
+- `db push` lists the migrations from `20260430145610` (the prototype's) to `20261102110000` and applies them all without an error.
 - `functions deploy` deploys `embed`, `embed-entries`, `extract-questions` and `process-questions`.
 
 **Result:** ☐ Done. Notes:
@@ -175,9 +175,22 @@ Two values you will note as you go (they are not secret):
 
 **Result:** ☐ Done. Notes:
 
-## When the demo has been idle
+### 11. The daily ping
 
-On the Free plan Supabase pauses a project after a period without use. Before a demo, open the project in the dashboard and choose **Restore project** if it is paused. Wait until it is ready, then load the app once.
+**Flow**
+
+1. In GitHub, open the repository's **Settings**, then **Secrets and variables**, then **Actions**.
+2. Under **Variables**, add `DEMO_SUPABASE_URL` with the Project URL.
+3. Under **Secrets**, add `DEMO_SUPABASE_ANON_KEY` with the anon (publishable) key, the same one you gave Vercel. Never the service-role or secret key.
+4. Open **Actions**, choose **Keep the demo awake**, then **Run workflow**.
+
+**Expected outcome:** the run passes and its log ends "The demo database answered." From then on it runs once a day.
+
+**Result:** ☐ Done. Notes:
+
+## If the demo is paused anyway
+
+The daily ping keeps the project active. If it ever fails (its run turns red) or GitHub stops it (scheduled runs stop in a public repository after 60 days without commits), Supabase may pause the project after a week. Open the project in the dashboard and choose **Restore project**, wait until it is ready, load the app once, and re-enable the workflow under **Actions** if needed.
 
 ## To reset the demo
 

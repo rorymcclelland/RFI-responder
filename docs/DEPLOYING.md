@@ -15,6 +15,7 @@ Until Sprint 14 RFI Respond ran only locally. Sprint 14 sets up an invite-only h
 | Put the API keys in the hosted project's Edge Function secrets, never in the app's environment | Anything in the app's `.env` is built into the browser bundle; the app refuses to start with a service-role key | R-06 |
 | Limit direct database connections to administrators | The access rules assume members reach the database only through the API ([decision 0003](decisions/0003-access-control.md)) | R-09 |
 | Do not load `supabase/seed.sql`; for a demo, load `supabase/demo-hosted.sql` (`npm run demo:hosted`) | The seed creates the fictional users with a shared development password; the hosted demo data has the same responses and knowledge base with fictional authors who cannot sign in | R-15 |
+| On a Free project, keep it awake: the daily `Keep the demo awake` workflow calls `public.keepalive()` | Supabase pauses a Free project after a week without database activity | Availability |
 | Use custom SMTP for invitations | Supabase's built-in email only reaches the project's own team, at 2 messages an hour ([Supabase docs](https://supabase.com/docs/guides/auth/auth-smtp)) | R-08 |
 | Set `APP_ORIGIN` and the authentication site and redirect addresses to the app's address | The Edge Functions accept browser calls only from `APP_ORIGIN`; invitation and reset links return to the site address | R-08 |
 | Review the provider terms and prices on the day ([`docs/governance/PROVIDERS.md`](governance/PROVIDERS.md)) and update `ai_prices` | Terms and prices change | R-11, R-07 |

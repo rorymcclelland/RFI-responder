@@ -110,3 +110,24 @@ describe('S14-2 hosted demo data loads on a hosted-like database', () => {
     expect(kept).toEqual({ n: 2, admin: true });
   });
 });
+
+describe('S14-7 the keep-alive ping', () => {
+  it('1. anyone, signed in or not, can call it, and it returns 1', async () => {
+    for (const u of [null, member, admin]) {
+      expect(await as(u, async (q) => (await q(`SELECT public.keepalive() AS r`)).rows[0].r)).toBe(1);
+    }
+  });
+
+  it('2. it reveals nothing and changes nothing: it takes no arguments and reads no table', async () => {
+    const def = await one<{ src: string; volatile: string; definer: boolean; config: string[] }>(
+      `SELECT prosrc AS src, provolatile AS volatile, prosecdef AS definer, proconfig AS config FROM pg_proc WHERE proname = 'keepalive' AND pronamespace = 'public'::regnamespace`);
+    expect(def.src.trim()).toBe('SELECT 1');
+    expect(def.volatile).toBe('i');
+    expect(def.definer).toBe(false);
+    expect(def.config).toEqual(['search_path=""']);
+  });
+
+  it('3. anonymous callers still reach no table', async () => {
+    await refused(as(null, (q) => q(`SELECT count(*) FROM kb_entries`)));
+  });
+});

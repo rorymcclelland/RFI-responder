@@ -86,6 +86,14 @@ Refined 26 October 2026, after Rory chose at the Sprint 13 review to "make it ho
 4. `PASSWORD_RECOVERY` still opens the set-password page.
 5. By hand (test pack): an expanded question, an open modal and a half-written answer survive switching applications and back, and a token renewal.
 
+### S14-7 A daily ping keeps the demo awake (added 27 October at Rory's request). S
+
+**The job.** On the Free plan Supabase pauses a project after a week without database activity, and an interviewer may open the link at any time. Supabase's page on pausing neither allows nor forbids keep-alive requests; Rory chose to add one.
+
+**What changes.** A migration adds `public.keepalive()`: no arguments, reads no table, returns 1, callable by anyone. A scheduled GitHub workflow calls it once a day through the API with the public anon key, refusing a secret key or a non-Supabase address, and passes quietly until Rory sets the repository variable and secret. The go-live pack gains the step.
+
+**Test cases.** 1. Anyone, signed in or not, can call it and gets 1. 2. It is a plain `SELECT 1`, not a definer function, with an empty search path. 3. Anonymous callers still reach no table. 4. The workflow calls only that endpoint, with no repository permissions, and passes until configured.
+
 ## Not in this sprint
 
 A custom domain (the Vercel address will do). Automatic deployment of the database and functions from CI (it would put the service key in GitHub; Rory deploys them from his PC). Real organisations' data: the hosted demo holds synthetic data only (rule 2).

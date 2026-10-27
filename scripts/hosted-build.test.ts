@@ -72,3 +72,21 @@ describe('Sprint 14 security review (M2)', () => {
     expect(forbiddenIn('createClient("https://abcdefghijklmnopqrst.supabase.co","sb_publishable_x")')).toEqual([]);
   });
 });
+
+describe('S14-7 the keep-alive workflow', () => {
+  const wf = readFileSync(join(ROOT, '.github/workflows/keepalive.yml'), 'utf8');
+  it('runs once a day and on demand, with no repository permissions', () => {
+    expect(wf).toMatch(/schedule:\n\s+- cron: '\d+ \d+ \* \* \*'/);
+    expect(wf).toMatch(/workflow_dispatch:/);
+    expect(wf).toMatch(/^permissions: \{\}$/m);
+  });
+  it('calls only public.keepalive, with the anon key, and refuses a secret key or a non-Supabase address', () => {
+    expect([...wf.matchAll(/\$URL\/rest\/v1\/[\w/]+/g)].map((m) => m[0])).toEqual(['$URL/rest/v1/rpc/keepalive']);
+    expect(wf).toMatch(/sb_secret_\*\) echo "::error::/);
+    expect(wf).toMatch(/\^https:\/\/\[a-z0-9\]\{20\}\\\.supabase\\\.co\$/);
+    expect(wf).not.toMatch(/service_role|SERVICE_ROLE/);
+  });
+  it('passes, saying so, until the owner has set it up', () => {
+    expect(wf).toMatch(/nothing to ping\."\n\s+exit 0/);
+  });
+});

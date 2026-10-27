@@ -1,0 +1,40 @@
+# Sprint 14 (S14-7): keeps the hosted demo's Supabase project awake. Supabase pauses a Free project after a
+# week without database activity; this calls public.keepalive() once a day with the public anon key.
+# Set up by the repository owner: the variable DEMO_SUPABASE_URL (https://<project-ref>.supabase.co) and
+# the secret DEMO_SUPABASE_ANON_KEY (the anon or publishable key; never the service-role or secret key).
+# Until both are set, the job says so and passes. GitHub stops scheduled workflows in a public repository
+# after 60 days without commits; re-enable it under Actions if that happens.
+name: Keep the demo awake
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      URL: ${{ vars.DEMO_SUPABASE_URL }}
+      KEY: ${{ secrets.DEMO_SUPABASE_ANON_KEY }}
+    steps:
+      - name: Call public.keepalive()
+        run: |
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::notice::DEMO_SUPABASE_URL or DEMO_SUPABASE_ANON_KEY is not set; nothing to ping."
+            exit 0
+          fi
+          if ! [[ "$URL" =~ ^https://[a-z0-9]{20}\.supabase\.co$ ]]; then
+            echo "::error::DEMO_SUPABASE_URL must be https://<project-ref>.supabase.co"; exit 1
+          fi
+          case "$KEY" in sb_secret_*) echo "::error::DEMO_SUPABASE_ANON_KEY holds a secret key; use the anon (publishable) key"; exit 1 ;; esac
+          body=$(curl -sS --max-time 60 --retry 3 --retry-delay 20 -X POST "$URL/rest/v1/rpc/keepalive" \
+            -H "apikey: $KEY" -H 'Content-Type: application/json' -d '{}' -w '\n%{http_code}')
+          code=$(echo "$body" | tail -n1)
+          if [ "$code" != "200" ] || [ "$(echo "$body" | head -n1)" != "1" ]; then
+            echo "::error::The ping failed (HTTP $code). If the project is paused, restore it in the Supabase dashboard."; exit 1
+          fi
+          echo "The demo database answered."
