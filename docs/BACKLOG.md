@@ -50,7 +50,7 @@ Refinement: `docs/refinement/sprint-0.md`
 | F-2 Generated database types | Backlog, from Sprint 0 review; now possible on Rory's PC |
 | F-5 Split RFIWorkspace | Sprint 2 (drafting rewrite) |
 | F-6, F-7, F-11 | Sprint 3 (learning loop and readiness workflow); F-11 near-duplicates move there from Sprint 1, since supersession is where they matter |
-| F-3 Invite screen | Backlog (moved out of Sprint 4 at the Sprint 3 review; ranked 10th) |
+| F-3 Invite screen | Done, Sprint 15 (S15-5) |
 | F-8, F-10 | Backlog, ranked for Sprint 6 (publishing) at the Sprint 3 review; publishing moved to Sprint 7 at the Sprint 5 review |
 | F-4 Tailwind 4 | Backlog, low priority |
 
@@ -646,10 +646,10 @@ F-8 (leaked-password protection) needs the Pro plan; on Free it stays a residual
 | F-57, BUG-34, BUG-35 | Done in Sprint 14 |
 | F-8 Leaked-password protection | Residual on the Free plan (R-15); turn it on if the demo moves to Pro |
 | Four medium and nine low findings from the security review, four from the ping's review | Done in Sprint 14 (review) |
-| F-63 A more elegant demo reset | Backlog, asked for by Rory at go-live |
-| F-64 Six policy helpers callable through the API | Backlog, from the go-live advisor check |
-| F-65 `auth.uid()` evaluated per row in nine policies | Backlog, from the go-live advisor check |
-| BUG-36 The knowledge-base search ignores entry numbers | Backlog, found by Rory in the hosted check |
+| F-63 A more elegant demo reset | Done, Sprint 15 (S15-4) |
+| F-64 Six policy helpers callable through the API | Done, Sprint 15 (S15-3) |
+| F-65 `auth.uid()` evaluated per row in nine policies | Done, Sprint 15 (S15-2) |
+| BUG-36 The knowledge-base search ignores entry numbers | Done, Sprint 15 (S15-1) |
 
 **Not yet in a sprint, ranked at the Sprint 14 review.** 1. BUG-36 search by entry number (small; reviewers of the demo will try it). 2. F-63 a reset for admins in the app (the demo now has outside users). 3. F-64 policy helpers out of the API (small, removes advisor warnings). 4. F-65 `(select auth.uid())` in policies (small). 5. F-14 and F-15 reviewed Japanese and near-miss items (need people). 6. F-59 the near miss against Japanese entries. 7. F-20 rerankers. 8. F-34 review during processing. 9. F-60 Japanese keyword matching. 10. F-62 import edge cases. 11. F-2 generated database types. 12. F-3 invite screen. 13. F-4 Tailwind 4.
 
@@ -661,12 +661,34 @@ Refinement: `docs/refinement/sprint-15.md`. Rory added the invite screen (F-3) a
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S15-1 | Search the knowledge base by entry number | BUG-36 | Ready, Sprint 15 |
-| S15-2 | Policies check the signed-in user once per query; the prototype's dead session policy goes | F-65 | Ready, Sprint 15 |
-| S15-3 | The policy helpers are no longer callable through the API | F-64 | Ready, Sprint 15 |
-| S15-4 | Reset the demo from the app (admins, confirmed by a typed phrase, audited) | F-63 | Ready, Sprint 15 |
-| S15-5 | Admins invite people from the app (members only, 20 a day per admin, audited) | F-3 | Ready, Sprint 15 |
-| S15-6 | Update the live demo | | Ready, Sprint 15 |
+| S15-1 | Search the knowledge base by entry number | BUG-36 | Done, Sprint 15 |
+| S15-2 | Policies check the signed-in user once per query; the prototype's dead session policy goes | F-65 | Done, Sprint 15 |
+| S15-3 | The policy helpers are no longer callable through the API | F-64 | Done, Sprint 15 |
+| S15-4 | Reset the demo from the app (admins, confirmed by a typed phrase, audited) | F-63 | Done, Sprint 15 |
+| S15-5 | Admins invite people from the app (members only, 20 a day per admin, audited) | F-3 | Done, Sprint 15 |
+| S15-6 | Update the live demo | | Done, Sprint 15 |
+
+### Sprint 15 review (28 October 2026)
+
+**Checks, with evidence.** 965 unit and 325 database tests on `sprint-15`; lint, type check and `deno check` clean; CI green, including new calls on the local stack (`invite-user` refuses the anon key, a malformed address, a member, an existing account and a fictional `.invalid` address; `rpc/is_admin` is no longer an endpoint). An independent security review found no high issue, two medium and seven low, with five for information; all fixed. Rory updated the live demo (four migrations, the `invite-user` function and the SQL reset that stores the reload script; later the BUG-41 migration) and ran the test pack (`docs/testing/sprint-15-test-pack.md`): cases 1, 2, 4 and 5 passed; case 3 found BUG-41 (every reset from the app failed on Supabase) and an unclear confirmation, both fixed and then passed. Claude checked the live project read-only: 61 migrations, the helpers gone from the API and the advisor, no policy checking the user per row, the reset at 21:06 back to KB-0001 to KB-0132 with KB-0101 the first Japanese entry, and one invitation audited.
+
+**Lesson.** The local test database does not load Supabase's `pg_safeupdate`, so a change with no WHERE clause passes every test and fails live. A test now checks every function for it.
+
+### Where every Sprint 15 review item now lives
+
+| Item | Now |
+|---|---|
+| BUG-36, F-63, F-64, F-65, F-3 | Done in Sprint 15 |
+| BUG-37 The SQL reset renumbered entries | Done in Sprint 15 (found while building) |
+| BUG-41 The reset from the app failed live; the confirmation looked frozen | Done in Sprint 15 (found at the hosted check) |
+| Two medium and seven low security review findings, five for information | Done in Sprint 15 (review) |
+| BUG-38 The knowledge-base modal moves as the search narrows | Backlog, from Rory's hosted check |
+| BUG-39 A response looks empty while its questions load | Backlog, from Rory's hosted check |
+| BUG-40 Adding an entry takes about 10 seconds | Backlog, from Rory's hosted check |
+
+**Not yet in a sprint, ranked at the Sprint 15 review.** 1. BUG-39 a loading state for a response (small; it is the first thing a reviewer sees). 2. BUG-40 confirm a new entry at once, index after (measure first). 3. BUG-38 a steady knowledge-base modal (small). 4. F-14 and F-15 reviewed Japanese and near-miss items (need people). 5. F-59 the near miss against Japanese entries. 6. F-20 rerankers. 7. F-34 review during processing. 8. F-60 Japanese keyword matching. 9. F-62 import edge cases. 10. F-8 leaked-password protection (needs the Pro plan). 11. F-2 generated database types. 12. F-4 Tailwind 4.
+
+**Proposed next.** A short Sprint 16 on how the demo feels to a reviewer: BUG-39, BUG-40 and BUG-38, with the live app updated at the close (front-end only, unless BUG-40's measurement points elsewhere). Alternatively pausing here: the demo is complete, and what remains needs people (F-14, F-15) or a paid plan (F-8).
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -674,13 +696,13 @@ Refinement: `docs/refinement/sprint-15.md`. Rory added the invite screen (F-3) a
 |---|---|---|---|
 | C-1 | Done, Sprint 12. Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later Refined as Sprint 12 (26 October 2026) |
 
-## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 from Sprint 11, F-58 to F-61 from Sprint 12, F-62 from Sprint 13, F-63 to F-65 from Sprint 14; ranked at each review; see "Where every review item now lives")
+## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 from Sprint 11, F-58 to F-61 from Sprint 12, F-62 from Sprint 13, F-63 to F-65 from Sprint 14; none new from Sprint 15; ranked at each review; see "Where every review item now lives")
 
 | ID | Item | Why |
 |---|---|---|
 | F-1 | End-to-end browser test of the main path (sign in, upload, review, assign, export) | Done at the Sprint 0 review, on Rory's PC |
 | F-2 | Generate database types (`npm run types`) and use them in the app | Needs the local Supabase stack |
-| F-3 | In-app "invite user" screen, via a server-side function with the service key | Invites go through the Supabase dashboard for now |
+| F-3 | Done, Sprint 15 (S15-5). In-app "invite user" screen, via a server-side function with the service key | Invites go through the Supabase dashboard for now |
 | F-4 | Move to Tailwind 4 | Clears the remaining dev-only audit findings (decision 0002) |
 | F-5 | Split `RFIWorkspace.tsx` (870 lines) | Done, Sprint 2. Planned with Sprint 2's drafting rewrite |
 | F-6 | Validate `kb_entries.origin_ref` server-side | Done, Sprint 3. Free text until Sprint 3's learning at export sets it |
@@ -741,10 +763,15 @@ Refinement: `docs/refinement/sprint-15.md`. Rory added the invite screen (F-3) a
 | F-61 | Done, Sprint 13 (S13-2). The knowledge-base import treats the same question as a duplicate whatever its language, while the database allows one current entry per question in each language | From the Sprint 12 security review (info). Compare the question and its language |
 | F-62 | The import trims only spaces from a question, so a tab or line break at either end gives a different key (only through a direct database call; the app trims cells); two imports at the same moment can collide on the unique index and roll back | From the Sprint 13 security review (info); both predate Sprint 13. Trim all whitespace; retry or lock on conflict |
 | BUG-34 | Done, Sprint 14 (S14-6). Switching to another application and back collapses an expanded question, closes modals and resets other state: the session check on refocus is treated as a new sign-in, which shows the full-page loading screen | Reported by Rory, 26 October 2026; added to Sprint 14 (S14-6) |
-| F-63 | Resetting the hosted demo means pasting `supabase/demo-hosted-reset.sql` into the Supabase SQL Editor; Rory would like a more elegant way | Asked for by Rory at go-live, 27 October 2026. Options to weigh: a **Reset demo** button for admins on the governance page (a definer function, audited, confirmed by retyping a phrase); a manually run GitHub workflow; or a nightly automatic reset. Keep: real accounts, roles, limits and the audit log untouched, and the next sign-in re-indexing the entries |
-| F-64 | Six `SECURITY DEFINER` helpers used by access policies (`is_admin`, `is_response_owner`, `can_decide_question`, `response_of_session`, `current_operation`, `entry_review_due`) are callable through the API by any signed-in user; Supabase's advisor flags them. They reveal little (the caller's own rights), but need not be exposed | From the Sprint 14 go-live advisor check. Move them to the `private` schema, or revoke API execute where policies do not need it |
-| F-65 | Nine access policies call `auth.uid()` once per row rather than once per query; Supabase's performance advisor flags them | From the Sprint 14 go-live advisor check. Wrap as `(select auth.uid())`; no effect at demo scale |
-| BUG-36 | The knowledge-base search does not look at an entry's number, so searching for `KB-0101` finds nothing; it searches questions, answers and tags only. The Sprint 12 and 14 test packs wrongly told Rory to search by number | Found by Rory at the Sprint 14 hosted check, 27 October 2026. Match the number too (with or without the `KB-` prefix and leading zeros) |
+| F-63 | Done, Sprint 15 (S15-4). Resetting the hosted demo means pasting `supabase/demo-hosted-reset.sql` into the Supabase SQL Editor; Rory would like a more elegant way | Asked for by Rory at go-live, 27 October 2026. Options to weigh: a **Reset demo** button for admins on the governance page (a definer function, audited, confirmed by retyping a phrase); a manually run GitHub workflow; or a nightly automatic reset. Keep: real accounts, roles, limits and the audit log untouched, and the next sign-in re-indexing the entries |
+| F-64 | Done, Sprint 15 (S15-3). Six `SECURITY DEFINER` helpers used by access policies (`is_admin`, `is_response_owner`, `can_decide_question`, `response_of_session`, `current_operation`, `entry_review_due`) are callable through the API by any signed-in user; Supabase's advisor flags them. They reveal little (the caller's own rights), but need not be exposed | From the Sprint 14 go-live advisor check. Move them to the `private` schema, or revoke API execute where policies do not need it |
+| F-65 | Done, Sprint 15 (S15-2). Nine access policies call `auth.uid()` once per row rather than once per query; Supabase's performance advisor flags them | From the Sprint 14 go-live advisor check. Wrap as `(select auth.uid())`; no effect at demo scale |
+| BUG-36 | Done, Sprint 15 (S15-1). The knowledge-base search does not look at an entry's number, so searching for `KB-0101` finds nothing; it searches questions, answers and tags only. The Sprint 12 and 14 test packs wrongly told Rory to search by number | Found by Rory at the Sprint 14 hosted check, 27 October 2026. Match the number too (with or without the `KB-` prefix and leading zeros) |
+| BUG-37 | Done, Sprint 15 (S15-4). The Sprint 14 SQL reset emptied `kb_entries` without restarting its numbering, so after a reset the demo's entries would have been KB-0135 onwards while the demo responses cite KB-0001 to KB-0132 | Found while building S15-4; the live demo had never been reset. Both resets restart the numbering; tested |
+| BUG-38 | In the knowledge-base modal, the box shrinks and moves to stay centred as the search narrows the list, which is distracting | Reported by Rory at the Sprint 15 hosted check, 28 October 2026. Keep the modal's top (and search box) fixed and let its height change downwards, or give it a fixed height |
+| BUG-39 | Opening a response shows it as empty for a moment while its questions load, which looks like a response with no questions and would be confusing on a slow connection | Reported by Rory at the Sprint 15 hosted check. Show a loading state until the questions have loaded (the count is already on the response's card), and an error if they cannot be read |
+| BUG-40 | Adding a knowledge-base entry took about 10 seconds to confirm | Reported by Rory at the Sprint 15 hosted check. Likely cause, from the code: the form waits for the new entry to be indexed (`indexNewEntries`, an Edge Function that may start cold, then Voyage) before saying it was added. Measure first; then confirm the save at once and index afterwards, as imports do |
+| BUG-41 | Done, Sprint 15. Every reset from the live app failed with "UPDATE requires a WHERE clause" (Supabase's `pg_safeupdate`), and the partly typed confirmation looked frozen | Found at the Sprint 15 hosted check; fixed in `20261103140000` with a test that no function has an UPDATE or DELETE without a WHERE clause, and a hint under the box |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 

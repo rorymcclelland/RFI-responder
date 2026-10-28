@@ -151,5 +151,9 @@ Rory updated the live demo and ran the test pack. Cases 1, 2, 4 and 5 passed. Ca
 - **BUG-41: every reset from the app failed on the live project** with "UPDATE requires a WHERE clause". Supabase's API runs each request with `pg_safeupdate`, which refuses an UPDATE or DELETE with no WHERE clause, even inside a function; the local test database does not load it, so every test passed. The step recording the reset date had none, so the whole reset rolled back and nothing changed. Fixed in `20261103140000_reset_demo_where.sql`, and a database test now fails if any function has an UPDATE or DELETE without a WHERE clause.
 - **The confirmation looked frozen.** With only part of the phrase typed, the button stayed unavailable with no explanation. A line under the box now says what is missing, the label asks for the whole phrase, and an unavailable button looks unavailable.
 
-Rory also raised three points for the backlog: the knowledge-base modal changes size and moves as the search narrows (BUG-38); a response looks empty while its questions load (BUG-39); and saving a knowledge-base entry took about 10 seconds (BUG-40).
+Rory then reset the demo from the app (21:06, back to 132 entries and four responses; Claude checked it live). Rory also raised three points for the backlog: the knowledge-base modal changes size and moves as the search narrows (BUG-38); a response looks empty while its questions load (BUG-39); and saving a knowledge-base entry took about 10 seconds (BUG-40).
+
+## Review and close (28 October 2026)
+
+All six stories done, with F-3 added at refinement. Security review: no high, two medium, seven low, five for information, all fixed. Hosted check: all five cases passed once BUG-41 was fixed. New backlog rows: BUG-38, BUG-39 and BUG-40; BUG-37 and BUG-41 found and fixed in the sprint. Test counts at the close: 965 unit, 325 database.
 
