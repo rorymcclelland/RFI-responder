@@ -48,7 +48,7 @@ async function signIn(browser: Browser, email: string): Promise<Page> {
   await page.locator('input[type=email]').fill(email);
   await page.locator('input[type=password]').fill(PASSWORD);
   await page.locator('input[type=password]').press('Enter');
-  await page.getByRole('button', { name: 'Opportunities' }).waitFor();
+  await page.getByRole('button', { name: 'Responses', exact: true }).first().waitFor();
   await page.waitForLoadState('networkidle');
   await dismissIntroduction(page);
   return page;
@@ -78,9 +78,9 @@ async function nav(page: Page, name: string) {
 }
 
 async function openResponse(page: Page, name: string) {
-  await nav(page, 'Opportunities');
-  const card = page.locator('div', { has: page.getByText(name, { exact: true }) }).filter({ has: page.getByText('Open workspace') }).last();
-  await card.getByText('Open workspace').click();
+  await nav(page, 'Responses');
+  // Sprint 17 (U-1): the card's link reads "Open"; the whole card opens the response.
+  await page.getByText(name, { exact: true }).first().click();
   await page.waitForLoadState('networkidle');
 }
 
@@ -150,10 +150,18 @@ async function main() {
   await page.evaluate(() => window.scrollTo({ top: 0 }));
   await shoot(page, '16-audit-log.png', 'audit log');
 
+  // Sprint 17 (K-1): the knowledge base is a page of its own. The overview, then all answers with one chosen.
+  await nav(page, 'Knowledge');
+  await page.getByText('What we know', { exact: true }).waitFor();
+  await shoot(page, '17-knowledge.png', 'knowledge overview');
+  await page.getByRole('button', { name: 'Browse all answers' }).click();
+  await page.getByRole('region', { name: 'Answers' }).getByRole('button').first().click();
+  await page.getByRole('complementary', { name: 'Selected answer' }).waitFor();
+  await shoot(page, '18-knowledge-browse.png', 'knowledge browse');
+
   // Importing into the knowledge base: the synthetic Q&A file, at the column mapping.
-  await page.locator('header button', { hasText: 'KB' }).first().click();
-  await page.getByRole('button', { name: 'Import Q&A' }).click();
-  await page.locator('input[type=file]').setInputFiles(join(process.cwd(), 'sample-data/security-qa.csv'));
+  await page.getByRole('button', { name: 'Import a spreadsheet' }).click();
+  await page.locator('.fixed.inset-0 input[type=file]').setInputFiles(join(process.cwd(), 'sample-data/security-qa.csv'));
   await page.getByText('Preview Import').waitFor();
   await shoot(page, '12-kb-import.png', 'knowledge-base import');
   await page.keyboard.press('Escape');

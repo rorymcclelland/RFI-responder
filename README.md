@@ -95,7 +95,7 @@ npx supabase functions serve         # the Edge Functions, in a second window
 npm run dev                          # http://127.0.0.1:5173
 ```
 
-Sign in as any seeded user (for example `sarah.chen@example.com`, the admin, or `priya.sharma@example.com`, who owns a response in review) with the local development password in `supabase/seed.sql`. The seed loads 100 synthetic knowledge-base entries, then 30 of them again in Japanese (machine translations, waiting for an admin's review), and four fictional responses, one at each stage.
+Sign in as any seeded user (for example `sarah.chen@example.com`, the admin, or `priya.sharma@example.com`, who owns a response in progress) with the local development password in `supabase/seed.sql`. The seed loads 100 synthetic knowledge-base entries, then 30 of them again in Japanese (machine translations, waiting for an admin's review), and four fictional responses, one at each stage.
 
 ## Scripts
 

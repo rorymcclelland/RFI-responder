@@ -18,8 +18,8 @@ describe('the introduction (S10-6)', () => {
   it('shows members the common and response steps, and admins the admin step as well', () => {
     const member = stepsFor(false).map((s) => s.id);
     const admin = stepsFor(true).map((s) => s.id);
-    expect(member).toEqual(['purpose', 'overview', 'upload', 'drafts', 'review', 'assign', 'export', 'help']);
-    expect(admin).toEqual(['purpose', 'overview', 'upload', 'drafts', 'review', 'assign', 'export', 'admin', 'help']);
+    expect(member).toEqual(['purpose', 'overview', 'upload', 'drafts', 'review', 'assign', 'export', 'knowledge', 'help']);
+    expect(admin).toEqual(['purpose', 'overview', 'upload', 'drafts', 'review', 'assign', 'export', 'knowledge', 'admin', 'help']);
   });
 
   it('is shown until it has been finished or skipped once', () => {
