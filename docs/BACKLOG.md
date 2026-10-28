@@ -690,6 +690,18 @@ Refinement: `docs/refinement/sprint-15.md`. Rory added the invite screen (F-3) a
 
 **Proposed next.** A short Sprint 16 on how the demo feels to a reviewer: BUG-39, BUG-40 and BUG-38, with the live app updated at the close (front-end only, unless BUG-40's measurement points elsewhere). Alternatively pausing here: the demo is complete, and what remains needs people (F-14, F-15) or a paid plan (F-8).
 
+## Sprint 16: the last rough edges, and a UX spike (asked for by Rory 28 October 2026, refined and answered the same day)
+
+Refinement: `docs/refinement/sprint-16.md`. Any redesign the spike recommends is refined and built from Sprint 17.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S16-1 | A response shows that it is loading, never an empty response | BUG-39 | Ready, Sprint 16 |
+| S16-2 | Adding an entry is confirmed at once; vectors saved in batches | BUG-40 | Ready, Sprint 16 |
+| S16-3 | The knowledge-base modal stays still while you search | BUG-38 | Ready, Sprint 16 |
+| S16-4 | Spike (two days): organising the app around jobs, not entities; report and clickable mockups | Rory, 28 October | Ready, Sprint 16 |
+| S16-5 | Independent review and the hosted check | | Ready, Sprint 16 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
