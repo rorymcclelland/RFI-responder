@@ -44,6 +44,8 @@ export default function BulkBar({ canApprove, eligible, held, showFinish, finish
               <Download size={14} /> Record export <ArrowRight size={13} />
             </button>
           )}
+          {/* Sprint 17 (S17-2): the reason is shown, not only on hover. */}
+          {showFinish && finishBlockedBy && <p className="text-xs text-ink-500 font-medium mt-1 text-right">{finishBlockedBy}</p>}
         </div>
       </div>
       {held > 0 && (

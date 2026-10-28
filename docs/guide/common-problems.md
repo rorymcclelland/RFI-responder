@@ -61,9 +61,9 @@ Some knowledge-base entries could not be indexed. They are indexed before questi
 
 The message after it says why each group was held: below the threshold, pricing, legal or translated, citing an unreviewed or overdue entry, partly answered, or not calibrated. Those must be approved one at a time. See [Approving in bulk](running-a-response.md#approving-in-bulk).
 
-### The bulk buttons are greyed out, or there is no Approve
+### There is no bulk bar, or no Approve
 
-Only the response's owner or an admin can approve in bulk; others see the bar with its buttons greyed out (hover for why), and **Record export** is shown only to the owner and admins. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
+Only the response's owner or an admin can approve in bulk; others see a line saying so instead of the bar, and **Record export** is shown only to the owner and admins. The bulk buttons are greyed out for them only when no question to do could be approved in bulk. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
 
 ### I cannot approve a question with no draft
 
@@ -71,7 +71,7 @@ Write its answer first; a placeholder is not an answer.
 
 ### Record export is not available
 
-Every question must be approved or left unanswered first; hover over the button to see how many are still to do.
+Every question must be approved or left unanswered first; the line under the button says how many are still to do.
 
 ### I cannot archive a response as Won or Lost
 

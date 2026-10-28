@@ -85,7 +85,7 @@ The question appears in their **Assignments** inbox ([Answering assigned questio
 
 ## 5. Record the export
 
-When every question is approved or left unanswered, choose **Record export** on the bulk bar. Until then it is greyed out; hover over it to see how many are still to do. Recording the export:
+When every question is approved or left unanswered, choose **Record export** on the bulk bar. Until then it is greyed out, and the line under it says how many are still to do. Recording the export:
 
 - marks the response as exported;
 - closes its open assignments;
@@ -115,7 +115,7 @@ Recording the export turns edited and person-written answers into knowledge-base
 
 ## 6. Finish
 
-Choose **Add a file** (or **Add another file** after the export) to add another file to the same response; earlier files stay under **Files in this response** (the ten most recent are listed), where **Resume** or **View** reopens them. The response opens on the most recent file.
+Choose **Add a file** (or **Add another file** after the export) to add another file to the same response (only the owner or an admin can; anyone else sees **Other files** when there are several); earlier files stay under **Files in this response** (the ten most recent are listed), where **Resume** or **View** reopens them. The response opens on the most recent file.
 
 When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the export recorded first, and recorded again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 

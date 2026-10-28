@@ -618,6 +618,7 @@ export default function App() {
               currentUser={currentUser}
               allUsers={allUsers}
               canAssign={currentUser.isAdmin || activeOpportunity.ownerId === currentUser.id}
+              ownerName={allUsers.find((u) => u.id === activeOpportunity.ownerId)?.displayName ?? null}
             />
           </>
         ) : view === 'inbox' ? (

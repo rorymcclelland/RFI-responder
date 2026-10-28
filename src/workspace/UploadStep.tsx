@@ -50,7 +50,9 @@ function SessionList({ title, note, sessions, onLoad, onRefresh }: {
   );
 }
 
-export default function UploadStep({ opportunityName, error, pastSessions, onFile, onLoadSession, onRefresh }: {
+export default function UploadStep({ opportunityName, error, pastSessions, onFile, onLoadSession, onRefresh, uploadNote = null }: {
+  /** Sprint 17 (S17-2): set when this person cannot add a file: the drop zone is replaced by this line. */
+  uploadNote?: string | null;
   opportunityName: string;
   error: string;
   pastSessions: RFISession[];
@@ -76,13 +78,17 @@ export default function UploadStep({ opportunityName, error, pastSessions, onFil
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       <div>
-        <h2 className="text-3xl font-black text-ink-900 tracking-tight">Add the questions</h2>
-        <p className="text-ink-500 mt-2 text-sm font-medium max-w-lg">
-          Upload questions for <strong className="text-ink-700">{opportunityName}</strong>. Each question is matched against the knowledge base,
-          checked for pricing and legal terms, and drafted from the matching entries for you to review.
-        </p>
+        <h2 className="text-3xl font-black text-ink-900 tracking-tight">{uploadNote === null ? 'Add the questions' : pastSessions.length > 0 ? 'Files in this response' : 'No questions yet'}</h2>
+        {uploadNote === null && (
+          <p className="text-ink-500 mt-2 text-sm font-medium max-w-lg">
+            Upload questions for <strong className="text-ink-700">{opportunityName}</strong>. Each question is matched against the knowledge base,
+            checked for pricing and legal terms, and drafted from the matching entries for you to review.
+          </p>
+        )}
       </div>
 
+      {uploadNote === null ? (
+        <>
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -125,6 +131,11 @@ export default function UploadStep({ opportunityName, error, pastSessions, onFil
           </div>
         ))}
       </div>
+
+        </>
+      ) : (
+        <p role="status" className="text-sm text-ink-600 font-medium bg-white border border-ink-100 rounded-2xl px-5 py-4 shadow-card">{uploadNote}</p>
+      )}
 
       {/* Sprint 17 (S17-1): files not linked to any response are no longer listed in every response. */}
       {pastSessions.length > 0 && (

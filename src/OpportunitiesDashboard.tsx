@@ -5,6 +5,7 @@ import {
 import { supabase } from './lib/supabase';
 import { archiveResponse, createResponse, deleteResponse, loadOverview, updateResponse } from './lib/responses';
 import type { Opportunity, ResponseOutcome, ResponseStage } from './types';
+import { filterOverview, type OverviewFlag } from './lib/overviewFilter';
 
 // ─── Avatar helpers ────────────────────────────────────────────────────────────
 
@@ -180,6 +181,9 @@ function ArchiveModal({ opp, onClose, onDone }: { opp: Opportunity; onClose: () 
             );
           })}
         </div>
+        {/* Sprint 17 (S17-2): the reason is shown, not only on hover. */}
+        {!opp.exportedAt && <p className="text-xs text-ink-500 font-medium">Won and Lost need the export recorded first; a response never sent can only be withdrawn.</p>}
+        {opp.exportedAt && opp.stage === 'changed' && <p className="text-xs text-ink-500 font-medium">An answer changed after the export was recorded: record the export again before archiving it as won or lost.</p>}
         {error && <p role="alert" className="text-xs text-coral-600 font-medium">{error}</p>}
       </div>
       <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink-100 rounded-b-3xl bg-ink-50">
@@ -311,13 +315,13 @@ function ResponseCard({ opp, canEdit, canDelete, onOpen, onChanged, onArchive, o
           <div className="ml-auto flex items-center gap-1">
             {editable && (
               <button aria-label="Archive" title="Archive with outcome" onClick={onArchive}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 w-7 h-7 flex items-center justify-center text-ink-300 hover:text-ink-700 hover:bg-ink-50 rounded-lg transition-all">
+                className="w-7 h-7 flex items-center justify-center text-ink-400 hover:text-ink-700 hover:bg-ink-50 rounded-lg transition-all">
                 <Archive size={13} />
               </button>
             )}
             {canDelete && (
               <button aria-label="Delete" title="Delete a response created in error" onClick={onDelete}
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 w-7 h-7 flex items-center justify-center text-ink-300 hover:text-coral-500 hover:bg-coral-50 rounded-lg transition-all">
+                className="w-7 h-7 flex items-center justify-center text-ink-400 hover:text-coral-500 hover:bg-coral-50 rounded-lg transition-all">
                 <Trash2 size={13} />
               </button>
             )}
@@ -352,6 +356,8 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<Tab>('active');
   const [stage, setStage] = useState<ResponseStage | 'all'>('all');
+  // Sprint 17 (S17-2): the At risk and Overdue tiles filter too.
+  const [flag, setFlag] = useState<OverviewFlag>(null);
   const [mine, setMine] = useState(false);
   const [creating, setCreating] = useState(false);
   const [archiving, setArchiving] = useState<Opportunity | null>(null);
@@ -369,16 +375,13 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
   };
   useEffect(() => { reload(); }, []);
 
-  const inTab = responses.filter((r) => (tab === 'archived' ? r.archivedAt !== null : r.archivedAt === null));
-  const visible = inTab.filter((r) =>
-    (stage === 'all' || r.stage === stage) && (!mine || r.ownerId === currentUserId)
-    && (!search || r.name.toLowerCase().includes(search.toLowerCase())));
+  const visible = filterOverview(responses, { tab, stage, flag, mine, search, me: currentUserId });
   const active = responses.filter((r) => r.archivedAt === null);
   const tiles = [
-    { label: 'In progress', value: active.filter((r) => r.stage === 'in_review').length, onClick: () => { setTab('active'); setStage('in_review'); } },
-    { label: 'Ready to send', value: active.filter((r) => r.stage === 'ready').length, onClick: () => { setTab('active'); setStage('ready'); } },
-    { label: 'At risk', value: active.filter((r) => r.atRisk).length, warn: true },
-    { label: 'Overdue', value: active.filter((r) => r.overdue).length, warn: true },
+    { label: 'In progress', value: active.filter((r) => r.stage === 'in_review').length, on: stage === 'in_review' && !flag, onClick: () => { setTab('active'); setFlag(null); setStage(stage === 'in_review' && !flag ? 'all' : 'in_review'); } },
+    { label: 'Ready to send', value: active.filter((r) => r.stage === 'ready').length, on: stage === 'ready' && !flag, onClick: () => { setTab('active'); setFlag(null); setStage(stage === 'ready' && !flag ? 'all' : 'ready'); } },
+    { label: 'At risk', value: active.filter((r) => r.atRisk).length, warn: true, on: flag === 'at_risk', onClick: () => { setTab('active'); setStage('all'); setFlag(flag === 'at_risk' ? null : 'at_risk'); } },
+    { label: 'Overdue', value: active.filter((r) => r.overdue).length, warn: true, on: flag === 'overdue', onClick: () => { setTab('active'); setStage('all'); setFlag(flag === 'overdue' ? null : 'overdue'); } },
   ];
 
   return (
@@ -408,8 +411,8 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {tiles.map((t) => (
-            <button key={t.label} onClick={t.onClick} disabled={!t.onClick}
-              className="p-5 rounded-2xl border text-left bg-white border-ink-100 shadow-card enabled:hover:shadow-card-hover transition-all disabled:cursor-default">
+            <button key={t.label} onClick={t.onClick} aria-pressed={t.on}
+              className={`p-5 rounded-2xl border text-left bg-white shadow-card hover:shadow-card-hover transition-all ${t.on ? 'border-ink-900 ring-1 ring-ink-900' : 'border-ink-100'}`}>
               <div className="text-xs font-bold mb-2 uppercase tracking-wide text-ink-400">{t.label}</div>
               <p className={`text-3xl font-black leading-none ${t.warn && t.value > 0 ? 'text-coral-600' : 'text-ink-900'}`}>{t.value}</p>
             </button>

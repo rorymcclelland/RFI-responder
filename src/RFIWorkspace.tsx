@@ -15,6 +15,7 @@ import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
 import { firstView, loadResponseSessions } from './workspace/openResponse';
 import { CONF_GROUPS, inGroup, type ConfidenceGroup } from './workspace/confidenceBands';
+import { exportReason, workspaceControls } from './workspace/controls';
 import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
 import { describeLearning, recordExport } from './lib/responses';
@@ -39,6 +40,8 @@ interface Props {
   allUsers: UserProfile[];
   /** Owner or admin: may assign this response's questions and approve them in bulk (decision 0003). */
   canAssign: boolean;
+  /** The owner's name, for the lines that say who can do what (S17-2). */
+  ownerName?: string | null;
 }
 
 // Sprint 16 (S16-1): 'loading' until the response's sessions are read; 'load_error' if they cannot be.
@@ -49,7 +52,9 @@ const FILTER_LABEL: Record<FilterTab, string> = { all: 'All', pending: 'To do', 
 
 
 
-export default function RFIWorkspace({ opportunityId, archived, opportunityName, currentUser, allUsers, canAssign }: Props) {
+export default function RFIWorkspace({ opportunityId, archived, opportunityName, ownerName = null, currentUser, allUsers, canAssign }: Props) {
+  // Sprint 17 (S17-2): what this person is offered, and why when it is less.
+  const controls = workspaceControls({ canManage: canAssign, archived, ownerName });
   const [step, setStep]                   = useState<WorkflowStep>('loading');
   const [loadError, setLoadError]         = useState('');
   // The latest load; an older one that finishes late is ignored.
@@ -366,6 +371,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       onFile={processFile}
       onLoadSession={openSession}
       onRefresh={() => loadPastSessions()}
+      uploadNote={controls.upload ? null : controls.uploadNote}
     />
   );
 
@@ -425,9 +431,13 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           <BarChart3 size={16} className="text-ink-400 flex-shrink-0" />
           <p className="text-sm font-bold text-ink-700 truncate max-w-xs">{fileName}</p>
           {/* F-23: start another upload for this response without finishing this one. */}
-          {!archived && (
+          {controls.upload ? (
             <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
               <Upload size={12} /> Add a file
+            </button>
+          ) : pastSessions.length > 1 && (
+            <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
+              <Upload size={12} /> Other files
             </button>
           )}
         </div>
@@ -451,13 +461,16 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         </div>
       )}
 
-      {!archived && (
+      {!archived && !controls.bulk && controls.bulkNote && (
+        <p className="text-xs text-ink-500 font-medium px-1">{controls.bulkNote}</p>
+      )}
+      {!archived && controls.bulk && (
         <BulkBar
           canApprove={canAssign}
           eligible={questions.filter(bulkEligible).length}
           held={pending.filter((q) => !bulkEligible(q)).length}
           showFinish={step === 'review' && canAssign}
-          finishBlockedBy={allDone ? null : `${pendingCount} question${pendingCount !== 1 ? 's are' : ' is'} still to do: approve ${pendingCount !== 1 ? 'each' : 'it'} or leave ${pendingCount !== 1 ? 'them' : 'it'} unanswered first`}
+          finishBlockedBy={exportReason(allDone ? 0 : pendingCount)}
           onBulk={runBulkAccept}
           onFinish={finishSession}
         />
