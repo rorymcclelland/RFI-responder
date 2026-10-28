@@ -65,3 +65,37 @@ describe('entryMatches', async () => {
     expect(entryMatches(kb0101, 'x'.repeat(100_000))).toBe(false);
   });
 });
+
+// Sprint 16, S16-2 (BUG-40): adding an entry is confirmed at once; indexing runs afterwards.
+describe('confirmThenIndex', async () => {
+  const { confirmThenIndex } = await import('./knowledgeBase');
+
+  it('1. confirms before indexing finishes', async () => {
+    let finish: (v: { ok: true; embedded: number }) => void = () => undefined;
+    const index = vi.fn(() => new Promise<{ ok: true; embedded: number }>((r) => { finish = r; }));
+    const later = vi.fn();
+    const message = confirmThenIndex({ ref: 'KB-0133', reviewed: true }, index, later);
+    expect(message).toBe('KB-0133 added.');
+    expect(index).toHaveBeenCalledTimes(1);
+    expect(later).not.toHaveBeenCalled();
+    finish({ ok: true, embedded: 1 });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(later).not.toHaveBeenCalled();
+  });
+
+  it('says when a member\'s entry waits for review', () => {
+    expect(confirmThenIndex({ ref: 'KB-0134', reviewed: false }, async () => ({ ok: true, embedded: 1 }), () => undefined))
+      .toBe('KB-0134 added. An admin will review it; until then, drafts that cite it are not bulk-approved.');
+  });
+
+  it('2. an indexing failure afterwards is reported separately; the entry stays saved', async () => {
+    const later = vi.fn();
+    confirmThenIndex({ ref: 'KB-0135', reviewed: true }, async () => ({ ok: false, reason: 'Daily limit reached' }), later);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(later).toHaveBeenCalledWith('KB-0135 is saved but could not be indexed yet (Daily limit reached), so it is indexed before the next questions are matched, if your daily limit allows.');
+    const thrown = vi.fn();
+    confirmThenIndex({ ref: 'KB-0136', reviewed: true }, async () => { throw new Error('offline'); }, thrown);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(thrown).toHaveBeenCalledWith(expect.stringMatching(/KB-0136 is saved but could not be indexed yet \(offline\)/));
+  });
+});

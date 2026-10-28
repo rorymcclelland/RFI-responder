@@ -83,6 +83,19 @@ export function describeImport(r: ImportResult): string {
  * (S1-3). Never throws: an import still counts if indexing fails, and the entries
  * are picked up by the next call.
  */
+type IndexResult = { ok: true; embedded: number } | { ok: false; reason: string };
+
+/**
+ * Sprint 16 (S16-2, BUG-40): the message for a saved entry, returned at once, while indexing runs in
+ * the background. After a demo reset indexing covers the whole knowledge base and can take seconds;
+ * the save does not wait for it. If indexing fails, `onIndexFailed` gets the message to show.
+ */
+export function confirmThenIndex(saved: { ref: string; reviewed: boolean }, index: () => Promise<IndexResult>, onIndexFailed: (message: string) => void): string {
+  const failed = (reason: string) => onIndexFailed(`${saved.ref} is saved but could not be indexed yet (${reason}), so it is indexed before the next questions are matched, if your daily limit allows.`);
+  index().then((r) => { if (!r.ok) failed(r.reason); }, (err: unknown) => failed(err instanceof Error ? err.message : 'no response'));
+  return `${saved.ref} added.${saved.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}`;
+}
+
 export async function indexNewEntries(): Promise<{ ok: true; embedded: number } | { ok: false; reason: string }> {
   const { data, error } = await supabase.functions.invoke('embed-entries', { body: {} });
   if (error || !data) return { ok: false, reason: (await functionErrorMessage(error)).message };

@@ -5,7 +5,7 @@ import {
   Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
 import { authEventAction, type AuthState } from './lib/authEvents';
-import { loadKnowledgeBase, importEntries, describeImport, entryMatches, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
+import { loadKnowledgeBase, importEntries, describeImport, entryMatches, confirmThenIndex, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
 import { KnowledgeEntry, Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
 import RFIWorkspace from './RFIWorkspace';
@@ -70,7 +70,7 @@ function KBEntry({ entry }: { entry: KnowledgeEntry }) {
   );
 }
 
-function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void; onCancel: () => void }) {
+function AddEntryForm({ onDone, onCancel, onIndexFailed }: { onDone: (message: string) => void; onCancel: () => void; onIndexFailed: (message: string) => void }) {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [tags, setTags] = useState('');
@@ -82,8 +82,8 @@ function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void;
     setSaving(true);
     try {
       const r = await addEntry(supabase, { question, answer, tags: parseTags(tags), source });
-      const indexed = await indexNewEntries();
-      onDone(`${r.ref} added.${r.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}${indexed.ok ? '' : ` It could not be indexed yet (${indexed.reason}), so it is indexed before the next questions are matched, if your daily limit allows.`}`);
+      // Sprint 16 (S16-2, BUG-40): the save is confirmed at once; indexing runs afterwards.
+      onDone(confirmThenIndex(r, indexNewEntries, onIndexFailed));
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -108,7 +108,7 @@ function AddEntryForm({ onDone, onCancel }: { onDone: (message: string) => void;
   );
 }
 
-function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: KnowledgeEntry[]; onClose: () => void; onBulkUpload: () => void; onAdded: (message: string) => void }) {
+function KBModal({ entries, onClose, onBulkUpload, onAdded, onIndexFailed }: { entries: KnowledgeEntry[]; onClose: () => void; onBulkUpload: () => void; onAdded: (message: string) => void; onIndexFailed: (message: string) => void }) {
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState(false);
   const filtered = entries.filter((e) => entryMatches(e, search));
@@ -155,7 +155,7 @@ function KBModal({ entries, onClose, onBulkUpload, onAdded }: { entries: Knowled
           </div>
         </div>
         <div className="overflow-y-auto flex-1 p-6 space-y-2.5">
-          {adding && <AddEntryForm onCancel={() => setAdding(false)} onDone={(m) => { setAdding(false); onAdded(m); }} />}
+          {adding && <AddEntryForm onCancel={() => setAdding(false)} onIndexFailed={onIndexFailed} onDone={(m) => { setAdding(false); onAdded(m); }} />}
           {filtered.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-sm text-ink-400">No entries match your search.</p>
@@ -390,6 +390,7 @@ export default function App() {
           onClose={() => setShowKBModal(false)}
           onBulkUpload={() => { setShowKBModal(false); setShowBulkUpload(true); }}
           onAdded={(m) => { showToast(m); refreshKB(); }}
+          onIndexFailed={(m) => showToast(m, 'error')}
         />
       )}
       {showBulkUpload && (
