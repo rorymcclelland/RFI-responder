@@ -3,7 +3,7 @@
  * what the organisation knows, and a full-screen browse with filters and the selected answer beside the
  * list. Reviewing stays under Governance until each answer has its own page (K-2); admins get a link.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Plus, Search, Upload } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import LanguageLabel from './LanguageLabel';
@@ -37,14 +37,19 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
   const [selected, setSelected] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
+  // Only the newest load may set the page, so an older one arriving last cannot overwrite it
+  // (security review, Sprint 17, L2; the same guard as the response screen's).
+  const loadSeq = useRef(0);
   const load = useCallback(async () => {
+    const seq = ++loadSeq.current;
     setError('');
     try {
       const [o, e] = await Promise.all([loadKnowledgeOverview(supabase), loadBrowseEntries(supabase)]);
+      if (seq !== loadSeq.current) return;
       setOverview(o);
       setEntries(e);
     } catch (err) {
-      setError((err as Error).message);
+      if (seq === loadSeq.current) setError((err as Error).message);
     }
   }, []);
   useEffect(() => { load(); }, [load, version]);
@@ -63,8 +68,8 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
         <h1 className="text-3xl font-black text-ink-900 tracking-tight">{view === 'overview' ? 'What we know' : 'All answers'}</h1>
         {view === 'overview' && overview && (
           <p className="text-ink-500 mt-1.5 text-sm font-medium">
-            {overview.total} answers, {overview.languages.en} in English and {overview.languages.ja} in Japanese, from {overview.contributors} {overview.contributors === 1 ? 'person' : 'people'}.
-            Every one says where it came from. Each response you export adds to it.
+            {overview.total} answers, {overview.languages.en} in English and {overview.languages.ja} in Japanese, added by {overview.contributors} {overview.contributors === 1 ? 'person' : 'people'}.
+            Every one says where it came from. Recording a response's export can add its approved answers.
           </p>
         )}
       </div>
@@ -105,7 +110,12 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
               </button>
             ))}
           </section>
-          {isAdmin && (overview.states.waiting + overview.states.overdue > 0) && (
+          {overview.states.proposals > 0 && (
+            <p className="text-sm text-ink-600">
+              {overview.states.proposals === 1 ? '1 proposed change to an existing answer is' : `${overview.states.proposals} proposed changes to existing answers are`} waiting for review too; until then the answers they would change stay as they are.
+            </p>
+          )}
+          {isAdmin && (overview.states.waiting + overview.states.translations + overview.states.overdue + overview.states.proposals > 0) && (
             <p className="text-sm text-ink-600">
               Reviewing is under Governance for now. <button onClick={onReview} className="font-bold underline decoration-ink-300 hover:decoration-ink-700">Review entries</button>
             </p>
@@ -130,10 +140,10 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
               <h2 id="learned" className="text-lg font-black text-ink-900">Learned recently</h2>
               {overview.learned.length === 0 && <p className="text-sm text-ink-500">Nothing learned from responses yet. Answers are learned when a response's export is recorded.</p>}
               {overview.learned.map((l) => (
-                <button key={l.ref} onClick={() => { openBrowse({}); setSelected(l.ref); }}
+                <button key={l.ref} onClick={() => { openBrowse({}); setSelected(l.replaces ?? l.ref); }}
                   className="block w-full text-left border-b border-ink-50 last:border-0 pb-3">
                   <span className="block text-sm font-bold text-ink-800">{l.question}</span>
-                  <span className="block text-xs text-ink-500 mt-0.5">{l.ref}{l.from ? ` · ${l.from}` : ''} · {l.reviewed ? 'reviewed' : 'waiting for review'}</span>
+                  <span className="block text-xs text-ink-500 mt-0.5">{l.ref}{l.replaces ? `, a proposed change to ${l.replaces}` : ''}{l.from ? ` · from ${l.from}` : ''} · {l.reviewed ? 'reviewed' : 'waiting for review'}</span>
                 </button>
               ))}
             </section>

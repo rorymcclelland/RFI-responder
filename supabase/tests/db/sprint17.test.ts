@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
+import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, getPool, refused, type TestUser } from './harness';
 import { one } from './fixtures';
 
 let member: TestUser;
@@ -20,7 +20,7 @@ describe('S17-3 knowledge_overview()', () => {
   it('1. on the demo data, every count matches the table', async () => {
     await asSuperuser(readFileSync(join(__dirname, '../../../supabase/demo-hosted.sql'), 'utf8'));
     const o = await overview(member);
-    const n = async (where: string) => (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND ${where}`)).n;
+    const n = async (where: string) => (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL AND ${where}`)).n;
     expect(o.total).toBe(await n('true'));
     expect(o.languages).toEqual({ en: await n(`language = 'en'`), ja: await n(`language = 'ja'`) });
     expect(o.states).toEqual({
@@ -28,8 +28,9 @@ describe('S17-3 knowledge_overview()', () => {
       overdue: await n(`reviewed_at IS NOT NULL AND access.entry_review_due(kb_entries) < now()`),
       waiting: await n(`reviewed_at IS NULL AND translated_from IS NULL`),
       translations: await n(`reviewed_at IS NULL AND translated_from IS NOT NULL`),
+      proposals: (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NOT NULL`)).n,
     });
-    expect(o.contributors).toBe((await one<{ n: number }>(`SELECT count(DISTINCT created_by)::int AS n FROM kb_entries WHERE superseded_by IS NULL`)).n);
+    expect(o.contributors).toBe((await one<{ n: number }>(`SELECT count(DISTINCT created_by)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL`)).n);
     expect(o.total).toBeGreaterThan(100);
     // Each entry's state, for browse, agrees with the counts.
     const states = Object.values(o.entries as Record<string, { state: string }>).map((x) => x.state);
@@ -38,6 +39,8 @@ describe('S17-3 knowledge_overview()', () => {
       expect(states.filter((x) => x === v).length, k).toBe(o.states[k]);
     }
     expect(o.languages.ja).toBeGreaterThan(0);
+    // The demo's two learned answers are proposed changes to existing entries.
+    expect(o.states.proposals).toBe(2);
   });
 
   it('2. counts topics and citations, with entries without tags under no topic', async () => {
@@ -73,6 +76,72 @@ describe('S17-3 knowledge_overview()', () => {
     const o = await overview(member);
     const learned = await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE origin = 'response' AND superseded_by IS NULL`);
     expect(o.learned.length).toBe(Math.min(5, learned.n));
-    for (const l of o.learned) expect(l).toEqual(expect.objectContaining({ ref: expect.stringMatching(/^KB-\d{4}$/), question: expect.any(String), reviewed: expect.any(Boolean) }));
+    for (const l of o.learned) {
+      expect(l).toEqual(expect.objectContaining({ ref: expect.stringMatching(/^KB-\d{4}$/), question: expect.any(String), reviewed: expect.any(Boolean) }));
+      // Named by the response, never by the internal path of ids (security review, M3).
+      expect(String(l.from ?? '')).not.toMatch(/response:|session:|[0-9a-f]{8}-[0-9a-f]{4}/);
+    }
   });
+
+  // Security review, Sprint 17, M3: a proposed change is not a current answer.
+  it('counts a proposed change apart, lists it as learned with what it would replace, and leaves it out of the answers', async () => {
+    const target = await one<{ id: string; ref: string }>(`INSERT INTO kb_entries (question, answer, tags, origin, created_by) VALUES ('Do you patch weekly (S17 M3)?', 'Yes.', '{s17-m3}', 'manual', $1) RETURNING id, ref`, [admin.id]);
+    const before = await overview(member);
+    const p = await one<{ ref: string }>(
+      `INSERT INTO kb_entries (question, answer, tags, source, origin, origin_ref, created_by, proposed_replacement_of)
+       VALUES ('Do you patch weekly (S17 M3)?', 'Yes, every Tuesday.', '{s17-m3}', 'RFI response: Juniper (S17)', 'response',
+               'response:00000000-0000-0000-0000-000000000001/session:x/question:y', $1, $2) RETURNING ref`, [member.id, target.id]);
+    const o = await overview(member);
+    expect(o.total).toBe(before.total);
+    expect(o.states.waiting).toBe(before.states.waiting);
+    expect(o.states.proposals).toBe(before.states.proposals + 1);
+    expect(o.entries[p.ref]).toBeUndefined();
+    expect(o.topics.find((t: { tag: string }) => t.tag === 's17-m3')).toMatchObject({ entries: 1 });
+    expect(o.learned[0]).toMatchObject({ ref: p.ref, replaces: target.ref, from: 'Juniper (S17)', reviewed: false });
+  });
+
+  it('counts a repeated tag once per entry, and a question citing an entry twice once', async () => {
+    const x = await one<{ ref: string }>(`INSERT INTO kb_entries (question, answer, tags, origin, created_by) VALUES ('Repeated tags (S17 L3)?', 'Yes.', '{s17-l3,s17-l3}', 'manual', $1) RETURNING ref`, [admin.id]);
+    const opp = await one<{ id: string }>(`INSERT INTO opportunities (name, created_by, owner_id) VALUES ('S17 L3', $1, $1) RETURNING id`, [admin.id]);
+    const s = await one<{ id: string }>(`INSERT INTO rfi_sessions (file_name, opportunity_id) VALUES ('l3.csv', $1) RETURNING id`, [opp.id]);
+    await asSuperuser(`INSERT INTO rfi_questions (session_id, position, question, cited_refs) VALUES ($1, 0, 'Q', $2)`, [s.id, [x.ref, x.ref]]);
+    const o = await overview(member);
+    expect(o.topics.find((t: { tag: string }) => t.tag === 's17-l3')).toMatchObject({ entries: 1, citations: 1 });
+    expect(o.entries[x.ref]).toMatchObject({ citations: 1 });
+  });
+
+  it('works out each review date by the same rule as access.entry_review_due', async () => {
+    await asSuperuser(`UPDATE kb_entries SET reviewed_at = now() - interval '2 years', last_reviewed_at = NULL WHERE ref = (SELECT min(ref) FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL)`);
+    const o = await overview(member);
+    const { rows } = await asSuperuser(`SELECT ref, access.entry_review_due(k) AS due FROM kb_entries k WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL`);
+    expect(rows.length).toBe(Object.keys(o.entries).length);
+    for (const r of rows) expect(new Date(o.entries[r.ref].due).getTime(), r.ref).toBe(new Date(r.due).getTime());
+    expect(Object.values(o.entries).some((v) => (v as { state: string }).state === 'overdue')).toBe(true);
+  });
+
+  // Security review, Sprint 17, M1: the cost grew with the square of the entries.
+  it('stays fast with thousands of entries and citations', async () => {
+    const pool = getPool();
+    const c = await pool.connect();
+    try {
+      await c.query('BEGIN');
+      await c.query(`INSERT INTO kb_entries (question, answer, tags, origin, created_by)
+                     SELECT 'Scale question ' || g || ' (S17 M1)?', 'Yes.', ARRAY['s17-scale-' || (g % 40)], 'manual', $1 FROM generate_series(1, 8000) g`, [admin.id]);
+      const opp = (await c.query(`INSERT INTO opportunities (name, created_by, owner_id) VALUES ('S17 M1', $1, $1) RETURNING id`, [admin.id])).rows[0];
+      const s = (await c.query(`INSERT INTO rfi_sessions (file_name, opportunity_id) VALUES ('m1.csv', $1) RETURNING id`, [opp.id])).rows[0];
+      await c.query(`INSERT INTO rfi_questions (session_id, position, question, cited_refs)
+                     SELECT $1, g, 'Q' || g, ARRAY[r.refs[1 + g % 8000], r.refs[1 + (g * 7) % 8000], r.refs[1 + (g * 13) % 8000]]
+                       FROM generate_series(1, 20000) g, (SELECT array_agg(ref) AS refs FROM kb_entries) r`, [s.id]);
+      await c.query(`SELECT set_config('request.jwt.claims', $1, true), set_config('request.jwt.claim.sub', $2, true)`, [JSON.stringify({ sub: member.id, role: 'authenticated' }), member.id]);
+      await c.query('SET LOCAL ROLE authenticated');
+      const t = Date.now();
+      const o = (await c.query(`SELECT public.knowledge_overview() AS o`)).rows[0].o;
+      const ms = Date.now() - t;
+      expect(o.total).toBeGreaterThanOrEqual(8000);
+      expect(ms).toBeLessThan(1500);
+    } finally {
+      await c.query('ROLLBACK');
+      c.release();
+    }
+  }, 60000);
 });

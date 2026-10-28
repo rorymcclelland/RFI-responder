@@ -14,9 +14,10 @@ export interface KnowledgeOverview {
   total: number;
   languages: { en: number; ja: number };
   contributors: number;
-  states: { reviewed: number; overdue: number; waiting: number; translations: number };
+  states: { reviewed: number; overdue: number; waiting: number; translations: number; proposals: number };
   topics: { tag: string | null; entries: number; citations: number }[];
-  learned: { ref: string; question: string; at: string; from: string | null; reviewed: boolean }[];
+  /** `from` is the response's name; `replaces` is set when the entry is a proposed change to that entry. */
+  learned: { ref: string; question: string; at: string; from: string | null; reviewed: boolean; replaces: string | null }[];
   entries: Record<string, { state: EntryState; citations: number; due: string }>;
 }
 
@@ -73,7 +74,11 @@ export function describeSource(e: BrowseEntry, names: Map<string, string>): stri
     case 'seed': return `Loaded with the demo data${file ? `, from ${file}` : ''}`;
     case 'import': return `Imported by ${who}${file ? ` from ${file}` : ''}`;
     case 'manual': return `Added by hand by ${who}`;
-    case 'response': return `Learned from a response${e.originRef ? ` (${e.originRef})` : ''}, answer approved by ${who}`;
+    case 'response': {
+      // origin_ref is an internal path of ids; the source names the response ("RFI response: <name>").
+      const name = e.source.replace(/^RFI response: /, '').trim();
+      return `Learned from ${name ? `the response ${name}` : 'a response'}, answer approved by ${who}`;
+    }
     default: return 'Source not recorded';
   }
 }
@@ -87,15 +92,25 @@ export async function loadKnowledgeOverview(client: SupabaseClient): Promise<Kno
   return data as KnowledgeOverview;
 }
 
+/** Rows per request: the API returns at most 1,000 (`max_rows`), so the list is read a page at a time. */
+export const BROWSE_PAGE = 1000;
+
 export async function loadBrowseEntries(client: SupabaseClient): Promise<BrowseEntry[]> {
-  const { data, error } = await client.from('kb_entries')
-    .select('ref, question, answer, tags, source, origin, origin_ref, created_by, created_at, language, translated_from')
-    .is('superseded_by', null).order('seq', { ascending: true });
-  if (error) {
-    console.error('kb_entries read failed', error);
-    throw new Error('The knowledge base could not be loaded. Check your connection and try again.');
+  const data: Record<string, unknown>[] = [];
+  for (let from = 0; ; from += BROWSE_PAGE) {
+    // Current entries only: not replaced ones, and not proposed changes still waiting for review.
+    const { data: page, error } = await client.from('kb_entries')
+      .select('ref, question, answer, tags, source, origin, origin_ref, created_by, created_at, language, translated_from')
+      .is('superseded_by', null).is('proposed_replacement_of', null)
+      .order('seq', { ascending: true }).range(from, from + BROWSE_PAGE - 1);
+    if (error) {
+      console.error('kb_entries read failed', error);
+      throw new Error('The knowledge base could not be loaded. Check your connection and try again.');
+    }
+    data.push(...((page ?? []) as Record<string, unknown>[]));
+    if (!page || page.length < BROWSE_PAGE) break;
   }
-  return (data ?? []).map((r) => ({
+  return data.map((r) => ({
     ref: r.ref as string, question: r.question as string, answer: r.answer as string,
     tags: (r.tags as string[] | null) ?? [], source: (r.source as string) ?? '', origin: r.origin as string,
     originRef: (r.origin_ref as string | null) ?? null, createdBy: (r.created_by as string | null) ?? null,

@@ -92,3 +92,18 @@ Order: S17-1 first (every later string uses its words), then S17-2 and S17-3, th
 | Q3 | Search by meaning in the new browse | Not this sprint: words and numbers now; meaning comes with **Ask it a question** (K-3, Sprint 18), which needs a server call **Rory: agreed** |
 | Q4 | The guide's screenshots | You retake them on your PC with `npm run screenshots` at the close (about 10 minutes, Docker running); otherwise they are marked out of date until U-10 **Rory: agreed, he retakes them** |
 | Q5 | Walk the live demo together before building | Not needed now: the spike's findings were confirmed in the code; walk it in the test pack instead (not asked again; Rory has not asked for it) |
+
+## Security review (28 October 2026)
+
+An independent review of `main..sprint-17` found no high issue, three medium and three low; all are fixed, with a test where code changed. It confirmed the new function reads only what a signed-in person can already read, refuses anonymous visitors and the service role, writes nothing, and that every control hidden from a member is still refused by the database.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | The overview's cost grew with the square of the entries: each entry looked up its citations by reading them all again, and worked out its review date through a definer function that read the settings for every row. Measured: 3.5 s for 8,000 entries and 20,000 questions, near Supabase's 8 s limit on hosted hardware | Citations are joined once and the review date is worked out inline (a test keeps it equal to `access.entry_review_due`); the same data takes 0.15 s, and a test fails above 1.5 s |
+| M2 | Browse read at most 1,000 entries (the API's `max_rows`), so after a large import later entries could not be found, while the guide said "every answer" | The list is read a page of 1,000 at a time until a short page; tested |
+| M3 | Proposed changes learned from a response (waiting to replace an entry) counted as answers of their own: in the total, as waiting, twice in topics, and as duplicates in browse. Learned answers showed an internal path of ids as their source, which the unit test missed because its fixture used a format the database never writes | Current means not replaced and not a proposal, as elsewhere in the schema. Proposals are counted apart, with a line on the overview, and listed under **Learned recently** with the entry they would change. The source is the response's name; the fixture uses the real formats. On the hosted demo the overview now shows 130 answers (100 English, 30 Japanese) and two proposed changes |
+| L1 | The overview said "Each response you export adds to it" (only **Record export** can, and only for some answers) and "from N people" (it counts who added an entry: the importer or the approver) | "Recording a response's export can add its approved answers"; "added by N people"; the guide matches |
+| L2 | An older load of the page could arrive last and overwrite a newer one | Only the newest load sets the page, as on the response screen |
+| L3 | A repeated tag, or a question citing the same entry twice, counted twice; the admin's **Review entries** link ignored translations and proposals | Each counted once (tested); the link shows whenever anything waits for review |
+
+Found on the way, before Sprint 17 and logged as BUG-42: entry numbers are cut to four digits, so the knowledge base cannot pass 9,999 entries.
