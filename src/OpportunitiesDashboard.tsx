@@ -343,13 +343,12 @@ interface Props {
   currentUserId: string;
   isAdmin: boolean;
   onSelectOpportunity: (opp: Opportunity) => void;
-  onImportKB: () => void;
 }
 
 type Tab = 'active' | 'archived';
 const ACTIVE_STAGES: ResponseStage[] = ['new', 'in_review', 'ready', 'exported', 'changed'];
 
-export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelectOpportunity, onImportKB }: Props) {
+export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelectOpportunity }: Props) {
   const [responses, setResponses] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -404,7 +403,6 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button onClick={onImportKB} className="btn-ghost text-sm"><Plus size={15} /> Import to the knowledge base</button>
             <button onClick={() => setCreating(true)} className="btn-primary text-sm"><Plus size={15} /> New response</button>
           </div>
         </div>

@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Database, X, BookOpen, Tag, CheckCircle2,
-  Plus, ChevronLeft, Briefcase,
-  Inbox, Users, LogOut, Menu, Search, Sparkles, AlertTriangle, Scale, HelpCircle,
+  Database, X, CheckCircle2,
+  ChevronLeft, Briefcase,
+  Inbox, Users, LogOut, Menu, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
 import { authEventAction, type AuthState } from './lib/authEvents';
-import { loadKnowledgeBase, importEntries, describeImport, entryMatches, confirmThenIndex, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
-import { KnowledgeEntry, Opportunity, UserProfile } from './types';
+import { importEntries, describeImport, indexNewEntries, type KbOrigin, type NewEntry } from './lib/knowledgeBase';
+import { Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
 import RFIWorkspace from './RFIWorkspace';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
@@ -14,177 +14,32 @@ import AuthPage from './AuthPage';
 import UserInbox from './UserInbox';
 import UserManagement from './UserManagement';
 import GovernanceAdmin from './GovernanceAdmin';
+import KnowledgePage from './KnowledgePage';
 import { loadUsageStatus, type UsageStatus } from './lib/usage';
-import { addEntry, parseTags } from './lib/entryReview';
 import { supabase } from './lib/supabase';
 import HelpView from './help/HelpView';
 import SetPassword from './SetPassword';
-import LanguageLabel from './LanguageLabel';
 import { linkPurpose } from './lib/passwordLink';
 import Introduction from './help/Introduction';
 import { startPage } from './lib/guide';
 import { loadOnboardedAt, markOnboarded, PROFILE_COLUMNS, shouldShowIntroduction, stepsFor } from './lib/onboarding';
 import type { Session } from '@supabase/supabase-js';
 
-// ─── KB Entry ─────────────────────────────────────────────────────────────────
-
-function KBEntry({ entry }: { entry: KnowledgeEntry }) {
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <div className="border border-ink-100 rounded-2xl overflow-hidden hover:border-ink-200 transition-colors">
-      <div className="p-4 cursor-pointer" onClick={() => setExpanded(!expanded)}>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xs font-bold text-ink-500 bg-ink-50 px-2 py-0.5 rounded-full border border-ink-100">
-            {entry.id}
-          </span>
-          {entry.source && (
-            <span className="text-2xs text-ink-400 flex items-center gap-1">
-              <BookOpen size={9} />{entry.source}
-            </span>
-          )}
-          <LanguageLabel language={entry.language} />
-          {entry.reviewed === false && (
-            <span className="text-2xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full" title="Added by a team member and not yet reviewed by an admin. Drafts citing it are not bulk-approved.">
-              Not yet reviewed
-            </span>
-          )}
-          <span className={`ml-auto text-ink-400 transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}>
-            <ChevronLeft size={13} className="rotate-180" />
-          </span>
-        </div>
-        <p className="text-sm font-medium text-ink-800 leading-snug">{entry.question}</p>
-        <div className="flex flex-wrap gap-1 mt-2.5">
-          {entry.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="inline-flex items-center gap-1 text-2xs text-ink-500 bg-ink-50 px-2 py-0.5 rounded-full border border-ink-100">
-              <Tag size={8} />{tag}
-            </span>
-          ))}
-        </div>
-      </div>
-      {expanded && (
-        <div className="border-t border-ink-100 px-4 py-3 bg-ink-50 text-sm text-ink-600 leading-relaxed">
-          {entry.answer}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AddEntryForm({ onDone, onCancel, onIndexFailed }: { onDone: (message: string) => void; onCancel: () => void; onIndexFailed: (message: string) => void }) {
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [tags, setTags] = useState('');
-  const [source, setSource] = useState('');
-  const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
-  const save = async () => {
-    setError('');
-    setSaving(true);
-    try {
-      const r = await addEntry(supabase, { question, answer, tags: parseTags(tags), source });
-      // Sprint 16 (S16-2, BUG-40): the save is confirmed at once; indexing runs afterwards.
-      onDone(confirmThenIndex(r, indexNewEntries, onIndexFailed));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setSaving(false);
-    }
-  };
-  return (
-    <div className="space-y-3 border border-ink-100 rounded-2xl p-4 bg-ink-50">
-      <p className="text-sm font-bold text-ink-800">Add an entry</p>
-      <textarea className="input min-h-[60px]" placeholder="The question it answers" value={question} onChange={(e) => setQuestion(e.target.value)} aria-label="Question" />
-      <textarea className="input min-h-[100px]" placeholder="The answer" value={answer} onChange={(e) => setAnswer(e.target.value)} aria-label="Answer" />
-      <div className="grid sm:grid-cols-2 gap-2">
-        <input className="input" placeholder="Tags, separated by commas" value={tags} onChange={(e) => setTags(e.target.value)} aria-label="Tags" />
-        <input className="input" placeholder="Source (policy, document)" value={source} onChange={(e) => setSource(e.target.value)} aria-label="Source" />
-      </div>
-      {error && <p className="text-xs text-coral-600">{error}</p>}
-      <div className="flex justify-end gap-2">
-        <button onClick={onCancel} className="btn-ghost text-sm">Cancel</button>
-        <button onClick={save} disabled={saving} className="btn-primary text-sm">{saving ? 'Saving…' : 'Add entry'}</button>
-      </div>
-    </div>
-  );
-}
-
-function KBModal({ entries, onClose, onBulkUpload, onAdded, onIndexFailed }: { entries: KnowledgeEntry[]; onClose: () => void; onBulkUpload: () => void; onAdded: (message: string) => void; onIndexFailed: (message: string) => void }) {
-  const [search, setSearch] = useState('');
-  const [adding, setAdding] = useState(false);
-  const filtered = entries.filter((e) => entryMatches(e, search));
-
-  return (
-    // BUG-38 (Sprint 16): anchored near the top with a fixed height, so narrowing the search shortens
-    // the list inside it rather than resizing and re-centring the box. Full screen on a phone.
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-stretch sm:items-start justify-center p-0 sm:p-4 sm:pt-[7vh] animate-fade-in">
-      <div className="bg-white sm:rounded-3xl shadow-modal w-full max-w-2xl h-full sm:h-[85vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-ink-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-ink-900 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Database size={18} className="text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-ink-900 text-base">Knowledge Base</h3>
-              <p className="text-xs text-ink-400">{entries.length} entries</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setAdding(true)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-ink-700 border border-ink-200 rounded-xl hover:bg-ink-50 transition-colors"
-            >
-              <Plus size={12} /> Add entry
-            </button>
-            <button
-              onClick={onBulkUpload}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-ink-700 border border-ink-200 rounded-xl hover:bg-ink-50 transition-colors"
-            >
-              <Plus size={12} /> Import Q&A
-            </button>
-            <button onClick={onClose} className="w-8 h-8 hover:bg-ink-100 rounded-xl transition-colors flex items-center justify-center">
-              <X size={16} className="text-ink-500" />
-            </button>
-          </div>
-        </div>
-        <div className="px-6 py-4 border-b border-ink-100">
-          <div className="relative">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
-            <input
-              type="text" placeholder="Search numbers, questions, answers, tags…" value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input pl-9"
-            />
-          </div>
-        </div>
-        <div className="overflow-y-auto flex-1 p-6 space-y-2.5">
-          {adding && <AddEntryForm onCancel={() => setAdding(false)} onIndexFailed={onIndexFailed} onDone={(m) => { setAdding(false); onAdded(m); }} />}
-          {filtered.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-sm text-ink-400">No entries match your search.</p>
-            </div>
-          ) : (
-            filtered.map((entry) => <KBEntry key={entry.id} entry={entry} />)
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 // BUG-30: read before the Supabase client clears the address's fragment.
 const ARRIVED_FOR = linkPurpose(window.location.hash);
 
-type AppView = 'responses' | 'inbox' | 'users' | 'governance' | 'help';
+type AppView = 'responses' | 'knowledge' | 'inbox' | 'users' | 'governance' | 'help';
 
 export default function App() {
   const [session, setSession]                     = useState<Session | null>(null);
   const [currentUser, setCurrentUser]             = useState<UserProfile | null>(null);
   const [allUsers, setAllUsers]                   = useState<UserProfile[]>([]);
   const [authLoading, setAuthLoading]             = useState(true);
-  const [kb, setKb]                               = useState<KnowledgeEntry[]>([]);
-  const [showKBModal, setShowKBModal]             = useState(false);
+  // Sprint 17 (S17-3): changes when entries change elsewhere, so the knowledge page reloads.
+  const [kbVersion, setKbVersion]                 = useState(0);
   const [showBulkUpload, setShowBulkUpload]       = useState(false);
   const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
@@ -295,13 +150,8 @@ export default function App() {
     toastTimer.current = setTimeout(() => setToast(null), tone === 'error' ? 10000 : 5000);
   };
 
-  const refreshKB = async () => {
-    try {
-      setKb(await loadKnowledgeBase());
-    } catch (err) {
-      showToast((err as Error).message, 'error');
-    }
-  };
+  // Sprint 17 (S17-3): the knowledge page reads the entries itself; this tells it to read them again.
+  const refreshKB = () => setKbVersion((v) => v + 1);
 
   /** Add entries through the database; returns whether anything was saved. */
   const addToKB = async (entries: NewEntry[], origin: KbOrigin, originRef: string): Promise<boolean> => {
@@ -375,6 +225,7 @@ export default function App() {
 
   const navItems: { key: AppView; icon: React.ReactNode; label: string }[] = [
     { key: 'responses', icon: <Briefcase size={18} />, label: 'Responses' },
+    { key: 'knowledge', icon: <Database size={18} />, label: 'Knowledge' },
     { key: 'inbox',         icon: <Inbox size={18} />,     label: 'Assignments' },
     { key: 'users',         icon: <Users size={18} />,     label: 'Team' },
     ...(currentUser.isAdmin ? [{ key: 'governance' as AppView, icon: <Scale size={18} />, label: 'Governance' }] : []),
@@ -387,15 +238,6 @@ export default function App() {
           steps={stepsFor(currentUser.isAdmin)}
           onClose={closeIntroduction}
           onOpenGuide={(page, anchor) => { closeIntroduction(); openGuide(page, anchor); }}
-        />
-      )}
-      {showKBModal && (
-        <KBModal
-          entries={kb}
-          onClose={() => setShowKBModal(false)}
-          onBulkUpload={() => { setShowKBModal(false); setShowBulkUpload(true); }}
-          onAdded={(m) => { showToast(m); refreshKB(); }}
-          onIndexFailed={(m) => showToast(m, 'error')}
         />
       )}
       {showBulkUpload && (
@@ -508,14 +350,6 @@ export default function App() {
               )}
             </div>
 
-            <button
-              onClick={() => setShowKBModal(true)}
-              className="hidden sm:flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-ink-600 border border-ink-200 rounded-xl hover:bg-ink-50 hover:border-ink-300 transition-colors"
-            >
-              <Database size={15} />
-              <span>Knowledge</span>
-              <span className="bg-ink-900 text-white text-2xs px-1.5 py-0.5 rounded-full font-bold">{kb.length}</span>
-            </button>
 
             {/* User chip */}
             <div className="flex items-center gap-2 pl-2 border-l border-ink-100">
@@ -563,13 +397,6 @@ export default function App() {
               );
             })}
             <div className="border-t border-ink-100 pt-2 mt-2">
-              <button
-                onClick={() => { setShowKBModal(true); setNavOpen(false); }}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-ink-600 hover:bg-ink-50 transition-colors"
-              >
-                <Database size={18} /> Knowledge Base
-                <span className="ml-auto text-2xs bg-ink-900 text-white px-1.5 py-0.5 rounded-full font-bold">{kb.length}</span>
-              </button>
               <button
                 onClick={() => openGuide(startPage(currentUser.isAdmin), null)}
                 className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-semibold text-ink-600 hover:bg-ink-50 transition-colors"
@@ -621,6 +448,16 @@ export default function App() {
               ownerName={allUsers.find((u) => u.id === activeOpportunity.ownerId)?.displayName ?? null}
             />
           </>
+        ) : view === 'knowledge' ? (
+          <KnowledgePage
+            names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
+            isAdmin={currentUser.isAdmin}
+            version={kbVersion}
+            onImport={() => setShowBulkUpload(true)}
+            onAdded={(m) => { showToast(m); refreshKB(); }}
+            onIndexFailed={(m) => showToast(m, 'error')}
+            onReview={() => setView('governance')}
+          />
         ) : view === 'inbox' ? (
           <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : view === 'users' ? (
@@ -639,7 +476,6 @@ export default function App() {
             currentUserId={currentUser.id}
             isAdmin={currentUser.isAdmin}
             onSelectOpportunity={(opp) => { setActiveOpportunity(opp); setView('responses'); }}
-            onImportKB={() => setShowBulkUpload(true)}
           />
         )}
       </main>
