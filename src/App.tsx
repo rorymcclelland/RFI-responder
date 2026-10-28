@@ -114,8 +114,10 @@ function KBModal({ entries, onClose, onBulkUpload, onAdded, onIndexFailed }: { e
   const filtered = entries.filter((e) => entryMatches(e, search));
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-modal w-full max-w-2xl max-h-[85vh] flex flex-col">
+    // BUG-38 (Sprint 16): anchored near the top with a fixed height, so narrowing the search shortens
+    // the list inside it rather than resizing and re-centring the box. Full screen on a phone.
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-stretch sm:items-start justify-center p-0 sm:p-4 sm:pt-[7vh] animate-fade-in">
+      <div className="bg-white sm:rounded-3xl shadow-modal w-full max-w-2xl h-full sm:h-[85vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-5 border-b border-ink-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-ink-900 rounded-xl flex items-center justify-center flex-shrink-0">
