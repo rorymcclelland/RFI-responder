@@ -112,25 +112,59 @@ Everything becomes a task in one queue (answer this, approve that, review this e
 
 The mockups that go with this report (the design "RFI Respond: jobs-first mockups", six screens you can click through with Play) show option B: Home for an owner, a response as a journey, a contributor's question, sending, the knowledge base with its review queue, and the demo's **Try it** start. They use the demo's fictional names; their figures are illustrative, not measured. One idea in them goes beyond today's rules and needs a decision at refinement: a contributor's answer can update the knowledge base straight away (waiting for an admin's review), rather than only when the response is marked as sent.
 
+## Rory's decision, and the knowledge base as the product (28 October 2026)
+
+Rory chose **option B**, and left the order of the slices to Claude. He added one requirement: the app exists to demonstrate an **institutional knowledge base**, with the RFI responder as the real-world use around it, so the knowledge base should not be a pop-up. "Not front and foremost, but more fully featured and occupying more of the screen", since it is the value proposition for most people looking at it.
+
+What that changes in option B:
+
+- **Knowledge is a main destination**, beside Responses, and fills the screen. Home stays first, because people come to do a job; Home carries a "What we know" panel that leads into it.
+- **An overview of what the organisation knows**: how many approved answers, in which languages, from whom; their health (reviewed, waiting for review, translations to check, gaps); answers by topic, with how often each topic is cited; what was learned recently.
+- **Ask it a question**: type a question as a customer would and see the answer it would draft, with its confidence and the entries behind it, before any questionnaire arrives. This is the shortest demonstration of the value, for a visitor and for an owner deciding whether to trust it. It uses the same matching, checking and drafting as a response, counted against the same limits.
+- **Browse and search, full screen**: by number, words or meaning, filtered by state, language and where an answer came from, with the selected answer beside the list.
+- **One answer and its whole history**: the answer, its state and topics; a proposed change waiting beside it; where it has been used, in which responses and with what outcome; its history (imported, reviewed, confirmed by use, what it replaced); its other languages; its next review. Edit, mark as still correct, or retire with a reason.
+- **Gaps**: questions from recent responses that it could not answer, grouped, with the answer a person wrote, so it can be added in one step, or an expert asked to write one. Pricing is never listed: it is never learned.
+
+The mockups were extended accordingly: four knowledge screens (7 to 10) and the "What we know" panel on Home. The earlier knowledge screen with its review queue is replaced: the review queue is the **Waiting for review** filter in browse, and the proposed change on each answer's page.
+
+What it needs underneath, to check at refinement: **Ask it a question** needs a server function that matches and drafts without a response, metered like processing; **where it has been used** and **gaps** read across responses (members can already read every response, so no access rule changes); **retire** needs a new audited database function; topic counts come from entries' tags.
+
 ## Outline stories (for refinement from Sprint 17; not refined)
 
-Ordered so each slice is useful on its own.
+Ordered so each slice is useful on its own. K stories are the knowledge base as a full place (Rory, 28 October).
 
 | | Story | Serves | Size (rough) |
 |---|---|---|---|
 | U-1 | One vocabulary: a response is a "response" everywhere; "files" instead of sessions; one set of status words, checked by the docs tests | all | S |
 | U-2 | Controls only for those who can use them: no upload or bulk bar for people who cannot, and the reason said up front, not on hover | 1, 5, 10 | S |
+| K-1 | Knowledge as a full page in the main menu: the overview (counts, health, topics, learned recently) and full-screen browse and search with filters, replacing the pop-up | 6, 7, 10 | M |
+| K-2 | One answer and its history: where used, history, other languages, next review; edit, mark as still correct, retire with a reason (audited) | 7, 9 | M |
+| K-3 | Ask it a question: the draft it would give, with confidence and sources, metered | 10, 1 | M |
+| K-4 | Gaps: what it could not answer, with one-step add or ask an expert | 6, 7 | M |
 | U-3 | "Questions for you": a contributor answers, approves or hands back an assigned question on one screen, with the current draft and sources; the assignment's stage follows (and, to decide at refinement, their answer proposed to the knowledge base at once) | 5, 6 | M |
-| U-4 | Home with "Needs you": answered by colleagues, assigned to you, at risk, entries to review; everyone lands there | 2, 3, 7 | M |
+| U-4 | Home with "Needs you" and "What we know": answered by colleagues, assigned to you, at risk, entries to review; everyone lands there | 2, 3, 7 | M |
 | U-5 | The response as a journey: header with due date and progress, stages, questions grouped by what they need, files as sources | 1, 4 | L (split at refinement) |
 | U-6 | Download separate from **Mark as sent**; mark as sent records the export, closes assignments and teaches the knowledge base, and says so | 1, 4 | S |
-| U-7 | Knowledge in one place, with the review queue ordered by what it blocks, and retiring an entry (audited) | 6, 7 | M |
 | U-8 | **Try it** for demo visitors: their own copy of a sample response, within the budget | 10 | M |
 | U-9 | Plain settings with **Advanced**, and the audit log filterable by person and response | 8, 9 | S |
-| U-10 | The guide, the introduction and the screenshots redone for the new screens | all | M |
+| U-10 | The guide, the introduction and the screenshots redone, a slice at a time | all | M |
 
-## Decisions for Rory
+(U-7, "knowledge in one place", is replaced by K-1 to K-4.)
 
-1. Which option: A, B (recommended) or C, or none for now.
-2. If B: whether to start with the contributor (U-1 to U-3) as recommended, or with Home (U-4) or the demo's **Try it** (U-8).
-3. Whether to walk the live demo together before Sprint 17 is refined, with you signed in to the browser pane, so the findings are checked on the real screens.
+### The order (Claude's choice, as Rory asked)
+
+| Sprint | Slice | Why first |
+|---|---|---|
+| 17 | U-1, U-2, K-1 | The knowledge base becomes the visible centre of the app at once, and the vocabulary and controls every later screen relies on are settled |
+| 18 | K-2, K-3 | Each answer's history is the proof that the knowledge is trustworthy; asking it a question is the shortest demonstration of the value |
+| 19 | U-3, U-4 | The contributor's job, the worst today, and Home, which ties the jobs together |
+| 20 | U-6, U-8, K-4 | Sending made plain, the demo's **Try it**, and gaps that make the knowledge base grow |
+| 21 | U-5, U-9 | The response page rebuilt as a journey, once the pieces it links to exist |
+
+U-10 goes with each slice: every sprint updates the guide and the introduction for the screens it changes.
+
+## Decisions taken
+
+1. **Option B** (Rory, 28 October), with the knowledge base as a full place in the app.
+2. **Order:** as above (Claude, at Rory's request); refined one sprint at a time, starting with Sprint 17.
+3. **Still open, for Sprint 17's refinement:** whether to walk the live demo together first, with Rory signed in to the browser pane.

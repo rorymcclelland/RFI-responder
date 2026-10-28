@@ -702,6 +702,8 @@ Refinement: `docs/refinement/sprint-16.md`. Any redesign the spike recommends is
 | S16-4 | Spike (two days): organising the app around jobs, not entities; report and clickable mockups | Rory, 28 October | Ready, Sprint 16 |
 | S16-5 | Independent review and the hosted check | | Ready, Sprint 16 |
 
+**The spike's decision (Rory, 28 October 2026).** Option B: reorganise the screens around jobs over the same data and access rules, with the knowledge base as a full place in the app rather than a pop-up, since it is the value proposition. Outline stories U-1 to U-10 and K-1 to K-4 are in `docs/ux/sprint-16-ux-spike.md`, planned for Sprints 17 to 21 in the order set there (Claude, at Rory's request), each refined at the previous sprint's close. Sprint 17: U-1 one vocabulary, U-2 controls only for those who can use them, K-1 knowledge as a full page.
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
