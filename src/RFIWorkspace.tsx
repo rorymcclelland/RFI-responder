@@ -13,6 +13,7 @@ import { extractFromWord } from './lib/wordExtraction';
 import { describeExtraction, fromExtraction, toInsertRows, type Draft } from './lib/questionDrafts';
 import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
+import { firstView, loadResponseSessions } from './workspace/openResponse';
 import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
 import { describeLearning, recordExport } from './lib/responses';
@@ -39,7 +40,8 @@ interface Props {
   canAssign: boolean;
 }
 
-type WorkflowStep    = 'idle' | 'mapping' | 'preview' | 'processing' | 'review' | 'export';
+// Sprint 16 (S16-1): 'loading' until the response's sessions are read; 'load_error' if they cannot be.
+type WorkflowStep    = 'loading' | 'load_error' | 'idle' | 'mapping' | 'preview' | 'processing' | 'review' | 'export';
 type FilterTab       = 'all' | 'pending' | 'accepted' | 'skipped';
 type ConfidenceGroup = 'all' | 'high' | 'medium' | 'low' | 'uncalibrated';
 
@@ -55,19 +57,13 @@ function inGroup(confidence: number | null, g: { key: ConfidenceGroup; min: numb
   return confidence !== null && confidence >= g.min && confidence < g.max;
 }
 
-const toSession = (r: Record<string, unknown>): RFISession => ({
-  id: r.id as string,
-  opportunityId: r.opportunity_id as string | null,
-  fileName: r.file_name as string,
-  // The database allows only these two values; anything else is treated as unfinished.
-  status: r.status === 'completed' ? 'completed' : 'in_progress',
-  questionCount: r.question_count as number,
-  acceptedCount: r.accepted_count as number,
-  createdAt: r.created_at as string,
-});
+
 
 export default function RFIWorkspace({ opportunityId, archived, opportunityName, currentUser, allUsers, canAssign }: Props) {
-  const [step, setStep]                   = useState<WorkflowStep>('idle');
+  const [step, setStep]                   = useState<WorkflowStep>('loading');
+  const [loadError, setLoadError]         = useState('');
+  // The latest load; an older one that finishes late is ignored.
+  const loadSeq = useRef(0);
   const [fileName, setFileName]           = useState('');
   const [headers, setHeaders]             = useState<string[]>([]);
   const [questionCol, setQuestionCol]     = useState('');
@@ -94,30 +90,48 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
 
   const { assignments, handleAssign, handleUnassign } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
-  const openSession = useCallback(async (session: RFISession) => {
+  /** Returns false if the questions could not be read; the caller decides what to show. */
+  const openSession = useCallback(async (session: RFISession, seq = loadSeq.current): Promise<boolean> => {
+    let loaded: RFIQuestion[];
     try {
-      setQuestions(await loadQuestions(supabase, session.id));
+      loaded = await loadQuestions(supabase, session.id);
     } catch (err) {
-      setUploadError((err as Error).message);
+      if (seq === loadSeq.current) setUploadError((err as Error).message);
+      return false;
     }
+    const exported = await loadExportState(supabase, session.id);
+    if (seq !== loadSeq.current) return true;
+    setQuestions(loaded);
     setFileName(session.fileName);
     setSessionId(session.id);
-    setExportState(await loadExportState(supabase, session.id));
+    setExportState(exported);
     setStep(session.status === 'completed' ? 'export' : 'review');
     setLearning('');
     setListCollapsed(session.status === 'completed');
     setFilter('all'); setSearch(''); setExpandedId(null); setNotice('');
+    return true;
   }, []);
 
   const loadPastSessions = useCallback(async (autoResume = false) => {
-    const [{ data: linked }, { data: orphans }] = await Promise.all([
-      supabase.from('rfi_sessions').select('*').eq('opportunity_id', opportunityId).order('created_at', { ascending: false }).limit(10),
-      supabase.from('rfi_sessions').select('*').is('opportunity_id', null).order('created_at', { ascending: false }).limit(10),
-    ]);
-    const linkedSessions = (linked ?? []).map(toSession);
-    setPastSessions(linkedSessions);
-    setOrphanSessions((orphans ?? []).map(toSession));
-    if (autoResume && linkedSessions.length > 0) await openSession(linkedSessions[0]);
+    const seq = ++loadSeq.current;
+    if (autoResume) { setStep('loading'); setLoadError(''); }
+    try {
+      const { linked, orphans } = await loadResponseSessions(supabase, opportunityId);
+      if (seq !== loadSeq.current) return;
+      setPastSessions(linked);
+      setOrphanSessions(orphans);
+      if (!autoResume) return;
+      const view = firstView(linked);
+      if (view === 'upload') { setStep('idle'); return; }
+      if (!(await openSession(view.open, seq)) && seq === loadSeq.current) {
+        setLoadError('The questions in this response could not be loaded. Check your connection and try again.');
+        setStep('load_error');
+      }
+    } catch (err) {
+      if (seq !== loadSeq.current) return;
+      if (autoResume) { setLoadError((err as Error).message); setStep('load_error'); }
+      else setUploadError((err as Error).message);
+    }
   }, [opportunityId, openSession]);
 
   useEffect(() => { loadPastSessions(true); }, [loadPastSessions]);
@@ -329,6 +343,21 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     }
     return true;
   });
+
+  if (step === 'loading') return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center" role="status" aria-live="polite">
+      <div className="w-10 h-10 mx-auto rounded-2xl bg-ink-900 animate-pulse" aria-hidden="true" />
+      <p className="mt-4 text-sm font-bold text-ink-800">Loading {opportunityName}…</p>
+      <p className="text-xs text-ink-400 mt-1">Reading its questions and answers.</p>
+    </div>
+  );
+
+  if (step === 'load_error') return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center" role="alert">
+      <p className="text-sm font-bold text-coral-600">{loadError}</p>
+      <button onClick={() => loadPastSessions(true)} className="btn-primary text-sm mt-4">Try again</button>
+    </div>
+  );
 
   if (step === 'idle') return (
     <UploadStep
