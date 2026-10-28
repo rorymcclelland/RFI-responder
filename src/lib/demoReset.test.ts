@@ -49,3 +49,15 @@ describe('resetDemo', () => {
     spy.mockRestore();
   });
 });
+
+describe('confirmHint (Rory, Sprint 15 check: a greyed button with no explanation looked frozen)', () => {
+  it('says what is still needed, as the phrase is typed', async () => {
+    const { confirmHint } = await import('./demoReset');
+    expect(confirmHint('')).toBe('Type the whole phrase, reset the demo, in small letters. The button works once it matches.');
+    expect(confirmHint('reset')).toBe('Keep typing: the button works once the box says reset the demo.');
+    expect(confirmHint('reset the')).toBe('Keep typing: the button works once the box says reset the demo.');
+    expect(confirmHint('Reset the demo')).toBe('Not quite: type reset the demo exactly, in small letters, with no extra spaces.');
+    expect(confirmHint('reset the demo ')).toBe('Not quite: type reset the demo exactly, in small letters, with no extra spaces.');
+    expect(confirmHint('reset the demo')).toBe('Ready: the button resets the demo.');
+  });
+});

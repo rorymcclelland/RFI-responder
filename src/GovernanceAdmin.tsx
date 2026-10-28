@@ -14,7 +14,7 @@ import {
 } from './lib/usage';
 import { describeOrigin, loadEntriesToReview, loadOverdueEntries, reviewEntry, type EntryForReview } from './lib/entryReview';
 import { AUDIT_GROUPS, AUDIT_LIMIT, describeAudit, loadAuditLog, type AuditRow } from './lib/auditLog';
-import { RESET_PHRASE, isConfirmed, loadDemoStatus, resetDemo, type DemoStatus } from './lib/demoReset';
+import { RESET_PHRASE, confirmHint, isConfirmed, loadDemoStatus, resetDemo, type DemoStatus } from './lib/demoReset';
 
 type Tab = 'usage' | 'review' | 'overdue' | 'audit' | 'demo';
 
@@ -398,11 +398,12 @@ function DemoTab({ status, onReset }: { status: DemoStatus; onReset: () => void 
         <p className="text-xs text-ink-400">Last reset: {status.lastResetAt ? new Date(status.lastResetAt).toLocaleString() : 'never'}.</p>
       </div>
       <label className="block max-w-sm">
-        <span className="text-sm font-bold text-ink-700">Type <code>{RESET_PHRASE}</code> to confirm</span>
-        <input className="input mt-1" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" spellCheck={false} />
+        <span className="text-sm font-bold text-ink-700">To confirm, type the whole phrase: &ldquo;{RESET_PHRASE}&rdquo;</span>
+        <input className="input mt-1" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} aria-describedby="demo-reset-hint" />
+        <span id="demo-reset-hint" className={`text-xs mt-1 block ${isConfirmed(typed) ? 'text-emerald-700' : 'text-ink-500'}`}>{confirmHint(typed)}</span>
       </label>
       <div className="flex items-center gap-3">
-        <button onClick={reset} disabled={!isConfirmed(typed) || resetting} aria-busy={resetting} className="btn-primary text-sm disabled:opacity-60">
+        <button onClick={reset} disabled={!isConfirmed(typed) || resetting} aria-busy={resetting} className="btn-primary text-sm disabled:bg-ink-200 disabled:text-ink-500 disabled:shadow-none disabled:cursor-not-allowed">
           <RefreshCw size={14} /> {resetting ? 'Resetting…' : 'Reset the demo'}
         </button>
         <span role="status" aria-live="polite" className={`text-sm ${result?.ok ? 'text-emerald-700' : 'text-coral-600'}`}>{result?.text ?? ''}</span>

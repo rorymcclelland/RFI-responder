@@ -13,6 +13,14 @@ export interface DemoStatus { loaded: boolean; lastResetAt: string | null }
 /** The phrase must be typed exactly, as the database requires. */
 export const isConfirmed = (typed: string): boolean => typed === RESET_PHRASE;
 
+/** What the box still needs, shown under it, so a button that is not yet available does not look frozen. */
+export function confirmHint(typed: string): string {
+  if (isConfirmed(typed)) return 'Ready: the button resets the demo.';
+  if (!typed) return `Type the whole phrase, ${RESET_PHRASE}, in small letters. The button works once it matches.`;
+  if (RESET_PHRASE.startsWith(typed)) return `Keep typing: the button works once the box says ${RESET_PHRASE}.`;
+  return `Not quite: type ${RESET_PHRASE} exactly, in small letters, with no extra spaces.`;
+}
+
 /** Whether this installation has a demo to reset. Any failure counts as no demo, so nothing is offered. */
 export async function loadDemoStatus(client: SupabaseClient): Promise<DemoStatus> {
   const { data, error } = await client.rpc('demo_status');
