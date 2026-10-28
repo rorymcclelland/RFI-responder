@@ -99,3 +99,7 @@ An independent review of `main..sprint-16` found no high issue, three medium and
 | L9 | The docs said one update per entry took 11.3 seconds; that was the whole run, Voyage included, and batches are 64 | Reworded |
 | L10 | A doc comment had moved onto the wrong declaration | Moved |
 
+## The spike's results (28 October 2026)
+
+Delivered: the report, `docs/ux/sprint-16-ux-spike.md`; the independent walk-through it draws on, `docs/ux/sprint-16-independent-walkthrough.md`; and six clickable mockups of option B (the design "RFI Respond: jobs-first mockups"). Recommendation: option B, reorganising the screens around jobs over the same data and rules, in slices starting with the contributor; outline stories U-1 to U-10 for refinement from Sprint 17. The walk-through on the live demo is pending Rory signing in to the browser pane. Found on the way and fixed: the admin introduction still said to invite people from Supabase.
+
