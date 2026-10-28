@@ -103,3 +103,7 @@ An independent review of `main..sprint-16` found no high issue, three medium and
 
 Delivered: the report, `docs/ux/sprint-16-ux-spike.md`; the independent walk-through it draws on, `docs/ux/sprint-16-independent-walkthrough.md`; and six clickable mockups of option B (the design "RFI Respond: jobs-first mockups"). Recommendation: option B, reorganising the screens around jobs over the same data and rules, in slices starting with the contributor; outline stories U-1 to U-10 for refinement from Sprint 17. The walk-through on the live demo is pending Rory signing in to the browser pane. Found on the way and fixed: the admin introduction still said to invite people from Supabase.
 
+## Review and close (28 October 2026)
+
+All five stories done. Rory ran the test pack (`docs/testing/sprint-16-test-pack.md`): all four cases passed. The spike ended in a decision: option B, with the knowledge base as a full place in the app (Rory), in the order of slices set in the report (Claude, at Rory's request). Test counts at the close: 981 unit, 330 database.
+

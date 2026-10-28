@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in sixteen sprints (Sprints 0 to 15). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in seventeen sprints (Sprints 0 to 16). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -69,6 +69,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 13 | Exports send only the answer and record translation in the provenance; import duplicates judged per language; calibration measured across languages (not adopted: one near miss still reaches the bulk line) |
 | 14 | An invite-only hosted demo (Supabase Free in London, Vercel): the audit log append-only for the Edge Functions too, demo data the fictional people cannot sign in with, security headers and a build that refuses to ship a key, a ping that keeps the Free project awake, and no reset when you switch away and back |
 | 15 | Polishing the live demo: search by entry number, admins reset the demo and invite people from the app, the access helpers out of the API, policies checking the user once per query |
+| 16 | The last rough edges (a response shows it is loading, adding an entry is confirmed at once, a steady knowledge-base box) and a UX spike: the app to be reorganised around people's jobs, with the knowledge base as a full place (`docs/ux/`) |
 
 Each sprint followed the same cycle:
 

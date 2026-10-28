@@ -682,9 +682,9 @@ Refinement: `docs/refinement/sprint-15.md`. Rory added the invite screen (F-3) a
 | BUG-37 The SQL reset renumbered entries | Done in Sprint 15 (found while building) |
 | BUG-41 The reset from the app failed live; the confirmation looked frozen | Done in Sprint 15 (found at the hosted check) |
 | Two medium and seven low security review findings, five for information | Done in Sprint 15 (review) |
-| BUG-38 The knowledge-base modal moves as the search narrows | Backlog, from Rory's hosted check |
-| BUG-39 A response looks empty while its questions load | Backlog, from Rory's hosted check |
-| BUG-40 Adding an entry takes about 10 seconds | Backlog, from Rory's hosted check |
+| BUG-38 The knowledge-base modal moves as the search narrows | Done, Sprint 16 (S16-3) |
+| BUG-39 A response looks empty while its questions load | Done, Sprint 16 (S16-1) |
+| BUG-40 Adding an entry takes about 10 seconds | Done, Sprint 16 (S16-2) |
 
 **Not yet in a sprint, ranked at the Sprint 15 review.** 1. BUG-39 a loading state for a response (small; it is the first thing a reviewer sees). 2. BUG-40 confirm a new entry at once, index after (measure first). 3. BUG-38 a steady knowledge-base modal (small). 4. F-14 and F-15 reviewed Japanese and near-miss items (need people). 5. F-59 the near miss against Japanese entries. 6. F-20 rerankers. 7. F-34 review during processing. 8. F-60 Japanese keyword matching. 9. F-62 import edge cases. 10. F-8 leaked-password protection (needs the Pro plan). 11. F-2 generated database types. 12. F-4 Tailwind 4.
 
@@ -696,11 +696,31 @@ Refinement: `docs/refinement/sprint-16.md`. Any redesign the spike recommends is
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S16-1 | A response shows that it is loading, never an empty response | BUG-39 | Ready, Sprint 16 |
-| S16-2 | Adding an entry is confirmed at once; vectors saved in batches | BUG-40 | Ready, Sprint 16 |
-| S16-3 | The knowledge-base modal stays still while you search | BUG-38 | Ready, Sprint 16 |
-| S16-4 | Spike (two days): organising the app around jobs, not entities; report and clickable mockups | Rory, 28 October | Ready, Sprint 16 |
-| S16-5 | Independent review and the hosted check | | Ready, Sprint 16 |
+| S16-1 | A response shows that it is loading, never an empty response | BUG-39 | Done, Sprint 16 |
+| S16-2 | Adding an entry is confirmed at once; vectors saved in batches | BUG-40 | Done, Sprint 16 |
+| S16-3 | The knowledge-base modal stays still while you search | BUG-38 | Done, Sprint 16 |
+| S16-4 | Spike (two days): organising the app around jobs, not entities; report and clickable mockups | Rory, 28 October | Done, Sprint 16 |
+| S16-5 | Independent review and the hosted check | | Done, Sprint 16 |
+
+### Sprint 16 review (28 October 2026)
+
+**Checks, with evidence.** 981 unit and 330 database tests on `sprint-16`; lint, type check and `deno check` clean; CI green. An independent security review found no high issue, three medium and seven low; all fixed. Rory updated the live demo (one migration, `embed-entries` and `process-questions` redeployed) and ran the test pack (`docs/testing/sprint-16-test-pack.md`): all four cases passed. Claude checked the live project read-only: 62 migrations, the latest `20261104100000`; Rory's test entry KB-0133 indexed; no entry without a vector. After the reset in case 3, the 133 entries were saved in three batch calls, the first and last 2.8 seconds apart (the run's start is not logged), where the run before took 11.3 seconds with one request per entry.
+
+**The spike** (S16-4) delivered the report, the independent walk-through and clickable mockups; Rory chose option B, with the knowledge base as a full place in the app.
+
+### Where every Sprint 16 review item now lives
+
+| Item | Now |
+|---|---|
+| BUG-38, BUG-39, BUG-40 | Done in Sprint 16 |
+| The admin introduction still said to invite people from Supabase | Fixed in Sprint 16 (found by the spike's walk-through) |
+| Three medium and seven low security review findings | Done in Sprint 16 (review) |
+| Option B, stories U-1 to U-10 and K-1 to K-4 | Planned, Sprints 17 to 21 (`docs/ux/sprint-16-ux-spike.md`) |
+| Two people indexing at the same moment can still overlap (review, M2) | Accepted: rare on the demo, and the cost is a few pence |
+
+**Not yet in a sprint, ranked at the Sprint 16 review.** The redesign comes first, in the order set by the spike (Sprints 17 to 21). Then: 1. F-14 and F-15 reviewed Japanese and near-miss items (need people). 2. F-59 the near miss against Japanese entries. 3. F-20 rerankers. 4. F-34 review during processing. 5. F-60 Japanese keyword matching. 6. F-62 import edge cases. 7. F-8 leaked-password protection (needs the Pro plan). 8. F-2 generated database types. 9. F-4 Tailwind 4.
+
+**Proposed next.** Sprint 17: U-1 one vocabulary, U-2 controls only for those who can use them, and K-1 the knowledge base as a full page (overview, browse and search), replacing the pop-up.
 
 **The spike's decision (Rory, 28 October 2026).** Option B: reorganise the screens around jobs over the same data and access rules, with the knowledge base as a full place in the app rather than a pop-up, since it is the value proposition. Outline stories U-1 to U-10 and K-1 to K-4 are in `docs/ux/sprint-16-ux-spike.md`, planned for Sprints 17 to 21 in the order set there (Claude, at Rory's request), each refined at the previous sprint's close. Sprint 17: U-1 one vocabulary, U-2 controls only for those who can use them, K-1 knowledge as a full page.
 
@@ -782,9 +802,9 @@ Refinement: `docs/refinement/sprint-16.md`. Any redesign the spike recommends is
 | F-65 | Done, Sprint 15 (S15-2). Nine access policies call `auth.uid()` once per row rather than once per query; Supabase's performance advisor flags them | From the Sprint 14 go-live advisor check. Wrap as `(select auth.uid())`; no effect at demo scale |
 | BUG-36 | Done, Sprint 15 (S15-1). The knowledge-base search does not look at an entry's number, so searching for `KB-0101` finds nothing; it searches questions, answers and tags only. The Sprint 12 and 14 test packs wrongly told Rory to search by number | Found by Rory at the Sprint 14 hosted check, 27 October 2026. Match the number too (with or without the `KB-` prefix and leading zeros) |
 | BUG-37 | Done, Sprint 15 (S15-4). The Sprint 14 SQL reset emptied `kb_entries` without restarting its numbering, so after a reset the demo's entries would have been KB-0135 onwards while the demo responses cite KB-0001 to KB-0132 | Found while building S15-4; the live demo had never been reset. Both resets restart the numbering; tested |
-| BUG-38 | In the knowledge-base modal, the box shrinks and moves to stay centred as the search narrows the list, which is distracting | Reported by Rory at the Sprint 15 hosted check, 28 October 2026. Keep the modal's top (and search box) fixed and let its height change downwards, or give it a fixed height |
-| BUG-39 | Opening a response shows it as empty for a moment while its questions load, which looks like a response with no questions and would be confusing on a slow connection | Reported by Rory at the Sprint 15 hosted check. Show a loading state until the questions have loaded (the count is already on the response's card), and an error if they cannot be read |
-| BUG-40 | Adding a knowledge-base entry took about 10 seconds to confirm | Reported by Rory at the Sprint 15 hosted check. Likely cause, from the code: the form waits for the new entry to be indexed (`indexNewEntries`, an Edge Function that may start cold, then Voyage) before saying it was added. Measure first; then confirm the save at once and index afterwards, as imports do |
+| BUG-38 | Done, Sprint 16 (S16-3). In the knowledge-base modal, the box shrinks and moves to stay centred as the search narrows the list, which is distracting | Reported by Rory at the Sprint 15 hosted check, 28 October 2026. Keep the modal's top (and search box) fixed and let its height change downwards, or give it a fixed height |
+| BUG-39 | Done, Sprint 16 (S16-1). Opening a response shows it as empty for a moment while its questions load, which looks like a response with no questions and would be confusing on a slow connection | Reported by Rory at the Sprint 15 hosted check. Show a loading state until the questions have loaded (the count is already on the response's card), and an error if they cannot be read |
+| BUG-40 | Done, Sprint 16 (S16-2). Adding a knowledge-base entry took about 10 seconds to confirm | Reported by Rory at the Sprint 15 hosted check. Likely cause, from the code: the form waits for the new entry to be indexed (`indexNewEntries`, an Edge Function that may start cold, then Voyage) before saying it was added. Measure first; then confirm the save at once and index afterwards, as imports do |
 | BUG-41 | Done, Sprint 15. Every reset from the live app failed with "UPDATE requires a WHERE clause" (Supabase's `pg_safeupdate`), and the partly typed confirmation looked frozen | Found at the Sprint 15 hosted check; fixed in `20261103140000` with a test that no function has an UPDATE or DELETE without a WHERE clause, and a hint under the box |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
