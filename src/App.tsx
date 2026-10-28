@@ -287,9 +287,12 @@ export default function App() {
     }
   }
 
+  // Sprint 16 security review (M1): each toast gets its own full time; an earlier one's timer cannot clear it.
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = (msg: string, tone: 'ok' | 'error' = 'ok') => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast({ msg, tone });
-    setTimeout(() => setToast(null), tone === 'error' ? 10000 : 5000);
+    toastTimer.current = setTimeout(() => setToast(null), tone === 'error' ? 10000 : 5000);
   };
 
   const refreshKB = async () => {

@@ -1,6 +1,6 @@
 // Sprint 16. Test numbers refer to docs/refinement/sprint-16.md. Role matrix: decision 0003.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asServiceRole, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
+import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
 import { one } from './fixtures';
 
 let member: TestUser;
@@ -33,22 +33,38 @@ describe('S16-2 vectors are saved a batch at a time (BUG-40)', () => {
     });
   });
 
-  it('3. a missing entry, a repeated entry or a wrong-length vector saves nothing from the batch', async () => {
+  // Refusals rely on statement atomicity: a refused call changes nothing, so each is checked in a
+  // separate transaction from the one it ran in (security review, finding 8).
+  const savedCount = (ids: string[]) => asServiceRole(async (q) =>
+    (await q(`SELECT count(*)::int AS n FROM kb_entries WHERE id = ANY($1) AND embedding IS NOT NULL`, [ids])).rows[0].n);
+
+  it('3. a repeated entry, a wrong-length vector, or a missing vector or model refuses the batch', async () => {
     const ids = await entries(2);
-    const bad = [
-      [{ id: ids[0], embedding: vector(0), model: 'voyage-4' }, { id: '00000000-0000-0000-0000-000000000000', embedding: vector(1), model: 'voyage-4' }],
-      [{ id: ids[0], embedding: vector(0), model: 'voyage-4' }, { id: ids[0], embedding: vector(1), model: 'voyage-4' }],
-      [{ id: ids[0], embedding: vector(0), model: 'voyage-4' }, { id: ids[1], embedding: vector(1, 3), model: 'voyage-4' }],
+    const v = (id: string, seed = 0) => ({ id, embedding: vector(seed), model: 'voyage-4' });
+    const bad: unknown[][] = [
+      [v(ids[0]), v(ids[0], 1)],
+      [v(ids[0]), { id: ids[1], embedding: vector(1, 3), model: 'voyage-4' }],
+      [v(ids[0]), { id: ids[1], model: 'voyage-4' }],
+      [v(ids[0]), { id: ids[1], embedding: null, model: 'voyage-4' }],
+      [v(ids[0]), { id: ids[1], embedding: vector(1) }],
+      [v(ids[0]), { id: ids[1], embedding: vector(1), model: 5 }],
+      [v(ids[0]), { id: ids[1], embedding: vector(1), model: ' ' }],
+      [v(ids[0]), 'not an object'],
     ];
     for (const rows of bad) {
-      await asServiceRole(async (q) => {
-        await q('SAVEPOINT s');
-        await refused(q(`SELECT public.save_entry_vectors($1::jsonb)`, [JSON.stringify(rows)]));
-        await q('ROLLBACK TO SAVEPOINT s');
-        const saved = await q(`SELECT count(*)::int AS n FROM kb_entries WHERE id = ANY($1) AND embedding IS NOT NULL`, [ids]);
-        expect(saved.rows[0].n).toBe(0);
-      });
+      // Run as the owner, outside a rolled-back transaction, so a call that wrongly succeeded would stay
+      // saved and the count below would see it. The checks inside do not depend on who calls.
+      await refused(asSuperuser(`SELECT public.save_entry_vectors($1::jsonb)`, [JSON.stringify(rows)]));
+      expect(await savedCount(ids)).toBe(0);
     }
+  });
+
+  it('3. an entry deleted since it was read is skipped; the rest are saved', async () => {
+    const ids = await entries(2);
+    const rows = [{ id: ids[0], embedding: vector(0), model: 'voyage-4' }, { id: '00000000-0000-0000-0000-000000000000', embedding: vector(1), model: 'voyage-4' }];
+    await asServiceRole(async (q) => {
+      expect((await q(`SELECT public.save_entry_vectors($1::jsonb) AS n`, [JSON.stringify(rows)])).rows[0].n).toBe(1);
+    });
   });
 
   it('refuses a body that is not an array, or more than 128', async () => {
@@ -60,6 +76,8 @@ describe('S16-2 vectors are saved a batch at a time (BUG-40)', () => {
   it('4. only the service role may call it', async () => {
     const [id] = await entries(1);
     const rows = JSON.stringify([{ id, embedding: vector(0), model: 'voyage-4' }]);
-    for (const u of [null, member, admin]) await refused(as(u, (q) => q(`SELECT public.save_entry_vectors($1::jsonb)`, [rows])));
+    for (const u of [null, member, admin]) {
+      expect(await refused(as(u, (q) => q(`SELECT public.save_entry_vectors($1::jsonb)`, [rows])))).toMatch(/permission denied for function/);
+    }
   });
 });

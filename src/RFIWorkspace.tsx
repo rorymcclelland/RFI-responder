@@ -64,6 +64,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [loadError, setLoadError]         = useState('');
   // The latest load; an older one that finishes late is ignored.
   const loadSeq = useRef(0);
+  const loadMessage = useRef<HTMLParagraphElement>(null);
+  // Keeps focus on the message when Try again replaces the button (security review, L7).
+  useEffect(() => { if ((step === 'loading' || step === 'load_error') && document.activeElement === document.body) loadMessage.current?.focus(); }, [step]);
   const [fileName, setFileName]           = useState('');
   const [headers, setHeaders]             = useState<string[]>([]);
   const [questionCol, setQuestionCol]     = useState('');
@@ -91,16 +94,20 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const { assignments, handleAssign, handleUnassign } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
   /** Returns false if the questions could not be read; the caller decides what to show. */
-  const openSession = useCallback(async (session: RFISession, seq = loadSeq.current): Promise<boolean> => {
+  const openSession = useCallback(async (session: RFISession, given?: number): Promise<boolean> => {
+    // Opened by hand (no sequence given), it is the newest load: an earlier one finishing late is ignored (security review, M3).
+    const seq = given ?? ++loadSeq.current;
     let loaded: RFIQuestion[];
     try {
       loaded = await loadQuestions(supabase, session.id);
     } catch (err) {
-      if (seq === loadSeq.current) setUploadError((err as Error).message);
+      // On the automatic path the caller shows its own error (security review, L6).
+      if (seq === loadSeq.current && given === undefined) setUploadError((err as Error).message);
       return false;
     }
     const exported = await loadExportState(supabase, session.id);
     if (seq !== loadSeq.current) return true;
+    setUploadError('');
     setQuestions(loaded);
     setFileName(session.fileName);
     setSessionId(session.id);
@@ -344,18 +351,22 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     return true;
   });
 
-  if (step === 'loading') return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center" role="status" aria-live="polite">
-      <div className="w-10 h-10 mx-auto rounded-2xl bg-ink-900 animate-pulse" aria-hidden="true" />
-      <p className="mt-4 text-sm font-bold text-ink-800">Loading {opportunityName}…</p>
-      <p className="text-xs text-ink-400 mt-1">Reading its questions and answers.</p>
-    </div>
-  );
-
-  if (step === 'load_error') return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center" role="alert">
-      <p className="text-sm font-bold text-coral-600">{loadError}</p>
-      <button onClick={() => loadPastSessions(true)} className="btn-primary text-sm mt-4">Try again</button>
+  // Security review (L7): one live region that stays mounted, so the change from loading to an error is announced;
+  // focus moves to the message, and the pulse respects reduced motion.
+  if (step === 'loading' || step === 'load_error') return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center" aria-live="polite">
+      {step === 'loading' ? (
+        <>
+          <div className="w-10 h-10 mx-auto rounded-2xl bg-ink-900 motion-safe:animate-pulse" aria-hidden="true" />
+          <p ref={loadMessage} tabIndex={-1} className="mt-4 text-sm font-bold text-ink-800 outline-none">Loading {opportunityName}…</p>
+          <p className="text-xs text-ink-400 mt-1">Reading its questions and answers.</p>
+        </>
+      ) : (
+        <>
+          <p ref={loadMessage} tabIndex={-1} role="alert" className="text-sm font-bold text-coral-600 outline-none">{loadError}</p>
+          <button onClick={() => loadPastSessions(true)} className="btn-primary text-sm mt-4">Try again</button>
+        </>
+      )}
     </div>
   );
 

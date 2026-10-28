@@ -1,7 +1,8 @@
 // Sprint 0, story S0-4: the import summary the user sees (tests 1, 3 and 4).
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('./supabase', () => ({ supabase: {} }));
+const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
+vi.mock('./supabase', () => ({ supabase: { functions: { invoke } } }));
 const { describeImport } = await import('./knowledgeBase');
 
 describe('describeImport', () => {
@@ -99,3 +100,23 @@ describe('confirmThenIndex', async () => {
     expect(thrown).toHaveBeenCalledWith(expect.stringMatching(/KB-0136 is saved but could not be indexed yet \(offline\)/));
   });
 });
+
+// Sprint 16 security review (M2): overlapping calls share one run, so entries are not indexed (and paid for) twice.
+describe('indexNewEntries', async () => {
+  const { indexNewEntries } = await import('./knowledgeBase');
+  it('joins a run in progress, and starts a new one after it finishes', async () => {
+    let finish: (v: unknown) => void = () => undefined;
+    invoke.mockReset();
+    invoke.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
+    const a = indexNewEntries();
+    const b = indexNewEntries();
+    expect(invoke).toHaveBeenCalledTimes(1);
+    finish({ data: { embedded: 3 }, error: null });
+    expect(await a).toEqual({ ok: true, embedded: 3 });
+    expect(await b).toEqual({ ok: true, embedded: 3 });
+    invoke.mockResolvedValueOnce({ data: { embedded: 0 }, error: null });
+    expect(await indexNewEntries()).toEqual({ ok: true, embedded: 0 });
+    expect(invoke).toHaveBeenCalledTimes(2);
+  });
+});
+

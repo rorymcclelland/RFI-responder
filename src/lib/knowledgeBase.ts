@@ -78,12 +78,7 @@ export function describeImport(r: ImportResult): string {
   return parts.join('; ') + '.';
 }
 
-/**
- * Ask the server to embed entries that have no vector from the configured model yet
- * (S1-3). Never throws: an import still counts if indexing fails, and the entries
- * are picked up by the next call.
- */
-type IndexResult = { ok: true; embedded: number } | { ok: false; reason: string };
+export type IndexResult = { ok: true; embedded: number } | { ok: false; reason: string };
 
 /**
  * Sprint 16 (S16-2, BUG-40): the message for a saved entry, returned at once, while indexing runs in
@@ -96,7 +91,22 @@ export function confirmThenIndex(saved: { ref: string; reviewed: boolean }, inde
   return `${saved.ref} added.${saved.reviewed ? '' : ' An admin will review it; until then, drafts that cite it are not bulk-approved.'}`;
 }
 
-export async function indexNewEntries(): Promise<{ ok: true; embedded: number } | { ok: false; reason: string }> {
+/** The run in progress, shared by every caller until it finishes (Sprint 16 security review, M2). */
+let indexing: Promise<IndexResult> | null = null;
+
+/**
+ * Ask the server to embed entries that have no vector from the configured model yet
+ * (S1-3). Never throws: an import still counts if indexing fails, and the entries
+ * are picked up by the next call. A call made while a run is in progress joins that
+ * run, so two quick additions, or one during the sign-in run, do not index (and pay
+ * for) the same entries twice.
+ */
+export function indexNewEntries(): Promise<IndexResult> {
+  if (!indexing) indexing = runIndexing().finally(() => { indexing = null; });
+  return indexing;
+}
+
+async function runIndexing(): Promise<IndexResult> {
   const { data, error } = await supabase.functions.invoke('embed-entries', { body: {} });
   if (error || !data) return { ok: false, reason: (await functionErrorMessage(error)).message };
   const d = data as { embedded: number; limit?: string | null };

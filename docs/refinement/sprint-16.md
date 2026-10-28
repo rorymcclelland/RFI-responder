@@ -81,3 +81,21 @@ Order: S16-1 to S16-3 (independent, small), the review, then the spike, so its w
 | Q2 | Whose jobs it covers | The response owner, the contributor, the admin and a first-time reviewer of the demo **Rory: agreed** |
 | Q3 | How long the spike runs | One day, time-boxed; what is unfinished is listed, not stretched **Rory: two days** |
 | Q4 | Slow saving (BUG-40) | Confirm the save at once and save vectors in batches **Rory: agreed** |
+
+## Security review (28 October 2026)
+
+An independent review of `main..sprint-16` found no high issue, three medium and seven low; all are fixed, with a test where code changed.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | A toast's timer could clear the next one: an indexing failure shown after "KB-0133 added." vanished within moments | Each toast clears the previous timer and gets its full time |
+| M2 | With the save no longer waiting, two quick additions (or one during the sign-in run) started two indexing runs over the same entries, paying twice and possibly reporting a false failure | Calls in the app share the run in progress; tested. Two different people indexing at the same moment can still overlap, as before |
+| M3 | Opening a past session by hand did not take the newest place in the load sequence, so a slower earlier open could win | A hand-opened session is always the newest load |
+| L4 | A missing or null vector, or a missing or non-text model name, was accepted and could wipe a good vector | The batch is refused unless every element has an id, a vector array and a model name; tested |
+| L5 | One entry deleted between reading and saving refused the whole batch, already paid for | A deleted entry is skipped; a malformed or repeated one still refuses the batch |
+| L6 | After Try again succeeded, the earlier read error still showed | Cleared on success, and not set on the automatic path |
+| L7 | The loading and error states could go unannounced, focus fell to the page after Try again, and the pulse ignored reduced motion | One live region stays mounted, focus moves to the message, the pulse is `motion-safe` |
+| L8 | The batch tests' refusals were checked inside a rolled-back savepoint, and the role test accepted any error | Refusals are checked after a call that would have committed; the role test expects a permission error. S16-1's screen behaviour is checked by hand in the test pack, since nothing renders the workspace in tests |
+| L9 | The docs said one update per entry took 11.3 seconds; that was the whole run, Voyage included, and batches are 64 | Reworded |
+| L10 | A doc comment had moved onto the wrong declaration | Moved |
+

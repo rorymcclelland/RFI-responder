@@ -224,7 +224,7 @@ Provider failures and unreadable model replies do not produce an error status: e
 
 1. Read up to 64 pending entries with `pending_embeddings(model, max_rows)` (service role): entries not superseded whose vector is missing or from another model.
 2. Reserve them (kind `embed`). If fewer are allowed, embed only those and stop.
-3. Embed each entry's question and answer together as a document, and save `embedding`, `embedding_model` and `embedded_at` for the whole batch in one call, `save_entry_vectors`, all or nothing (Sprint 16; before, one update per entry took 11.3 seconds for 128 entries on the live demo).
+3. Embed each entry's question and answer together as a document, and save `embedding`, `embedding_model` and `embedded_at` for the whole batch in one call, `save_entry_vectors` (Sprint 16). Before, each entry was saved with its own request: on the live demo the run that re-indexed 128 entries after a reset, Voyage calls included, took 11.3 seconds. An entry deleted since it was read is skipped; a malformed or repeated one refuses the batch. In the app, a call made while one is still running joins it rather than starting a second run.
 4. Stop when a batch is short, the cap is reached, or the batch limit is reached.
 
 Each batch has its own reservation. In `finally`, usage is recorded under `embed-entries` with no session and every reservation is settled.
