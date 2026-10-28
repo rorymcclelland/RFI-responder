@@ -100,7 +100,7 @@ export const INTRO_STEPS: IntroStep[] = [
     id: 'admin',
     title: 'For admins: people, knowledge and spend',
     body: [
-      'Invite people from the Supabase dashboard, and give admin rights under **Team**. Add to the knowledge base from **KB**.',
+      'Invite people under **Team**, with **Invite someone**, and give admin rights there too. Add to the knowledge base from **KB**.',
       '**Governance** shows the AI spend against the monthly budget, sets the limits, and lists the entries waiting for your review.',
     ],
     image: '7-governance-usage.png',
