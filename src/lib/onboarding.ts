@@ -34,8 +34,8 @@ export const INTRO_STEPS: IntroStep[] = [
     id: 'overview',
     title: 'Every response in one place',
     body: [
-      '**Opportunities** lists the responses in progress, with their owners, due dates and progress, and flags those **At risk** or **Overdue**.',
-      'Choose **New Opportunity** to start one. Anyone can start a response and owns the ones they start.',
+      '**Responses** lists the responses in progress, with their owners, due dates and progress, and flags those **At risk** or **Overdue**.',
+      'Choose **New response** to start one. Anyone can start a response and owns the ones they start.',
     ],
     image: '1-overview.png',
     imageAlt: 'The overview of responses',
@@ -67,7 +67,7 @@ export const INTRO_STEPS: IntroStep[] = [
     id: 'review',
     title: 'Review, one at a time or in bulk',
     body: [
-      '**Accept** a draft, **Edit First**, or **Write an answer** when there is none. The owner can approve many drafts at once above a confidence.',
+      '**Approve** a draft, **Edit First**, or **Write an answer** when there is none. The owner can approve many drafts at once above a confidence.',
       'Some questions are never approved in bulk: pricing (a person always answers those), legal and translated questions, partly answered ones, and drafts that rely on an entry no admin has reviewed. Each card says why.',
     ],
     image: '4-pricing-held.png',
@@ -100,7 +100,7 @@ export const INTRO_STEPS: IntroStep[] = [
     id: 'admin',
     title: 'For admins: people, knowledge and spend',
     body: [
-      'Invite people under **Team**, with **Invite someone**, and give admin rights there too. Add to the knowledge base from **KB**.',
+      'Invite people under **Team**, with **Invite someone**, and give admin rights there too. Add to the knowledge base from **Knowledge**.',
       '**Governance** shows the AI spend against the monthly budget, sets the limits, and lists the entries waiting for your review.',
     ],
     image: '7-governance-usage.png',

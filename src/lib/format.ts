@@ -81,7 +81,7 @@ export function bulkHoldReason(q: {
     : q.checker.verdict === null && q.provenance.judgeModel !== null ? 'the checker gave a score but no verdict'
     : q.checker.verdict === null ? 'no checker is configured, so confidence comes from similarity alone'
     : null;
-  return why && `Not included in bulk approval: ${why}. Accept it on its own if the draft is right.`;
+  return why && `Not included in bulk approval: ${why}. Approve it on its own if the draft is right.`;
 }
 
 interface BandedTable { evaluationSet: string; bands?: { probability: number; n: number; low: number; high: number }[] }

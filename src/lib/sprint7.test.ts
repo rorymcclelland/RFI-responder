@@ -24,8 +24,8 @@ describe('S7-3 test 1: each origin from what was recorded', () => {
     [{ draftKind: 'insufficient_evidence' as const, generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Written.' }, 'written by a person'],
     [{ draftKind: 'person_required' as const, generatedAnswer: 'Pricing.', finalAnswer: 'Written.' }, 'written by a person'],
     // Security review, Sprint 7 (finding 3): accepted before the database refused it.
-    [{ draftKind: 'insufficient_evidence' as const, generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Insufficient evidence.' }, 'placeholder accepted unedited'],
-    [{ draftKind: 'person_required' as const, generatedAnswer: 'Pricing.', finalAnswer: ' Pricing. ' }, 'placeholder accepted unedited'],
+    [{ draftKind: 'insufficient_evidence' as const, generatedAnswer: 'Insufficient evidence.', finalAnswer: 'Insufficient evidence.' }, 'placeholder approved unedited'],
+    [{ draftKind: 'person_required' as const, generatedAnswer: 'Pricing.', finalAnswer: ' Pricing. ' }, 'placeholder approved unedited'],
     [{ status: 'skipped' as const }, 'not answered'],
     [{ draftKind: null, processed: false }, 'not recorded (processed before provenance was kept)'],
   ])('%o is "%s"', (over, origin) => {
@@ -110,15 +110,15 @@ describe('Security review, Sprint 7 (finding 7): the card says why a drafted que
     const { bulkHoldReason } = await import('./format');
     const pending = (over: Partial<RFIQuestion>) => q({ status: 'pending', ...over });
     expect(bulkHoldReason(pending({ checker: { verdict: 'partly', bestRef: null, reason: null } })))
-      .toBe('Not included in bulk approval: the checker said the entries answer it only in part. Accept it on its own if the draft is right.');
+      .toBe('Not included in bulk approval: the checker said the entries answer it only in part. Approve it on its own if the draft is right.');
     expect(bulkHoldReason(pending({ checker: { verdict: 'no', bestRef: null, reason: null } })))
-      .toBe('Not included in bulk approval: the checker said the entries do not answer it. Accept it on its own if the draft is right.');
+      .toBe('Not included in bulk approval: the checker said the entries do not answer it. Approve it on its own if the draft is right.');
     expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null } })))
-      .toBe('Not included in bulk approval: the checker gave a score but no verdict. Accept it on its own if the draft is right.');
+      .toBe('Not included in bulk approval: the checker gave a score but no verdict. Approve it on its own if the draft is right.');
     expect(bulkHoldReason(pending({}))).toBeNull();
     // Sprint 9 (F-40): similarity alone now has its own reason.
     expect(bulkHoldReason(pending({ checker: { verdict: null, bestRef: null, reason: null }, provenance: { ...base.provenance, judgeModel: null } })))
-      .toBe('Not included in bulk approval: no checker is configured, so confidence comes from similarity alone. Accept it on its own if the draft is right.');
+      .toBe('Not included in bulk approval: no checker is configured, so confidence comes from similarity alone. Approve it on its own if the draft is right.');
     expect(bulkHoldReason(pending({ gate: 'pricing', checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
     expect(bulkHoldReason(q({ checker: { verdict: 'partly', bestRef: null, reason: null } }))).toBeNull();
   });
@@ -130,6 +130,6 @@ describe('Sprint 11 (S11-10): a skip is recorded in the provenance', () => {
     const [r] = provenanceRows([q({ status: 'skipped', approval: null, skip: { by: 'u3', at: '2026-10-25T12:00:00Z' } })], names);
     expect(r.origin).toBe('not answered');
     expect(r.approvedBy).toBe('');
-    expect(r.approval).toBe('skipped by Priya Sharma, 2026-10-25T12:00:00Z');
+    expect(r.approval).toBe('left unanswered by Priya Sharma, 2026-10-25T12:00:00Z');
   });
 });

@@ -17,17 +17,17 @@ export const toSession = (r: Record<string, unknown>): RFISession => ({
   createdAt: r.created_at as string,
 });
 
-/** The response's sessions (newest first, at most ten) and any not linked to a response. Throws if either read fails. */
-export async function loadResponseSessions(client: SupabaseClient, opportunityId: string): Promise<{ linked: RFISession[]; orphans: RFISession[] }> {
-  const [linked, orphans] = await Promise.all([
-    client.from('rfi_sessions').select('*').eq('opportunity_id', opportunityId).order('created_at', { ascending: false }).limit(10),
-    client.from('rfi_sessions').select('*').is('opportunity_id', null).order('created_at', { ascending: false }).limit(10),
-  ]);
-  if (linked.error || orphans.error) {
-    console.error('rfi_sessions read failed', linked.error ?? orphans.error);
+/**
+ * The response's files (sessions; newest first, at most ten). Throws if the read fails. Since Sprint 17
+ * (S17-1) files not linked to any response are not read: they were listed in every response.
+ */
+export async function loadResponseSessions(client: SupabaseClient, opportunityId: string): Promise<{ linked: RFISession[] }> {
+  const linked = await client.from('rfi_sessions').select('*').eq('opportunity_id', opportunityId).order('created_at', { ascending: false }).limit(10);
+  if (linked.error) {
+    console.error('rfi_sessions read failed', linked.error);
     throw new Error('This response could not be loaded. Check your connection and try again.');
   }
-  return { linked: (linked.data ?? []).map(toSession), orphans: (orphans.data ?? []).map(toSession) };
+  return { linked: (linked.data ?? []).map(toSession) };
 }
 
 /** What to show first: the newest session, or the upload step for a response with none. */

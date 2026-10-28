@@ -73,8 +73,8 @@ export async function importEntries(entries: NewEntry[], origin: KbOrigin, origi
 export function describeImport(r: ImportResult): string {
   const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
   const parts = [`${plural(r.inserted, 'entry', 'entries')} added to the knowledge base`];
-  if (r.duplicates > 0) parts.push(`${plural(r.duplicates, 'duplicate', 'duplicates')} skipped`);
-  if (r.invalid > 0) parts.push(`${plural(r.invalid, 'row', 'rows')} without a question or answer skipped`);
+  if (r.duplicates > 0) parts.push(`${plural(r.duplicates, 'duplicate', 'duplicates')} left out`);
+  if (r.invalid > 0) parts.push(`${plural(r.invalid, 'row', 'rows')} without a question or answer left out`);
   return parts.join('; ') + '.';
 }
 

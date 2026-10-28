@@ -91,7 +91,7 @@ export default function AuthPage({ onAuthenticated }: Props) {
               {mode === 'login' ? 'Welcome back' : 'Reset password'}
             </h2>
             <p className="text-ink-500 mt-2 text-sm">
-              {mode === 'login' ? 'Sign in to continue to your workspace.' :
+              {mode === 'login' ? 'Sign in to continue.' :
                'We\'ll send you a link to reset your password.'}
             </p>
           </div>

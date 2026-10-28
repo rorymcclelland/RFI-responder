@@ -71,7 +71,7 @@ export async function readWordDocument(file: UploadLike): Promise<WordDocument> 
     throw new WordDocumentError('This is the older Word format (.doc). Open it in Word, save it as .docx, then upload that.');
   }
   if (name.endsWith('.docm') || name.endsWith('.dotm')) {
-    throw new WordDocumentError('Documents with macros (.docm) are not accepted. Save a copy as .docx without macros.');
+    throw new WordDocumentError('Documents with macros (.docm) cannot be used. Save a copy as .docx without macros.');
   }
   if (file.size > WORD_LIMITS.maxBytes) {
     throw new WordDocumentError(`The file is too large (limit ${WORD_LIMITS.maxBytes / 1024 / 1024} MB).`);
@@ -91,7 +91,7 @@ export async function readWordDocument(file: UploadLike): Promise<WordDocument> 
   const documentPart = zip.file('word/document.xml');
   if (!documentPart) throw notWord();
   if (zip.file(/vbaProject\.bin$/i).length > 0) {
-    throw new WordDocumentError('Documents with macros are not accepted. Save a copy as .docx without macros.');
+    throw new WordDocumentError('Documents with macros cannot be used. Save a copy as .docx without macros.');
   }
 
   // Declared sizes, read from the zip directory before anything is inflated.

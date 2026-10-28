@@ -5,9 +5,9 @@ Every question in a response has a card. This page explains each thing on it. Ch
 ## The heading
 
 - The dot and the bar show the confidence: green for **High** (80% or more), amber for **Medium** (40% to 80%), red for **Low** (under 40%), grey for **Not calibrated**. The bar reads `n/c` when there is no calibrated confidence.
-- The number is the question's place in the upload (the list itself is in review order); a small grey label beside it is the customer's own number for the question, kept in the export.
+- The number is the question's place in its file (the list itself is sorted by need); a small grey label beside it is the customer's own number for the question, kept in the export.
 - Badges say why the question is reviewed one at a time (below), and **Not processed yet** if matching and drafting have not run.
-- **Accepted**, **Accepted (edited)** or **Accepted (written by a person)**, with who accepted it and when, and "bulk at 80%" or similar if it was approved in bulk. **Skipped**, with who skipped it and when, if it was skipped.
+- **Approved**, **Approved (edited)** or **Approved (written by a person)**, with who approved it and when, and "bulk at 80%" or similar if it was approved in bulk. **Not answered**, with who left it unanswered and when.
 - **Assigned** (or how many are assigned) if colleagues have been asked to look at it.
 
 ## Confidence and similarity
@@ -18,7 +18,7 @@ Every question in a response has a card. This page explains each thing on it. Ch
 
 **Similarity** is how close the question is to the best-matching entry (or the keyword score, when matching fell back to keywords). It is not a probability, and a high similarity does not mean the entry answers the question; that is what the checker is for.
 
-A **Low confidence** warning appears on pending questions under 40%: the knowledge base probably does not answer them.
+A **Very low confidence** warning appears on questions still to do under 40%: the knowledge base probably does not answer them.
 
 ## Checker
 
@@ -31,7 +31,7 @@ Whether the matched entries actually answer the question, as judged by a languag
 
 The reason follows the verdict, usually naming the entry it relied on. Questions checked before 24 October 2026 may show **No** with no reason: before then, a reply that could not be read was recorded as No.
 
-When the verdict keeps a question out of bulk approval, a line under it says so, for example "Not included in bulk approval: the checker said the entries answer it only in part". Accept it on its own if the draft is right.
+When the verdict keeps a question out of bulk approval, a line under it says so, for example "Not included in bulk approval: the checker said the entries answer it only in part". Approve it on its own if the draft is right.
 
 ## Why a question is reviewed one at a time
 
@@ -50,7 +50,7 @@ These badges mean a question is never approved in bulk. Hover over the badge, or
 
 Pricing and legal questions are found two ways, by rules (words such as "price" or "indemnity") and by a language model, and a question is held if either finds it.
 
-## KB Sources
+## Knowledge-base sources
 
 The best-matching entries, up to three, which the draft is written from, each with its number and its similarity to the question. Choose one to read it in full.
 
@@ -70,7 +70,7 @@ The box explains why instead:
 
 - "Pricing question: a person answers this."
 - "No matching knowledge-base entry was found for this question."
-- "No confident match in the knowledge base": the closest entries are listed under KB Sources, but the confidence is under 30%, so they probably do not answer it.
+- "No confident match in the knowledge base": the closest entries are listed under Knowledge-base sources, but the confidence is under 30%, so they probably do not answer it.
 - The drafting model judged that the entries do not answer the question.
 
 A note under the answer says when a draft was written but not offered, for example because it cited an entry it was not given, or contained a figure that is not in its sources. In each case choose **Write an answer**.

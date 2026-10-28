@@ -7,12 +7,15 @@ import { QuestionAssignment, AssignmentStatus } from './types';
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 
+// Sprint 17 (S17-1): what the button does, in the glossary's words.
+const NEXT_ACTION: Record<string, string> = { in_review: 'Start working on it', answered: 'Mark as answered', approved: 'Mark as approved' };
+
 const STATUS_CONFIG: Record<AssignmentStatus, {
   label: string; icon: React.ReactNode;
   pill: string; next: AssignmentStatus | null;
 }> = {
-  pending:   { label: 'Pending',   icon: <Clock size={12} />,        pill: 'bg-ink-50 text-ink-600 border-ink-200',             next: 'in_review' },
-  in_review: { label: 'In Review', icon: <TrendingUp size={12} />,   pill: 'bg-amber-50 text-amber-700 border-amber-200',       next: 'answered' },
+  pending:   { label: 'Asked',   icon: <Clock size={12} />,        pill: 'bg-ink-50 text-ink-600 border-ink-200',             next: 'in_review' },
+  in_review: { label: 'Working on it', icon: <TrendingUp size={12} />,   pill: 'bg-amber-50 text-amber-700 border-amber-200',       next: 'answered' },
   answered:  { label: 'Answered',  icon: <CheckCircle2 size={12} />, pill: 'bg-sky-50 text-sky-700 border-sky-200',             next: 'approved' },
   approved:  { label: 'Approved',  icon: <CheckCheck size={12} />,   pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', next: null },
   closed:    { label: 'Closed',    icon: <Lock size={12} />,         pill: 'bg-ink-50 text-ink-400 border-ink-200',             next: null },
@@ -169,7 +172,7 @@ function AssignmentCard({ assignment, isOwn, tab, onStatusChange, onNotesUpdate 
                   className="btn-primary text-xs py-2"
                 >
                   {STATUS_CONFIG[nextStatus].icon}
-                  Mark as {STATUS_CONFIG[nextStatus].label}
+                  {NEXT_ACTION[nextStatus]}
                   <ArrowRight size={12} />
                 </button>
               )}
@@ -301,12 +304,12 @@ export default function UserInbox({ userId, isAdmin }: Props) {
         <div className="flex items-center gap-2">
           {pendingCount > 0 && (
             <span className="status-pill bg-amber-50 text-amber-700 border-amber-200 text-xs">
-              <Clock size={12} /> {pendingCount} pending
+              <Clock size={12} /> {pendingCount} asked
             </span>
           )}
           {inReviewCount > 0 && (
             <span className="status-pill bg-sky-50 text-sky-700 border-sky-200 text-xs">
-              <TrendingUp size={12} /> {inReviewCount} in review
+              <TrendingUp size={12} /> {inReviewCount} being worked on
             </span>
           )}
           <button onClick={loadAssignments} className="w-9 h-9 flex items-center justify-center text-ink-400 hover:text-ink-700 bg-white border border-ink-200 rounded-xl transition-colors shadow-card" title="Refresh">

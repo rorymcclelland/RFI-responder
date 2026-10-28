@@ -18,7 +18,7 @@ The app says what is wrong with a file it will not open. The usual reasons:
 |---|---|
 | Old Excel files (.xls) are not supported | Open it in Excel and save it as .xlsx. |
 | This is the older Word format (.doc) | Open it in Word and save it as .docx. |
-| Documents with macros are not accepted | Save a copy as .docx without macros. |
+| Documents with macros cannot be used | Save a copy as .docx without macros. |
 | The file is too large | The limit is 5 MB. Split the file, or remove images. |
 | The file has more than 2000 rows | Split it into smaller files. |
 | The CSV file is not valid UTF-8 text | Save it again as "CSV UTF-8" from Excel. |
@@ -49,7 +49,7 @@ That is deliberate when the knowledge base does not answer it, or it is about pr
 
 ### Many questions are "Not calibrated"
 
-The checker was unavailable while they were processed, or matching fell back to keywords (meaning-based search is unavailable, for example because an AI key is missing). The notes on each card say which. They can still be accepted one at a time.
+The checker was unavailable while they were processed, or matching fell back to keywords (meaning-based search is unavailable, for example because an AI key is missing). The notes on each card say which. They can still be approved one at a time.
 
 ### A message says meaning-based search is unavailable
 
@@ -57,21 +57,21 @@ Some knowledge-base entries could not be indexed. They are indexed before questi
 
 ## Review and approval
 
-### Bulk approval accepted fewer than I expected
+### Bulk approval approved fewer than I expected
 
-The message after it says why each group was held: below the threshold, pricing, legal or translated, citing an unreviewed or overdue entry, partly answered, or not calibrated. Those must be accepted one at a time. See [Approving in bulk](running-a-response.md#approving-in-bulk).
+The message after it says why each group was held: below the threshold, pricing, legal or translated, citing an unreviewed or overdue entry, partly answered, or not calibrated. Those must be approved one at a time. See [Approving in bulk](running-a-response.md#approving-in-bulk).
 
-### The bulk buttons are greyed out, or there is no Accept
+### The bulk buttons are greyed out, or there is no Approve
 
 Only the response's owner or an admin can approve in bulk; others see the bar with its buttons greyed out (hover for why), and **Record export** is shown only to the owner and admins. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
 
-### I cannot accept a question with no draft
+### I cannot approve a question with no draft
 
 Write its answer first; a placeholder is not an answer.
 
 ### Record export is not available
 
-Every question must be accepted or skipped first; hover over the button to see how many are still pending.
+Every question must be approved or left unanswered first; hover over the button to see how many are still to do.
 
 ### I cannot archive a response as Won or Lost
 
@@ -93,9 +93,9 @@ Suggestions come from who wrote the entries matched to the question, who approve
 
 ## The knowledge base
 
-### An import skipped rows
+### An import left out rows
 
-Rows without a question or an answer are skipped, and so are questions already in the knowledge base (ignoring case and spacing), including repeats within the same file.
+Rows without a question or an answer are left out, and so are questions already in the knowledge base (ignoring case and spacing), including repeats within the same file.
 
 ### My entry says "Not yet reviewed"
 

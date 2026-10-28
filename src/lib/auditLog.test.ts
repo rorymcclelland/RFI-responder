@@ -29,7 +29,7 @@ describe('the audit-log screen (Sprint 11, S11-9)', () => {
 
   it('describes the details', () => {
     expect(describeAudit({ action: 'response.exported', details: { accepted: 5, skipped: 1, added: 2, re_export: true } }))
-      .toBe('Recorded the export again after changes: 5 accepted, 1 skipped; learned 2 added.');
+      .toBe('Recorded the export again after changes: 5 approved, 1 not answered; learned 2 added.');
     expect(describeAudit({ action: 'settings.changed', details: { before: { monthly_budget_gbp: 10, alert_share: 0.8 }, after: { monthly_budget_gbp: 25, alert_share: 0.8 } } }))
       .toBe('Changed the limits: monthly budget gbp: 10 to 25.');
     expect(describeAudit({ action: 'user.admin_granted', details: {}, targetId: 'u1' }, new Map([['u1', 'Tom Richardson']])))

@@ -13,7 +13,7 @@ function SessionRow({ session: s, onLoad }: { session: RFISession; onLoad: (s: R
         <p className="text-sm font-bold text-ink-800 truncate">{s.fileName}</p>
         <p className="text-xs text-ink-400 font-medium">
           {new Date(s.createdAt).toLocaleDateString()} · {s.questionCount} questions
-          {s.status === 'completed' && ` · ${s.acceptedCount} accepted`}
+          {s.status === 'completed' && ` · ${s.acceptedCount} approved`}
         </p>
       </div>
       <span className={`status-pill flex-shrink-0 ${
@@ -38,7 +38,7 @@ function SessionList({ title, note, sessions, onLoad, onRefresh }: {
         <p className="text-sm font-bold text-ink-700">{title}</p>
         {note && <span className="text-2xs text-ink-400 font-medium bg-ink-100 px-2 py-0.5 rounded-full">{note}</span>}
         {onRefresh && (
-          <button onClick={onRefresh} aria-label="Refresh sessions" className="ml-auto w-7 h-7 flex items-center justify-center text-ink-400 hover:text-ink-700 hover:bg-ink-100 rounded-lg transition-colors">
+          <button onClick={onRefresh} aria-label="Refresh the list of files" className="ml-auto w-7 h-7 flex items-center justify-center text-ink-400 hover:text-ink-700 hover:bg-ink-100 rounded-lg transition-colors">
             <RefreshCw size={13} />
           </button>
         )}
@@ -50,11 +50,10 @@ function SessionList({ title, note, sessions, onLoad, onRefresh }: {
   );
 }
 
-export default function UploadStep({ opportunityName, error, pastSessions, orphanSessions, onFile, onLoadSession, onRefresh }: {
+export default function UploadStep({ opportunityName, error, pastSessions, onFile, onLoadSession, onRefresh }: {
   opportunityName: string;
   error: string;
   pastSessions: RFISession[];
-  orphanSessions: RFISession[];
   onFile: (file: File) => void;
   onLoadSession: (s: RFISession) => void;
   onRefresh: () => void;
@@ -77,7 +76,7 @@ export default function UploadStep({ opportunityName, error, pastSessions, orpha
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       <div>
-        <h2 className="text-3xl font-black text-ink-900 tracking-tight">New RFI Session</h2>
+        <h2 className="text-3xl font-black text-ink-900 tracking-tight">Add the questions</h2>
         <p className="text-ink-500 mt-2 text-sm font-medium max-w-lg">
           Upload questions for <strong className="text-ink-700">{opportunityName}</strong>. Each question is matched against the knowledge base,
           checked for pricing and legal terms, and drafted from the matching entries for you to review.
@@ -116,7 +115,7 @@ export default function UploadStep({ opportunityName, error, pastSessions, orpha
         {[
           { n: '1', icon: <Upload size={18} />, title: 'Upload', desc: 'CSV, Excel or Word' },
           { n: '2', icon: <Sparkles size={18} />, title: 'Match and draft', desc: 'From the knowledge base' },
-          { n: '3', icon: <CheckCircle2 size={18} />, title: 'Review', desc: 'Accept, edit or skip' },
+          { n: '3', icon: <CheckCircle2 size={18} />, title: 'Review', desc: 'Approve, edit or leave unanswered' },
           { n: '4', icon: <FileDown size={18} />, title: 'Export', desc: 'Excel, CSV or Word' },
         ].map((s) => (
           <div key={s.n} className="bg-white rounded-2xl border border-ink-100 shadow-card p-4 text-center hover:shadow-card-hover hover:-translate-y-0.5 transition-all">
@@ -127,17 +126,10 @@ export default function UploadStep({ opportunityName, error, pastSessions, orpha
         ))}
       </div>
 
-      {(pastSessions.length > 0 || orphanSessions.length > 0) && (
+      {/* Sprint 17 (S17-1): files not linked to any response are no longer listed in every response. */}
+      {pastSessions.length > 0 && (
         <div className="space-y-6">
-          {pastSessions.length > 0 && <SessionList title="Previous Sessions" sessions={pastSessions} onLoad={onLoadSession} onRefresh={onRefresh} />}
-          {orphanSessions.length > 0 && (
-            <SessionList
-              title={pastSessions.length > 0 ? 'Other Sessions' : 'Previous Sessions'}
-              note={pastSessions.length > 0 ? 'not linked to this opportunity' : undefined}
-              sessions={orphanSessions}
-              onLoad={onLoadSession}
-            />
-          )}
+          <SessionList title="Files in this response" sessions={pastSessions} onLoad={onLoadSession} onRefresh={onRefresh} />
         </div>
       )}
     </div>

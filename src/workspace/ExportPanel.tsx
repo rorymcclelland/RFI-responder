@@ -61,7 +61,7 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
 
         <div className="border-t border-ink-100 pt-4">
           {onStartNew && <button onClick={onStartNew} className="btn-ghost text-sm">
-            <Upload size={15} /> Start New RFI
+            <Upload size={15} /> Add another file
           </button>}
         </div>
       </div>

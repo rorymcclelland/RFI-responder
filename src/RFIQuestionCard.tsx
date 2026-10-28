@@ -130,7 +130,7 @@ const ASSIGNMENT_BADGE: Record<string, string> = {
   approved:  'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 const ASSIGNMENT_LABEL: Record<string, string> = {
-  pending: 'Pending', in_review: 'In Review', answered: 'Answered', approved: 'Approved',
+  pending: 'Asked', in_review: 'Working on it', answered: 'Answered', approved: 'Approved',
 };
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
@@ -357,7 +357,7 @@ export default function RFIQuestionCard({
             {question.status === 'accepted' && (
               <span className="flex items-center gap-1 text-2xs text-emerald-700 font-bold">
                 <CheckCircle2 size={11} />
-                {source === 'person' ? 'Accepted (written by a person)' : source === 'edited' ? 'Accepted (edited)' : 'Accepted'}
+                {source === 'person' ? 'Approved (written by a person)' : source === 'edited' ? 'Approved (edited)' : 'Approved'}
                 {question.approval && (
                   <span className="font-medium text-emerald-600">
                     {' '}by {users.find((u) => u.id === question.approval!.by)?.displayName ?? 'a team member'},{' '}
@@ -369,7 +369,7 @@ export default function RFIQuestionCard({
             )}
             {question.status === 'skipped' && (
               <span className="text-2xs text-ink-400 font-bold">
-                Skipped
+                Not answered
                 {question.skip && (
                   <span className="font-medium">
                     {' '}by {users.find((u) => u.id === question.skip!.by)?.displayName ?? 'a team member'},{' '}
@@ -459,7 +459,7 @@ export default function RFIQuestionCard({
           {question.sources.length > 0 && (
             <div>
               <p className="section-label mb-2.5 flex items-center gap-1.5">
-                <BookOpen size={11} /> KB Sources
+                <BookOpen size={11} /> Knowledge-base sources
                 <InfoTip text="Knowledge-base entries this draft was assembled from. Click to read the full entry." />
               </p>
               <div className="flex flex-wrap gap-2">
@@ -503,7 +503,7 @@ export default function RFIQuestionCard({
               <p className="section-label flex items-center gap-1.5">
                 {editing ? 'Edit Response' : ANSWER_HEADING[source]}
                 {!editing && <InfoTip text={source === 'draft'
-                  ? `${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'}${placeholderOnly ? ' Write the answer, or skip.' : ' Accept as it is, edit, or skip.'}`
+                  ? `${question.draftKind ? DRAFT_KIND_TIP[question.draftKind] : 'Draft assembled from the best-matching knowledge-base answers, with references.'}${placeholderOnly ? ' Write the answer, or leave it unanswered.' : ' Approve it as it is, edit it, or leave it unanswered.'}`
                   : ANSWER_TIP[source]} />}
               </p>
               {!editing && canDecide && question.status !== 'skipped' && (
@@ -527,7 +527,7 @@ export default function RFIQuestionCard({
                 <div className="flex items-center gap-2">
                   <button onClick={() => { onAccept(editText); setEditing(false); }} className="btn-primary text-xs py-2 disabled:opacity-50"
                     disabled={needsWrittenAnswer({ ...question, finalAnswer: editText })}>
-                    <CheckCircle2 size={13} /> Save & Accept
+                    <CheckCircle2 size={13} /> Save & approve
                   </button>
                   <button onClick={() => { setEditing(false); setEditText(question.finalAnswer); }} className="btn-ghost text-xs py-2">
                     Cancel
@@ -573,7 +573,7 @@ export default function RFIQuestionCard({
                   ) : (
                     <>
                       <button onClick={handleAccept} className="btn-primary text-xs py-2">
-                        <CheckCircle2 size={14} /> Accept
+                        <CheckCircle2 size={14} /> Approve
                       </button>
                       <button onClick={handleStartEdit} className="btn-ghost text-xs py-2">
                         <Pencil size={13} /> Edit First
@@ -582,7 +582,7 @@ export default function RFIQuestionCard({
                   )}
                   <button onClick={(e) => { e.stopPropagation(); onSkip(); }}
                     className="flex items-center gap-1.5 text-xs font-bold text-ink-400 hover:text-ink-700 transition-colors ml-auto">
-                    <SkipForward size={13} /> Skip
+                    <SkipForward size={13} /> Leave unanswered
                   </button>
                 </>
               )}
@@ -603,7 +603,7 @@ export default function RFIQuestionCard({
             <div className="flex items-start gap-2.5 p-3.5 bg-coral-50 border border-coral-200 rounded-xl">
               <AlertTriangle size={14} className="flex-shrink-0 mt-0.5 text-coral-500" />
               <p className="text-xs text-coral-700 font-medium leading-relaxed">
-                Low confidence: the knowledge base probably does not answer this. Review carefully before accepting.
+                Very low confidence: the knowledge base probably does not answer this. Review carefully before approving.
               </p>
             </div>
           )}

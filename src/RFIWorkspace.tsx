@@ -14,6 +14,7 @@ import { describeExtraction, fromExtraction, toInsertRows, type Draft } from './
 import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
 import { firstView, loadResponseSessions } from './workspace/openResponse';
+import { CONF_GROUPS, inGroup, type ConfidenceGroup } from './workspace/confidenceBands';
 import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
 import { describeLearning, recordExport } from './lib/responses';
@@ -43,19 +44,8 @@ interface Props {
 // Sprint 16 (S16-1): 'loading' until the response's sessions are read; 'load_error' if they cannot be.
 type WorkflowStep    = 'loading' | 'load_error' | 'idle' | 'mapping' | 'preview' | 'processing' | 'review' | 'export';
 type FilterTab       = 'all' | 'pending' | 'accepted' | 'skipped';
-type ConfidenceGroup = 'all' | 'high' | 'medium' | 'low' | 'uncalibrated';
-
-const CONF_GROUPS: { key: ConfidenceGroup; label: string; min: number; max: number; dot: string }[] = [
-  { key: 'high',   label: 'High ≥80%',    min: 0.80, max: 1.01, dot: 'bg-emerald-500' },
-  { key: 'medium', label: 'Medium 40–80%', min: 0.40, max: 0.80, dot: 'bg-amber-400' },
-  { key: 'low',    label: 'Low <40%',      min: 0,    max: 0.40, dot: 'bg-coral-500' },
-  { key: 'uncalibrated', label: 'Not calibrated', min: NaN, max: NaN, dot: 'bg-ink-300' },
-];
-
-function inGroup(confidence: number | null, g: { key: ConfidenceGroup; min: number; max: number }): boolean {
-  if (g.key === 'uncalibrated') return confidence === null;
-  return confidence !== null && confidence >= g.min && confidence < g.max;
-}
+// Sprint 17 (S17-1): the glossary's words for the stored statuses.
+const FILTER_LABEL: Record<FilterTab, string> = { all: 'All', pending: 'To do', accepted: 'Approved', skipped: 'Not answered' };
 
 
 
@@ -79,7 +69,6 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [expandedId, setExpandedId]       = useState<string | null>(null);
   const [sessionId, setSessionId]         = useState<string | null>(null);
   const [pastSessions, setPastSessions]   = useState<RFISession[]>([]);
-  const [orphanSessions, setOrphanSessions] = useState<RFISession[]>([]);
   const [learning, setLearning]           = useState('');
   const [uploadError, setUploadError]     = useState('');
   const [notice, setNotice]               = useState('');
@@ -123,10 +112,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     const seq = ++loadSeq.current;
     if (autoResume) { setStep('loading'); setLoadError(''); }
     try {
-      const { linked, orphans } = await loadResponseSessions(supabase, opportunityId);
+      const { linked } = await loadResponseSessions(supabase, opportunityId);
       if (seq !== loadSeq.current) return;
       setPastSessions(linked);
-      setOrphanSessions(orphans);
       if (!autoResume) return;
       const view = firstView(linked);
       if (view === 'upload') { setStep('idle'); return; }
@@ -208,7 +196,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       .insert({ file_name: fileName, question_count: asked.length, opportunity_id: opportunityId })
       .select().maybeSingle();
     if (error || !session) {
-      setUploadError(`The session could not be created: ${error?.message ?? 'no response'}`);
+      setUploadError(`The file could not be added: ${error?.message ?? 'no response'}`);
       return;
     }
     setSessionId(session.id);
@@ -231,7 +219,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       .insert({ file_name: fileName, question_count: rows.length, opportunity_id: opportunityId })
       .select().maybeSingle();
     if (error || !session) {
-      setUploadError(`The session could not be created: ${error?.message ?? 'no response'}`);
+      setUploadError(`The file could not be added: ${error?.message ?? 'no response'}`);
       return;
     }
     setSessionId(session.id);
@@ -375,7 +363,6 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       opportunityName={opportunityName}
       error={uploadError}
       pastSessions={pastSessions}
-      orphanSessions={orphanSessions}
       onFile={processFile}
       onLoadSession={openSession}
       onRefresh={() => loadPastSessions()}
@@ -440,16 +427,16 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           {/* F-23: start another upload for this response without finishing this one. */}
           {!archived && (
             <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
-              <Upload size={12} /> New upload
+              <Upload size={12} /> Add a file
             </button>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap ml-auto">
           {[
             { label: `${totalCount}`, sub: 'total',    cls: 'bg-white border-ink-200 text-ink-700' },
-            { label: `${acceptedCount}`, sub: 'accepted', cls: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-            { label: `${pendingCount}`, sub: 'pending',  cls: pendingCount > 0 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-ink-100 text-ink-400' },
-            ...(skippedCount > 0 ? [{ label: `${skippedCount}`, sub: 'skipped', cls: 'bg-white border-ink-200 text-ink-500' }] : []),
+            { label: `${acceptedCount}`, sub: 'approved', cls: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
+            { label: `${pendingCount}`, sub: 'to do',  cls: pendingCount > 0 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-ink-100 text-ink-400' },
+            ...(skippedCount > 0 ? [{ label: `${skippedCount}`, sub: 'not answered', cls: 'bg-white border-ink-200 text-ink-500' }] : []),
           ].map((s) => (
             <span key={s.sub} className={`inline-flex items-baseline gap-1 px-3 py-1.5 rounded-xl border text-xs font-bold ${s.cls}`}>
               {s.label} <span className="font-medium opacity-70">{s.sub}</span>
@@ -470,7 +457,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           eligible={questions.filter(bulkEligible).length}
           held={pending.filter((q) => !bulkEligible(q)).length}
           showFinish={step === 'review' && canAssign}
-          finishBlockedBy={allDone ? null : `${pendingCount} question${pendingCount !== 1 ? 's are' : ' is'} still pending: accept or skip ${pendingCount !== 1 ? 'each' : 'it'} first`}
+          finishBlockedBy={allDone ? null : `${pendingCount} question${pendingCount !== 1 ? 's are' : ' is'} still to do: approve ${pendingCount !== 1 ? 'each' : 'it'} or leave ${pendingCount !== 1 ? 'them' : 'it'} unanswered first`}
           onBulk={runBulkAccept}
           onFinish={finishSession}
         />
@@ -490,7 +477,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-medium">
           <AlertTriangle size={14} className="flex-shrink-0" />
           <span className="flex-1">
-            {unprocessed.length} pending question{unprocessed.length !== 1 ? 's have' : ' has'} not been checked and drafted by the server
+            {unprocessed.length} question{unprocessed.length !== 1 ? 's' : ''} to do {unprocessed.length !== 1 ? 'have' : 'has'} not been checked and drafted by the server
             (a batch failed, or the session was created by an earlier version of the app), so {unprocessed.length !== 1 ? 'they are' : 'it is'} not available for bulk approval.
           </span>
           <button onClick={() => sessionId && processAndReload(sessionId, unprocessed.map((q) => q.id))} className="btn-ghost text-xs py-1.5">
@@ -513,10 +500,10 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
               const cnt: Record<FilterTab, number> = { all: totalCount, pending: pendingCount, accepted: acceptedCount, skipped: skippedCount };
               return (
                 <button key={t} onClick={() => setFilter(t)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-bold capitalize transition-all ${
+                  className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
                     filter === t ? 'bg-ink-900 text-white' : 'text-ink-500 hover:text-ink-800 hover:bg-ink-50'
                   }`}>
-                  {t} <span className="opacity-60">({cnt[t]})</span>
+                  {FILTER_LABEL[t]} <span className="opacity-60">({cnt[t]})</span>
                 </button>
               );
             })}

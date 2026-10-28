@@ -14,11 +14,11 @@ The first time you sign in, a short introduction explains what the app does. You
 
 The bar at the top of every screen has:
 
-- **Opportunities**: every response in progress, with its owner, due date and progress. This is where you start.
+- **Responses**: every response in progress, with its owner, due date and progress. This is where you start.
 - **Assignments**: questions colleagues have asked you to answer or check, and the ones you have sent to others.
-- **Team**: everyone in your organisation's workspace, with their job titles and areas of expertise.
+- **Team**: everyone in your organisation, with their job titles and areas of expertise.
 - **Governance** (admins only): spend, limits, and knowledge-base entries waiting for review.
-- **KB**: the knowledge base, with the number of entries. Open it to search entries, add one, or import a spreadsheet of questions and answers. Entries can be in English or Japanese; matching is by meaning, so a question can match an entry in the other language.
+- **Knowledge**: the knowledge base, with the number of entries. Open it to search entries, add one, or import a spreadsheet of questions and answers. Entries can be in English or Japanese; matching is by meaning, so a question can match an entry in the other language.
 - **Help**: this guide, and the introduction.
 - Your name, and **Sign out** (the arrow icon).
 
@@ -30,16 +30,16 @@ On a narrow window some of these show as icons only; hover over an icon to see i
 
 ## The overview
 
-**Opportunities** lists the responses in progress (**Active**) and finished ones (**Archived**). Each card shows:
+**Responses** lists the responses in progress (**Active**) and finished ones (**Archived**). Each card shows:
 
-- the response's name, its owner and its stage: **New** (no questions yet), **In review** (questions still pending), **Ready** (every question decided), **Exported**, **Changed since export** (an answer changed after the export was recorded), or **Archived** with its outcome;
+- the response's name, its owner and its stage: **No questions yet**, **In progress** (questions still to do), **Ready to send** (every question decided), **Exported**, **Changed since export** (an answer changed after the export was recorded), or **Archived** with its outcome;
 - how many of its questions are decided, and how many pricing or legal questions are still open;
 - the due date, and **Overdue** or **At risk** when it needs attention: at risk means three working days or fewer left with less than 80% of questions decided (or none uploaded yet), or a day or less left with pricing or legal questions still open;
 - how many assignments to colleagues are still open (**with experts**). An owner or admin counts them all; anyone else counts only their own.
 
-The tiles at the top count the responses **In review**, **Ready to export**, **At risk** and **Overdue**; choose the first two to filter the list. You can also filter by stage, show **Mine only**, or search by name.
+The tiles at the top count the responses **In progress**, **Ready to send**, **At risk** and **Overdue**; choose one to filter the list. You can also filter by stage, show **Mine only**, or search by name.
 
-Choose a card to open its workspace.
+Choose a card to open the response.
 
 ## Your profile
 
@@ -49,4 +49,4 @@ Under **Team**, choose **Edit** on your own card to change your display name, jo
 
 - To answer a questionnaire, read [Running a response](running-a-response.md).
 - If a colleague has sent you a question, read [Answering assigned questions](specialists.md).
-- If you look after the workspace, read [Administering RFI Respond](admin.md).
+- If you look after RFI Respond for your organisation, read [Administering RFI Respond](admin.md).

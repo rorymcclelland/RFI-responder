@@ -83,9 +83,9 @@ function ContributorAvatars({ opportunityId }: { opportunityId: string }) {
 // ─── Stage ─────────────────────────────────────────────────────────────────────
 
 const STAGE: Record<ResponseStage, { label: string; pill: string; accent: string }> = {
-  new:       { label: 'New',       pill: 'bg-sky-50 text-sky-700 border-sky-200',             accent: 'border-l-sky-300' },
-  in_review: { label: 'In review', pill: 'bg-amber-50 text-amber-700 border-amber-200',       accent: 'border-l-amber-300' },
-  ready:     { label: 'Ready',     pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', accent: 'border-l-emerald-400' },
+  new:       { label: 'No questions yet',       pill: 'bg-sky-50 text-sky-700 border-sky-200',             accent: 'border-l-sky-300' },
+  in_review: { label: 'In progress', pill: 'bg-amber-50 text-amber-700 border-amber-200',       accent: 'border-l-amber-300' },
+  ready:     { label: 'Ready to send',     pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', accent: 'border-l-emerald-400' },
   exported:  { label: 'Exported',  pill: 'bg-ink-900 text-white border-ink-900',              accent: 'border-l-ink-700' },
   // Sprint 11 (S11-1): answers changed after the export was recorded; record it again.
   changed:   { label: 'Changed since export', pill: 'bg-amber-50 text-amber-800 border-amber-300', accent: 'border-l-amber-400' },
@@ -129,7 +129,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
     }
   };
   return (
-    <Modal title="New Opportunity" onClose={onClose}>
+    <Modal title="New response" onClose={onClose}>
       <div className="p-6 space-y-5">
         <div>
           <label htmlFor="new-name" className="block text-xs font-bold text-ink-600 mb-2 uppercase tracking-wide">Name <span className="text-coral-500">*</span></label>
@@ -205,7 +205,7 @@ function DeleteModal({ opp, onClose, onDone }: { opp: Opportunity; onClose: () =
     <Modal title={`Delete ${opp.name}`} onClose={onClose}>
       <div className="p-6 space-y-4">
         <p className="text-sm text-ink-600">
-          Deleting is only for responses created in error. It removes the response, its sessions and questions permanently,
+          Deleting is only for responses created in error. It removes the response, its files and questions permanently,
           and is recorded in the audit log with your reason. To keep a finished response, archive it instead.
         </p>
         <label htmlFor="delete-reason" className="block text-xs font-bold text-ink-600 uppercase tracking-wide">Reason (at least 10 characters)</label>
@@ -327,7 +327,7 @@ function ResponseCard({ opp, canEdit, canDelete, onOpen, onChanged, onArchive, o
         <div className="pt-3 border-t border-ink-50"><ContributorAvatars opportunityId={opp.id} /></div>
       </div>
       <div className="px-5 pb-4">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-400 group-hover:text-ink-700 transition-colors">Open workspace <ArrowRight size={12} /></div>
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-400 group-hover:text-ink-700 transition-colors">Open <ArrowRight size={12} /></div>
       </div>
     </div>
   );
@@ -375,8 +375,8 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
     && (!search || r.name.toLowerCase().includes(search.toLowerCase())));
   const active = responses.filter((r) => r.archivedAt === null);
   const tiles = [
-    { label: 'In review', value: active.filter((r) => r.stage === 'in_review').length, onClick: () => { setTab('active'); setStage('in_review'); } },
-    { label: 'Ready to export', value: active.filter((r) => r.stage === 'ready').length, onClick: () => { setTab('active'); setStage('ready'); } },
+    { label: 'In progress', value: active.filter((r) => r.stage === 'in_review').length, onClick: () => { setTab('active'); setStage('in_review'); } },
+    { label: 'Ready to send', value: active.filter((r) => r.stage === 'ready').length, onClick: () => { setTab('active'); setStage('ready'); } },
     { label: 'At risk', value: active.filter((r) => r.atRisk).length, warn: true },
     { label: 'Overdue', value: active.filter((r) => r.overdue).length, warn: true },
   ];
@@ -395,14 +395,14 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
           <div>
-            <h1 className="text-3xl font-black text-ink-900 tracking-tight">Opportunities</h1>
+            <h1 className="text-3xl font-black text-ink-900 tracking-tight">Responses</h1>
             <p className="text-ink-500 mt-1.5 text-sm font-medium">
               Every response in flight, with its owner, due date and progress. Finished responses are archived with their outcome.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button onClick={onImportKB} className="btn-ghost text-sm"><Plus size={15} /> Import KB</button>
-            <button onClick={() => setCreating(true)} className="btn-primary text-sm"><Plus size={15} /> New Opportunity</button>
+            <button onClick={onImportKB} className="btn-ghost text-sm"><Plus size={15} /> Import to the knowledge base</button>
+            <button onClick={() => setCreating(true)} className="btn-primary text-sm"><Plus size={15} /> New response</button>
           </div>
         </div>
 
@@ -440,7 +440,7 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
           </label>
           <div className="relative flex-1 min-w-[200px]">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
-            <input aria-label="Search opportunities" type="text" placeholder="Search opportunities…" value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-10" />
+            <input aria-label="Search responses" type="text" placeholder="Search responses…" value={search} onChange={(e) => setSearch(e.target.value)} className="input pl-10" />
           </div>
           <button onClick={reload} aria-label="Refresh" className="w-9 h-9 flex items-center justify-center text-ink-400 hover:text-ink-700 hover:bg-white border border-ink-200 rounded-xl shadow-card">
             <RefreshCw size={15} />
@@ -454,8 +454,8 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
         ) : visible.length === 0 ? (
           <div className="text-center py-24 space-y-5">
             <div className="w-16 h-16 rounded-2xl bg-white border border-ink-100 shadow-card flex items-center justify-center mx-auto"><Briefcase size={28} className="text-ink-300" /></div>
-            <p className="font-bold text-ink-700 text-base">{responses.length === 0 ? 'No opportunities yet' : 'Nothing matches'}</p>
-            {responses.length === 0 && <button onClick={() => setCreating(true)} className="btn-primary mx-auto"><Plus size={15} /> Create First Opportunity</button>}
+            <p className="font-bold text-ink-700 text-base">{responses.length === 0 ? 'No responses yet' : 'Nothing matches'}</p>
+            {responses.length === 0 && <button onClick={() => setCreating(true)} className="btn-primary mx-auto"><Plus size={15} /> Start your first response</button>}
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -176,7 +176,7 @@ function KBModal({ entries, onClose, onBulkUpload, onAdded, onIndexFailed }: { e
 // BUG-30: read before the Supabase client clears the address's fragment.
 const ARRIVED_FOR = linkPurpose(window.location.hash);
 
-type AppView = 'opportunities' | 'inbox' | 'users' | 'governance' | 'help';
+type AppView = 'responses' | 'inbox' | 'users' | 'governance' | 'help';
 
 export default function App() {
   const [session, setSession]                     = useState<Session | null>(null);
@@ -188,7 +188,7 @@ export default function App() {
   const [showBulkUpload, setShowBulkUpload]       = useState(false);
   const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
-  const [view, setView]                           = useState<AppView>('opportunities');
+  const [view, setView]                           = useState<AppView>('responses');
   // S4-1: admins are warned past the budget's warning point; everyone is told when it is reached.
   const [usage, setUsage]                         = useState<UsageStatus | null>(null);
   const [navOpen, setNavOpen]                     = useState(false);
@@ -214,7 +214,7 @@ export default function App() {
         setCurrentUser(null);
         setAllUsers([]);
         setActiveOpportunity(null);
-        setView('opportunities');
+        setView('responses');
         setHelpAt(null);
         setIntroOpen(false);
         setUsage(null);
@@ -326,7 +326,7 @@ export default function App() {
     await supabase.auth.signOut();
     setNavOpen(false);
     setActiveOpportunity(null);
-    setView('opportunities');
+    setView('responses');
   };
 
   const navigate = (v: AppView) => {
@@ -374,7 +374,7 @@ export default function App() {
   }
 
   const navItems: { key: AppView; icon: React.ReactNode; label: string }[] = [
-    { key: 'opportunities', icon: <Briefcase size={18} />, label: 'Opportunities' },
+    { key: 'responses', icon: <Briefcase size={18} />, label: 'Responses' },
     { key: 'inbox',         icon: <Inbox size={18} />,     label: 'Assignments' },
     { key: 'users',         icon: <Users size={18} />,     label: 'Team' },
     ...(currentUser.isAdmin ? [{ key: 'governance' as AppView, icon: <Scale size={18} />, label: 'Governance' }] : []),
@@ -464,12 +464,12 @@ export default function App() {
           {/* Breadcrumb when in workspace */}
           {activeOpportunity && (
             // BUG-33: the breadcrumb takes the space left and truncates the name (full name on hover); it
-            // never overlaps Help. The back link is an icon, since Opportunities is already in the bar.
+            // never overlaps Help. The back link is an icon, since Responses is already in the bar.
             <div className="hidden lg:flex flex-1 items-center gap-1.5 ml-2 text-sm min-w-0">
               <button
-                onClick={() => { setActiveOpportunity(null); setView('opportunities'); }}
-                title="Back to Opportunities"
-                aria-label="Back to Opportunities"
+                onClick={() => { setActiveOpportunity(null); setView('responses'); }}
+                title="Back to responses"
+                aria-label="Back to responses"
                 className="flex-shrink-0 flex items-center text-ink-400 hover:text-ink-700 transition-colors"
               >
                 <ChevronLeft size={16} />
@@ -513,7 +513,7 @@ export default function App() {
               className="hidden sm:flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-ink-600 border border-ink-200 rounded-xl hover:bg-ink-50 hover:border-ink-300 transition-colors"
             >
               <Database size={15} />
-              <span>KB</span>
+              <span>Knowledge</span>
               <span className="bg-ink-900 text-white text-2xs px-1.5 py-0.5 rounded-full font-bold">{kb.length}</span>
             </button>
 
@@ -605,7 +605,7 @@ export default function App() {
                 onClick={() => setActiveOpportunity(null)}
                 className="flex items-center gap-1.5 text-ink-400 hover:text-ink-700 transition-colors font-medium"
               >
-                <ChevronLeft size={14} /> Opportunities
+                <ChevronLeft size={14} /> Responses
               </button>
               <span className="text-ink-200">/</span>
               <span className="font-semibold text-ink-800 truncate">{activeOpportunity.name}</span>
@@ -637,7 +637,7 @@ export default function App() {
           <OpportunitiesDashboard
             currentUserId={currentUser.id}
             isAdmin={currentUser.isAdmin}
-            onSelectOpportunity={(opp) => { setActiveOpportunity(opp); setView('opportunities'); }}
+            onSelectOpportunity={(opp) => { setActiveOpportunity(opp); setView('responses'); }}
             onImportKB={() => setShowBulkUpload(true)}
           />
         )}

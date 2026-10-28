@@ -69,7 +69,7 @@ export function exportRows(questions: RFIQuestion[]) {
 export type AnswerOrigin =
   | 'model-drafted, approved unedited' | 'model-drafted, edited by a person'
   | 'assembled from knowledge-base entries, approved unedited' | 'assembled from knowledge-base entries, edited by a person'
-  | 'written by a person' | 'placeholder accepted unedited' | 'not answered' | 'not recorded (processed before provenance was kept)';
+  | 'written by a person' | 'placeholder approved unedited' | 'not answered' | 'not recorded (processed before provenance was kept)';
 
 /** How one answer was produced, from what the database recorded. */
 export function answerOrigin(q: RFIQuestion): AnswerOrigin {
@@ -79,7 +79,7 @@ export function answerOrigin(q: RFIQuestion): AnswerOrigin {
   if (q.draftKind === 'assembled') return edited ? 'assembled from knowledge-base entries, edited by a person' : 'assembled from knowledge-base entries, approved unedited';
   if (q.draftKind === 'insufficient_evidence' || q.draftKind === 'person_required') {
     // Security review, Sprint 7 (finding 3): the database now refuses this; earlier records say so plainly.
-    return needsWrittenAnswer(q) ? 'placeholder accepted unedited' : 'written by a person';
+    return needsWrittenAnswer(q) ? 'placeholder approved unedited' : 'written by a person';
   }
   return 'not recorded (processed before provenance was kept)';
 }
@@ -119,7 +119,7 @@ export function provenanceRows(questions: RFIQuestion[], names: Map<string, stri
       approvedAt: q.status === 'accepted' && q.approval ? q.approval.at : '',
       // Sprint 11 (S11-10): a skip is a decision too; say who made it and when.
       approval: q.status === 'accepted' && q.approval ? approvalLabel(q.approval) || 'individual'
-        : q.status === 'skipped' && q.skip ? `skipped by ${q.skip.by ? names.get(q.skip.by) ?? 'a team member' : 'a team member'}, ${q.skip.at}` : '',
+        : q.status === 'skipped' && q.skip ? `left unanswered by ${q.skip.by ? names.get(q.skip.by) ?? 'a team member' : 'a team member'}, ${q.skip.at}` : '',
       translation: translationOf(q),
     };
   });

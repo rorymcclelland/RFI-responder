@@ -51,7 +51,7 @@ export default function ReadyForReviewBanner({
                       a.status === 'answered' ? 'bg-sky-50 text-sky-700 border-sky-200' :
                       'bg-amber-100 text-amber-700 border-amber-300'
                     }`}>
-                      {a.status === 'approved' ? 'Approved' : a.status === 'answered' ? 'Answered' : 'In review'}
+                      {a.status === 'approved' ? 'Approved' : a.status === 'answered' ? 'Answered' : 'Working on it'}
                     </span>
                   </div>
                   <p className="text-xs text-amber-800 font-medium line-clamp-1 mb-1">{q?.question ?? a.questionText}</p>

@@ -174,7 +174,7 @@ export default function BulkUploadModal({ onImport, onClose }: Props) {
             <FileSpreadsheet size={16} className="text-teal-600" />
             <div>
               <h3 className="text-sm font-semibold text-slate-800">Import to Knowledge Base</h3>
-              <p className="text-xs text-slate-500">Upload a Q&amp;A spreadsheet to add entries directly to the KB</p>
+              <p className="text-xs text-slate-500">Upload a Q&amp;A spreadsheet to add entries directly to the knowledge base</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">

@@ -28,14 +28,14 @@ export async function bulkAcceptInDb(client: SupabaseClient, sessionId: string, 
 
 /** Describe what bulk approval did and what it held back, in plain words. */
 export function describeBulk(r: BulkResult, threshold: number): string {
-  const parts = [`${r.accepted} accepted`];
+  const parts = [`${r.accepted} approved`];
   if (r.belowThreshold) parts.push(`${r.belowThreshold} below ${Math.round(threshold * 100)}%`);
   if (r.heldGated) parts.push(`${r.heldGated} held back for individual review (pricing, legal, unchecked, translated or Japanese, matched before every entry was indexed, or citing an entry that is unreviewed or overdue for review)`);
   if (r.heldUncalibrated) parts.push(`${r.heldUncalibrated} without calibrated confidence`);
   if (r.heldNoDraft) parts.push(`${r.heldNoDraft} with no draft to approve`);
-  if (r.heldPartly) parts.push(`${r.heldPartly} held because the checker said the entries answer them only in part (accept them individually)`);
-  if (r.heldNoChecker) parts.push(`${r.heldNoChecker} held because no checker is configured (accept ${r.heldNoChecker === 1 ? 'it' : 'them'} individually)`);
-  if (r.heldNoVerdict) parts.push(`${r.heldNoVerdict} held because the checker gave a score but no verdict (accept ${r.heldNoVerdict === 1 ? 'it' : 'them'} individually)`);
+  if (r.heldPartly) parts.push(`${r.heldPartly} held because the checker said the entries answer them only in part (approve them one at a time)`);
+  if (r.heldNoChecker) parts.push(`${r.heldNoChecker} held because no checker is configured (approve ${r.heldNoChecker === 1 ? 'it' : 'them'} one at a time)`);
+  if (r.heldNoVerdict) parts.push(`${r.heldNoVerdict} held because the checker gave a score but no verdict (approve ${r.heldNoVerdict === 1 ? 'it' : 'them'} one at a time)`);
   return `${parts.join('; ')}.`;
 }
 
@@ -57,7 +57,7 @@ export async function saveQuestionPatch(
     if (!problem) continue;
     // The answer saved but the decision did not: say so, so the screen reloads rather than rolling
     // back an answer that is in the database (Sprint 6 security review, finding 5).
-    if (i > 0) throw Object.assign(new Error(`Your edited answer was saved, but it was not accepted: ${problem}.`), { partial: true });
+    if (i > 0) throw Object.assign(new Error(`Your edited answer was saved, but it was not approved: ${problem}.`), { partial: true });
     throw new Error(`Your change was not saved: ${problem}${error ? '' : '.'}`);
   }
 }

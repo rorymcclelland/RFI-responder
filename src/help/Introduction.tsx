@@ -2,7 +2,7 @@
  * Sprint 10 (S10-6): the introduction. A dialog of steps, each a picture of the screen and a few
  * lines, with a link to the guide page that covers it. Focus moves into the dialog and back to
  * where it was (or to the Help button, if that was a menu item that has gone); Tab stays inside it;
- * Escape closes it, as Skip does; each step is announced. The rest of the app is inert while it is
+ * Escape closes it, as Not now does; each step is announced. The rest of the app is inert while it is
  * open, so a click outside cannot take focus behind it (security review, Sprint 10, L4).
  */
 import { useEffect, useRef, useState } from 'react';
@@ -95,7 +95,7 @@ export default function Introduction({ steps, onClose, onOpenGuide }: {
             <Sparkles size={12} /> Introduction: step {index + 1} of {steps.length}
           </p>
           <button onClick={() => onClose('skipped')} className="flex items-center gap-1 text-xs font-bold text-ink-400 hover:text-ink-800 px-2 py-1 rounded-lg">
-            Skip <X size={13} />
+            Not now <X size={13} />
           </button>
         </div>
 

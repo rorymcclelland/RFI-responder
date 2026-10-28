@@ -73,7 +73,7 @@ describe('Sprint 9, S9-1 tests 4 and 5 (F-40): the screen and the summary', () =
   it('5. the bulk summary names the count', async () => {
     const { describeBulk } = await import('./sessions');
     expect(describeBulk({ accepted: 1, heldGated: 0, heldUncalibrated: 0, heldNoDraft: 0, belowThreshold: 0, heldNoChecker: 2 }, 0.8))
-      .toBe('1 accepted; 2 held because no checker is configured (accept them individually).');
+      .toBe('1 approved; 2 held because no checker is configured (approve them one at a time).');
   });
 });
 

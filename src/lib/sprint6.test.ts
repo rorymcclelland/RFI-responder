@@ -67,7 +67,7 @@ describe('S6-5 a refused save is reported', () => {
     const select = vi.fn(async () => (call++ === 0 ? { data: [{ id: 'q1' }], error: null } : { data: [], error: null }));
     const c = { from: () => ({ update: () => ({ eq: () => ({ select }) }) }) } as never;
     const err = await saveQuestionPatch(c, 'q1', { finalAnswer: 'x', status: 'accepted' }).catch((e) => e);
-    expect(err.message).toMatch(/edited answer was saved, but it was not accepted/);
+    expect(err.message).toMatch(/edited answer was saved, but it was not approved/);
     expect(err.partial).toBe(true);
   });
 
@@ -112,8 +112,8 @@ describe('Sprint 7, S7-1: bulk approval needs a "yes" verdict (F-33)', () => {
     // Sprint 9 (F-40): similarity alone is no longer bulk-eligible either.
     expect(bulkEligible({ ...base, checker: { ...base.checker, verdict: null }, provenance: { ...base.provenance, judgeModel: null } })).toBe(false);
     expect(describeBulk({ accepted: 3, heldGated: 0, heldUncalibrated: 0, heldNoDraft: 0, belowThreshold: 0, heldPartly: 2 }, 0.8))
-      .toBe('3 accepted; 2 held because the checker said the entries answer them only in part (accept them individually).');
+      .toBe('3 approved; 2 held because the checker said the entries answer them only in part (approve them one at a time).');
     expect(describeBulk({ accepted: 0, heldGated: 0, heldUncalibrated: 0, heldNoDraft: 0, belowThreshold: 0, heldNoVerdict: 1 }, 0.8))
-      .toBe('0 accepted; 1 held because the checker gave a score but no verdict (accept it individually).');
+      .toBe('0 approved; 1 held because the checker gave a score but no verdict (approve it one at a time).');
   });
 });

@@ -12,13 +12,13 @@ describe('describeImport', () => {
 
   it('reports duplicates on a repeated import', () => {
     expect(describeImport({ inserted: 0, duplicates: 100, invalid: 0 })).toBe(
-      '0 entries added to the knowledge base; 100 duplicates skipped.',
+      '0 entries added to the knowledge base; 100 duplicates left out.',
     );
   });
 
   it('reports skipped invalid rows, with singulars', () => {
     expect(describeImport({ inserted: 1, duplicates: 1, invalid: 1 })).toBe(
-      '1 entry added to the knowledge base; 1 duplicate skipped; 1 row without a question or answer skipped.',
+      '1 entry added to the knowledge base; 1 duplicate left out; 1 row without a question or answer left out.',
     );
   });
 });

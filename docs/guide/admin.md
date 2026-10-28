@@ -1,12 +1,12 @@
 # Administering RFI Respond
 
-For admins: the people who look after the workspace. An admin can do everything a response owner can, on every response ([Running a response](running-a-response.md)), and the things on this page.
+For admins: the people who look after RFI Respond for their organisation. An admin can do everything a response owner can, on every response ([Running a response](running-a-response.md)), and the things on this page.
 
 ## People
 
 ### Inviting someone
 
-Accounts are by invitation only. On the **Team** page, under **Invite someone**, give the person's email address and, if you like, their name, and choose **Send invitation**. They get an email from the installation's mail settings with a link to the app, which asks them to choose a password. Everyone invited joins as a member; make them an admin afterwards if they need it (below). Each admin can send 20 invitations a day. An address that already has an account, even one not yet accepted, is refused and nothing is sent: resend an invitation from Supabase instead. Addresses on reserved domains that cannot receive mail (such as `.invalid`, used by the demo's fictional people) are refused too. Each invitation is recorded in the audit log; if that record cannot be written, the message after sending says so.
+Accounts are by invitation only. On the **Team** page, under **Invite someone**, give the person's email address and, if you like, their name, and choose **Send invitation**. They get an email from the installation's mail settings with a link to the app, which asks them to choose a password. Everyone invited joins as a member; make them an admin afterwards if they need it (below). Each admin can send 20 invitations a day. An address that already has an account, even one not yet approved, is refused and nothing is sent: resend an invitation from Supabase instead. Addresses on reserved domains that cannot receive mail (such as `.invalid`, used by the demo's fictional people) are refused too. Each invitation is recorded in the audit log; if that record cannot be written, the message after sending says so.
 
 Supabase's dashboard (Studio) can still invite people, under Authentication, then Users, and is where an invitation is resent or withdrawn. On a local install Studio is at the address `npx supabase start` prints (usually `http://127.0.0.1:54323`); the invitation email itself is caught by the local mail viewer (usually `http://127.0.0.1:54324`).
 
@@ -16,11 +16,11 @@ Under **Team**, choose **Edit** on anyone's card to change their name, job title
 
 ## The knowledge base
 
-Drafts are written only from the knowledge base, so its quality is the quality of the answers. Open it with **KB** in the top bar.
+Drafts are written only from the knowledge base, so its quality is the quality of the answers. Open it with **Knowledge** in the top bar.
 
 - **Search** by entry number (`KB-0101`, or just `101`), or by the words of questions, answers and tags. Each entry shows its number (KB-0001 and so on), its source and its tags; entries waiting for an admin's review are marked **Not yet reviewed**. An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
 - **Add entry** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
-- **Import Q&A** (or **Import KB** on the overview) adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are skipped, and so is any question already in the knowledge base in the same language (ignoring case and spacing): an English question imported with a Japanese answer is a new, Japanese entry.
+- **Import Q&A** (or **Import to the knowledge base** on the overview) adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are left out, and so is any question already in the knowledge base in the same language (ignoring case and spacing): an English question imported with a Japanese answer is a new, Japanese entry.
 
 ![Importing a spreadsheet of questions and answers into the knowledge base](../screenshots/12-kb-import.png)
 
@@ -58,11 +58,11 @@ For each entry choose **Approve**, or **Correct** to fix the question or answer 
 
 ### Overdue for review
 
-Entries not reviewed or confirmed within the review interval. A draft that cites one is never approved in bulk until it is reviewed again. Each card shows the date it fell due and, if it was cited in the last 90 days, how often. Choose **Still correct**, or **Correct** it. An answer accepted unedited at export also counts as a confirmation of the entries it cited.
+Entries not reviewed or confirmed within the review interval. A draft that cites one is never approved in bulk until it is reviewed again. Each card shows the date it fell due and, if it was cited in the last 90 days, how often. Choose **Still correct**, or **Correct** it. An answer approved unedited at export also counts as a confirmation of the entries it cited.
 
 ## Deleting a response
 
-Archive finished responses rather than deleting them: an archived response is the record of what was sent. Only a response created in error should be deleted. On its card on the overview, choose the bin icon (**Delete a response created in error**), give a reason of at least ten characters, and choose **Delete permanently**. It removes the response, its sessions and questions, and records the deletion and your reason in the audit log. It cannot be undone.
+Archive finished responses rather than deleting them: an archived response is the record of what was sent. Only a response created in error should be deleted. On its card on the overview, choose the bin icon (**Delete a response created in error**), give a reason of at least ten characters, and choose **Delete permanently**. It removes the response, its files and questions, and records the deletion and your reason in the audit log. It cannot be undone.
 
 ## Resetting the demo
 

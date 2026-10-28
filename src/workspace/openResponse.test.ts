@@ -17,15 +17,13 @@ function client(linked: { data: unknown; error: unknown }, orphans: { data: unkn
 const row = { id: 's1', opportunity_id: 'o1', file_name: 'q.csv', status: 'in_progress', question_count: 4, accepted_count: 1, created_at: '2026-10-28T10:00:00Z' };
 
 describe('loadResponseSessions', () => {
-  it('reads the response\'s sessions, newest first, and the unlinked ones', async () => {
+  it('reads the response\'s files, newest first (and not the unlinked ones, Sprint 17)', async () => {
     const r = await loadResponseSessions(client({ data: [row], error: null }) as never, 'o1');
     expect(r.linked).toEqual([{ id: 's1', opportunityId: 'o1', fileName: 'q.csv', status: 'in_progress', questionCount: 4, acceptedCount: 1, createdAt: '2026-10-28T10:00:00Z' }]);
-    expect(r.orphans).toEqual([]);
   });
 
   it('3. a failed read is an error, never an empty response', async () => {
     await expect(loadResponseSessions(client({ data: null, error: { message: 'timeout' } }) as never, 'o1')).rejects.toThrow(/could not be loaded/);
-    await expect(loadResponseSessions(client({ data: [row], error: null }, { data: null, error: { message: 'x' } }) as never, 'o1')).rejects.toThrow(/could not be loaded/);
   });
 });
 

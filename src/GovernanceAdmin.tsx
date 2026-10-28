@@ -262,7 +262,7 @@ function ReviewTab({ mode }: { mode: 'unreviewed' | 'overdue' }) {
     <div className="space-y-4">
       <p className="text-sm text-ink-500">
         {mode === 'overdue'
-          ? 'Entries not reviewed or confirmed within the review interval (set under Usage and limits). Drafts that cite them are never bulk-approved until they are reviewed again. An answer accepted unedited at export also counts as a confirmation.'
+          ? 'Entries not reviewed or confirmed within the review interval (set under Usage and limits). Drafts that cite them are never bulk-approved until they are reviewed again. An answer approved unedited at export also counts as a confirmation.'
           : 'Entries added by team members go into the knowledge base at once, but drafts that cite them are never bulk-approved until an admin reviews them here.'}
       </p>
       {error && <p className="text-sm text-coral-600 flex items-center gap-2"><AlertTriangle size={14} /> {error}</p>}

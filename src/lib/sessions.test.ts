@@ -11,7 +11,7 @@ describe('bulkAcceptInDb', () => {
     expect(rpc).toHaveBeenCalledWith('bulk_accept', { p_session: 'session-1', p_min_confidence: 0.8 });
     expect(r.accepted).toBe(3);
     expect(describeBulk(r, 0.8)).toBe(
-      '3 accepted; 4 below 80%; 2 held back for individual review (pricing, legal, unchecked, translated or Japanese, matched before every entry was indexed, or citing an entry that is unreviewed or overdue for review); 1 without calibrated confidence.',
+      '3 approved; 4 below 80%; 2 held back for individual review (pricing, legal, unchecked, translated or Japanese, matched before every entry was indexed, or citing an entry that is unreviewed or overdue for review); 1 without calibrated confidence.',
     );
   });
 
