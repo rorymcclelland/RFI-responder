@@ -275,3 +275,22 @@ describe('Sprint 15 security review: invitations are reserved before anything is
     }
   });
 });
+
+describe('BUG-41 every function would pass Supabase\'s pg_safeupdate', () => {
+  it('no UPDATE or DELETE in any function lacks a WHERE clause', async () => {
+    const { rows } = await asSuperuser(`
+      SELECT n.nspname || '.' || p.proname AS fn, p.prosrc AS src
+        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+       WHERE n.nspname IN ('public', 'private', 'access') `);
+    const offenders: string[] = [];
+    for (const r of rows) {
+      const src = String(r.src)
+        .replace(/--[^\n]*/g, '')
+        .replace(/ON\s+CONFLICT[^;]*DO\s+UPDATE[^;]*;/gi, ';');
+      for (const stmt of src.split(';')) {
+        if (/\b(UPDATE\s+[\w."]+\s+SET|DELETE\s+FROM)\b/i.test(stmt) && !/\bWHERE\b/i.test(stmt)) offenders.push(`${r.fn}: ${stmt.trim().slice(0, 80)}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});

@@ -143,3 +143,13 @@ An independent review of `main..sprint-15` found no high issue, two medium and s
 - **S15-3 test case 4** (calling a helper through the API is refused) cannot be shown without the API, which the database tests do not run; it moved to CI, which calls `rpc/is_admin` on the local stack and expects a 404, and to the live check (S15-6).
 - **S15-5 records invitations by account id only.** Writing the address into the append-only audit log would keep it after the person was deleted, against DATA-HANDLING; the row names the new account instead, and the audit screen shows their current name. The page is called **Team** in the app, not **Users**.
 - **S15-5 is also checked in CI:** `invite-user` refuses the anon key (401), a malformed address (400) and a member (403) on the local stack.
+
+## Hosted check (28 October 2026)
+
+Rory updated the live demo and ran the test pack. Cases 1, 2, 4 and 5 passed. Case 3 found two problems with the reset from the app, both fixed before the close:
+
+- **BUG-41: every reset from the app failed on the live project** with "UPDATE requires a WHERE clause". Supabase's API runs each request with `pg_safeupdate`, which refuses an UPDATE or DELETE with no WHERE clause, even inside a function; the local test database does not load it, so every test passed. The step recording the reset date had none, so the whole reset rolled back and nothing changed. Fixed in `20261103140000_reset_demo_where.sql`, and a database test now fails if any function has an UPDATE or DELETE without a WHERE clause.
+- **The confirmation looked frozen.** With only part of the phrase typed, the button stayed unavailable with no explanation. A line under the box now says what is missing, the label asks for the whole phrase, and an unavailable button looks unavailable.
+
+Rory also raised three points for the backlog: the knowledge-base modal changes size and moves as the search narrows (BUG-38); a response looks empty while its questions load (BUG-39); and saving a knowledge-base entry took about 10 seconds (BUG-40).
+
