@@ -127,13 +127,13 @@ Refined 29 October 2026: the third slice of option B from the Sprint 16 UX spike
 
 **No spike:** nothing depends on an unknown.
 
-## Questions for Rory
+## Questions for Rory (answered 29 October 2026)
 
 | | Question | Recommended |
 |---|---|---|
-| Q1 | May a contributor approve the question themselves, or only send their answer to the owner? | **Both, as the rules already allow.** **Approve** decides it, as they can today on the question card; **Send to the owner** leaves the decision to the owner. The owner sees which happened |
-| Q2 | How does a contributor say "not me"? | **Hand back, with a required note**, using the existing Answered stage with no answer; no new stage, so nothing in the data changes |
-| Q3 | Should a contributor's answer go into the knowledge base straight away (the spike's idea)? | **Not yet.** Learning stays at **Record export**, after the owner's decision, with its checks; revisit with U-6 (Sprint 20), which makes sending explicit |
-| Q4 | Member suggestions to an answer (put off at Sprint 18, Q3)? | **Still later**, beside K-4's gaps (Sprint 20): a suggestion is a new kind of proposal, and it fits there |
-| Q5 | Home as everyone's landing page? | **Yes**, first in the menu; **Responses** stays as it is, one click away |
-| Q6 | Screenshots | **You retake them at the close**, as in Sprints 17 and 18 |
+| Q1 | May a contributor approve the question themselves, or only send their answer to the owner? | **Both, as the rules already allow.** **Approve** decides it, as they can today on the question card; **Send to the owner** leaves the decision to the owner. The owner sees which happened **Rory: agreed** |
+| Q2 | How does a contributor say "not me"? | **Hand back, with a required note**, using the existing Answered stage with no answer; no new stage, so nothing in the data changes **Rory: agreed** |
+| Q3 | Should a contributor's answer go into the knowledge base straight away (the spike's idea)? | **Not yet.** Learning stays at **Record export**, after the owner's decision, with its checks; revisit with U-6 (Sprint 20), which makes sending explicit **Rory: agreed** |
+| Q4 | Member suggestions to an answer (put off at Sprint 18, Q3)? | **Still later**, beside K-4's gaps (Sprint 20): a suggestion is a new kind of proposal, and it fits there **Rory: agreed** |
+| Q5 | Home as everyone's landing page? | **Yes**, first in the menu; **Responses** stays as it is, one click away **Rory: agreed** |
+| Q6 | Screenshots | **You retake them at the close**, as in Sprints 17 and 18 **Rory: agreed** |

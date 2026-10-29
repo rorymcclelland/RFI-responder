@@ -821,14 +821,14 @@ Refinement: `docs/refinement/sprint-18.md`. The second slice of option B (Sprint
 
 ## Sprint 19: questions for you, and Home (refined 29 October 2026)
 
-Refinement: `docs/refinement/sprint-19.md`. The third slice of option B (Sprint 16 spike).
+Refinement: `docs/refinement/sprint-19.md`. The third slice of option B (Sprint 16 spike). Questions Q1 to Q6 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S19-1 | Questions for you: a contributor approves, sends to the owner or hands back an assigned question on one screen; the owner sees and uses their answer | U-3 | Refined, Sprint 19 |
-| S19-2 | Open a response at a question, in whichever file it is in | U-3, U-4 | Refined, Sprint 19 |
-| S19-3 | Home: Needs you, Your responses, What we know; everyone lands there | U-4 | Refined, Sprint 19 |
-| S19-4 | Guide, introduction and screenshots for these screens | U-10 | Refined, Sprint 19 |
+| S19-1 | Questions for you: a contributor approves, sends to the owner or hands back an assigned question on one screen; the owner sees and uses their answer | U-3 | Ready, Sprint 19 |
+| S19-2 | Open a response at a question, in whichever file it is in | U-3, U-4 | Ready, Sprint 19 |
+| S19-3 | Home: Needs you, Your responses, What we know; everyone lands there | U-4 | Ready, Sprint 19 |
+| S19-4 | Guide, introduction and screenshots for these screens | U-10 | Ready, Sprint 19 |
 
 ## Candidate stories (not yet placed in a sprint)
 
