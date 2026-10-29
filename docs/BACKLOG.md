@@ -730,10 +730,45 @@ Refinement: `docs/refinement/sprint-17.md`. The first slice of option B (Sprint 
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S17-1 | One vocabulary: response, files, knowledge; one set of status words; a glossary the tests enforce | U-1 | Ready, Sprint 17 |
-| S17-2 | Controls only for those who can use them, with reasons shown, not on hover; the At risk and Overdue tiles filter | U-2 | Ready, Sprint 17 |
-| S17-3 | The knowledge base as a full page: overview and full-screen browse, replacing the pop-up | K-1 | Ready, Sprint 17 |
-| S17-4 | Guide, introduction and screenshots for the changed screens (Rory retakes the screenshots) | U-10 | Ready, Sprint 17 |
+| S17-1 | One vocabulary: response, files, knowledge; one set of status words; a glossary the tests enforce | U-1 | Done, Sprint 17 |
+| S17-2 | Controls only for those who can use them, with reasons shown, not on hover; the At risk and Overdue tiles filter | U-2 | Done, Sprint 17 |
+| S17-3 | The knowledge base as a full page: overview and full-screen browse, replacing the pop-up | K-1 | Done, Sprint 17 |
+| S17-4 | Guide, introduction and screenshots for the changed screens (Rory retakes the screenshots) | U-10 | Done, Sprint 17 |
+
+### Sprint 17 review (29 October 2026)
+
+**Checks, with evidence.** 1006 unit and 338 database tests on `sprint-17`; lint and type check clean; CI green. A new test scans every visible string in the app and the guide for the retired words. An independent security review found no high issue, three medium and three low; all fixed (`docs/refinement/sprint-17.md`). The worst was the overview's cost growing with the square of the entries: 3.5 s at 8,000, now 0.15 s, with a test. Rory applied the one migration to the live demo and ran the test pack (`docs/testing/sprint-17-test-pack.md`). All six cases passed apart from three points, each fixed the same night:
+- the bulk bar wrapped **Record export** and its new reason into the middle of the row;
+- case 1.3: the Assignments page still spoke of "routing for expert review during RFI review" (its stage words were the glossary's; the pack had not listed them);
+- case 5.6: at phone width a chosen answer sat below the whole list, out of sight. Choosing one now scrolls to it, with **Back to the list**.
+
+Rory retook every screenshot on his PC (every view fits 768 px); the two new ones of the knowledge page are in the README, the guide and the introduction.
+
+### Where every Sprint 17 review item now lives
+
+| Item | Now |
+|---|---|
+| U-1, U-2, K-1 (with U-10 for these screens) | Done in Sprint 17 |
+| Three medium and three low security review findings | Done in Sprint 17 (review) |
+| The bulk bar's layout; the Assignments copy; a chosen answer out of sight at phone width | Done in Sprint 17 (found at Rory's check) |
+| Entry numbers stop at KB-9999 (review, predates Sprint 17) | BUG-42, backlog |
+
+**Not yet in a sprint, ranked at the Sprint 17 review.** The redesign continues in the spike's order (Sprints 18 to 21). Then:
+1. BUG-42 entry numbers past 9,999 (small; no install is near it, so it can wait for a sprint that touches entries, such as K-2's).
+2. F-14 and F-15 reviewed Japanese and near-miss items (need people).
+3. F-59 the near miss against Japanese entries.
+4. F-20 rerankers.
+5. F-34 review during processing.
+6. F-60 Japanese keyword matching.
+7. F-62 import edge cases.
+8. F-8 leaked-password protection (needs the Pro plan).
+9. F-2 generated database types.
+10. F-4 Tailwind 4.
+
+**Proposed next.** Sprint 18, the next slice in the spike's order:
+- K-2 one answer and its history: where it was used, its history, its other languages, its next review; edit it, mark it still correct, or retire it with a reason (audited). Each answer's history is the proof that the knowledge can be trusted, and it builds on the browse view's selected answer.
+- K-3 ask it a question: the draft the knowledge base would give, with confidence and sources, metered against the person's limits. It is the shortest demonstration of the value, and brings the search by meaning deferred from Sprint 17 (Q3).
+- BUG-42 joins it, since K-2 changes how entries are edited anyway.
 
 ## Candidate stories (not yet placed in a sprint)
 

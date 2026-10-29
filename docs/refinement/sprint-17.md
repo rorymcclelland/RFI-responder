@@ -107,3 +107,7 @@ An independent review of `main..sprint-17` found no high issue, three medium and
 | L3 | A repeated tag, or a question citing the same entry twice, counted twice; the admin's **Review entries** link ignored translations and proposals | Each counted once (tested); the link shows whenever anything waits for review |
 
 Found on the way, before Sprint 17 and logged as BUG-42: entry numbers are cut to four digits, so the knowledge base cannot pass 9,999 entries.
+
+## Review and close (29 October 2026)
+
+All four stories done. Rory applied the migration live and ran the test pack (`docs/testing/sprint-17-test-pack.md`): all six cases passed, after three fixes from his check (the bulk bar's layout, the Assignments copy, and a chosen answer out of sight at phone width). He retook the screenshots (Q4); the knowledge page's two are in the README, the guide and the introduction. Test counts at the close: 1006 unit, 338 database. Proposed next: Sprint 18, K-2 and K-3, with BUG-42.
