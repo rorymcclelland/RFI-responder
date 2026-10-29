@@ -14,8 +14,9 @@ The first time you sign in, a short introduction explains what the app does. You
 
 The bar at the top of every screen has:
 
-- **Responses**: every response in progress, with its owner, due date and progress. This is where you start.
-- **Assignments**: questions colleagues have asked you to answer or check, and the ones you have sent to others.
+- **Home**: where you land. **Needs you** lists what is waiting for you today: **Questions for you** (questions colleagues have assigned to you and you have not answered yet), **Answered by colleagues** (on your responses, answered or handed back and not yet decided), **Your responses at risk or overdue**, and for admins one line of answers waiting for review. Each item opens the place to act on it. **Your responses** lists the ones you own that are in progress, and **What we know** sums up the knowledge base, with **Ask it a question**.
+- **Responses**: every response in progress, with its owner, due date and progress.
+- **Assignments**: **Questions for you**, to answer the questions colleagues have assigned to you ([Answering assigned questions](specialists.md)), and the ones you have sent to others.
 - **Team**: everyone in your organisation, with their job titles and areas of expertise.
 - **Governance** (admins only): spend, limits, and knowledge-base entries waiting for review.
 - **Knowledge**: the knowledge base, as a page of its own: what the organisation knows, by topic and state, and every answer to browse and search, each with its history and where it has been used. **Ask it a question** to see the answer it would draft. Add an answer or import a spreadsheet there. Entries can be in English or Japanese; matching is by meaning, so a question can match an entry in the other language.

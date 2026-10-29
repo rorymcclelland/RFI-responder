@@ -32,13 +32,14 @@ export const INTRO_STEPS: IntroStep[] = [
   },
   {
     id: 'overview',
-    title: 'Every response in one place',
+    title: 'Start at Home',
     body: [
-      '**Responses** lists the responses in progress, with their owners, due dates and progress, and flags those **At risk** or **Overdue**.',
-      'Choose **New response** to start one. Anyone can start a response and owns the ones they start.',
+      '**Home** shows what needs you today: questions colleagues have assigned to you, answers they have sent you, and your responses at risk or overdue. Each opens the place to act on it.',
+      '**Responses** lists every response in progress. Choose **New response** to start one; anyone can start a response and owns the ones they start.',
     ],
-    image: '1-overview.png',
-    imageAlt: 'The overview of responses',
+    // The screenshot (21-home.png) is added once Rory has retaken the screenshots (Sprint 19, Q6).
+    image: null,
+    imageAlt: '',
     guide: { page: 'getting-started.md', anchor: 'the-overview', label: 'Getting started' },
   },
   {

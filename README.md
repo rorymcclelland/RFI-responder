@@ -36,8 +36,8 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 | Ask it a question: the draft it would give, its confidence and sources | One answer's history and where it has been used |
 | ![Overview of responses in flight](docs/screenshots/1-overview.png) | ![Review, lowest confidence first, with the bulk approval bar](docs/screenshots/2-review.png) |
 | Responses in flight, with owner, due date and progress | Review, lowest confidence first; bulk approval above a threshold |
-| ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![An expert's assignment inbox](docs/screenshots/5-assignments.png) |
-| A pricing question, never drafted or bulk-approved | A specialist's inbox of assigned questions |
+| ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![A specialist's questions for you](docs/screenshots/5-assignments.png) |
+| A pricing question, never drafted or bulk-approved | A specialist answers an assigned question on one screen |
 | ![An exported response and what the knowledge base learned](docs/screenshots/6-export-and-learning.png) | ![The governance page: usage and limits](docs/screenshots/7-governance-usage.png) |
 | An exported response, and what the knowledge base learned | Spend, limits and prices on the governance page |
 

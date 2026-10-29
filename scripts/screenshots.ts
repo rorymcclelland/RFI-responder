@@ -48,7 +48,7 @@ async function signIn(browser: Browser, email: string): Promise<Page> {
   await page.locator('input[type=email]').fill(email);
   await page.locator('input[type=password]').fill(PASSWORD);
   await page.locator('input[type=password]').press('Enter');
-  await page.getByRole('button', { name: 'Responses', exact: true }).first().waitFor();
+  await page.getByRole('button', { name: 'Home', exact: true }).first().waitFor();
   await page.waitForLoadState('networkidle');
   await dismissIntroduction(page);
   return page;
@@ -126,8 +126,12 @@ async function main() {
 
   // James was assigned a question by Priya, and owns the exported response.
   page = await signIn(browser, 'james.okafor@example.com');
+  // Sprint 19 (S19-3, S19-1): Home, where he lands, and the question for him.
+  await page.getByText('Needs you', { exact: true }).waitFor();
+  await shoot(page, '21-home.png', 'home');
   await nav(page, 'Assignments');
-  await shoot(page, '5-assignments.png', 'assignments');
+  await page.getByText('Your answer', { exact: true }).waitFor();
+  await shoot(page, '5-assignments.png', 'questions for you');
   await openResponse(page, 'Larkspur Health (fictional): data platform RFI');
   await shoot(page, '6-export-and-learning.png', 'exported response');
 
