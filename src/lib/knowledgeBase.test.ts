@@ -40,6 +40,16 @@ describe('entryMatches', async () => {
     }
   });
 
+  // Sprint 18 (S18-1, BUG-42, test 3): numbers past KB-9999.
+  it('finds KB-10000 by its number, and 1000 does not find it', () => {
+    const kb10000 = e('KB-10000');
+    const kb1000 = e('KB-1000');
+    for (const q of ['KB-10000', '10000', 'kb10000']) expect(entryMatches(kb10000, q), q).toBe(true);
+    expect(entryMatches(kb10000, '1000')).toBe(false);
+    expect(entryMatches(kb1000, '1000')).toBe(true);
+    expect(entryMatches(kb1000, '10000')).toBe(false);
+  });
+
   it('a bare number also finds text containing it (test 2)', () => {
     expect(entryMatches(text101, '101')).toBe(true);
     expect(entryMatches(text101, 'KB-0101')).toBe(false);

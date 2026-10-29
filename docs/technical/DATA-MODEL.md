@@ -199,7 +199,7 @@ Created in [`20261022130000_knowledge_base.sql`](../../supabase/migrations/20261
 
 | Column | Meaning |
 |---|---|
-| `ref` | Generated from `seq` (`KB-` and a number): how drafts cite an entry |
+| `ref` | Generated from `seq` (`KB-` and a number of at least four digits, KB-0001 to KB-9999 and then KB-10000 onwards; Sprint 18, [`20261106100000`](../../supabase/migrations/20261106100000_entry_numbers_past_9999.sql), BUG-42): how drafts cite an entry |
 | `question`, `answer`, `tags`, `source` | The content. Question at most 5,000 characters, answer at most 20,000, source at most 500 |
 | `question_key` | Generated: the question lower-cased with spaces collapsed. Unique, with `language`, among current entries that are not proposals: the same question may have one current entry in English and one in Japanese (Sprint 12, [`20261031130000`](../../supabase/migrations/20261031130000_learning_across_languages.sql)) |
 | `origin` | `seed`, `manual`, `import` or `response` (learned at export) |
