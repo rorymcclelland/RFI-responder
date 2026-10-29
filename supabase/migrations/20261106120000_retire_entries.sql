@@ -20,7 +20,7 @@ CREATE UNIQUE INDEX kb_entries_current_question ON public.kb_entries (question_k
   WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL AND retired_at IS NULL;
 
 -- Matching: never a retired answer.
-CREATE OR REPLACE FUNCTION public.match_kb_entries(query_embedding vector, query_text text, match_count integer DEFAULT 5, model_name text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.match_kb_entries(query_embedding extensions.vector, query_text text, match_count integer DEFAULT 5, model_name text DEFAULT NULL::text)
  RETURNS TABLE(id uuid, ref text, question text, answer text, tags text[], source text, similarity double precision, keyword_rank real, fused_score double precision, embedding_model text, language text)
  LANGUAGE sql
  STABLE
@@ -82,7 +82,7 @@ AS $function$
 $function$;
 
 -- Importing: a retired answer's question can be imported again.
-CREATE OR REPLACE FUNCTION public.import_kb_entries(entries jsonb, entry_origin kb_origin, entry_origin_ref text)
+CREATE OR REPLACE FUNCTION public.import_kb_entries(entries jsonb, entry_origin public.kb_origin, entry_origin_ref text)
  RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -146,7 +146,7 @@ $function$;
 
 -- The overdue report: retired answers are not due for review.
 CREATE OR REPLACE FUNCTION public.overdue_entries()
- RETURNS TABLE(id uuid, ref text, question text, answer text, tags text[], source text, origin kb_origin, origin_ref text, added_by text, created_at timestamp with time zone, last_reviewed_at timestamp with time zone, review_due timestamp with time zone, recent_citations bigint)
+ RETURNS TABLE(id uuid, ref text, question text, answer text, tags text[], source text, origin public.kb_origin, origin_ref text, added_by text, created_at timestamp with time zone, last_reviewed_at timestamp with time zone, review_due timestamp with time zone, recent_citations bigint)
  LANGUAGE plpgsql
  STABLE SECURITY DEFINER
  SET search_path TO ''

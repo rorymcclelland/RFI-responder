@@ -40,3 +40,18 @@ describe('what migrations insert', () => {
     }
   });
 });
+
+// Sprint 18 (found at Rory's live update): a function signature copied with pg_get_functiondef named
+// the vector type without its schema. The local test database has pgvector where it resolves; on
+// Supabase it lives in `extensions`, so the migration failed there. Outside function bodies, every
+// use of the type must name its schema.
+describe('types outside function bodies', () => {
+  const files = readdirSync(DIR).filter((f) => f.endsWith('.sql'));
+  it('name the vector type with its schema, extensions.vector', () => {
+    for (const f of files) {
+      const sql = topLevel(readFileSync(join(DIR, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, ''));
+      const bare = [...sql.matchAll(/(?<![.\w"])vector\s*(?:\(|,|\)|\[)/gi)].map((m) => m[0]);
+      expect(bare, f).toEqual([]);
+    }
+  });
+});
