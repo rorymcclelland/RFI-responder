@@ -27,6 +27,6 @@ export function workspaceControls(o: { canManage: boolean; archived: boolean; ow
 export function exportReason(toDo: number): string | null {
   if (toDo === 0) return null;
   return toDo === 1
-    ? '1 question is still to do: approve it or leave it unanswered first.'
-    : `${toDo} questions are still to do: approve each or leave them unanswered first.`;
+    ? '1 question is still to do: approve it or leave it unanswered before recording the export.'
+    : `${toDo} questions are still to do: approve each or leave them unanswered before recording the export.`;
 }

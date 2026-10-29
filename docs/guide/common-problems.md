@@ -71,7 +71,7 @@ Write its answer first; a placeholder is not an answer.
 
 ### Record export is not available
 
-Every question must be approved or left unanswered first; the line under the button says how many are still to do.
+Every question must be approved or left unanswered first; the line under the buttons says how many are still to do.
 
 ### I cannot archive a response as Won or Lost
 

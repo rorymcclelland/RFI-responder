@@ -69,7 +69,7 @@ The screens are not drawn in the automated tests, so cases 1 to 6 are the check 
 
 **Expected outcome**
 
-- As you (admin): the bulk bar is there. Beside **Record export** you read why it is unavailable, without hovering, for example "8 questions are still to do: approve each or leave them unanswered first." (the number is Bluefin's to-do count).
+- As you (admin): the bulk bar is there, with **Record export** at the right of the same row. Under the buttons you read why it is unavailable, without hovering: "7 questions are still to do: approve each or leave them unanswered before recording the export."
 - As the member:
   - There is no **Add a file** and no bulk bar.
   - In their place you read "Approving in bulk is for the owner (Priya Sharma) or an admin."

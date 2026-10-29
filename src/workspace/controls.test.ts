@@ -31,8 +31,8 @@ describe('workspaceControls', () => {
 
 describe('exportReason', () => {
   it('4. says, as text, why the export cannot be recorded yet', () => {
-    expect(exportReason(3)).toBe('3 questions are still to do: approve each or leave them unanswered first.');
-    expect(exportReason(1)).toBe('1 question is still to do: approve it or leave it unanswered first.');
+    expect(exportReason(3)).toBe('3 questions are still to do: approve each or leave them unanswered before recording the export.');
+    expect(exportReason(1)).toBe('1 question is still to do: approve it or leave it unanswered before recording the export.');
     expect(exportReason(0)).toBeNull();
   });
 });
