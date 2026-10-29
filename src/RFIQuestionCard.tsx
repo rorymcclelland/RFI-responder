@@ -503,6 +503,31 @@ export default function RFIQuestionCard({
             </div>
           )}
 
+          {/* Sprint 19 (S19-1): what colleagues sent back, where the owner decides. */}
+          {assignments.filter((a) => a.status === 'answered').map((a) => {
+            const who = users.find((u) => u.id === a.assignedTo)?.displayName ?? 'A former team member';
+            const sent = (a.answerText ?? '').trim();
+            return (
+              <div key={`answered-${a.id}`} className="border-t border-ink-100 pt-4" onClick={(e) => e.stopPropagation()}>
+                {sent ? (
+                  <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 space-y-2">
+                    <p className="text-xs font-bold text-ink-700">{who} answered:</p>
+                    <p className="text-sm text-ink-800 whitespace-pre-wrap">{a.answerText}</p>
+                    {a.notes && <p className="text-xs text-ink-500">Notes: {a.notes}</p>}
+                    {canDecide && question.status === 'pending' && (
+                      <button onClick={() => { setEditText(a.answerText); setEditing(true); }} className="btn-ghost text-xs">Use their answer</button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+                    <p className="text-xs font-bold text-ink-700">{who} handed this back:</p>
+                    <p className="text-sm text-ink-800 whitespace-pre-wrap">{a.notes || 'No note.'}</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
           {/* Answer */}
           <div className="border-t border-ink-100 pt-4">
             <div className="flex items-center justify-between mb-3">

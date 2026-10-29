@@ -2,25 +2,34 @@
 
 For a colleague whose expertise a response owner needs: someone has assigned you a question to answer or check.
 
-## Your inbox
+## Questions for you
 
-**Assignments** lists the questions sent to you (**My Inbox**) and the ones you have sent to others (**Sent**); admins also see **All**. Filter by stage: **Asked**, **Working on it**, **Answered**, **Approved**, and **Closed** for assignments closed when their response was exported. The counts at the top show how many of yours are asked and being worked on.
+**Assignments** opens on **Questions for you**: every question a colleague has assigned to you, as it is now, with the response it belongs to, its due date and who asked. Choose one to see what you need to answer it:
 
-Choose an assignment to see the question, the proposed answer when there is one, and any notes.
+- the question and its current answer or draft;
+- the draft's confidence and the checker's verdict and reason, and why it is held back from bulk approval, if it is;
+- the answers it was drawn from, each opening its page under **Knowledge**;
+- **Open it in the response**, which opens the response at that question, in whichever file it is in.
 
-![A specialist's inbox](../screenshots/5-assignments.png)
+Opening a question you were only asked about moves its assignment to **Working on it**.
 
-## Working through an assignment
+![A specialist's questions](../screenshots/5-assignments.png)
 
-An assignment moves through four stages, shown by the dots on the right: asked, working on it, answered, approved. On your own assignments, the button that moves it on says what it does (**Start working on it**, **Mark as answered**, **Mark as approved**). If you are also the response's owner or an admin, marking yours approved approves the other assignments on the same question too; otherwise only yours changes. If a change cannot be saved (for example, the response has been exported and its assignments closed), the inbox says so and shows what was saved.
+## Answering
 
-Use **Add Notes** (or **Edit Notes**) to tell the owner what you found, what you changed, or what still needs checking. The owner sees your notes in a banner at the top of their review list.
+Under the question, **Your answer** starts with the answer you sent before, or the current answer or draft. For a pricing question, or one the knowledge base could not answer, it starts empty: write the answer. Then choose one of:
 
-## Deciding the question itself
+- **Approve**: decides the question with your answer, as the owner could, and marks your assignment approved. The owner sees it as decided.
+- **Send to the owner**: saves your answer on the assignment and marks it answered. The question stays to do; the owner sees "<your name> answered:" on its card, with **Use their answer**, and decides.
+- **Hand back**, when it is not for you: write why (5 to 500 characters, for example "ask the legal team"), then **Hand it back**. The assignment is marked answered with no answer, and the owner sees your note.
 
-The inbox tracks the assignment; the answer is decided in the response itself. Open **Responses**, choose the response (its name is shown on the assignment), and find the question. The response opens on its most recent file; if the question came from an earlier one, choose **Other files** and open it under **Files in this response**. As someone assigned to it you can **Approve** the draft, **Edit First** and **Save & approve** your version, **Write an answer** when there is no draft, or **Leave unanswered**, exactly as the owner can ([Running a response](running-a-response.md#deciding-one-question)). [The question card](question-card.md) explains what you will see.
+A question the owner has already decided moves to **Decided**, and needs nothing more from you. Assignments are closed when the response's export is recorded, and then leave the list.
 
 You cannot approve questions in bulk, assign others, or record the export: those are the owner's.
+
+## Assignments you sent, and all assignments
+
+**Sent** lists the questions you have assigned to others, and admins also see **All**. Filter them by stage: **Asked**, **Working on it**, **Answered**, **Approved**, and **Closed** for assignments closed when their response was exported. Choose one to see its answer and notes; **Add Notes** (or **Edit Notes**) adds a note for the person answering.
 
 ## Getting suggested for the right questions
 

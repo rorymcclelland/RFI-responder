@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Inbox, Clock, TrendingUp, CheckCircle2, CheckCheck, ChevronDown, RefreshCw, MessageSquare, X, ArrowRight, Lock } from 'lucide-react';
+import { Inbox, Clock, TrendingUp, CheckCircle2, CheckCheck, ChevronDown, RefreshCw, MessageSquare, X, Lock } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { assignmentPeople } from './lib/format';
-import { saveAssignmentNotes, setAssignmentStatus } from './lib/assignments';
+import { saveAssignmentNotes } from './lib/assignments';
+import QuestionsForYou from './QuestionsForYou';
 import { QuestionAssignment, AssignmentStatus } from './types';
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 
-// Sprint 17 (S17-1): what the button does, in the glossary's words.
-const NEXT_ACTION: Record<string, string> = { in_review: 'Start working on it', answered: 'Mark as answered', approved: 'Mark as approved' };
 
 const STATUS_CONFIG: Record<AssignmentStatus, {
   label: string; icon: React.ReactNode;
@@ -75,16 +74,14 @@ function NotesModal({ assignment, onClose, onSave }: {
 
 // ─── Assignment card ──────────────────────────────────────────────────────────
 
-function AssignmentCard({ assignment, isOwn, tab, onStatusChange, onNotesUpdate }: {
+function AssignmentCard({ assignment, tab, onNotesUpdate }: {
   tab: 'mine' | 'sent' | 'all';
-  assignment: QuestionAssignment; isOwn: boolean;
-  onStatusChange: (id: string, status: AssignmentStatus) => void;
+  assignment: QuestionAssignment;
   onNotesUpdate: (id: string, notes: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const cfg = STATUS_CONFIG[assignment.status];
-  const nextStatus = cfg.next;
   const sidx = STATUS_ORDER.indexOf(assignment.status);
 
   return (
@@ -166,16 +163,6 @@ function AssignmentCard({ assignment, isOwn, tab, onStatusChange, onNotesUpdate 
             )}
 
             <div className="flex items-center gap-2 flex-wrap pt-1">
-              {isOwn && nextStatus && (
-                <button
-                  onClick={() => onStatusChange(assignment.id, nextStatus)}
-                  className="btn-primary text-xs py-2"
-                >
-                  {STATUS_CONFIG[nextStatus].icon}
-                  {NEXT_ACTION[nextStatus]}
-                  <ArrowRight size={12} />
-                </button>
-              )}
               <button
                 onClick={() => setShowNotes(true)}
                 className="btn-ghost text-xs py-2"
@@ -206,10 +193,10 @@ function AssignmentCard({ assignment, isOwn, tab, onStatusChange, onNotesUpdate 
 
 // ─── Main inbox ───────────────────────────────────────────────────────────────
 
-interface Props { userId: string; isAdmin: boolean; }
+interface Props { userId: string; isAdmin: boolean; names: Map<string, string> }
 type InboxTab = 'mine' | 'sent' | 'all';
 
-export default function UserInbox({ userId, isAdmin }: Props) {
+export default function UserInbox({ userId, isAdmin, names }: Props) {
   const [assignments, setAssignments] = useState<QuestionAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<InboxTab>('mine');
@@ -254,19 +241,6 @@ export default function UserInbox({ userId, isAdmin }: Props) {
 
   // BUG-29: every change is checked, then the list is reloaded, so it shows what the database holds.
   const [error, setError] = useState('');
-  const handleStatusChange = async (id: string, status: AssignmentStatus) => {
-    const a = assignments.find((x) => x.id === id);
-    if (!a) return;
-    setError('');
-    try {
-      const r = await setAssignmentStatus(supabase, a, status);
-      if (r.othersRefused) setError(`Yours was approved, but the other assignments on this question were not: ${r.othersRefused}`);
-    } catch (err) {
-      setError((err as Error).message);
-    }
-    await loadAssignments();
-  };
-
   const handleNotesUpdate = async (id: string, notes: string) => {
     setError('');
     try {
@@ -278,7 +252,7 @@ export default function UserInbox({ userId, isAdmin }: Props) {
   };
 
   const tabItems: { key: InboxTab; label: string }[] = [
-    { key: 'mine', label: 'My Inbox' },
+    { key: 'mine', label: 'Questions for you' },
     { key: 'sent', label: 'Sent' },
     ...(isAdmin ? [{ key: 'all' as InboxTab, label: 'All' }] : []),
   ];
@@ -331,7 +305,7 @@ export default function UserInbox({ userId, isAdmin }: Props) {
           ))}
         </div>
 
-        <div className="flex bg-white border border-ink-200 rounded-xl p-1 gap-0.5 shadow-card">
+        {tab !== 'mine' && <div className="flex bg-white border border-ink-200 rounded-xl p-1 gap-0.5 shadow-card">
           <button onClick={() => setStatusFilter('all')}
             className={`text-xs px-3 py-2 rounded-lg font-bold transition-all ${
               statusFilter === 'all' ? 'bg-ink-900 text-white' : 'text-ink-500 hover:text-ink-800 hover:bg-ink-50'
@@ -344,13 +318,15 @@ export default function UserInbox({ userId, isAdmin }: Props) {
               {STATUS_CONFIG[s].label}
             </button>
           ))}
-        </div>
+        </div>}
       </div>
 
       {error && <div role="alert" className="text-sm text-coral-700 bg-coral-50 border border-coral-200 rounded-xl px-4 py-3 font-medium">{error}</div>}
 
-      {/* List */}
-      {loading ? (
+      {/* Sprint 19 (S19-1): your own are answered here, one at a time; the lists are for the rest. */}
+      {tab === 'mine' ? (
+        <QuestionsForYou names={names} onChanged={loadAssignments} />
+      ) : loading ? (
         <div className="flex items-center justify-center py-24 text-ink-400 text-sm gap-2 font-medium">
           <RefreshCw size={16} className="animate-spin" /> Loading…
         </div>
@@ -361,11 +337,10 @@ export default function UserInbox({ userId, isAdmin }: Props) {
           </div>
           <div>
             <p className="font-bold text-ink-700">
-              {tab === 'mine' ? 'No questions assigned to you' : tab === 'sent' ? 'You have not assigned any questions' : 'No assignments yet'}
+              {tab === 'sent' ? 'You have not assigned any questions' : 'No assignments yet'}
             </p>
             <p className="text-sm text-ink-400 mt-1 font-medium">
               {tab === 'sent' ? 'A question appears here when you assign it to a colleague from a response.'
-                : tab === 'mine' ? 'A question appears here when someone assigns it to you from a response.'
                 : 'A question appears here when anyone assigns it to a colleague from a response.'}
             </p>
           </div>
@@ -376,9 +351,7 @@ export default function UserInbox({ userId, isAdmin }: Props) {
             <AssignmentCard
               key={a.id}
               assignment={a}
-              isOwn={a.assignedTo === userId}
               tab={tab}
-              onStatusChange={handleStatusChange}
               onNotesUpdate={handleNotesUpdate}
             />
           ))}

@@ -1,4 +1,6 @@
 import { OPEN_ENTRY_EVENT } from './lib/openEntry';
+import { OPEN_QUESTION_EVENT, type QuestionTarget } from './lib/openQuestion';
+import { loadResponse } from './lib/responses';
 import { useState, useEffect, useRef } from 'react';
 import {
   Database, X, CheckCircle2,
@@ -44,6 +46,8 @@ export default function App() {
   const [showBulkUpload, setShowBulkUpload]       = useState(false);
   // Sprint 18 (S18-2): an answer to open on the knowledge page, from a draft's sources or an ask.
   const [openRef, setOpenRef]                     = useState<{ ref: string; n: number } | null>(null);
+  // Sprint 19 (S19-2): a question to open the response at, from Home or questions for you.
+  const [focus, setFocus]                         = useState<(QuestionTarget & { n: number; used?: boolean }) | null>(null);
   const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
   const [view, setView]                           = useState<AppView>('responses');
@@ -198,6 +202,21 @@ export default function App() {
     };
     window.addEventListener(OPEN_ENTRY_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_ENTRY_EVENT, onOpen);
+  }, []);
+
+  useEffect(() => {
+    const onOpen = async (e: Event) => {
+      const t = (e as CustomEvent<QuestionTarget>).detail;
+      if (!t?.responseId) return;
+      const opp = await loadResponse(supabase, t.responseId).catch(() => null);
+      if (!opp) { showToast('That response could not be opened.', 'error'); return; }
+      setView('responses');
+      setNavOpen(false);
+      setFocus((f) => ({ ...t, n: (f?.n ?? 0) + 1 }));
+      setActiveOpportunity(opp);
+    };
+    window.addEventListener(OPEN_QUESTION_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_QUESTION_EVENT, onOpen);
   }, []);
 
   const openGuide = (page: string, anchor: string | null) => {
@@ -452,7 +471,9 @@ export default function App() {
               <span className="font-semibold text-ink-800 truncate">{activeOpportunity.name}</span>
             </div>
             <RFIWorkspace
-              key={activeOpportunity.id}
+              key={`${activeOpportunity.id}:${focus?.n ?? 0}`}
+              focus={focus && !focus.used && focus.responseId === activeOpportunity.id ? { sessionId: focus.sessionId, questionId: focus.questionId } : null}
+              onFocused={() => setFocus((f) => (f ? { ...f, used: true } : f))}
               opportunityId={activeOpportunity.id}
               archived={activeOpportunity.archivedAt !== null}
               opportunityName={activeOpportunity.name}
@@ -476,7 +497,7 @@ export default function App() {
             onAsked={() => loadUsageStatus(supabase).then(setUsage).catch(() => undefined)}
           />
         ) : view === 'inbox' ? (
-          <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} />
+          <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} names={new Map(allUsers.map((u) => [u.id, u.displayName]))} />
         ) : view === 'users' ? (
           <UserManagement currentUserId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : view === 'governance' && currentUser.isAdmin ? (
