@@ -206,12 +206,12 @@ The guide's knowledge section gains the answer's page, retiring and asking. The 
 
 **No spike:** nothing here depends on an unknown.
 
-## Questions for Rory
+## Questions for Rory (answered 29 October 2026)
 
 | | Question | Recommended |
 |---|---|---|
-| Q1 | Should every signed-in person see an answer's history (its reviews, corrections and confirmations), which today only admins see in the audit log? | **Yes, for that entry's own knowledge-base events only.** The history is the proof the knowledge can be trusted, and members can already read the entry and every response; the rest of the audit log stays admin-only |
-| Q2 | Retiring: soft, with a reason and a way back, or delete? | **Retire with a reason, admin only, and Restore, both audited.** Nothing is lost, where it was used stays linked, and declining a proposal works the same way |
-| Q3 | Should a member be able to suggest a change to an answer? | **Not this sprint.** Members still cannot change entries (decision 0003); a suggestion would be a new kind of proposal, better decided with U-3's contributor screen in Sprint 19 |
-| Q4 | Keep the questions people ask? | **No: nothing is saved but the cost.** It keeps the feature simple and private; K-4's gaps come from responses |
-| Q5 | Sprint size: about four days with retiring, or about two and a half without it | **Keep all five.** Retiring is what makes an answer's page complete, and it closes the gap that proposals can never be declined |
+| Q1 | Should every signed-in person see an answer's history (its reviews, corrections and confirmations), which today only admins see in the audit log? | **Yes, for that entry's own knowledge-base events only.** The history is the proof the knowledge can be trusted, and members can already read the entry and every response; the rest of the audit log stays admin-only **Rory: agreed** |
+| Q2 | Retiring: soft, with a reason and a way back, or delete? | **Retire with a reason, admin only, and Restore, both audited.** Nothing is lost, where it was used stays linked, and declining a proposal works the same way **Rory: agreed** |
+| Q3 | Should a member be able to suggest a change to an answer? | **Not this sprint.** Members still cannot change entries (decision 0003); a suggestion would be a new kind of proposal, better decided with U-3's contributor screen in Sprint 19 **Rory: agreed** |
+| Q4 | Keep the questions people ask? | **No: nothing is saved but the cost.** It keeps the feature simple and private; K-4's gaps come from responses **Rory: agreed** |
+| Q5 | Sprint size: about four days with retiring, or about two and a half without it | **Keep all five.** Retiring is what makes an answer's page complete, and it closes the gap that proposals can never be declined **Rory: agreed** |
