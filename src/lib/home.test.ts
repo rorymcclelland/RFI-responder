@@ -54,6 +54,11 @@ describe('needsYou', () => {
     expect(i.action).toEqual({ kind: 'question', target: { responseId: 'r1', sessionId: 's1', questionId: 'q1' } });
   });
 
+  it('a hand-back with an empty note says there was none', () => {
+    const [i] = needsYou({ me: 'priya', isAdmin: false, names, toMe: [], fromMe: [asg({ status: 'answered', answerText: '', notes: ' ' })], responses: [], knowledge: null });
+    expect(i.detail).toBe('James Okafor handed this back: no note · Bluefin');
+  });
+
   it('3. nothing needs you: an empty list', () => {
     expect(needsYou({ me: 'x', isAdmin: true, names, toMe: [], fromMe: [], responses: [], knowledge: kb({}) })).toEqual([]);
   });

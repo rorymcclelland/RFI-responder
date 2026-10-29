@@ -20,10 +20,17 @@ function client(refuse: number[] = []) {
   return {
     calls,
     from: (table: string) => ({
-      update: (patch: Record<string, unknown>) => ({ eq: () => ({ select: async () => {
-        n++; calls.push({ table, patch });
-        return refuse.includes(n) ? { data: [], error: null } : { data: [{ id: 'x' }], error: null };
-      } }) }),
+      update: (patch: Record<string, unknown>) => {
+        const filters: string[] = [];
+        const chain = {
+          eq: (col: string, v: unknown) => { filters.push(`${col}=${v}`); return chain; },
+          select: async () => {
+            n++; calls.push({ table, patch, filters } as never);
+            return refuse.includes(n) ? { data: [], error: null } : { data: [{ id: 'x' }], error: null };
+          },
+        };
+        return chain;
+      },
     }),
   };
 }
@@ -37,6 +44,8 @@ describe('forYouState (test 9)', () => {
     // 6. A question the owner has decided needs nothing more.
     expect(m.forYouState(a({}, { status: 'accepted' }))).toMatchObject({ open: false });
     expect(m.forYouState(a({}, { status: 'skipped' }))).toMatchObject({ open: false });
+    // Approved by you, then reopened (review, L6).
+    expect(m.forYouState(a({ status: 'approved' }))).toMatchObject({ open: true, label: expect.stringMatching(/reopened/) });
   });
 });
 
@@ -72,7 +81,14 @@ describe('the actions (tests 3 to 5)', () => {
       ['rfi_questions', 'final_answer'], ['rfi_questions', 'status'], ['question_assignments', 'answer_text,completed_at,status,updated_at'],
     ]);
     expect(c.calls[1].patch.status).toBe('accepted');
+    // Security review, M1: both question writes apply only while it is still to do.
+    for (const call of c.calls.slice(0, 2)) expect((call as never as { filters: string[] }).filters).toEqual(['id=q1', 'status=pending']);
     expect(c.calls[2].patch.status).toBe('approved');
+  });
+  it('M1. a question the owner decided meanwhile is left alone, and the contributor is told', async () => {
+    const c = client([1]);
+    await expect(m.approveAssigned(c as never, a(), 'Stale text.')).rejects.toThrow(m.ALREADY_DECIDED);
+    expect(c.calls).toHaveLength(1);
   });
   it('3. says plainly when the question was approved but the assignment did not move', async () => {
     await expect(m.approveAssigned(client([3]) as never, a(), 'Yes.')).rejects.toThrow(/^The question is approved, but your assignment was not saved/);
@@ -88,7 +104,9 @@ describe('the actions (tests 3 to 5)', () => {
     await expect(m.handBack(c as never, a(), 'no')).rejects.toThrow();
     expect(c.calls).toHaveLength(0);
     await m.handBack(c as never, a(), '  Ask the legal team.  ');
-    expect(c.calls[0]).toMatchObject({ table: 'question_assignments', patch: { status: 'answered', answer_text: '', notes: 'Ask the legal team.' } });
+    expect(c.calls[0]).toMatchObject({ table: 'question_assignments', patch: { status: 'answered', answer_text: '', notes: 'Handed back: Ask the legal team.' } });
+    // Security review, M2: the reason is added to the notes already there.
+    expect(m.notesAfterHandBack('Owner: check the 2025 policy.', 'Ask legal.')).toBe('Owner: check the 2025 policy.\n\nHanded back: Ask legal.');
     expect(m.isHandedBack({ status: 'answered', answerText: '' })).toBe(true);
   });
   it('opening an asked question moves it to Working on it, once', async () => {
@@ -96,5 +114,14 @@ describe('the actions (tests 3 to 5)', () => {
     expect(await m.startWorking(c as never, a())).toBe(true);
     expect(await m.startWorking(c as never, a({ status: 'in_review' }))).toBe(false);
     expect(c.calls).toEqual([expect.objectContaining({ patch: expect.objectContaining({ status: 'in_review' }) })]);
+  });
+});
+
+describe('notes (review, M2)', () => {
+  it('saves notes on the assignment, at most 2,000 characters', async () => {
+    const c = client();
+    await expect(m.saveNotes(c as never, a(), 'x'.repeat(2001))).rejects.toThrow(/2,000/);
+    await m.saveNotes(c as never, a(), 'Checked with the SOC.');
+    expect(c.calls[0]).toMatchObject({ table: 'question_assignments', patch: { notes: 'Checked with the SOC.' } });
   });
 });

@@ -511,7 +511,8 @@ export default function RFIQuestionCard({
               <div key={`answered-${a.id}`} className="border-t border-ink-100 pt-4" onClick={(e) => e.stopPropagation()}>
                 {sent ? (
                   <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 space-y-2">
-                    <p className="text-xs font-bold text-ink-700">{who} answered:</p>
+                    {/* Security review, L1: the answer on the assignment, which before Sprint 19 could be the copy taken when it was assigned. */}
+                    <p className="text-xs font-bold text-ink-700">{who} marked it answered, with this answer:</p>
                     <p className="text-sm text-ink-800 whitespace-pre-wrap">{a.answerText}</p>
                     {a.notes && <p className="text-xs text-ink-500">Notes: {a.notes}</p>}
                     {canDecide && question.status === 'pending' && (

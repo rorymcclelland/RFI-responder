@@ -81,7 +81,7 @@ When a question needs a specialist, open its card and under **Expert Assignment*
 
 ![Assigning a question, with suggested people and their reasons](../screenshots/11-assign.png)
 
-The question appears under **Questions for you** in their **Assignments** ([Answering assigned questions](specialists.md)). They can approve it themselves, send their answer to you, or hand it back with a note. An answer they send shows on the question's card as "<their name> answered:", with **Use their answer**, which puts it in the editor for you to approve; a handed-back question shows their note. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
+The question appears under **Questions for you** in their **Assignments** ([Answering assigned questions](specialists.md)). They can approve it themselves, send their answer to you, or hand it back with a note. An answer they send shows on the question's card as "<their name> marked it answered, with this answer:", with **Use their answer**, which puts it in the editor for you to approve; a handed-back question shows their note. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
 
 ## 5. Record the export
 

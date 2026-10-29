@@ -5,7 +5,6 @@
  * card, and may change their own assignment's answer, notes and stage.
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { saveQuestionPatch } from './sessions';
 import { needsWrittenAnswer } from './format';
 
 export interface MyAssignment {
@@ -49,6 +48,7 @@ export const isHandedBack = (a: Pick<MyAssignment, 'status' | 'answerText'>) => 
 export function forYouState(a: MyAssignment): { label: string; open: boolean } {
   if (a.question.status === 'accepted') return { label: 'Approved; nothing more is needed from you', open: false };
   if (a.question.status === 'skipped') return { label: 'Left unanswered by the owner; nothing more is needed from you', open: false };
+  if (a.status === 'approved') return { label: 'You approved it, but it has been reopened since; it is to do again', open: true };
   if (isHandedBack(a)) return { label: 'You handed this back; the owner decides', open: true };
   if (a.status === 'answered') return { label: 'You sent your answer to the owner; you can still change it or approve it', open: true };
   if (a.status === 'in_review') return { label: 'Working on it', open: true };
@@ -102,11 +102,21 @@ export async function startWorking(client: SupabaseClient, a: MyAssignment): Pro
   }
 }
 
-/** Approve: the question, with this text (as on the question card), then the assignment. */
+export const ALREADY_DECIDED = 'The owner has already decided this question since you opened it, so nothing was changed. The list now shows their decision.';
+
+/**
+ * Approve: the question, with this text (as on the question card), then the assignment. Each write
+ * applies only while the question is still to do (security review, M1): a screen opened before the
+ * owner decided can no longer reopen and overwrite their decision.
+ */
 export async function approveAssigned(client: SupabaseClient, a: MyAssignment, text: string): Promise<void> {
   const problem = answerProblem(a, text);
   if (problem) throw new Error(problem);
-  await saveQuestionPatch(client, a.question.id, { finalAnswer: text, status: 'accepted' });
+  for (const [i, patch] of [{ final_answer: text }, { status: 'accepted' }].entries()) {
+    const r = (await client.from('rfi_questions').update(patch).eq('id', a.question.id).eq('status', 'pending').select('id')) as unknown as Saved;
+    if (r.error) throw new Error(i === 0 ? `Your answer was not saved: ${r.error.message}.` : `Your answer was saved, but it was not approved: ${r.error.message}.`);
+    if (!r.data?.length) throw new Error(i === 0 ? ALREADY_DECIDED : 'Your answer was saved, but the question was decided meanwhile, so it was not approved.');
+  }
   try {
     await updateAssignment(client, a.id, { status: 'approved', answer_text: text, completed_at: new Date().toISOString() }, 'Your assignment');
   } catch (err) {
@@ -121,9 +131,23 @@ export async function sendToOwner(client: SupabaseClient, a: MyAssignment, text:
   await updateAssignment(client, a.id, { status: 'answered', answer_text: text }, 'Your answer');
 }
 
+/** The notes after handing back: the reason is added to the notes already there, never replacing them (review, M2). */
+export function notesAfterHandBack(existing: string | null, note: string): string {
+  const reason = `Handed back: ${note.trim()}`;
+  return (existing ?? '').trim() ? `${existing!.trim()}\n\n${reason}` : reason;
+}
+
 /** Hand back: a note for the owner, and no answer. */
 export async function handBack(client: SupabaseClient, a: MyAssignment, note: string): Promise<void> {
   const problem = handBackProblem(note);
   if (problem) throw new Error(problem);
-  await updateAssignment(client, a.id, { status: 'answered', answer_text: '', notes: note.trim() }, 'Your note');
+  await updateAssignment(client, a.id, { status: 'answered', answer_text: '', notes: notesAfterHandBack(a.notes, note) }, 'Your note');
+}
+
+export const MAX_NOTES = 2000;
+
+/** Notes on the assignment, shared by the person answering and the owner. */
+export async function saveNotes(client: SupabaseClient, a: MyAssignment, notes: string): Promise<void> {
+  if (notes.length > MAX_NOTES) throw new Error(`Keep the notes to ${MAX_NOTES.toLocaleString('en-GB')} characters.`);
+  await updateAssignment(client, a.id, { notes }, 'Your notes');
 }

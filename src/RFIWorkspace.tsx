@@ -156,7 +156,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       setFilter('all'); setSearch(''); setListCollapsed(false); setExpandedId(pendingFocus.questionId);
       setTimeout(() => document.getElementById(`question-${pendingFocus.questionId}`)?.scrollIntoView({ block: 'center' }), 100);
     } else if (sessionId) {
-      setNotice('That question could not be found in this response; its file may have been removed. The newest file is shown.');
+      setNotice(pendingFocus.missing
+        ? 'That question could not be found: its file is no longer in this response. The newest file is shown.'
+        : 'That question is no longer in this file; it may have been removed.');
     } else {
       return;
     }

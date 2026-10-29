@@ -137,3 +137,19 @@ Refined 29 October 2026: the third slice of option B from the Sprint 16 UX spike
 | Q4 | Member suggestions to an answer (put off at Sprint 18, Q3)? | **Still later**, beside K-4's gaps (Sprint 20): a suggestion is a new kind of proposal, and it fits there **Rory: agreed** |
 | Q5 | Home as everyone's landing page? | **Yes**, first in the menu; **Responses** stays as it is, one click away **Rory: agreed** |
 | Q6 | Screenshots | **You retake them at the close**, as in Sprints 17 and 18 **Rory: agreed** |
+
+## Security review (29 October 2026)
+
+An independent review of `main..sprint-19` found no high issue, three medium and six low; all are fixed. It confirmed that `my_assignments()` reads only what the caller may read, refuses anonymous visitors and the service role, and names every type with its schema, and that the contributor's actions rely only on rules the database enforces.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | Approving from a screen opened before the owner decided reopened the question and overwrote the owner's decision | Both writes apply only while the question is still to do; otherwise nothing changes and the contributor is told. Tested in the database and in unit tests |
+| M2 | Contributors could no longer add notes, the panel called shared notes "Your notes", and handing back replaced the owner's note | **Add Notes** and **Edit Notes** on the question; the notes are shared with the owner; the hand-back reason is added to them, never replacing them; the guide says so |
+| M3 | The role test could not tell the assigner from the owner | A fixture where an admin assigns on someone else's response: both see it under "from me", another member does not |
+| L1 | "<Name> answered:" could show the copy taken when the question was assigned (assignments marked answered before this sprint) | The card says "<Name> marked it answered, with this answer:", which is true of either |
+| L2 | The limits on an assignment's answer and notes were only on the screen | The database refuses an answer over 20,000 characters and notes over 2,000 (new and changed rows); the 5-character minimum for a hand-back stays on the screen, as the guide implies |
+| L3 | `my_assignments()` scanned every assignment an admin can read | It filters to the caller's own rows first; 5,000 others' assignments are tested |
+| L4 | A focus not used before leaving the response stuck, and one notice named the wrong file | A focus is dropped when its response is left; the two cases each have their own wording |
+| L5 | A bulk-approved question showed "Left unanswered." under Decided | It shows the approved answer, or "Left unanswered." only when it was |
+| L6 | The admin line opened Governance, not Knowledge; an empty hand-back note read oddly; an approved assignment reopened since was labelled "Asked" | The admin line opens Knowledge filtered to what waits for review; "no note"; "You approved it, but it has been reopened since" |

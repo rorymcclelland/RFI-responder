@@ -56,6 +56,7 @@ export default function App() {
   // Sprint 19 (S19-3, Q5): everyone lands on Home.
   const [view, setView]                           = useState<AppView>('home');
   const [forYouId, setForYouId]                   = useState<string | null>(null);
+  const [kbStates, setKbStates]                   = useState<{ states: ('waiting' | 'translation' | 'overdue')[]; n: number } | null>(null);
   // S4-1: admins are warned past the budget's warning point; everyone is told when it is reached.
   const [usage, setUsage]                         = useState<UsageStatus | null>(null);
   const [navOpen, setNavOpen]                     = useState(false);
@@ -208,6 +209,11 @@ export default function App() {
     window.addEventListener(OPEN_ENTRY_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_ENTRY_EVENT, onOpen);
   }, []);
+
+  // Security review (L4): a focus not used before leaving its response is dropped, so a later visit opens as usual.
+  useEffect(() => {
+    setFocus((f) => (f && !f.used && f.responseId !== activeOpportunity?.id ? { ...f, used: true } : f));
+  }, [activeOpportunity?.id]);
 
   useEffect(() => {
     const onOpen = async (e: Event) => {
@@ -500,6 +506,8 @@ export default function App() {
             onReview={() => setView('governance')}
             openRef={openRef}
             onOpenedRef={() => setOpenRef(null)}
+            openStates={kbStates}
+            onOpenedStates={() => setKbStates(null)}
             onAsked={() => loadUsageStatus(supabase).then(setUsage).catch(() => undefined)}
           />
         ) : view === 'inbox' ? (
@@ -509,7 +517,7 @@ export default function App() {
           <HomePage currentUser={currentUser} names={names}
             onOpenForYou={(id) => { setForYouId(id); navigate('inbox'); }}
             onOpenResponse={(opp) => { setActiveOpportunity(opp); setView('responses'); }}
-            onReview={() => navigate('governance')}
+            onReview={() => { setKbStates((k) => ({ states: ['waiting', 'translation', 'overdue'], n: (k?.n ?? 0) + 1 })); navigate('knowledge'); }}
             onKnowledge={() => navigate('knowledge')}
             onAsked={() => loadUsageStatus(supabase).then(setUsage).catch(() => undefined)} />
         ) : view === 'users' ? (

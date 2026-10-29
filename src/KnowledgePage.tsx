@@ -34,6 +34,9 @@ interface Props {
   onOpenedRef?: () => void;
   /** After an ask, so the usage banner can refresh. */
   onAsked?: () => void;
+  /** Sprint 19 (Home): open browse with these states; `n` changes on every request. */
+  openStates?: { states: EntryState[]; n: number } | null;
+  onOpenedStates?: () => void;
 }
 
 /** True below the width at which the filters, the list and the answer fit side by side. */
@@ -50,7 +53,7 @@ function useNarrow(query = '(max-width: 1040px)'): boolean {
   return narrow;
 }
 
-export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview, openRef = null, onOpenedRef, onAsked }: Props) {
+export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview, openRef = null, onOpenedRef, onAsked, openStates = null, onOpenedStates }: Props) {
   const [view, setView] = useState<'overview' | 'browse'>('overview');
   const [overview, setOverview] = useState<KnowledgeOverview | null>(null);
   const [entries, setEntries] = useState<BrowseEntry[]>([]);
@@ -115,6 +118,10 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
   }, [openRef?.n]);
   const questionOf = useMemo(() => new Map(entries.map((e) => [e.ref, e.question])), [entries]);
   const askBox = <AskBox questionOf={(r) => questionOf.get(r)} onOpen={(r) => { setView('browse'); pick(r); }} onAsked={onAsked} />;
+  useEffect(() => {
+    if (openStates) { openBrowse({ states: openStates.states }); onOpenedStates?.(); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openStates?.n]);
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const header = (

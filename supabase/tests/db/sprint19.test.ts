@@ -89,3 +89,52 @@ describe('S19-1 my_assignments()', () => {
     await refused(as(other, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [qid]).then((r) => { if (!r.rowCount) throw new Error('no rows'); })));
   });
 });
+
+// Sprint 19 security review.
+describe('Sprint 19 security review', () => {
+  it('M3. the assigner and the owner each see it from them, when they are different people', async () => {
+    const opp = await response(owner.id, { name: 'Owner and assigner differ (review M3)' });
+    const s = await session(opp);
+    const q = await question(s, { text: 'Assigned by an admin (review M3)?' });
+    const a = await assign(q, s, opp, expert, admin);
+    expect((await mine(admin)).fromMe.map((r) => r.id)).toContain(a.id);
+    expect((await mine(owner)).fromMe.map((r) => r.id)).toContain(a.id);
+    expect((await mine(expert)).toMe.map((r) => r.id)).toContain(a.id);
+    expect((await mine(other)).fromMe.map((r) => r.id)).not.toContain(a.id);
+  });
+
+  it('M1. an approval written only while the question is still to do leaves the owner\'s decision alone', async () => {
+    const opp = await response(owner.id, { name: 'Stale approval (review M1)' });
+    const s = await session(opp);
+    const q = await question(s, { text: 'Decided by the owner first (review M1)?' });
+    await assign(q, s, opp, expert, owner);
+    // The owner decided it after the contributor's screen was loaded.
+    await asSuperuser(`UPDATE rfi_questions SET final_answer = 'Owner text.', status = 'accepted' WHERE id = $1`, [q]);
+    await as(expert, async (c) => {
+      const r = await c(`UPDATE rfi_questions SET final_answer = 'Stale contributor text.' WHERE id = $1 AND status = 'pending' RETURNING id`, [q]);
+      expect(r.rowCount).toBe(0);
+      expect((await c(`SELECT final_answer, status FROM rfi_questions WHERE id = $1`, [q])).rows[0]).toEqual({ final_answer: 'Owner text.', status: 'accepted' });
+    });
+  });
+
+  it('L2. answers and notes on an assignment are bounded in the database', async () => {
+    const opp = await response(owner.id, { name: 'Bounds (review L2)' });
+    const s = await session(opp);
+    const q = await question(s, { text: 'Bounds (review L2)?' });
+    const a = await assign(q, s, opp, expert, owner);
+    expect(await refused(as(expert, (c) => c(`UPDATE question_assignments SET answer_text = $1 WHERE id = $2`, ['x'.repeat(20001), a.id])))).toMatch(/answer_length/);
+    expect(await refused(as(expert, (c) => c(`UPDATE question_assignments SET notes = $1 WHERE id = $2`, ['x'.repeat(2001), a.id])))).toMatch(/notes_length/);
+    await as(expert, (c) => c(`UPDATE question_assignments SET answer_text = $1, notes = $2 WHERE id = $3`, ['x'.repeat(20000), 'y'.repeat(2000), a.id]));
+  });
+
+  it('L3. stays fast with many assignments that are not the caller\'s', async () => {
+    const opp = await response(owner.id, { name: 'Many (review L3)' });
+    const s = await session(opp);
+    const q = await question(s, { text: 'Many (review L3)?' });
+    await asSuperuser(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, status)
+      SELECT $1, $2, $3, $4, $5, 'pending' FROM generate_series(1, 5000)`, [q, s, opp, other.id, owner.id]);
+    const t = Date.now();
+    expect((await mine(expert)).toMe.every((r) => r.question.text !== 'Many (review L3)?')).toBe(true);
+    expect(Date.now() - t).toBeLessThan(1500);
+  }, 60000);
+});

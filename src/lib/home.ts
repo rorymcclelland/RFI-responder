@@ -54,7 +54,7 @@ export function needsYou(o: {
     const back = isHandedBack(a);
     items.push({
       key: `answered-${a.id}`, group: 'answered', title: a.question.text,
-      detail: back ? `${who(a.assignedTo)} handed this back: ${a.notes ?? 'no note'} · ${a.response}` : `${who(a.assignedTo)} answered · ${a.response}`,
+      detail: back ? `${who(a.assignedTo)} handed this back: ${(a.notes ?? '').trim() || 'no note'} · ${a.response}` : `${who(a.assignedTo)} answered · ${a.response}`,
       action: { kind: 'question', target: { responseId: a.responseId, sessionId: a.sessionId, questionId: a.question.id } },
     });
   }

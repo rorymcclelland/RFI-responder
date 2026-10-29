@@ -7,8 +7,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Inbox } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import {
-  approveAssigned, answerProblem, forYouState, handBack, handBackProblem, loadMyAssignments, sendToOwner, startWorking, startingAnswer,
-  MAX_ANSWER, type MyAssignment,
+  approveAssigned, answerProblem, forYouState, handBack, handBackProblem, loadMyAssignments, saveNotes, sendToOwner, startWorking, startingAnswer,
+  MAX_ANSWER, MAX_NOTES, type MyAssignment,
 } from './lib/myAssignments';
 import { openEntry } from './lib/openEntry';
 import { openQuestion } from './lib/openQuestion';
@@ -105,6 +105,8 @@ function QuestionPanel({ a, names, onDone }: { a: MyAssignment; names: Map<strin
   const [text, setText] = useState(() => startingAnswer(a));
   const [note, setNote] = useState('');
   const [handingBack, setHandingBack] = useState(false);
+  const [notes, setNotes] = useState(a.notes ?? '');
+  const [editingNotes, setEditingNotes] = useState(false);
   const [busy, setBusy] = useState(false);
   const band = confidenceBand(q.confidence);
   const noDraft = q.draftKind === 'insufficient_evidence' || q.draftKind === 'person_required';
@@ -143,7 +145,26 @@ function QuestionPanel({ a, names, onDone }: { a: MyAssignment; names: Map<strin
             <span key={r}>{i > 0 ? ', ' : ''}<button className="font-bold underline" onClick={() => openEntry(r)}>{r}</button></span>
           ))}</p>
         )}
-        {a.notes && <p className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 text-ink-700">Your notes: {a.notes}</p>}
+      </div>
+
+      {/* Notes on the assignment: shared with the owner, who can add to them too (security review, M2). */}
+      <div className="space-y-2">
+        {!editingNotes ? (
+          <div className="text-xs text-ink-600 space-y-1">
+            {a.notes ? <p className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 text-ink-700 whitespace-pre-wrap">Notes: {a.notes}</p> : null}
+            {state.open && <button onClick={() => setEditingNotes(true)} className="btn-ghost text-xs">{a.notes ? 'Edit Notes' : 'Add Notes'}</button>}
+          </div>
+        ) : (
+          <form className="space-y-2" onSubmit={(e) => { e.preventDefault(); act(() => saveNotes(supabase, a, notes), 'Notes saved.'); }}>
+            <label className="block text-sm font-bold text-ink-700">Notes, for you and the owner
+              <textarea className="input mt-1 text-sm" rows={3} maxLength={MAX_NOTES} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </label>
+            <div className="flex gap-2">
+              <button type="submit" disabled={busy} className="btn-primary text-xs">Save notes</button>
+              <button type="button" onClick={() => { setEditingNotes(false); setNotes(a.notes ?? ''); }} className="btn-ghost text-xs">Cancel</button>
+            </div>
+          </form>
+        )}
       </div>
 
       {state.open ? (
@@ -177,7 +198,9 @@ function QuestionPanel({ a, names, onDone }: { a: MyAssignment; names: Map<strin
           )}
         </>
       ) : (
-        <div className="text-sm text-ink-700 bg-ink-50 rounded-2xl p-4 whitespace-pre-wrap">{q.finalAnswer || 'Left unanswered.'}</div>
+        <div className="text-sm text-ink-700 bg-ink-50 rounded-2xl p-4 whitespace-pre-wrap">
+          {q.status === 'skipped' ? 'Left unanswered.' : (q.finalAnswer ?? q.generatedAnswer ?? '')}
+        </div>
       )}
     </aside>
   );

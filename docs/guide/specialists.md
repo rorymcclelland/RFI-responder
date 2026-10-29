@@ -21,7 +21,9 @@ Under the question, **Your answer** starts with the answer you sent before, or t
 
 - **Approve**: decides the question with your answer, as the owner could, and marks your assignment approved. The owner sees it as decided.
 - **Send to the owner**: saves your answer on the assignment and marks it answered. The question stays to do; the owner sees "<your name> answered:" on its card, with **Use their answer**, and decides.
-- **Hand back**, when it is not for you: write why (5 to 500 characters, for example "ask the legal team"), then **Hand it back**. The assignment is marked answered with no answer, and the owner sees your note.
+- **Hand back**, when it is not for you: write why (5 to 500 characters, for example "ask the legal team"), then **Hand it back**. The assignment is marked answered with no answer, and your reason is added to its notes for the owner.
+
+**Add Notes** (or **Edit Notes**) keeps notes on the assignment, which you and the owner both see and can change. If the owner decides the question while you have it open, **Approve** changes nothing and says so.
 
 A question the owner has already decided moves to **Decided**, and needs nothing more from you. Assignments are closed when the response's export is recorded, and then leave the list.
 
@@ -29,7 +31,7 @@ You cannot approve questions in bulk, assign others, or record the export: those
 
 ## Assignments you sent, and all assignments
 
-**Sent** lists the questions you have assigned to others, and admins also see **All**. Filter them by stage: **Asked**, **Working on it**, **Answered**, **Approved**, and **Closed** for assignments closed when their response was exported. Choose one to see its answer and notes; **Add Notes** (or **Edit Notes**) adds a note for the person answering.
+**Sent** lists the questions you have assigned to others, and admins also see **All**. Filter them by stage: **Asked**, **Working on it**, **Answered**, **Approved**, and **Closed** for assignments closed when their response was exported. Choose one to see its answer and notes; **Add Notes** (or **Edit Notes**) changes the notes, which the person answering sees too.
 
 ## Getting suggested for the right questions
 
