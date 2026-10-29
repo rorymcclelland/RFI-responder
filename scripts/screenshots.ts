@@ -162,6 +162,8 @@ async function main() {
   await page.getByLabel('Search by number or words').fill('KB-0015');
   await page.getByRole('region', { name: 'Answers' }).getByRole('button', { name: /KB-0015/ }).click();
   await page.getByText('A proposed change is waiting').waitFor();
+  // The ask box sits above the list: bring the answer's page to the top, below the sticky header.
+  await page.getByRole('complementary', { name: 'Selected answer' }).evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96 }));
   await shoot(page, '19-answer-page.png', 'an answer and its history');
   // Sprint 18 (S18-4): asking it a question. It needs the Edge Functions running with their keys
   // (npx supabase functions serve); without them the run carries on without this picture.

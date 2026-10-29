@@ -102,9 +102,15 @@ describe('processInBatches at the usage caps (Sprint 4, S4-1)', () => {
   });
 
   it('falls back to the generic message when the reply has no reason', async () => {
-    const invoke = vi.fn().mockResolvedValueOnce({ data: null, error: new Error('Failed to send a request') });
+    const invoke = vi.fn().mockResolvedValueOnce({ data: null, error: new Error('Something else went wrong') });
     const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a'], () => undefined);
-    expect(r.reasons).toEqual(['Failed to send a request']);
+    expect(r.reasons).toEqual(['Something else went wrong']);
+  });
+
+  it('says plainly when the function cannot be reached at all (Sprint 18)', async () => {
+    const invoke = vi.fn().mockResolvedValueOnce({ data: null, error: new Error('Failed to send a request to the Edge Function') });
+    const r = await processInBatches({ functions: { invoke } } as never, 's1', ['a'], () => undefined);
+    expect(r.reasons[0]).toMatch(/^The service could not be reached/);
   });
 });
 

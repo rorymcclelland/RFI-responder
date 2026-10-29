@@ -101,6 +101,11 @@ export async function functionErrorMessage(error: unknown): Promise<{ message: s
     }
     return { message: e?.message ?? 'no response', status: ctx.status };
   }
+  // Sprint 18 (found at Rory's check): supabase-js says "Failed to send a request to the Edge
+  // Function" when it cannot reach the function at all (not deployed, offline, or blocked).
+  if (e?.message && /failed to send a request/i.test(e.message)) {
+    return { message: 'The service could not be reached. Check your connection and try again shortly; if it keeps happening, an admin should check the Edge Functions are deployed.', status: null };
+  }
   return { message: e?.message ?? 'no response', status: null };
 }
 

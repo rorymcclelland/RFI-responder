@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in eighteen sprints (Sprints 0 to 17). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in nineteen sprints (Sprints 0 to 18). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -32,6 +32,8 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 |---|---|
 | ![The knowledge page: what the organisation knows](docs/screenshots/17-knowledge.png) | ![All answers, with one chosen](docs/screenshots/18-knowledge-browse.png) |
 | The knowledge base: what the organisation knows, by topic and state | Every answer, searchable, with where it came from |
+| ![Asking the knowledge base a question](docs/screenshots/20-ask.png) | ![One answer, with a proposed change waiting and where it has been used](docs/screenshots/19-answer-page.png) |
+| Ask it a question: the draft it would give, its confidence and sources | One answer's history and where it has been used |
 | ![Overview of responses in flight](docs/screenshots/1-overview.png) | ![Review, lowest confidence first, with the bulk approval bar](docs/screenshots/2-review.png) |
 | Responses in flight, with owner, due date and progress | Review, lowest confidence first; bulk approval above a threshold |
 | ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![An expert's assignment inbox](docs/screenshots/5-assignments.png) |
@@ -73,6 +75,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 15 | Polishing the live demo: search by entry number, admins reset the demo and invite people from the app, the access helpers out of the API, policies checking the user once per query |
 | 16 | The last rough edges (a response shows it is loading, adding an entry is confirmed at once, a steady knowledge-base box) and a UX spike: the app to be reorganised around people's jobs, with the knowledge base as a full place (`docs/ux/`) |
 | 17 | The first slice of the redesign: one vocabulary across the app (a glossary the tests enforce), controls only for those who can use them, and the knowledge base as a full page with an overview and browse, in place of the pop-up |
+| 18 | Each answer's story and asking the knowledge base: an answer's own page (history, where it was used, other languages; approve, mark still correct, edit), retiring and restoring answers and declining proposed changes, Ask it a question through the same pipeline as a response, and entry numbers past KB-9999 |
 
 Each sprint followed the same cycle:
 

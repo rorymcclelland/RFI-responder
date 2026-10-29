@@ -36,6 +36,8 @@ The answer you choose opens its own page beside the list (on a phone, in place o
 - **History**, oldest first: how it was added, imported or learned; each review, with the earlier text when it was corrected; changes of topics or source; each confirmation by use (an export that approved it unedited); retirement and restoring; and what it replaced.
 - **Other languages**: the translations made from it, or the entries it was translated from.
 
+![One answer, with a proposed change waiting and where it has been used](../screenshots/19-answer-page.png)
+
 Everyone sees the same page, history included; the rest of the audit log stays with admins. An admin can also, on the page:
 
 - **Approve** an answer waiting for review, or **Mark as still correct** one already reviewed, which moves its next review on by the review interval.
@@ -48,6 +50,8 @@ Everyone sees the same page, history included; the rest of the audit log stays w
 ### Asking it a question
 
 **Ask it a question**, on the knowledge page, takes a question as a customer would write it and shows the answer the knowledge base would draft, before any questionnaire arrives: the draft, its confidence, the checker's verdict and reason, what would happen to it in a response (a pricing question, for instance, is never drafted), and the answers it drew on, each opening its page. It uses exactly the matching, checks and drafting of a response, so it counts towards your daily question limit and the month's budget. Nothing about your question is saved but its cost.
+
+![Asking the knowledge base a question](../screenshots/20-ask.png)
 
 ![Importing a spreadsheet of questions and answers into the knowledge base](../screenshots/12-kb-import.png)
 
