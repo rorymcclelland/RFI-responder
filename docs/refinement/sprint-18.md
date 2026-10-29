@@ -236,3 +236,11 @@ An independent review of `main..sprint-18` found no high issue, two medium and s
 | L4 | The service role can set the retired columns directly | Accepted: the service key is server-only, as for every other column it writes (decision 0005) |
 | L5 | A history longer than 500 events dropped its newest | The newest 500 are kept, shown oldest first. Tested |
 | L6 | "Nothing is saved" while an ask may index unindexed entries; the usage banner did not refresh after an ask; a correction of only the question showed the unchanged answer as "Before" | "Nothing about your question is saved"; the banner refreshes; a correction shows only what it changed, compared with the next version (tested). The guide also says when **Restore** is refused |
+
+## Review and close (29 October 2026)
+
+All five stories done. Rory updated the live demo and ran the test pack (`docs/testing/sprint-18-test-pack.md`): all six cases passed. On the way:
+- the retire migration failed on Supabase's push (copied signatures named `vector` without its schema) and was fixed, with a migrations test;
+- case 5.1 first failed because `ask-knowledge` had not been deployed yet; the app now says plainly when it cannot reach a function.
+
+He retook the screenshots; the answer's page and an ask are in the README and the guide. Test counts at the close: 1039 unit, 368 database. Proposed next: Sprint 19, U-3 and U-4.

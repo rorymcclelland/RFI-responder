@@ -772,15 +772,52 @@ Rory retook every screenshot on his PC (every view fits 768 px); the two new one
 
 ## Sprint 18: each answer's story, and asking the knowledge base a question (refined 29 October 2026)
 
-Refinement: `docs/refinement/sprint-18.md`. The second slice of option B (Sprint 16 spike); questions Q1 to Q5 answered by Rory the same day, each as recommended.
+Refinement: `docs/refinement/sprint-18.md`. The second slice of option B (Sprint 16 spike); questions Q1 to Q5 answered by Rory the same day, each as recommended. Closed 29 October 2026.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S18-1 | Entry numbers past KB-9999 | BUG-42 | Ready, Sprint 18 |
-| S18-2 | One answer and its history: where used, history, other languages, next review; mark as still correct and edit there | K-2 | Ready, Sprint 18 |
-| S18-3 | Retire an answer, or decline a proposed change, with a reason; restore | K-2 | Ready, Sprint 18 |
-| S18-4 | Ask it a question: the draft it would give, with confidence and sources, metered | K-3 | Ready, Sprint 18 |
-| S18-5 | Guide, introduction and screenshots for these screens | U-10 | Ready, Sprint 18 |
+| S18-1 | Entry numbers past KB-9999 | BUG-42 | Done, Sprint 18 |
+| S18-2 | One answer and its history: where used, history, other languages, next review; mark as still correct and edit there | K-2 | Done, Sprint 18 |
+| S18-3 | Retire an answer, or decline a proposed change, with a reason; restore | K-2 | Done, Sprint 18 |
+| S18-4 | Ask it a question: the draft it would give, with confidence and sources, metered | K-3 | Done, Sprint 18 |
+| S18-5 | Guide, introduction and screenshots for these screens | U-10 | Done, Sprint 18 |
+
+### Sprint 18 review (29 October 2026)
+
+**Checks, with evidence.**
+- 1039 unit and 368 database tests on `sprint-18`; lint, type check and `deno check` clean; CI green, including `ask-knowledge` on the local stack: its refusals, an assembled draft, the pricing hold, nothing written, and a 429 with nothing spent at a daily cap of 0.
+- An independent security review found no high issue, two medium and six low; all fixed, one low accepted (`docs/refinement/sprint-18.md`).
+- Rory updated the live demo and ran the test pack (`docs/testing/sprint-18-test-pack.md`). All six cases passed. Two points came up along the way:
+  - the third migration failed on Supabase's push, because copied function signatures named `vector` without its schema; it was fixed, with a migrations test, and pushed again;
+  - case 5.1 first failed because `ask-knowledge` had not yet been deployed. The raw "Failed to send a request to the Edge Function" now reads as a plain message.
+- Claude checked the live project read-only: 66 migrations, the latest `20261106120000`; `ask-knowledge` and `process-questions` deployed; asking recorded in `ai_usage`; a retirement and a restore in the audit log. The security advisor lists only what it listed before, plus `retire_entry` and `restore_entry`, which signed-in users are meant to call (admins only, checked inside).
+- Rory retook the screenshots: every view fits 768 px, and the answer's page and an ask are in the README and the guide.
+
+### Where every Sprint 18 review item now lives
+
+| Item | Now |
+|---|---|
+| K-2, K-3, BUG-42 (with U-10 for these screens) | Done in Sprint 18 |
+| Two medium and six low security review findings | Done in Sprint 18 (review); the service role writing the retired columns is accepted, as for its other columns |
+| The migration's bare `vector` type; the raw message when a function cannot be reached | Done in Sprint 18 (found at Rory's check) |
+| The answer's page photographed below the ask box | The script now scrolls to it; Rory reruns `npm run screenshots` with the next screenshots |
+| The governance page shows spend in total, not by function | Accepted for now: asking is recorded under its own name in `ai_usage`, and U-9 (Sprint 21) can add a breakdown |
+
+**Not yet in a sprint, ranked at the Sprint 18 review.** The redesign continues in the spike's order (Sprints 19 to 21). Then:
+1. F-14 and F-15 reviewed Japanese and near-miss items (need people).
+2. F-59 the near miss against Japanese entries.
+3. F-20 rerankers.
+4. F-34 review during processing.
+5. F-60 Japanese keyword matching.
+6. F-62 import edge cases.
+7. F-8 leaked-password protection (needs the Pro plan).
+8. F-2 generated database types.
+9. F-4 Tailwind 4.
+
+**Proposed next.** Sprint 19, the next slice in the spike's order:
+- **U-3 "Questions for you":** a contributor answers, approves or hands back an assigned question on one screen, with the current draft and sources. It is the job the app serves worst today, and it can reuse the answer's page and the ask's result card.
+- **U-4 Home:** "Needs you" and "What we know", where everyone lands, tying the jobs together.
+- To decide at refinement (from the spike): whether a contributor's answer is proposed to the knowledge base at once, and member suggestions (Sprint 18, Q3).
 
 ## Candidate stories (not yet placed in a sprint)
 
