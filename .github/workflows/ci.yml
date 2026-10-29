@@ -140,6 +140,26 @@ jobs:
           # The policy helpers are not API endpoints (Sprint 15, S15-3, test 4).
           code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$API_URL/rest/v1/rpc/is_admin" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{}')
           [ "$code" = "404" ] || fail "is_admin should not be callable through the API" "got $code $(cat /tmp/r.json)"
+          # ask-knowledge (Sprint 18, S18-4): refusals, then a real question with every provider failing.
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$F/ask-knowledge" -H 'Content-Type: application/json' -d '{"question":"How do you encrypt data at rest?"}')
+          [ "$code" = "401" ] || fail "ask-knowledge without JWT should get 401" "got $code"
+          code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/ask-knowledge" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"   "}')
+          [ "$code" = "400" ] || fail "ask-knowledge with an empty question should get 400" "got $code $(cat /tmp/r.json)"
+          code=$(curl -s -o /tmp/a.json -w '%{http_code}' -X POST "$F/ask-knowledge" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"How do you encrypt data at rest?"}')
+          [ "$code" = "200" ] || fail "ask-knowledge should answer with failing providers" "got $code $(cat /tmp/a.json)"
+          echo "ask-knowledge: $(cat /tmp/a.json)"
+          if grep -q 'should-never-appear' /tmp/a.json; then fail "Key leaked" "ask-knowledge returned a key"; fi
+          code=$(curl -s -o /tmp/a2.json -w '%{http_code}' -X POST "$F/ask-knowledge" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"What is the annual licence cost?"}')
+          python3 - <<'PY' || fail "ask-knowledge did not answer from the seed entries, or did not hold pricing" "$(cat /tmp/a.json) $(cat /tmp/a2.json)"
+          import json, re
+          a = json.load(open('/tmp/a.json'))['result']
+          assert a['sources'] and all(re.fullmatch(r'KB-\d{4,}', s['ref']) for s in a['sources']), a
+          assert a['draftKind'] in ('assembled', 'insufficient_evidence'), a
+          p = json.load(open('/tmp/a2.json'))['result']
+          assert p['gate'] == 'pricing' and p['draftKind'] == 'person_required', p
+          PY
+          n=$(curl -s "$API_URL/rest/v1/ai_usage?select=function&function=eq.ask-knowledge" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | python3 -c 'import sys,json; print(len(json.load(sys.stdin)))')
+          echo "ask-knowledge usage rows: $n"
           # process-questions (Sprint 2, S2-2a): refusals, then a real batch with every provider failing.
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$F/process-questions" -H 'Content-Type: application/json' -d '{}')
           [ "$code" = "401" ] || fail "process-questions without JWT should get 401" "got $code"

@@ -1,6 +1,6 @@
 # Edge Functions reference
 
-The five Supabase Edge Functions (Deno) hold the keys the browser must never have: four are the only place the app calls an AI provider, and the fifth, `invite-user` (Sprint 15), sends invitations with the service role. The browser calls them with the user's session; they read and write the database with the service role where members cannot, and they hold the provider keys ([decision 0005](../decisions/0005-where-the-ai-runs.md)). How they fit into the whole system is in [ARCHITECTURE.md](../ARCHITECTURE.md).
+The six Supabase Edge Functions (Deno) hold the keys the browser must never have: five are the only place the app calls an AI provider, and the sixth, `invite-user` (Sprint 15), sends invitations with the service role. The browser calls them with the user's session; they read and write the database with the service role where members cannot, and they hold the provider keys ([decision 0005](../decisions/0005-where-the-ai-runs.md)). How they fit into the whole system is in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 | Function | What it does | Called from |
 |---|---|---|
@@ -8,6 +8,7 @@ The five Supabase Edge Functions (Deno) hold the keys the browser must never hav
 | [`extract-questions`](../../supabase/functions/extract-questions/index.ts) | Finds the questions in a Word document's text blocks; saves nothing | `extractFromWord` in [`src/lib/wordExtraction.ts`](../../src/lib/wordExtraction.ts), used by [`src/RFIWorkspace.tsx`](../../src/RFIWorkspace.tsx) |
 | [`embed`](../../supabase/functions/embed/index.ts) | Returns embedding vectors for up to 128 texts | Nothing in `src/` or `eval/` calls it; only the CI job below does |
 | [`embed-entries`](../../supabase/functions/embed-entries/index.ts) | Embeds knowledge-base entries that have no vector from the configured model | `indexNewEntries` in [`src/lib/knowledgeBase.ts`](../../src/lib/knowledgeBase.ts), used by [`src/App.tsx`](../../src/App.tsx) and [`src/RFIWorkspace.tsx`](../../src/RFIWorkspace.tsx) |
+| [`ask-knowledge`](../../supabase/functions/ask-knowledge/index.ts) | Answers one question as the knowledge base would in a response, through the same pipeline, and saves nothing but its cost (Sprint 18) | `askKnowledge` in [`src/lib/ask.ts`](../../src/lib/ask.ts), used by [`src/knowledge/AskBox.tsx`](../../src/knowledge/AskBox.tsx) |
 | [`invite-user`](../../supabase/functions/invite-user/index.ts) | An admin invites someone by email; they join as a member (Sprint 15) | `inviteSomeone` in [`src/lib/invite.ts`](../../src/lib/invite.ts), used by [`src/UserManagement.tsx`](../../src/UserManagement.tsx) |
 
 No function calls another; the browser calls each one through `supabase.functions.invoke`.
@@ -253,6 +254,26 @@ Each batch has its own reservation. In `finally`, usage is recorded under `embed
 
 **Steps.** Authenticate and validate. Then `reserve_invitation` (service role only), under a lock per admin: the caller must be an admin, the address must have no account at all (so the demo's fictional people and reviewers who have not yet accepted are never sent a fresh link), and the admin must have sent fewer than 20 today (UTC); it takes a slot. Then Supabase Auth's `inviteUserByEmail`, with the name as `display_name` and the first `APP_ORIGIN` as the link's destination; if nothing was sent, `release_invitation` gives the slot back. Last, the audit row `user.invited` with the admin as actor and the new account as target, and no address, so deleting the person later leaves no address in the log. A sent invitation keeps its slot even if the audit row fails, so the limit still holds. CORS limits which web pages can call it from a browser; the function itself requires a signed-in admin's token whatever the origin.
 
+## ask-knowledge
+
+**Purpose.** Story S18-4 (K-3). Anyone signed in types a question as a customer would and sees the answer the knowledge base would draft, with its confidence, the checker's verdict and the entries behind it, before any questionnaire arrives. Nothing is saved but the cost (Rory, Q4).
+
+**Request.** `POST` with `{ "question": string }`, checked by `validateAskRequest` in [`_shared/ask-core.ts`](../../supabase/functions/_shared/ask-core.ts): text, 1 to 2,000 characters once trimmed. Every failure is `400`.
+
+**Response.** `200` with `{ result }`: the question, the draft and how it was made (`draftKind`), the calibrated confidence, the checker's verdict and reason, the gate and its reason, the language, the cited entries and the matched entries with their scores, and the reviewer's note.
+
+**Errors.**
+
+| Status | When |
+|---|---|
+| `400` | Validation |
+| `401` | No signed-in user |
+| `429` | The caller's daily question cap, or the monthly budget, is reached; nothing is spent |
+| `502` | The pipeline failed unexpectedly (the detail is logged) |
+| `503` | Usage could not be checked, so nothing was spent |
+
+**Steps.** Authenticate and validate. Reserve one question against the caller's daily cap and the monthly budget, all or nothing (`reserve_quota`), before any provider is called. Build the pipeline with `pipelineDeps` in [`_shared/pipeline-env.ts`](../../supabase/functions/_shared/pipeline-env.ts), the same set-up `process-questions` uses: entries without a vector are indexed first under the caller's indexing cap, matching runs as the caller, and the cited entries' review state comes from `entry_review_status`. Then `processQuestions` for the one question, unchanged, so the gates, drafting checks and calibration are those of a response. Usage is recorded in `ai_usage` under `ask-knowledge`, in a `finally`, even after an error. No question, draft or result is written.
+
 ## Embedding and Claude clients
 
 | Provider | Endpoint | Retries | Errors |
@@ -300,6 +321,8 @@ All in [`supabase/functions/_shared/`](../../supabase/functions/_shared/). Most 
 | `embed-core.ts` | `validateEmbedRequest` and `embedPendingEntries`, the logic of `embed` and `embed-entries` |
 | `claude.ts` | The Claude client for structured output, and the prompt canary |
 | `process-core.ts` | `validateProcessRequest` and `processQuestions`, the batch pipeline |
+| `pipeline-env.ts` | `checkerFromEnv` and `pipelineDeps`: the pipeline's providers and dependencies from the secrets, shared by `process-questions` and `ask-knowledge` (Sprint 18) |
+| `ask-core.ts` | `validateAskRequest` and `askKnowledge`, the logic of `ask-knowledge` (Sprint 18) |
 | `sources.ts` | Which matches a draft is built from |
 | `answerability.ts` | The Claude judge and Voyage rerank checkers |
 | `calibration.ts` | Calibrated confidence from a table, and the 0.3 floor |

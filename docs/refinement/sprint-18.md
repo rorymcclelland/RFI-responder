@@ -160,7 +160,7 @@ Refined 29 October 2026, the second slice of option B from the Sprint 16 UX spik
 
   It says plainly that nothing was saved and that a response would also go through a person's approval.
 - **Japanese:** a question in Japanese is answered by the same rules as in a response, including the translation and Japanese gates.
-- **Limits:** past the daily cap or the budget, the box says so, with the same wording as processing; the governance page counts the cost under its own function.
+- **Limits:** past the daily cap or the budget, the box says so, with the same wording as processing; its cost is recorded under its own function name in `ai_usage` and counts in the governance page's spend for the month (built: the page shows spend in total, not by function).
 
 **Test cases.**
 1. Unit, on the function's core: a question returns the draft and its provenance; nothing is written to `rfi_questions`.

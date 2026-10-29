@@ -15,3 +15,10 @@ export function inGroup(confidence: number | null, g: { key: ConfidenceGroup; mi
   if (g.key === 'uncalibrated') return confidence === null;
   return confidence !== null && confidence >= g.min && confidence < g.max;
 }
+
+/** The band a confidence falls in, as the card, the filter and an ask show it (Sprint 18: one rule). */
+export function confidenceBand(confidence: number | null): { key: ConfidenceGroup; label: 'High' | 'Medium' | 'Low' | 'Not calibrated' } {
+  const g = CONF_GROUPS.find((x) => inGroup(confidence, x)) ?? CONF_GROUPS[CONF_GROUPS.length - 1];
+  const label = g.key === 'high' ? 'High' : g.key === 'medium' ? 'Medium' : g.key === 'low' ? 'Low' : 'Not calibrated';
+  return { key: g.key, label };
+}

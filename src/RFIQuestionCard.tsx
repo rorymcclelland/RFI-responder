@@ -1,4 +1,5 @@
 import { openEntry } from './lib/openEntry';
+import { confidenceBand } from './workspace/confidenceBands';
 import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
@@ -90,11 +91,13 @@ function KBArticleModal({ entry, score, onClose }: { entry: KnowledgeEntry; scor
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Sprint 18: the card used 40% as the bottom of Medium, where the glossary, the filter and the bulk
+// buttons use 60% (missed in Sprint 17); it now takes the band from the one rule.
 function confidenceLabel(c: number | null): { label: string; dot: string; bar: string; text: string } {
-  if (c === null) return { label: 'Not calibrated', dot: 'bg-ink-300', bar: 'bg-ink-300', text: 'text-ink-500' };
-  const pct = c * 100;
-  if (pct >= 80) return { label: 'High',   dot: 'bg-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-700' };
-  if (pct >= 40) return { label: 'Medium', dot: 'bg-amber-400',   bar: 'bg-amber-400',   text: 'text-amber-700' };
+  const band = confidenceBand(c).key;
+  if (band === 'uncalibrated') return { label: 'Not calibrated', dot: 'bg-ink-300', bar: 'bg-ink-300', text: 'text-ink-500' };
+  if (band === 'high') return { label: 'High',   dot: 'bg-emerald-500', bar: 'bg-emerald-500', text: 'text-emerald-700' };
+  if (band === 'medium') return { label: 'Medium', dot: 'bg-amber-400',   bar: 'bg-amber-400',   text: 'text-amber-700' };
   return               { label: 'Low',    dot: 'bg-coral-500',   bar: 'bg-coral-500',   text: 'text-coral-600' };
 }
 

@@ -14,34 +14,10 @@
  * reason. Every provider call is recorded in ai_usage.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { claudeJudge, voyageRerankChecker, type AnswerabilityChecker } from '../_shared/answerability.ts';
-import { CALIBRATION_TABLES } from '../_shared/calibration-tables.ts';
-import { claudeClient } from '../_shared/claude.ts';
-import { DEFAULT_CHECKER, providerFromEnv } from '../_shared/embeddings.ts';
+import { pipelineDeps } from '../_shared/pipeline-env.ts';
 import { HttpError, json, requireUser, serve } from '../_shared/http.ts';
-import { finishUsage, meteredClaude, meteredEmbedder, meteredFetch, quotaMessage, reserveQuota, type UsageRow } from '../_shared/usage.ts';
+import { finishUsage, quotaMessage, reserveQuota, type UsageRow } from '../_shared/usage.ts';
 import { processQuestions, validateProcessRequest } from '../_shared/process-core.ts';
-import { indexBeforeMatching } from '../_shared/embed-core.ts';
-import { serviceEntryStore } from '../_shared/entry-store.ts';
-import type { MatchRow } from '../_shared/sources.ts';
-
-/**
- * The configured answerability checker. 'none' deliberately falls back to similarity calibration;
- * a checker that is configured but has no key fails every check, so confidence is null rather
- * than quietly falling back (security review).
- */
-function checkerFromEnv(env: Record<string, string | undefined>, usage: UsageRow[]): AnswerabilityChecker | null {
-  const choice = env.ANSWERABILITY_CHECKER ?? DEFAULT_CHECKER;
-  if (choice === 'none') return null;
-  const key = choice.startsWith('rerank-') ? env.VOYAGE_API_KEY : env.ANTHROPIC_API_KEY;
-  if (!key) {
-    return { name: 'unavailable', model: choice, check: () => Promise.reject(new Error(`${choice} has no API key configured`)) };
-  }
-  if (choice.startsWith('rerank-')) {
-    return voyageRerankChecker({ apiKey: key, model: choice, fetch: meteredFetch(fetch, { kind: 'rerank', provider: 'voyage', model: choice }, usage) });
-  }
-  return claudeJudge({ client: meteredClaude(claudeClient({ apiKey: key }), 'judge', usage), model: choice });
-}
 
 serve(async (req) => {
   const { user, client: asCaller } = await requireUser(req);
@@ -74,59 +50,8 @@ serve(async (req) => {
   // Everything that spends goes inside try; usage is recorded in finally, even after an error.
   let saved: Record<string, unknown>[] = [];
   try {
-    const provider = (() => {
-      try {
-        return providerFromEnv(env);
-      } catch {
-        return null;
-      }
-    })();
-    const claude = env.ANTHROPIC_API_KEY ? claudeClient({ apiKey: env.ANTHROPIC_API_KEY }) : null;
-    const embedder = provider ? meteredEmbedder(provider, usage) : null;
-    // Sprint 11 (S11-2, F-43): entries with no vector cannot be matched by meaning. Index them first
-    // (two batches at most, under the caller's indexing cap); questions are told about any left.
-    let unindexed: number | null = 0;
-    if (embedder) {
-      const indexing = await indexBeforeMatching({
-        db: serviceEntryStore(admin),
-        provider: embedder,
-        async reserve(n) {
-          try {
-            const r = await reserveQuota(admin, user.id, 'embed', n);
-            reservations.push(r.reservation);
-            return r.allowed;
-          } catch {
-            return 0;
-          }
-        },
-      });
-      unindexed = indexing.remaining;
-    }
-    const results = await processQuestions(toProcess, {
-      unindexed,
-      embed: embedder ? (texts) => embedder.embed(texts, 'query') : null,
-      async match(text, vector, model) {
-        const { data, error } = await asCaller.rpc('match_kb_entries', {
-          query_embedding: vector ? `[${vector.join(',')}]` : null,
-          query_text: text,
-          match_count: 5,
-          model_name: model,
-        });
-        if (error) throw new Error('match failed');
-        return (data ?? []) as MatchRow[];
-      },
-      checker: checkerFromEnv(env, usage),
-      classifier: claude ? { client: meteredClaude(claude, 'gate', usage), model: env.GATE_MODEL ?? 'claude-haiku-5-5' } : null,
-      drafter: claude ? { client: meteredClaude(claude, 'draft', usage), model: env.DRAFT_MODEL ?? 'claude-haiku-5-5' } : null,
-      tables: CALIBRATION_TABLES,
-      // Sprint 4 (S4-3, S4-4): drafts citing unreviewed or overdue entries are held from bulk approval.
-      async sourceStatus(refs) {
-        const { data, error } = await admin.rpc('entry_review_status', { p_refs: refs });
-        if (error) throw new Error('review status unavailable');
-        const rows = (data ?? []) as { ref: string; reviewed: boolean; overdue_since: string | null; replaced_by: string | null; retired: boolean | null }[];
-        return new Map(rows.map((r) => [r.ref, { reviewed: r.reviewed, overdueSince: r.overdue_since, replacedBy: r.replaced_by, retired: r.retired === true }]));
-      },
-    });
+    const deps = await pipelineDeps({ env, asCaller, admin, userId: user.id, usage, reservations });
+    const results = await processQuestions(toProcess, deps);
 
     saved = [];
     for (const r of results) {

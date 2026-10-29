@@ -9,6 +9,7 @@ import { supabase } from './lib/supabase';
 import LanguageLabel from './LanguageLabel';
 import AddEntryForm from './knowledge/AddEntryForm';
 import EntryPanel from './knowledge/EntryPanel';
+import AskBox from './knowledge/AskBox';
 import {
   EMPTY_FILTERS, STATE_LABEL, browse, loadBrowseEntries, loadKnowledgeOverview,
   type BrowseEntry, type BrowseFilters, type BrowseSort, type EntryState, type KnowledgeOverview, type OriginGroup,
@@ -107,6 +108,8 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
     pick(openRef.ref);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openRef?.n]);
+  const questionOf = useMemo(() => new Map(entries.map((e) => [e.ref, e.question])), [entries]);
+  const askBox = <AskBox questionOf={(r) => questionOf.get(r)} onOpen={(r) => { setView('browse'); pick(r); }} />;
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const header = (
@@ -169,9 +172,10 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
           )}
           {isAdmin && (overview.states.waiting + overview.states.translations + overview.states.overdue + overview.states.proposals > 0) && (
             <p className="text-sm text-ink-600">
-              Reviewing is under Governance for now. <button onClick={onReview} className="font-bold underline decoration-ink-300 hover:decoration-ink-700">Review entries</button>
+              Review them one at a time on each answer's page, or as a queue under Governance. <button onClick={onReview} className="font-bold underline decoration-ink-300 hover:decoration-ink-700">Review entries</button>
             </p>
           )}
+          {askBox}
 
           <div className="flex flex-wrap gap-6 items-start">
             <section aria-labelledby="topics" className="card p-6 space-y-4 flex-[999_1_520px] min-w-0">
@@ -205,6 +209,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
 
       {view === 'browse' && (
         <div className="space-y-5">
+          {!hideList && askBox}
           <label className={`block ${hideList ? 'hidden' : ''}`}>
             <span className="text-sm font-bold text-ink-700">Search by number or words</span>
             <span className="relative block mt-1">
