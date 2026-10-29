@@ -76,7 +76,7 @@ describe('the review queue', () => {
 
   it('says plainly where a learned entry came from', () => {
     expect(describeOrigin({ origin: 'response', originRef: 'response:x', addedBy: 'Maya Patel' }))
-      .toMatch(/approved by Maya Patel, who is not an admin/);
+      .toMatch(/approved by Maya Patel$/);
   });
 });
 
@@ -102,7 +102,7 @@ describe('describeOrigin for a translation (Sprint 12, S12-3 test 5)', () => {
   it('names what it was translated from and its language, whoever approved it', () => {
     expect(describeOrigin({ origin: 'response', originRef: null, addedBy: 'Sarah Chen', translatedFrom: ['KB-0001'], language: 'ja' }))
       .toBe('Translated from KB-0001 (English) in a response; answer approved by Sarah Chen. A translation is reviewed before it is trusted, whoever approved it');
-    expect(describeOrigin({ origin: 'response', originRef: null, addedBy: 'Priya Sharma' })).toMatch(/who is not an admin/);
+    expect(describeOrigin({ origin: 'response', originRef: null, addedBy: 'Priya Sharma' })).toBe('Learned from a response; answer approved by Priya Sharma');
   });
   it('S12-5: a seeded Japanese entry says it is a machine translation in the demo data', () => {
     expect(describeOrigin({ origin: 'seed', originRef: 'sample-data/security-qa-ja.csv', addedBy: 'Sarah Chen', translatedFrom: ['KB-0004'], language: 'ja' }))

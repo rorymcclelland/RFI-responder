@@ -30,6 +30,10 @@ interface Props {
   onReview: () => void;
   /** Sprint 18 (S18-2): an answer to open, from elsewhere in the app; `n` changes on every request. */
   openRef?: { ref: string; n: number } | null;
+  /** Called once openRef has been opened, so a later visit opens the overview (security review, L1). */
+  onOpenedRef?: () => void;
+  /** After an ask, so the usage banner can refresh. */
+  onAsked?: () => void;
 }
 
 /** True below the width at which the filters, the list and the answer fit side by side. */
@@ -46,7 +50,7 @@ function useNarrow(query = '(max-width: 1040px)'): boolean {
   return narrow;
 }
 
-export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview, openRef = null }: Props) {
+export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview, openRef = null, onOpenedRef, onAsked }: Props) {
   const [view, setView] = useState<'overview' | 'browse'>('overview');
   const [overview, setOverview] = useState<KnowledgeOverview | null>(null);
   const [entries, setEntries] = useState<BrowseEntry[]>([]);
@@ -106,10 +110,11 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
     setFilters(EMPTY_FILTERS);
     setView('browse');
     pick(openRef.ref);
+    onOpenedRef?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openRef?.n]);
   const questionOf = useMemo(() => new Map(entries.map((e) => [e.ref, e.question])), [entries]);
-  const askBox = <AskBox questionOf={(r) => questionOf.get(r)} onOpen={(r) => { setView('browse'); pick(r); }} />;
+  const askBox = <AskBox questionOf={(r) => questionOf.get(r)} onOpen={(r) => { setView('browse'); pick(r); }} onAsked={onAsked} />;
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const header = (

@@ -87,3 +87,22 @@ describe('retiring (S18-3, test 7)', async () => {
     expect(calls).toEqual([['retire_entry', { p_entry: 'e1', p_reason: 'The office closed.' }]]);
   });
 });
+
+describe('correctionBefore (security review, L6)', async () => {
+  const { correctionBefore } = await import('./entryDetail');
+  const d = (history: unknown[]) => ({ entry: { question: 'Q now?', answer: 'A now.' }, history }) as never;
+  const rev = (previous: Record<string, string>) => ({ at: 'x', action: 'kb.reviewed', actor: null, details: { edited: true, previous } });
+  it('shows only the part a correction changed', () => {
+    expect(correctionBefore(d([rev({ question: 'Q now?', answer: 'A then.' })]), 0)).toEqual({ answer: 'A then.' });
+    expect(correctionBefore(d([rev({ question: 'Q then?', answer: 'A now.' })]), 0)).toEqual({ question: 'Q then?' });
+  });
+  it('compares each correction with the next one, not with today', () => {
+    const h = [rev({ question: 'Q now?', answer: 'A first.' }), rev({ question: 'Q now?', answer: 'A second.' })];
+    expect(correctionBefore(d(h), 0)).toEqual({ answer: 'A first.' });
+    expect(correctionBefore(d(h), 1)).toEqual({ answer: 'A second.' });
+  });
+  it('gives nothing for other events or an unchanged review', () => {
+    expect(correctionBefore(d([{ at: 'x', action: 'kb.changed', actor: null, details: {} }]), 0)).toBeNull();
+    expect(correctionBefore(d([{ at: 'x', action: 'kb.reviewed', actor: null, details: { edited: false, previous: null } }]), 0)).toBeNull();
+  });
+});

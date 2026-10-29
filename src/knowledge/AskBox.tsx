@@ -49,7 +49,7 @@ export default function AskBox({ questionOf, onOpen, onAsked }: Props) {
     <section aria-labelledby="ask" className="card p-6 space-y-4">
       <div>
         <h2 id="ask" className="text-lg font-black text-ink-900 flex items-center gap-2"><MessageCircleQuestion size={18} /> Ask it a question</h2>
-        <p className="text-sm text-ink-500 mt-1">Type a question as a customer would. You see the answer it would draft, and why, before any questionnaire arrives. Nothing is saved; it counts towards your daily limit like a question in a response.</p>
+        <p className="text-sm text-ink-500 mt-1">Type a question as a customer would. You see the answer it would draft, and why, before any questionnaire arrives. Nothing about your question is saved; it counts towards your daily limit like a question in a response.</p>
       </div>
       <form className="flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); if (!busy) ask(); }}>
         <label className="flex-1">

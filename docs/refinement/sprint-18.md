@@ -215,3 +215,24 @@ The guide's knowledge section gains the answer's page, retiring and asking. The 
 | Q3 | Should a member be able to suggest a change to an answer? | **Not this sprint.** Members still cannot change entries (decision 0003); a suggestion would be a new kind of proposal, better decided with U-3's contributor screen in Sprint 19 **Rory: agreed** |
 | Q4 | Keep the questions people ask? | **No: nothing is saved but the cost.** It keeps the feature simple and private; K-4's gaps come from responses **Rory: agreed** |
 | Q5 | Sprint size: about four days with retiring, or about two and a half without it | **Keep all five.** Retiring is what makes an answer's page complete, and it closes the gap that proposals can never be declined **Rory: agreed** |
+
+## Security review (29 October 2026)
+
+An independent review of `main..sprint-18` found no high issue, two medium and six low; all are fixed or, for one, accepted and recorded. It confirmed that:
+- an answer's history exposes only that entry's own knowledge-base events;
+- retiring and restoring are admin-only, audited and safe under `pg_safeupdate`;
+- every redefined function kept its grants;
+- no check of what is current misses retired answers;
+- asking is capped before any provider is called;
+- moving the pipeline's set-up into `pipeline-env.ts` left `process-questions` unchanged.
+
+| | Finding | Fix |
+|---|---|---|
+| M1 | An admin's export of a draft citing a retired (or replaced) answer recorded that answer as "confirmed by use": the review date was rightly left alone, but the audit row named every cited entry, so the retired answer's history said it was confirmed | `record_export` names only the entries it actually confirmed. A draft whose every cited entry is retired or replaced confirms nothing (`not_confirmed_source`). Tested, history included |
+| M2 | Agreed cases without a test that could fail: the cap, usage recorded after a provider failure, nothing written by an ask, an assembled draft in CI, the `retired` flag process-questions reads, re-importing a retired answer's question, the overdue report, and matching by meaning | Each now has a database test or a CI assertion. CI sets the daily cap to 0 and checks the 429, its message, and that nothing is spent |
+| L1 | After opening an answer from a draft's sources, every later visit to Knowledge reopened that answer | The request is cleared once used |
+| L2 | "Approved by X, who is not an admin" could be untrue (an admin's translated answer also becomes a proposal), on the answer's page and under Governance | The clause is removed from both |
+| L3 | Changes proposed for a retired answer kept waiting, and approving one would have replaced the retired answer | Retiring an answer declines the changes proposed for it (audited), and approving a change for a retired answer is refused. Tested |
+| L4 | The service role can set the retired columns directly | Accepted: the service key is server-only, as for every other column it writes (decision 0005) |
+| L5 | A history longer than 500 events dropped its newest | The newest 500 are kept, shown oldest first. Tested |
+| L6 | "Nothing is saved" while an ask may index unindexed entries; the usage banner did not refresh after an ask; a correction of only the question showed the unchanged answer as "Before" | "Nothing about your question is saved"; the banner refreshes; a correction shows only what it changed, compared with the next version (tested). The guide also says when **Restore** is refused |

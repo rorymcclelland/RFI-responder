@@ -145,6 +145,9 @@ jobs:
           [ "$code" = "401" ] || fail "ask-knowledge without JWT should get 401" "got $code"
           code=$(curl -s -o /tmp/r.json -w '%{http_code}' -X POST "$F/ask-knowledge" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"   "}')
           [ "$code" = "400" ] || fail "ask-knowledge with an empty question should get 400" "got $code $(cat /tmp/r.json)"
+          count_questions() { curl -s "$API_URL/rest/v1/rfi_questions?select=id" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | python3 -c 'import sys,json; print(len(json.load(sys.stdin)))'; }
+          count_ask_usage() { curl -s "$API_URL/rest/v1/ai_usage?select=id&function=eq.ask-knowledge" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | python3 -c 'import sys,json; print(len(json.load(sys.stdin)))'; }
+          q_before=$(count_questions)
           code=$(curl -s -o /tmp/a.json -w '%{http_code}' -X POST "$F/ask-knowledge" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"How do you encrypt data at rest?"}')
           [ "$code" = "200" ] || fail "ask-knowledge should answer with failing providers" "got $code $(cat /tmp/a.json)"
           echo "ask-knowledge: $(cat /tmp/a.json)"
@@ -154,12 +157,24 @@ jobs:
           import json, re
           a = json.load(open('/tmp/a.json'))['result']
           assert a['sources'] and all(re.fullmatch(r'KB-\d{4,}', s['ref']) for s in a['sources']), a
-          assert a['draftKind'] in ('assembled', 'insufficient_evidence'), a
+          # The drafter fails (a fake key), so the draft is assembled from the matched seed entries.
+          assert a['draftKind'] == 'assembled' and a['draft'].strip(), a
           p = json.load(open('/tmp/a2.json'))['result']
           assert p['gate'] == 'pricing' and p['draftKind'] == 'person_required', p
           PY
-          n=$(curl -s "$API_URL/rest/v1/ai_usage?select=function&function=eq.ask-knowledge" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | python3 -c 'import sys,json; print(len(json.load(sys.stdin)))')
-          echo "ask-knowledge usage rows: $n"
+          # Nothing about the question is saved (S18-4 test 1); the failed provider calls are recorded (test 5).
+          [ "$(count_questions)" = "$q_before" ] || fail "ask-knowledge must not write questions" "$q_before before, $(count_questions) after"
+          n=$(count_ask_usage)
+          [ "$n" -ge 1 ] || fail "ask-knowledge should record its provider calls in ai_usage" "got $n rows"
+          # At the daily cap it refuses with the limit's message and spends nothing (test 3).
+          S="$API_URL/rest/v1/ai_settings?id=eq.true"
+          cap=$(curl -s "$S&select=daily_question_cap" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" | python3 -c 'import sys,json; print(json.load(sys.stdin)[0]["daily_question_cap"])')
+          curl -s -o /dev/null -X PATCH "$S" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"daily_question_cap":0}'
+          code=$(curl -s -o /tmp/a3.json -w '%{http_code}' -X POST "$F/ask-knowledge" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"question":"How do you encrypt data at rest?"}')
+          curl -s -o /dev/null -X PATCH "$S" -H "apikey: $ANON_KEY" -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d "{\"daily_question_cap\":$cap}"
+          [ "$code" = "429" ] || fail "ask-knowledge at the daily cap should get 429" "got $code $(cat /tmp/a3.json)"
+          grep -q "limit on processing questions" /tmp/a3.json || fail "ask-knowledge at the cap should say so" "$(cat /tmp/a3.json)"
+          [ "$(count_ask_usage)" = "$n" ] || fail "ask-knowledge at the cap must spend nothing" "$n before, $(count_ask_usage) after"
           # process-questions (Sprint 2, S2-2a): refusals, then a real batch with every provider failing.
           code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$F/process-questions" -H 'Content-Type: application/json' -d '{}')
           [ "$code" = "401" ] || fail "process-questions without JWT should get 401" "got $code"

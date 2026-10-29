@@ -472,6 +472,8 @@ export default function App() {
             onIndexFailed={(m) => showToast(m, 'error')}
             onReview={() => setView('governance')}
             openRef={openRef}
+            onOpenedRef={() => setOpenRef(null)}
+            onAsked={() => loadUsageStatus(supabase).then(setUsage).catch(() => undefined)}
           />
         ) : view === 'inbox' ? (
           <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} />

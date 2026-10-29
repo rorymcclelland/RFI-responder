@@ -198,6 +198,7 @@ DECLARE
   qlang         text;
   translated    boolean;
   from_refs     text[];
+  confirmed_refs text[];
 BEGIN
   SELECT * INTO sess FROM public.rfi_sessions s WHERE s.id = p_session FOR UPDATE;
   IF NOT FOUND THEN
@@ -285,13 +286,24 @@ BEGIN
         outcome := 'not_confirmed_source';
       ELSE
         -- F-25: only the entries the draft cited are confirmed (before Sprint 4, none were recorded).
-        UPDATE public.kb_entries k SET last_reviewed_at = now()
-         WHERE k.ref = ANY (coalesce(q.cited_refs, '{}'::text[])) AND k.superseded_by IS NULL AND k.retired_at IS NULL;
-        IF coalesce(cardinality(q.cited_refs), 0) > 0 THEN
+        -- Sprint 18 security review (M1): only the entries actually confirmed (current: not replaced or
+        -- retired) are named in the audit row, so a retired or replaced entry's history never says it
+        -- was confirmed by use. A draft whose every cited entry was retired or replaced confirms nothing.
+        WITH upd AS (
+          UPDATE public.kb_entries k SET last_reviewed_at = now()
+           WHERE k.ref = ANY (coalesce(q.cited_refs, '{}'::text[])) AND k.superseded_by IS NULL AND k.retired_at IS NULL
+          RETURNING k.ref
+        )
+        SELECT coalesce(array_agg(upd.ref ORDER BY upd.ref), '{}'::text[]) INTO confirmed_refs FROM upd;
+        IF cardinality(confirmed_refs) > 0 THEN
           INSERT INTO public.audit_log (actor, action, target_id, details)
-          VALUES (auth.uid(), 'kb.confirmed', q.id, jsonb_build_object('refs', to_jsonb(q.cited_refs), 'approver', approver));
+          VALUES (auth.uid(), 'kb.confirmed', q.id, jsonb_build_object('refs', to_jsonb(confirmed_refs), 'approver', approver));
+          outcome := 'confirmed';
+        ELSIF coalesce(cardinality(q.cited_refs), 0) > 0 THEN
+          outcome := 'not_confirmed_source';
+        ELSE
+          outcome := 'confirmed';
         END IF;
-        outcome := 'confirmed';
       END IF;
     ELSE
       top_ref := q.sources_json->0->>'id';
@@ -387,6 +399,10 @@ BEGIN
   END IF;
   IF e.retired_at IS NOT NULL THEN
     RAISE EXCEPTION 'This entry is retired; restore it before reviewing it' USING ERRCODE = '22023';
+  END IF;
+  IF e.proposed_replacement_of IS NOT NULL AND EXISTS (
+       SELECT 1 FROM public.kb_entries k WHERE k.id = e.proposed_replacement_of AND k.retired_at IS NOT NULL) THEN
+    RAISE EXCEPTION 'The answer this change was proposed for is retired; restore it first, or decline the change' USING ERRCODE = '22023';
   END IF;
   edited := (p_question IS NOT NULL AND btrim(p_question) <> e.question) OR (p_answer IS NOT NULL AND btrim(p_answer) <> e.answer);
 
@@ -633,6 +649,18 @@ BEGIN
     RAISE EXCEPTION 'This entry is already retired' USING ERRCODE = '22023';
   END IF;
   UPDATE public.kb_entries SET retired_at = now(), retired_by = auth.uid(), retired_reason = reason WHERE id = p_entry;
+  -- Security review (L3): changes proposed for the answer being retired are declined with it, so none
+  -- waits for review or could bring it back by being approved. Restoring the answer does not restore them.
+  WITH declined AS (
+    UPDATE public.kb_entries p
+       SET retired_at = now(), retired_by = auth.uid(),
+           retired_reason = left('Declined because ' || e.ref || ' was retired: ' || reason, 500)
+     WHERE p.proposed_replacement_of = p_entry AND p.superseded_by IS NULL AND p.retired_at IS NULL
+    RETURNING p.id, p.ref, p.retired_reason
+  )
+  INSERT INTO public.audit_log (actor, action, target_id, details)
+  SELECT auth.uid(), 'kb.retired', d.id, jsonb_build_object('ref', d.ref, 'reason', d.retired_reason, 'declined', true, 'proposal_for', e.ref)
+    FROM declined d;
   -- Pending questions in open responses whose draft cites it are held from bulk approval, saying why
   -- (bulk approval checks the source gate again in any case); those already held for their sources
   -- get the new reason.

@@ -13,20 +13,23 @@ CREATE FUNCTION access.entry_events(p_entry uuid)
 RETURNS TABLE (at timestamptz, action text, actor uuid, details jsonb)
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
   WITH e AS (SELECT k.id, k.ref, k.created_at FROM public.kb_entries k WHERE k.id = p_entry)
-  SELECT a.at, a.action, a.actor,
-         CASE WHEN a.action = 'kb.confirmed' THEN
-                jsonb_build_object('response', o.name, 'question', q.question)
-              ELSE a.details END
-    FROM e
-    JOIN public.audit_log a
-      ON (a.action LIKE 'kb.%' AND a.action <> 'kb.confirmed' AND a.target_id = e.id)
-      OR (a.action = 'kb.confirmed' AND a.details->'refs' ? e.ref AND a.at >= e.created_at)
-    LEFT JOIN public.rfi_questions q ON a.action = 'kb.confirmed' AND q.id = a.target_id
-    LEFT JOIN public.rfi_sessions s ON s.id = q.session_id
-    LEFT JOIN public.opportunities o ON o.id = s.opportunity_id
-   WHERE auth.uid() IS NOT NULL
-   ORDER BY a.at, a.id
-   LIMIT 500;
+  -- The newest 500, oldest first (security review, L5: a long history keeps its latest events).
+  SELECT h.at, h.action, h.actor, h.details FROM (
+    SELECT a.id, a.at, a.action, a.actor,
+           CASE WHEN a.action = 'kb.confirmed' THEN
+                  jsonb_build_object('response', o.name, 'question', q.question)
+                ELSE a.details END AS details
+      FROM e
+      JOIN public.audit_log a
+        ON (a.action LIKE 'kb.%' AND a.action <> 'kb.confirmed' AND a.target_id = e.id)
+        OR (a.action = 'kb.confirmed' AND a.details->'refs' ? e.ref AND a.at >= e.created_at)
+      LEFT JOIN public.rfi_questions q ON a.action = 'kb.confirmed' AND q.id = a.target_id
+      LEFT JOIN public.rfi_sessions s ON s.id = q.session_id
+      LEFT JOIN public.opportunities o ON o.id = s.opportunity_id
+     WHERE auth.uid() IS NOT NULL
+     ORDER BY a.at DESC, a.id DESC
+     LIMIT 500) h
+   ORDER BY h.at, h.id;
 $$;
 REVOKE ALL ON FUNCTION access.entry_events(uuid) FROM PUBLIC, anon, service_role;
 GRANT EXECUTE ON FUNCTION access.entry_events(uuid) TO authenticated;

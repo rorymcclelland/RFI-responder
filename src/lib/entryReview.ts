@@ -110,7 +110,7 @@ export function describeOrigin(e: Pick<EntryForReview, 'origin' | 'originRef' | 
   switch (e.origin) {
     case 'manual': return `Added by hand by ${who}`;
     case 'import': return `Imported by ${who}${e.originRef ? ` from ${e.originRef}` : ''}`;
-    case 'response': return `Learned from a response; answer approved by ${who}, who is not an admin`;
+    case 'response': return `Learned from a response; answer approved by ${who}`;
     default: return `Seed data`;
   }
 }

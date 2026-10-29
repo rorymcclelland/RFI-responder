@@ -9,7 +9,7 @@ import { BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import LanguageLabel from '../LanguageLabel';
 import { reviewEntry } from '../lib/entryReview';
-import { DETAIL_STATE_LABEL, describeEvent, describeUse, loadEntryDetail, restoreEntry, retireEntry, retireReasonProblem, saveEntryEdits, type EntryDetail } from '../lib/entryDetail';
+import { DETAIL_STATE_LABEL, correctionBefore, describeEvent, describeUse, loadEntryDetail, restoreEntry, retireEntry, retireReasonProblem, saveEntryEdits, type EntryDetail } from '../lib/entryDetail';
 import { describeSource } from '../lib/knowledgeBrowse';
 
 const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
@@ -83,7 +83,7 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
   const asBrowse = { ...e, originRef: null, source: e.source ?? '' };
   const history = [
     { at: e.createdAt, text: `${describeSource(asBrowse as never, names)}` },
-    ...detail.history.map((h) => ({ at: h.at, text: describeEvent(h, names), previous: h.action === 'kb.reviewed' ? (h.details?.previous as { question?: string; answer?: string } | null) : null })),
+    ...detail.history.map((h, i) => ({ at: h.at, text: describeEvent(h, names), previous: correctionBefore(detail, i) })),
   ];
 
   return (
@@ -188,7 +188,7 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
           <p className="text-sm text-ink-700 whitespace-pre-line">{detail.proposal.answer}</p>
           <p className="text-xs text-ink-500">
             <button className="font-bold underline" onClick={() => onOpen(detail.proposal!.ref)}>{detail.proposal.ref}</button>
-            {detail.proposal.source ? ` · ${detail.proposal.source.replace(/^RFI response: /, 'from ')}` : ''} · approved by {names.get(detail.proposal.createdBy ?? '') ?? 'a former team member'}, who is not an admin
+            {detail.proposal.source ? ` · ${detail.proposal.source.replace(/^RFI response: /, 'from ')}` : ''} · approved by {names.get(detail.proposal.createdBy ?? '') ?? 'a former team member'}
           </p>
           {isAdmin && (
             <button disabled={busy} onClick={() => act(async () => { await reviewEntry(supabase, detail.proposal!.id); return `${detail.proposal!.ref} approved; it replaces ${e.ref}.`; })}
@@ -221,7 +221,10 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
             <li key={i} className="text-xs text-ink-600">
               <span className="text-ink-400">{day(h.at)}</span> · {h.text}
               {'previous' in h && h.previous && (
-                <span className="block mt-1 pl-3 border-l-2 border-ink-100 text-ink-500 whitespace-pre-line">Before: {h.previous.answer ?? h.previous.question}</span>
+                <span className="block mt-1 pl-3 border-l-2 border-ink-100 text-ink-500 whitespace-pre-line">
+                  {h.previous.question && <>Question before: {h.previous.question}{h.previous.answer ? '\n' : ''}</>}
+                  {h.previous.answer && <>Answer before: {h.previous.answer}</>}
+                </span>
               )}
             </li>
           ))}

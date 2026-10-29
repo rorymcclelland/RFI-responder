@@ -41,13 +41,13 @@ Everyone sees the same page, history included; the rest of the audit log stays w
 - **Approve** an answer waiting for review, or **Mark as still correct** one already reviewed, which moves its next review on by the review interval.
 - **Edit** its question, answer, topics or source. Changing the question or answer counts as your review; topics and source change without one.
 - **Approve the change** or **Decline the change**, for a proposed change.
-- **Retire** an answer that is no longer true (a lapsed certificate, a closed office), saying why in 5 to 500 characters. A retired answer is no longer matched, drafted from or learned onto, its question is free for a new answer, and any draft still to do that cites it is held for a person. It stays readable, marked **Retired**, with its reason and history. **Restore** brings it back, unless another answer now has its question. Declining a proposed change retires it in the same way, and leaves the answer it would have changed as it is. Both are recorded in the audit log.
+- **Retire** an answer that is no longer true (a lapsed certificate, a closed office), saying why in 5 to 500 characters. A retired answer is no longer matched, drafted from or learned onto, its question is free for a new answer, and any draft still to do that cites it is held for a person. It stays readable, marked **Retired**, with its reason and history. **Restore** brings it back, unless another answer now has its question or it has been replaced since. Retiring an answer also declines any change proposed for it. Declining a proposed change retires it in the same way, and leaves the answer it would have changed as it is. Both are recorded in the audit log.
 
 **Governance** (below) still lists everything waiting for review in one queue.
 
 ### Asking it a question
 
-**Ask it a question**, on the knowledge page, takes a question as a customer would write it and shows the answer the knowledge base would draft, before any questionnaire arrives: the draft, its confidence, the checker's verdict and reason, what would happen to it in a response (a pricing question, for instance, is never drafted), and the answers it drew on, each opening its page. It uses exactly the matching, checks and drafting of a response, so it counts towards your daily question limit and the month's budget. Nothing is saved but its cost.
+**Ask it a question**, on the knowledge page, takes a question as a customer would write it and shows the answer the knowledge base would draft, before any questionnaire arrives: the draft, its confidence, the checker's verdict and reason, what would happen to it in a response (a pricing question, for instance, is never drafted), and the answers it drew on, each opening its page. It uses exactly the matching, checks and drafting of a response, so it counts towards your daily question limit and the month's budget. Nothing about your question is saved but its cost.
 
 ![Importing a spreadsheet of questions and answers into the knowledge base](../screenshots/12-kb-import.png)
 

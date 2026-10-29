@@ -133,3 +133,21 @@ export async function restoreEntry(client: SupabaseClient, id: string): Promise<
   const { error } = await client.rpc('restore_entry', { p_entry: id });
   if (error) throw new Error(`It was not restored: ${error.message}`);
 }
+
+type Text = { question?: string; answer?: string };
+/**
+ * What a correction changed (security review, L6): the text before it, only where it differs from
+ * the text after it (the next correction's "before", or the answer as it is now).
+ */
+export function correctionBefore(detail: EntryDetail, i: number): Text | null {
+  const prev = (h: EntryDetail['history'][number] | undefined) =>
+    (h?.action === 'kb.reviewed' ? (h.details?.previous as Text | null | undefined) : null) ?? null;
+  const before = prev(detail.history[i]);
+  if (!before) return null;
+  const next = detail.history.slice(i + 1).map(prev).find((t) => t) ?? { question: detail.entry.question, answer: detail.entry.answer };
+  const out: Text = {};
+  if (before.question && before.question !== next.question) out.question = before.question;
+  if (before.answer && before.answer !== next.answer) out.answer = before.answer;
+  return out.question || out.answer ? out : null;
+}
+
