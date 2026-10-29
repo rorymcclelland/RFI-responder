@@ -1,6 +1,6 @@
 {
  "width": 768,
- "checkedAt": "2026-10-26T13:01:16.555Z",
+ "checkedAt": "2026-10-29T00:29:32.596Z",
  "views": [
   {
    "view": "overview",
@@ -76,6 +76,18 @@
   },
   {
    "view": "audit log",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "knowledge overview",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "knowledge browse",
    "scrollWidth": 768,
    "clientWidth": 768,
    "fits": true

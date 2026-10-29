@@ -30,6 +30,8 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 
 | | |
 |---|---|
+| ![The knowledge page: what the organisation knows](docs/screenshots/17-knowledge.png) | ![All answers, with one chosen](docs/screenshots/18-knowledge-browse.png) |
+| The knowledge base: what the organisation knows, by topic and state | Every answer, searchable, with where it came from |
 | ![Overview of responses in flight](docs/screenshots/1-overview.png) | ![Review, lowest confidence first, with the bulk approval bar](docs/screenshots/2-review.png) |
 | Responses in flight, with owner, due date and progress | Review, lowest confidence first; bulk approval above a threshold |
 | ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![An expert's assignment inbox](docs/screenshots/5-assignments.png) |

@@ -103,9 +103,8 @@ export const INTRO_STEPS: IntroStep[] = [
       '**Knowledge** is the organisation\'s knowledge base, for everyone: how many answers there are, by topic and state, what was learned recently, and every answer to search and browse.',
       'Every draft comes from it, so a better knowledge base means better drafts. Add an answer or import a spreadsheet there.',
     ],
-    // The screenshot (17-knowledge.png) is added once Rory has retaken the screenshots (Sprint 17, Q4).
-    image: null,
-    imageAlt: '',
+    image: '17-knowledge.png',
+    imageAlt: 'The knowledge page: what the organisation knows',
     guide: { page: 'admin.md', anchor: 'the-knowledge-base', label: 'The knowledge base' },
   },
   {

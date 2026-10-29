@@ -18,10 +18,14 @@ Under **Team**, choose **Edit** on anyone's card to change their name, job title
 
 Drafts are written only from the knowledge base, so its quality is the quality of the answers. **Knowledge** in the top bar opens it as a page of its own (Sprint 17), for everyone, not only admins.
 
+![The knowledge page: what the organisation knows](../screenshots/17-knowledge.png)
+
 - **What we know**, the overview: how many answers there are, in which languages and added by how many people; four counts that open the matching answers (**reviewed and current**, **waiting for an admin’s review**, **machine translations to check**, **overdue for review**); the answers **By topic**, from their tags, with how often each topic was cited in responses; and what was **Learned recently** from responses. A proposed change to an existing answer (learned from a response) is not counted as an answer of its own: it waits for review, and the answer it would change stays as it is until then.
 - **Browse all answers**: search by entry number (`KB-0101`, or just `101`) or by the words of questions, answers and tags; filter by state, language and where an answer came from (**Imported**, **Learned from responses**, **Added by hand**); and sort by number, most cited or oldest review first. The answer you choose is shown beside the list, with its topics, source and where it came from. Searching by meaning comes later. An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
 - **Add an answer** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
 - **Import a spreadsheet** adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are left out, and so is any question already in the knowledge base in the same language (ignoring case and spacing): an English question imported with a Japanese answer is a new, Japanese entry.
+
+![All answers, with one chosen](../screenshots/18-knowledge-browse.png)
 
 Reviewing entries is still under **Governance** (below); for an admin, the knowledge page links there.
 
