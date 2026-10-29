@@ -21,13 +21,33 @@ Drafts are written only from the knowledge base, so its quality is the quality o
 ![The knowledge page: what the organisation knows](../screenshots/17-knowledge.png)
 
 - **What we know**, the overview: how many answers there are, in which languages and added by how many people; four counts that open the matching answers (**reviewed and current**, **waiting for an admin’s review**, **machine translations to check**, **overdue for review**); the answers **By topic**, from their tags, with how often each topic was cited in responses; and what was **Learned recently** from responses. A proposed change to an existing answer (learned from a response) is not counted as an answer of its own: it waits for review, and the answer it would change stays as it is until then.
-- **Browse all answers**: search by entry number (`KB-0101`, or just `101`) or by the words of questions, answers and tags; filter by state, language and where an answer came from (**Imported**, **Learned from responses**, **Added by hand**); and sort by number, most cited or oldest review first. The answer you choose is shown beside the list, with its topics, source and where it came from. Searching by meaning comes later. An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
+- **Browse all answers**: search by entry number (`KB-0101`, or just `101`) or by the words of questions, answers and tags; filter by state, language and where an answer came from (**Imported**, **Learned from responses**, **Added by hand**); and sort by number, most cited or oldest review first. Retired answers are left out unless you tick **Retired**. Searching by meaning is what **Ask it a question** does (below). An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
 - **Add an answer** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
 - **Import a spreadsheet** adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are left out, and so is any question already in the knowledge base in the same language (ignoring case and spacing): an English question imported with a Japanese answer is a new, Japanese entry.
 
 ![All answers, with one chosen](../screenshots/18-knowledge-browse.png)
 
-Reviewing entries is still under **Governance** (below); for an admin, the knowledge page links there.
+### One answer and its history
+
+The answer you choose opens its own page beside the list (on a phone, in place of the list, with **Back to the list**). It shows the answer, its state, topics and source and its **Next review**, and then:
+
+- **A proposed change is waiting**, when a response proposed a different answer to the same question and an admin has not yet looked at it.
+- **Where it has been used**: each response whose draft cited it, the question, whether the answer was approved as drafted, approved after editing, not answered or still to do, and how the response stands (in progress, exported, won, lost, withdrawn or archived).
+- **History**, oldest first: how it was added, imported or learned; each review, with the earlier text when it was corrected; changes of topics or source; each confirmation by use (an export that approved it unedited); retirement and restoring; and what it replaced.
+- **Other languages**: the translations made from it, or the entries it was translated from.
+
+Everyone sees the same page, history included; the rest of the audit log stays with admins. An admin can also, on the page:
+
+- **Approve** an answer waiting for review, or **Mark as still correct** one already reviewed, which moves its next review on by the review interval.
+- **Edit** its question, answer, topics or source. Changing the question or answer counts as your review; topics and source change without one.
+- **Approve the change** or **Decline the change**, for a proposed change.
+- **Retire** an answer that is no longer true (a lapsed certificate, a closed office), saying why in 5 to 500 characters. A retired answer is no longer matched, drafted from or learned onto, its question is free for a new answer, and any draft still to do that cites it is held for a person. It stays readable, marked **Retired**, with its reason and history. **Restore** brings it back, unless another answer now has its question. Declining a proposed change retires it in the same way, and leaves the answer it would have changed as it is. Both are recorded in the audit log.
+
+**Governance** (below) still lists everything waiting for review in one queue.
+
+### Asking it a question
+
+**Ask it a question**, on the knowledge page, takes a question as a customer would write it and shows the answer the knowledge base would draft, before any questionnaire arrives: the draft, its confidence, the checker's verdict and reason, what would happen to it in a response (a pricing question, for instance, is never drafted), and the answers it drew on, each opening its page. It uses exactly the matching, checks and drafting of a response, so it counts towards your daily question limit and the month's budget. Nothing is saved but its cost.
 
 ![Importing a spreadsheet of questions and answers into the knowledge base](../screenshots/12-kb-import.png)
 

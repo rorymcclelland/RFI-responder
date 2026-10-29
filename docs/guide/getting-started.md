@@ -18,7 +18,7 @@ The bar at the top of every screen has:
 - **Assignments**: questions colleagues have asked you to answer or check, and the ones you have sent to others.
 - **Team**: everyone in your organisation, with their job titles and areas of expertise.
 - **Governance** (admins only): spend, limits, and knowledge-base entries waiting for review.
-- **Knowledge**: the knowledge base, as a page of its own: what the organisation knows, by topic and state, and every answer to browse and search. Add an answer or import a spreadsheet there. Entries can be in English or Japanese; matching is by meaning, so a question can match an entry in the other language.
+- **Knowledge**: the knowledge base, as a page of its own: what the organisation knows, by topic and state, and every answer to browse and search, each with its history and where it has been used. **Ask it a question** to see the answer it would draft. Add an answer or import a spreadsheet there. Entries can be in English or Japanese; matching is by meaning, so a question can match an entry in the other language.
 - **Help**: this guide, and the introduction.
 - Your name, and **Sign out** (the arrow icon).
 

@@ -101,6 +101,7 @@ export const INTRO_STEPS: IntroStep[] = [
     title: 'What we know',
     body: [
       '**Knowledge** is the organisation\'s knowledge base, for everyone: how many answers there are, by topic and state, what was learned recently, and every answer to search and browse.',
+      'Each answer shows its history and where it has been used. **Ask it a question** to see the answer it would draft, before any questionnaire arrives.',
       'Every draft comes from it, so a better knowledge base means better drafts. Add an answer or import a spreadsheet there.',
     ],
     image: '17-knowledge.png',

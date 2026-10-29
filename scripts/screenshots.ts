@@ -158,6 +158,23 @@ async function main() {
   await page.getByRole('region', { name: 'Answers' }).getByRole('button').first().click();
   await page.getByRole('complementary', { name: 'Selected answer' }).waitFor();
   await shoot(page, '18-knowledge-browse.png', 'knowledge browse');
+  // Sprint 18 (S18-2): one answer's page, with the change proposed for it and where it was used.
+  await page.getByLabel('Search by number or words').fill('KB-0015');
+  await page.getByRole('region', { name: 'Answers' }).getByRole('button', { name: /KB-0015/ }).click();
+  await page.getByText('A proposed change is waiting').waitFor();
+  await shoot(page, '19-answer-page.png', 'an answer and its history');
+  // Sprint 18 (S18-4): asking it a question. It needs the Edge Functions running with their keys
+  // (npx supabase functions serve); without them the run carries on without this picture.
+  await page.getByLabel('Search by number or words').fill('');
+  await page.getByPlaceholder('How do you encrypt customer data at rest?').fill('How do you encrypt customer data at rest?');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  const answered = await page.getByText('Answers it drew on').waitFor({ timeout: 60000 }).then(() => true, () => false);
+  if (answered) {
+    await page.getByRole('region', { name: 'Ask it a question' }).evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96 }));
+    await shoot(page, '20-ask.png', 'asking it a question');
+  } else {
+    console.log('  20-ask.png skipped: the question was not answered (are the Edge Functions running?)');
+  }
 
   // Importing into the knowledge base: the synthetic Q&A file, at the column mapping.
   await page.getByRole('button', { name: 'Import a spreadsheet' }).click();
