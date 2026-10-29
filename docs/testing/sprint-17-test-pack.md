@@ -115,7 +115,7 @@ The screens are not drawn in the automated tests, so cases 1 to 6 are the check 
 3. **Japanese** alone shows 30. With **Reviewed and current** as well it shows only answers that are both: none on the reset demo, since every Japanese answer is a translation still to check, and the page says "No answers match. Clear a filter or change the search."
 4. Most cited puts the most cited answers first.
 5. A learned answer opens the answer it would change (KB-0015 or KB-0070), which is the current one.
-6. At phone width the tiles stack one above another. Browse shows the list, then the selected answer below it. Nothing scrolls sideways.
+6. At phone width the tiles stack one above another. Browse shows the list, then the selected answer below it; choosing an answer scrolls to it, and **Back to the list** returns to it in the list (added after your first run). Nothing scrolls sideways.
 
 **Result:** ☐ Pass ☐ Fail. Notes:
 

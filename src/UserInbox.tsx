@@ -299,7 +299,7 @@ export default function UserInbox({ userId, isAdmin }: Props) {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-ink-900 tracking-tight">Assignments</h1>
-          <p className="text-ink-500 mt-1.5 text-sm font-medium">Questions routed to you or others for expert review.</p>
+          <p className="text-ink-500 mt-1.5 text-sm font-medium">Questions a colleague asked you about, and the ones you asked others about.</p>
         </div>
         <div className="flex items-center gap-2">
           {pendingCount > 0 && (
@@ -361,10 +361,12 @@ export default function UserInbox({ userId, isAdmin }: Props) {
           </div>
           <div>
             <p className="font-bold text-ink-700">
-              {tab === 'mine' ? 'No questions assigned to you' : tab === 'sent' ? 'No questions sent for review' : 'No assignments yet'}
+              {tab === 'mine' ? 'No questions assigned to you' : tab === 'sent' ? 'You have not assigned any questions' : 'No assignments yet'}
             </p>
             <p className="text-sm text-ink-400 mt-1 font-medium">
-              Assignments appear here when questions are routed during RFI review.
+              {tab === 'sent' ? 'A question appears here when you assign it to a colleague from a response.'
+                : tab === 'mine' ? 'A question appears here when someone assigns it to you from a response.'
+                : 'A question appears here when anyone assigns it to a colleague from a response.'}
             </p>
           </div>
         </div>

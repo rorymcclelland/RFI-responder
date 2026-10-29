@@ -57,6 +57,35 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
   const results = useMemo(() => browse(entries, overview?.entries ?? {}, filters), [entries, overview, filters]);
   const current = results.find((e) => e.ref === selected) ?? results[0] ?? null;
   const openBrowse = (f: Partial<BrowseFilters>) => { setFilters({ ...EMPTY_FILTERS, ...f }); setSelected(null); setView('browse'); };
+  // At phone width the selected answer sits below the list, out of sight (Rory's check, case 5.6):
+  // choosing an answer brings it into view, and a link goes back to it in the list.
+  const listRef = useRef<HTMLElement>(null);
+  const answerRef = useRef<HTMLElement>(null);
+  const [stacked, setStacked] = useState(false);
+  const [picked, setPicked] = useState(0);
+  const pick = (ref: string) => { setSelected(ref); setPicked((n) => n + 1); };
+  useEffect(() => {
+    const measure = () => {
+      const list = listRef.current, answer = answerRef.current;
+      setStacked(!!list && !!answer && answer.offsetTop > list.offsetTop + 8);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [view, current?.ref]);
+  useEffect(() => {
+    if (!picked) return;
+    const list = listRef.current, answer = answerRef.current;
+    if (!list || !answer || answer.offsetTop <= list.offsetTop + 8) return;
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    answer.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+    answer.focus({ preventScroll: true });
+  }, [picked]);
+  const backToList = () => {
+    const item = listRef.current?.querySelector<HTMLElement>(`[data-ref="${current?.ref}"]`);
+    item?.scrollIntoView({ block: 'center' });
+    item?.focus({ preventScroll: true });
+  };
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const header = (
@@ -140,7 +169,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
               <h2 id="learned" className="text-lg font-black text-ink-900">Learned recently</h2>
               {overview.learned.length === 0 && <p className="text-sm text-ink-500">Nothing learned from responses yet. Answers are learned when a response's export is recorded.</p>}
               {overview.learned.map((l) => (
-                <button key={l.ref} onClick={() => { openBrowse({}); setSelected(l.replaces ?? l.ref); }}
+                <button key={l.ref} onClick={() => { openBrowse({}); pick(l.replaces ?? l.ref); }}
                   className="block w-full text-left border-b border-ink-50 last:border-0 pb-3">
                   <span className="block text-sm font-bold text-ink-800">{l.question}</span>
                   <span className="block text-xs text-ink-500 mt-0.5">{l.ref}{l.replaces ? `, a proposed change to ${l.replaces}` : ''}{l.from ? ` · from ${l.from}` : ''} · {l.reviewed ? 'reviewed' : 'waiting for review'}</span>
@@ -205,13 +234,13 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
               )}
             </aside>
 
-            <section aria-label="Answers" className="flex-[999_1_360px] min-w-0 space-y-2">
+            <section ref={listRef} aria-label="Answers" className="flex-[999_1_360px] min-w-0 space-y-2">
               <p className="text-sm text-ink-500" role="status">{results.length} of {entries.length} answers</p>
               {results.length === 0 && <p className="text-sm text-ink-400 py-8 text-center">No answers match. Clear a filter or change the search.</p>}
               {results.slice(0, 200).map((e) => {
                 const info = overview?.entries[e.ref];
                 return (
-                  <button key={e.ref} onClick={() => setSelected(e.ref)} aria-pressed={current?.ref === e.ref}
+                  <button key={e.ref} data-ref={e.ref} onClick={() => pick(e.ref)} aria-pressed={current?.ref === e.ref}
                     className={`w-full text-left bg-white rounded-2xl border px-4 py-3 transition-colors ${current?.ref === e.ref ? 'border-ink-900' : 'border-ink-100 hover:border-ink-300'}`}>
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="text-xs font-bold text-ink-500">{e.ref}</span>
@@ -226,7 +255,8 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
             </section>
 
             {current && (
-              <aside aria-label="Selected answer" className="flex-[1_1_320px] max-w-md card p-6 space-y-3 border-2 border-ink-900">
+              <aside ref={answerRef} tabIndex={-1} aria-label="Selected answer" className="flex-[1_1_320px] max-w-md card p-6 space-y-3 border-2 border-ink-900 scroll-mt-24 outline-none">
+                {stacked && <button onClick={backToList} className="text-xs font-semibold text-ink-500 hover:text-ink-800">Back to the list</button>}
                 <p className="text-xs font-bold text-ink-500 flex items-center gap-2"><BookOpen size={12} /> {current.ref} · {STATE_LABEL[overview?.entries[current.ref]?.state ?? 'waiting']}</p>
                 <h2 className="text-lg font-black text-ink-900">{current.question}</h2>
                 <p className="text-sm text-ink-700 leading-relaxed whitespace-pre-line">{current.answer}</p>
