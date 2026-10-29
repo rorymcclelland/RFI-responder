@@ -13,7 +13,7 @@ import { extractFromWord } from './lib/wordExtraction';
 import { describeExtraction, fromExtraction, toInsertRows, type Draft } from './lib/questionDrafts';
 import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
-import { firstView, loadResponseSessions } from './workspace/openResponse';
+import { firstView, loadResponseSession, loadResponseSessions } from './workspace/openResponse';
 import { CONF_GROUPS, inGroup, type ConfidenceGroup } from './workspace/confidenceBands';
 import { exportReason, workspaceControls } from './workspace/controls';
 import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
@@ -42,6 +42,10 @@ interface Props {
   canAssign: boolean;
   /** The owner's name, for the lines that say who can do what (S17-2). */
   ownerName?: string | null;
+  /** Sprint 19 (S19-2): open at this question, in its own file, rather than at the newest file. */
+  focus?: { sessionId: string; questionId: string } | null;
+  /** Called once the focus has been used, so a later visit opens as usual. */
+  onFocused?: () => void;
 }
 
 // Sprint 16 (S16-1): 'loading' until the response's sessions are read; 'load_error' if they cannot be.
@@ -52,7 +56,7 @@ const FILTER_LABEL: Record<FilterTab, string> = { all: 'All', pending: 'To do', 
 
 
 
-export default function RFIWorkspace({ opportunityId, archived, opportunityName, ownerName = null, currentUser, allUsers, canAssign }: Props) {
+export default function RFIWorkspace({ opportunityId, archived, opportunityName, ownerName = null, currentUser, allUsers, canAssign, focus = null, onFocused }: Props) {
   // Sprint 17 (S17-2): what this person is offered, and why when it is less.
   const controls = workspaceControls({ canManage: canAssign, archived, ownerName });
   const [step, setStep]                   = useState<WorkflowStep>('loading');
@@ -121,8 +125,13 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       if (seq !== loadSeq.current) return;
       setPastSessions(linked);
       if (!autoResume) return;
-      const view = firstView(linked);
+      let wanted = focus ? linked.find((x) => x.id === focus.sessionId) ?? null : null;
+      // A file older than the ten read first is read on its own.
+      if (focus && !wanted) wanted = await loadResponseSession(supabase, opportunityId, focus.sessionId);
+      if (seq !== loadSeq.current) return;
+      const view = firstView(wanted && !linked.includes(wanted) ? [wanted, ...linked] : linked, focus?.sessionId ?? null);
       if (view === 'upload') { setStep('idle'); return; }
+      if (focus) setPendingFocus({ ...focus, missing: view.missing === true });
       if (!(await openSession(view.open, seq)) && seq === loadSeq.current) {
         setLoadError('The questions in this response could not be loaded. Check your connection and try again.');
         setStep('load_error');
@@ -132,9 +141,28 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       if (autoResume) { setLoadError((err as Error).message); setStep('load_error'); }
       else setUploadError((err as Error).message);
     }
-  }, [opportunityId, openSession]);
+  }, [opportunityId, openSession, focus]);
 
-  useEffect(() => { loadPastSessions(true); }, [loadPastSessions]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadPastSessions(true); }, [opportunityId]);
+
+  // Sprint 19 (S19-2): once the focused file's questions are on screen, open the question and go to it.
+  const [pendingFocus, setPendingFocus] = useState<{ sessionId: string; questionId: string; missing: boolean } | null>(null);
+  useEffect(() => {
+    if (!pendingFocus) return;
+    if (!pendingFocus.missing && sessionId !== pendingFocus.sessionId) return;
+    const found = !pendingFocus.missing && questions.some((q) => q.id === pendingFocus.questionId);
+    if (found) {
+      setFilter('all'); setSearch(''); setListCollapsed(false); setExpandedId(pendingFocus.questionId);
+      setTimeout(() => document.getElementById(`question-${pendingFocus.questionId}`)?.scrollIntoView({ block: 'center' }), 100);
+    } else if (sessionId) {
+      setNotice('That question could not be found in this response; its file may have been removed. The newest file is shown.');
+    } else {
+      return;
+    }
+    setPendingFocus(null);
+    onFocused?.();
+  }, [pendingFocus, sessionId, questions, onFocused]);
 
   // ── File parsing ─────────────────────────────────────────────────────────
 

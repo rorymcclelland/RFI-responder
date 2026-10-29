@@ -30,7 +30,23 @@ export async function loadResponseSessions(client: SupabaseClient, opportunityId
   return { linked: (linked.data ?? []).map(toSession) };
 }
 
-/** What to show first: the newest session, or the upload step for a response with none. */
-export function firstView(linked: RFISession[]): { open: RFISession } | 'upload' {
+/**
+ * What to show first: the newest session, or the upload step for a response with none. Since Sprint 19
+ * (S19-2), a requested file comes first when it is one of the response's; `missing` says it was not.
+ */
+export function firstView(linked: RFISession[], wanted: string | null = null): { open: RFISession; missing?: boolean } | 'upload' {
+  if (wanted) {
+    const hit = linked.find((s) => s.id === wanted);
+    if (hit) return { open: hit };
+    if (linked.length > 0) return { open: linked[0], missing: true };
+    return 'upload';
+  }
   return linked.length > 0 ? { open: linked[0] } : 'upload';
+}
+
+/** One of the response's files by id (for a file older than the ten read first), or null. */
+export async function loadResponseSession(client: SupabaseClient, opportunityId: string, sessionId: string): Promise<RFISession | null> {
+  const { data, error } = await client.from('rfi_sessions').select('*').eq('opportunity_id', opportunityId).eq('id', sessionId).maybeSingle();
+  if (error || !data) return null;
+  return toSession(data as Record<string, unknown>);
 }

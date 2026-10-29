@@ -35,3 +35,17 @@ describe('firstView', () => {
     expect(firstView([])).toEqual('upload');
   });
 });
+
+describe('firstView with a requested file (Sprint 19, S19-2)', () => {
+  const s = (id: string) => ({ id }) as never;
+  it('1. opens the requested file when it is one of the response\'s', () => {
+    expect(firstView([s('s3'), s('s2'), s('s1')], 's1')).toEqual({ open: { id: 's1' } });
+  });
+  it('2. opens the newest and says so when the requested file is not there', () => {
+    expect(firstView([s('s3'), s('s2')], 'gone')).toEqual({ open: { id: 's3' }, missing: true });
+    expect(firstView([], 'gone')).toBe('upload');
+  });
+  it('3. without a request, the newest as before', () => {
+    expect(firstView([s('s3'), s('s2')])).toEqual({ open: { id: 's3' } });
+  });
+});
