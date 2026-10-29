@@ -9,7 +9,7 @@ import { BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import LanguageLabel from '../LanguageLabel';
 import { reviewEntry } from '../lib/entryReview';
-import { DETAIL_STATE_LABEL, describeEvent, describeUse, loadEntryDetail, saveEntryEdits, type EntryDetail } from '../lib/entryDetail';
+import { DETAIL_STATE_LABEL, describeEvent, describeUse, loadEntryDetail, restoreEntry, retireEntry, retireReasonProblem, saveEntryEdits, type EntryDetail } from '../lib/entryDetail';
 import { describeSource } from '../lib/knowledgeBrowse';
 
 const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
@@ -24,15 +24,17 @@ interface Props {
   onChanged: (message: string) => void;
   /** Shown at the top on a phone, where the answer sits below the list. */
   backToList?: (() => void) | null;
-  extraActions?: (d: EntryDetail, reload: () => void) => React.ReactNode;
 }
 
-export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, backToList, extraActions }: Props) {
+export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, backToList }: Props) {
   const [detail, setDetail] = useState<EntryDetail | null | undefined>(undefined);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ question: '', answer: '', tags: '', source: '' });
+  // Sprint 18 (S18-3): retiring this answer (or declining a proposal: this one, or the one beside it).
+  const [retiring, setRetiring] = useState<{ id: string; ref: string; decline: boolean } | null>(null);
+  const [reason, setReason] = useState('');
   const seq = useRef(0);
 
   const load = useCallback(async () => {
@@ -45,7 +47,7 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
       if (n === seq.current) { setDetail(undefined); setError((err as Error).message); }
     }
   }, [refId]);
-  useEffect(() => { setDetail(undefined); setEditing(false); load(); }, [load]);
+  useEffect(() => { setDetail(undefined); setEditing(false); setRetiring(null); load(); }, [load]);
 
   const act = async (fn: () => Promise<string>) => {
     setBusy(true);
@@ -53,6 +55,8 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
     try {
       const message = await fn();
       setEditing(false);
+      setRetiring(null);
+      setReason('');
       await load();
       onChanged(message);
     } catch (err) {
@@ -95,6 +99,12 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
         {e.state === 'proposal' && e.proposalFor && (
           <p className="text-sm text-ink-700 bg-amber-50 rounded-xl px-3 py-2">A proposed change to <button className="font-bold underline" onClick={() => onOpen(e.proposalFor!)}>{e.proposalFor}</button>, waiting for an admin's review; until then {e.proposalFor} is used as it stands.</p>
         )}
+        {e.state === 'retired' && (
+          <p className="text-sm text-ink-700 bg-coral-50 border border-coral-200 rounded-xl px-3 py-2">
+            {e.proposalFor ? `Declined as a change to ${e.proposalFor}` : 'Retired'} on {day(e.retiredAt)} by {names.get(e.retiredBy ?? '') ?? 'a former team member'}: {e.retiredReason}.
+            {' '}{e.proposalFor ? 'It is not used.' : 'It is no longer used for drafts, and its question is free for a new answer.'}
+          </p>
+        )}
         {editing ? (
           <form className="space-y-3" onSubmit={(ev) => { ev.preventDefault(); act(async () => {
             const r = await saveEntryEdits(supabase, e, form);
@@ -133,10 +143,42 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
               className="btn-primary text-xs">{e.state === 'waiting' || e.state === 'translation' ? 'Approve' : 'Mark as still correct'}</button>
             <button disabled={busy} onClick={() => { setForm({ question: e.question, answer: e.answer, tags: e.tags.join(', '), source: e.source ?? '' }); setEditing(true); }}
               className="btn-ghost text-xs">Edit</button>
-            {extraActions?.(detail, load)}
+            <button disabled={busy} onClick={() => { setReason(''); setRetiring({ id: e.id, ref: e.ref, decline: false }); }} className="btn-ghost text-xs">Retire</button>
           </div>
         )}
-        {isAdmin && !current && !editing && extraActions?.(detail, load)}
+        {isAdmin && !editing && e.state === 'proposal' && (
+          <div className="flex flex-wrap gap-2">
+            <button disabled={busy} onClick={() => act(async () => { await reviewEntry(supabase, e.id); return `${e.ref} approved; it replaces ${e.proposalFor}.`; })}
+              className="btn-primary text-xs">Approve the change</button>
+            <button disabled={busy} onClick={() => { setReason(''); setRetiring({ id: e.id, ref: e.ref, decline: true }); }} className="btn-ghost text-xs">Decline the change</button>
+          </div>
+        )}
+        {isAdmin && !editing && e.state === 'retired' && (
+          <button disabled={busy} onClick={() => act(async () => { await restoreEntry(supabase, e.id); return `${e.ref} restored.`; })} className="btn-ghost text-xs">Restore</button>
+        )}
+        {retiring && (
+          <form className="space-y-2 rounded-2xl border border-ink-200 p-4" onSubmit={(ev) => { ev.preventDefault(); act(async () => {
+            await retireEntry(supabase, retiring.id, reason);
+            return retiring.decline ? `${retiring.ref} declined.` : `${retiring.ref} retired.`;
+          }); }}>
+            <label className="block text-sm font-bold text-ink-700">
+              {retiring.decline ? `Why is ${retiring.ref} declined?` : `Why is ${retiring.ref} being retired?`}
+              <textarea className="input mt-1 text-sm" rows={2} maxLength={500} value={reason} onChange={(v) => setReason(v.target.value)}
+                placeholder={retiring.decline ? 'For example: our patching is still monthly.' : 'For example: the certificate lapsed in 2026.'} />
+            </label>
+            <p className="text-xs text-ink-500">
+              {retiring.decline
+                ? 'The answer it would have changed stays as it is. The reason is recorded in its history and the audit log.'
+                : 'It stops being used for drafts and learning, and drafts that cite it are held for a person. It stays here, with its history, and can be restored.'}
+            </p>
+            <div className="flex gap-2">
+              <button type="submit" disabled={busy || retireReasonProblem(reason) !== null} className="btn-primary text-xs">
+                {busy ? 'Saving…' : retiring.decline ? 'Decline it' : 'Retire it'}
+              </button>
+              <button type="button" onClick={() => setRetiring(null)} className="btn-ghost text-xs">Cancel</button>
+            </div>
+          </form>
+        )}
         {error && <p role="alert" className="text-sm text-coral-600">{error}</p>}
       </div>
 
@@ -150,7 +192,11 @@ export default function EntryPanel({ refId, names, isAdmin, onOpen, onChanged, b
           </p>
           {isAdmin && (
             <button disabled={busy} onClick={() => act(async () => { await reviewEntry(supabase, detail.proposal!.id); return `${detail.proposal!.ref} approved; it replaces ${e.ref}.`; })}
-              className="btn-primary text-xs">Approve the change</button>
+              className="btn-primary text-xs mr-2">Approve the change</button>
+          )}
+          {isAdmin && (
+            <button disabled={busy} onClick={() => { setReason(''); setRetiring({ id: detail.proposal!.id, ref: detail.proposal!.ref, decline: true }); }}
+              className="btn-ghost text-xs">Decline the change</button>
           )}
         </section>
       )}

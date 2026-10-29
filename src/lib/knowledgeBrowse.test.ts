@@ -56,6 +56,18 @@ describe('browse (test 4)', () => {
   });
 });
 
+describe('retired answers and long numbers (Sprint 18)', () => {
+  const list = [e('KB-9999'), e('KB-10000'), e('KB-0002'), e('KB-0003')];
+  const info = { 'KB-0003': { state: 'retired', citations: 4, due: '' } };
+  it('leaves retired answers out unless the Retired state is chosen (S18-3, test 8)', () => {
+    expect(browse(list as never, info as never, EMPTY_FILTERS).map((x) => x.ref)).not.toContain('KB-0003');
+    expect(browse(list as never, info as never, { ...EMPTY_FILTERS, states: ['retired'] }).map((x) => x.ref)).toEqual(['KB-0003']);
+  });
+  it('sorts KB-10000 after KB-9999 (S18-1)', () => {
+    expect(browse(list as never, info as never, EMPTY_FILTERS).map((x) => x.ref)).toEqual(['KB-0002', 'KB-9999', 'KB-10000']);
+  });
+});
+
 describe('describeSource (test 5)', () => {
   const names = new Map([['u1', 'Sarah Chen']]);
   it('says where each answer came from, in words', () => {

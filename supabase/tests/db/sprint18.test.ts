@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
+import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, getPool, refused, type TestUser } from './harness';
 import { entry, one, question, response, session } from './fixtures';
 
 const ROOT = join(__dirname, '../../..');
@@ -178,4 +178,165 @@ describe('S18-2 one answer and its history (K-2)', () => {
     expect(d.usedCount).toBeGreaterThanOrEqual(5000);
     expect(d.used).toHaveLength(100);
   }, 60000);
+});
+
+describe('S18-3 retire an answer, or decline a proposed change (K-2)', () => {
+  const retire = (u: TestUser | null, id: string, reason: string | null = 'The certificate lapsed in 2026.') =>
+    as(u, (q) => q(`SELECT public.retire_entry($1, $2)`, [id, reason]));
+  const commitRetire = async (id: string, reason = 'The certificate lapsed in 2026.') => {
+    const c = await getPool().connect();
+    try {
+      await c.query('BEGIN');
+      await c.query(`SELECT set_config('request.jwt.claims', $1, true), set_config('request.jwt.claim.sub', $2, true)`, [JSON.stringify({ sub: admin.id, role: 'authenticated' }), admin.id]);
+      await c.query('SET LOCAL ROLE authenticated');
+      await c.query(`SELECT public.retire_entry($1, $2)`, [id, reason]);
+      await c.query('COMMIT');
+    } finally { c.release(); }
+  };
+  const matched = async (text: string) => (await as(member, (q) => q(`SELECT ref FROM match_kb_entries(NULL, $1, 20, NULL)`, [text]))).rows.map((r) => r.ref as string);
+
+  it('1. retiring records who, when and why (audited), and the answer is no longer matched', async () => {
+    const e = await entry({ question: 'Are you certified to the zebracorn standard (S18-3)?', answer: 'Yes, zebracorn certified.', createdBy: admin.id });
+    expect(await matched('zebracorn standard')).toContain(e.ref);
+    await commitRetire(e.id);
+    expect(await matched('zebracorn standard')).not.toContain(e.ref);
+    const r = await one<{ retired_by: string; retired_reason: string; at: boolean }>(`SELECT retired_by, retired_reason, retired_at IS NOT NULL AS at FROM kb_entries WHERE id = $1`, [e.id]);
+    expect(r).toEqual({ retired_by: admin.id, retired_reason: 'The certificate lapsed in 2026.', at: true });
+    const a = await one<{ details: Record<string, unknown>; actor: string }>(`SELECT details, actor FROM audit_log WHERE action = 'kb.retired' AND target_id = $1`, [e.id]);
+    expect(a).toMatchObject({ actor: admin.id, details: { ref: e.ref, reason: 'The certificate lapsed in 2026.', declined: false } });
+    expect((await one<{ n: number }>(`SELECT count(*)::int AS n FROM pending_embeddings('voyage-4', 500) WHERE id = $1`, [e.id])).n).toBe(0);
+    const d = await detail(member, e.ref);
+    expect(d.entry).toMatchObject({ state: 'retired', retiredReason: 'The certificate lapsed in 2026.' });
+    expect(d.history.at(-1)).toMatchObject({ action: 'kb.retired' });
+  });
+
+  it('2. a pending question citing it is held, saying why; an approved one is left alone', async () => {
+    const e = await entry({ question: 'Retired and cited (S18-3)?', createdBy: admin.id });
+    const s = await session(await response(admin.id));
+    const pending = await question(s, { cited: [e.ref], sources: [e.ref], text: 'Pending, citing it (S18-3)?' });
+    const done = await question(s, { cited: [e.ref], sources: [e.ref], text: 'Approved, citing it (S18-3)?' });
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [done]);
+    await commitRetire(e.id);
+    const g = await asSuperuser<{ id: string; gate: string | null; gate_reason: string | null }>(`SELECT id, gate, gate_reason FROM rfi_questions WHERE id = ANY($1)`, [[pending, done]]);
+    const by = new Map(g.rows.map((r) => [r.id, r]));
+    expect(by.get(pending)).toMatchObject({ gate: 'stale_source', gate_reason: `Cites ${e.ref} (retired), so it is reviewed individually.` });
+    expect(by.get(done)!.gate).toBeNull();
+    // Bulk approval leaves it, whatever the stored gate says.
+    await asSuperuser(`UPDATE rfi_questions SET gate = NULL, gate_reason = NULL WHERE id = $1`, [pending]);
+    await as(admin, async (q) => {
+      await q(`SELECT bulk_accept($1, 0)`, [s]);
+      expect((await q(`SELECT status FROM rfi_questions WHERE id = $1`, [pending])).rows[0].status).toBe('pending');
+    });
+  });
+
+  it('3. an export close to a retired answer adds a new entry; it never confirms or replaces the retired one', async () => {
+    const e = await entry({ question: 'Which SIEM do you use (S18-3)?', answer: 'We use SIEM-A.', createdBy: admin.id });
+    await commitRetire(e.id, 'We moved to another SIEM.');
+    const s = await session(await response(admin.id));
+    const qid = await question(s, { cited: [e.ref], sources: [e.ref], text: 'What SIEM do you run (S18-3)?', final: 'We use SIEM-B now.' });
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', judge_best_ref = $2, sources_json = $3 WHERE id = $1`,
+      [qid, e.ref, JSON.stringify([{ id: e.ref, score: 0.99 }])]);
+    // The same question as the retired one, approved unedited, would confirm it if it were current.
+    const same = await question(s, { cited: [e.ref], sources: [e.ref], text: 'Which SIEM do you use (S18-3)?' });
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', judge_best_ref = $2 WHERE id = $1`, [same, e.ref]);
+    await as(admin, async (q) => {
+      await q(`SELECT record_export($1)`, [s]);
+      const k = (await q(`SELECT superseded_by, last_reviewed_at FROM kb_entries WHERE id = $1`, [e.id])).rows[0];
+      expect(k).toEqual({ superseded_by: null, last_reviewed_at: null });
+      const out = (await q(`SELECT learn_outcome FROM rfi_questions WHERE id = $1`, [qid])).rows[0].learn_outcome;
+      expect(out).toBe('added');
+    });
+  });
+
+  it('4. its question is free for a new answer; restoring then is refused with the reason, and without a clash restore brings it back', async () => {
+    const e = await entry({ question: 'Do you have an office in Leeds (S18-3)?', answer: 'Yes, in Leeds.', createdBy: admin.id });
+    await commitRetire(e.id, 'The Leeds office closed.');
+    await as(admin, async (q) => {
+      await q(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('Do you have an office in Leeds (S18-3)?', 'No, it closed.', '{}', 'manual')`);
+      expect(await refused(q(`SELECT public.restore_entry($1)`, [e.id]))).toMatch(/Another current answer now has this question/);
+    });
+    await as(admin, async (q) => {
+      await q(`SELECT public.restore_entry($1)`, [e.id]);
+      expect((await q(`SELECT ref FROM match_kb_entries(NULL, 'office in Leeds', 20, NULL)`)).rows.map((r) => r.ref)).toContain(e.ref);
+      const a = (await q(`SELECT details FROM audit_log WHERE action = 'kb.restored' AND target_id = $1`, [e.id])).rows;
+      expect(a).toHaveLength(1);
+      expect((await q(`SELECT retired_at FROM kb_entries WHERE id = $1`, [e.id])).rows[0].retired_at).toBeNull();
+    });
+  });
+
+  it('4. restoring releases the questions held only because they cited it', async () => {
+    const e = await entry({ question: 'Restored and cited (S18-3)?', createdBy: admin.id });
+    const s = await session(await response(admin.id));
+    const pending = await question(s, { cited: [e.ref], sources: [e.ref], text: 'Held then released (S18-3)?' });
+    await commitRetire(e.id);
+    await as(admin, async (q) => {
+      await q(`SELECT public.restore_entry($1)`, [e.id]);
+      expect((await q(`SELECT gate FROM rfi_questions WHERE id = $1`, [pending])).rows[0].gate).toBeNull();
+    });
+  });
+
+  it('5. retiring a proposal declines it: its entry shows no proposal, and the proposal says Retired with the reason', async () => {
+    const target = await entry({ question: 'Do you patch monthly (S18-3)?', createdBy: admin.id });
+    const p = await one<{ id: string; ref: string }>(
+      `INSERT INTO kb_entries (question, answer, tags, source, origin, origin_ref, created_by, proposed_replacement_of)
+       VALUES ('Do you patch monthly (S18-3)?', 'Weekly now.', '{}', 'RFI response: R', 'response', 'response:x/session:y/question:z', $1, $2) RETURNING id, ref`,
+      [member.id, target.id]);
+    expect((await detail(member, target.ref)).proposal).toMatchObject({ ref: p.ref });
+    await commitRetire(p.id, 'We still patch monthly.');
+    expect((await detail(member, target.ref)).proposal).toBeNull();
+    expect((await detail(member, p.ref)).entry).toMatchObject({ state: 'retired', retiredReason: 'We still patch monthly.', proposalFor: target.ref });
+    const a = await one<{ details: Record<string, unknown> }>(`SELECT details FROM audit_log WHERE action = 'kb.retired' AND target_id = $1`, [p.id]);
+    expect(a.details).toMatchObject({ declined: true, proposal_for: target.ref });
+    await refused(as(admin, (q) => q(`SELECT public.review_entry($1)`, [p.id])));
+    const o = await as(member, async (q) => (await q(`SELECT public.knowledge_overview() AS o`)).rows[0].o);
+    expect(o.learned.some((l: { ref: string }) => l.ref === p.ref)).toBe(false);
+  });
+
+  it('6. role matrix: only an admin retires or restores, and nobody sets the columns directly', async () => {
+    const e = await entry({ question: 'Role matrix (S18-3)?', createdBy: admin.id });
+    expect(await refused(retire(member, e.id))).toMatch(/Only an admin/);
+    await refused(retire(null, e.id));
+    expect(await refused(asServiceRole((q) => q(`SELECT public.retire_entry($1, 'Service role tries.')`, [e.id])))).toMatch(/permission denied/);
+    for (const u of [member, admin]) {
+      await refused(as(u, (q) => q(`UPDATE kb_entries SET retired_at = now(), retired_reason = 'Directly set.' WHERE id = $1`, [e.id])));
+      await refused(as(u, (q) => q(`UPDATE kb_entries SET retired_reason = 'Directly set.' WHERE id = $1`, [e.id])));
+    }
+    await retire(admin, e.id);
+    await commitRetire(e.id);
+    expect(await refused(as(member, (q) => q(`SELECT public.restore_entry($1)`, [e.id])))).toMatch(/Only an admin/);
+    await refused(asServiceRole((q) => q(`SELECT public.restore_entry($1)`, [e.id])));
+    const defs = await asSuperuser<{ name: string; definer: boolean; config: string[] }>(
+      `SELECT proname AS name, prosecdef AS definer, proconfig AS config FROM pg_proc WHERE proname IN ('retire_entry', 'restore_entry')`);
+    for (const d of defs.rows) expect(d).toMatchObject({ definer: true, config: ['search_path=""'] });
+  });
+
+  it('7. a missing or short reason, an already retired answer and a replaced one are refused', async () => {
+    const e = await entry({ question: 'Refusals (S18-3)?', createdBy: admin.id });
+    for (const r of [null, '', '    ', 'no', 'x'.repeat(501)]) expect(await refused(retire(admin, e.id, r))).toMatch(/5 to 500 characters/);
+    await commitRetire(e.id);
+    expect(await refused(retire(admin, e.id))).toMatch(/already retired/);
+    const old = await entry({ question: 'Replaced (S18-3)?', createdBy: admin.id });
+    const nu = await entry({ question: 'Replacement (S18-3)?', createdBy: admin.id });
+    await asSuperuser(`UPDATE kb_entries SET superseded_by = $1 WHERE id = $2`, [nu.id, old.id]);
+    expect(await refused(retire(admin, old.id))).toMatch(/replaced by a newer one/);
+    expect(await refused(retire(admin, '00000000-0000-0000-0000-000000000000'))).toMatch(/No such entry/);
+  });
+
+  it('8. the overview and its counts leave retired answers out, and list them as retired for the filter', async () => {
+    const before = await as(member, async (q) => (await q(`SELECT public.knowledge_overview() AS o`)).rows[0].o);
+    const e = await entry({ question: 'Overview counts (S18-3)?', createdBy: admin.id });
+    const mid = await as(member, async (q) => (await q(`SELECT public.knowledge_overview() AS o`)).rows[0].o);
+    expect(mid.total).toBe(before.total + 1);
+    await commitRetire(e.id);
+    const after = await as(member, async (q) => (await q(`SELECT public.knowledge_overview() AS o`)).rows[0].o);
+    expect(after.total).toBe(before.total);
+    expect(after.states.retired).toBe(before.states.retired + 1);
+    expect(after.entries[e.ref]).toMatchObject({ state: 'retired' });
+    expect(after.states.reviewed).toBe(before.states.reviewed);
+  });
+
+  it('every UPDATE in the new functions has a WHERE clause (pg_safeupdate)', async () => {
+    const { rows } = await asSuperuser<{ src: string }>(`SELECT prosrc AS src FROM pg_proc WHERE proname IN ('retire_entry', 'restore_entry')`);
+    for (const r of rows) for (const stmt of r.src.split(/;/).filter((x) => /\bUPDATE\b/i.test(x))) expect(stmt).toMatch(/\bWHERE\b/i);
+  });
 });

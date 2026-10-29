@@ -16,7 +16,7 @@ import {
 
 const ORIGIN_LABEL: Record<OriginGroup, string> = { imported: 'Imported', response: 'Learned from responses', manual: 'Added by hand' };
 const SORT_LABEL: Record<BrowseSort, string> = { number: 'Number', cited: 'Most cited', review: 'Oldest review first' };
-const STATES: EntryState[] = ['reviewed', 'waiting', 'translation', 'overdue'];
+const STATES: EntryState[] = ['reviewed', 'waiting', 'translation', 'overdue', 'retired'];
 
 interface Props {
   names: Map<string, string>;
@@ -258,7 +258,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
             </aside>
 
             <section ref={listRef} aria-label="Answers" className={`flex-[999_1_360px] min-w-0 space-y-2 ${hideList ? 'hidden' : ''}`}>
-              <p className="text-sm text-ink-500" role="status">{results.length} of {entries.length} answers</p>
+              <p className="text-sm text-ink-500" role="status">{filters.states.includes('retired') ? `${results.length} shown; ${overview?.states.retired ?? 0} retired` : `${results.length} of ${overview?.total ?? entries.length} answers`}</p>
               {results.length === 0 && <p className="text-sm text-ink-400 py-8 text-center">No answers match. Clear a filter or change the search.</p>}
               {results.slice(0, 200).map((e) => {
                 const info = overview?.entries[e.ref];

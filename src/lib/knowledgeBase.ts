@@ -18,25 +18,6 @@ export interface ImportResult {
 
 export type NewEntry = Omit<KnowledgeEntry, 'id'>;
 
-/** Current (not superseded) entries, oldest first. `id` is the short reference, e.g. KB-0042. */
-export async function loadKnowledgeBase(): Promise<KnowledgeEntry[]> {
-  const { data, error } = await supabase
-    .from('kb_entries')
-    .select('ref, question, answer, tags, source, reviewed_at, language')
-    .is('superseded_by', null)
-    .order('seq', { ascending: true });
-  if (error) throw new Error(`Could not load the knowledge base: ${error.message}`);
-  return (data ?? []).map((r) => ({
-    id: r.ref as string,
-    question: r.question as string,
-    answer: r.answer as string,
-    tags: (r.tags as string[] | null) ?? [],
-    source: (r.source as string) || undefined,
-    reviewed: r.reviewed_at !== null,
-    language: r.language === 'ja' ? 'ja' : 'en',
-  }));
-}
-
 /** The digits of an entry number, without leading zeros ("KB-0101" -> "101"), or null. */
 function entryNumber(text: string): string | null {
   const m = /^(?:kb[-\s]?)?(\d+)$/i.exec(text);

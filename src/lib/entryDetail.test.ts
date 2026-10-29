@@ -71,3 +71,19 @@ describe('saveEntryEdits', () => {
     expect(c.calls).toEqual([]);
   });
 });
+
+describe('retiring (S18-3, test 7)', async () => {
+  const { retireReasonProblem, retireEntry } = await import('./entryDetail');
+  it('asks for a reason of 5 to 500 characters, as the database does', () => {
+    for (const r of ['', '    ', 'no', 'abcd']) expect(retireReasonProblem(r), r).toMatch(/at least 5/);
+    expect(retireReasonProblem('x'.repeat(501))).toMatch(/500/);
+    expect(retireReasonProblem('  The office closed.  ')).toBeNull();
+  });
+  it('sends the trimmed reason, and refuses a short one without calling the database', async () => {
+    const calls: unknown[] = [];
+    const client = { rpc: async (name: string, args: unknown) => { calls.push([name, args]); return { error: null }; } };
+    await expect(retireEntry(client as never, 'e1', 'no')).rejects.toThrow();
+    await retireEntry(client as never, 'e1', '  The office closed. ');
+    expect(calls).toEqual([['retire_entry', { p_entry: 'e1', p_reason: 'The office closed.' }]]);
+  });
+});

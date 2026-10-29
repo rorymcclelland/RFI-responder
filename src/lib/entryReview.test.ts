@@ -48,7 +48,8 @@ describe('the review queue', () => {
         created_at: '2026-10-24T09:00:00Z', added_by: { display_name: 'Tom Richardson' } }],
       error: null,
     });
-    const is2 = vi.fn(() => ({ order }));
+    const is3 = vi.fn(() => ({ order }));
+    const is2 = vi.fn(() => ({ is: is3 }));
     const is1 = vi.fn(() => ({ is: is2 }));
     const select = vi.fn(() => ({ is: is1 }));
     const c = { from: () => ({ select }) } as never;
@@ -57,6 +58,8 @@ describe('the review queue', () => {
     expect(select.mock.calls[0]).toEqual([expect.stringContaining('replaces:proposed_replacement_of(ref, answer)')]);
     expect(is1).toHaveBeenCalledWith('reviewed_at', null);
     expect(is2).toHaveBeenCalledWith('superseded_by', null);
+    // Sprint 18 (S18-3): retired answers and declined changes are not waiting for review.
+    expect(is3).toHaveBeenCalledWith('retired_at', null);
     expect(e).toMatchObject({ ref: 'KB-0201', addedBy: 'Tom Richardson', tags: [] });
     expect(describeOrigin(e)).toBe('Imported by Tom Richardson from answers.csv');
   });

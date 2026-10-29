@@ -112,3 +112,24 @@ export async function saveEntryEdits(
   if (textChanged) await reviewEntry(client, current.id, { question: edits.question.trim(), answer: edits.answer.trim() });
   return { reviewed: textChanged, changed };
 }
+
+/** The reason a retirement needs (5 to 500 characters, as the database checks), or a problem. */
+export function retireReasonProblem(reason: string): string | null {
+  const r = reason.trim();
+  if (r.length < 5) return 'Say why it is being retired, in at least 5 characters.';
+  if (r.length > 500) return 'Keep the reason to 500 characters.';
+  return null;
+}
+
+/** Sprint 18 (S18-3): retire an answer, or decline a proposed change, with a reason (admins; audited). */
+export async function retireEntry(client: SupabaseClient, id: string, reason: string): Promise<void> {
+  const problem = retireReasonProblem(reason);
+  if (problem) throw new Error(problem);
+  const { error } = await client.rpc('retire_entry', { p_entry: id, p_reason: reason.trim() });
+  if (error) throw new Error(`It was not retired: ${error.message}`);
+}
+
+export async function restoreEntry(client: SupabaseClient, id: string): Promise<void> {
+  const { error } = await client.rpc('restore_entry', { p_entry: id });
+  if (error) throw new Error(`It was not restored: ${error.message}`);
+}

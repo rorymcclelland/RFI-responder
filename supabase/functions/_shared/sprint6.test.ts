@@ -178,3 +178,24 @@ describe('Sprint 7, S7-2: processing holds a draft citing a replaced entry (F-32
     expect(r.gate_reason).toBe('Cites KB-0001 (replaced by KB-0118), so it is reviewed individually.');
   });
 });
+
+describe('Sprint 18, S18-3: processing holds a draft citing a retired entry', () => {
+  const row = (ref: string, similarity: number): MatchRow => ({
+    id: ref, ref, question: `Question for ${ref}`, answer: 'We use a centralised SIEM.', tags: [], source: 'synthetic', similarity, keyword_rank: 0,
+    fused_score: similarity, embedding_model: 'voyage-4',
+  });
+  it('gates it as stale, saying it is retired', async () => {
+    const [r] = await processQuestions([{ id: 'q1', question: 'Which SIEM do you use?' }], {
+      embed: async (texts) => ({ model: 'voyage-4', vectors: texts.map(() => [0.1]) }),
+      match: async () => [row('KB-0001', 0.62)],
+      checker: null,
+      classifier: { client: scripted([{ data: { category: 'none', reason: 'How security runs.' } }]), model: 'm' },
+      drafter: { client: scripted([{ data: { status: 'drafted', answer: 'We use a centralised SIEM.', citations: ['KB-0001'], missing: '' } }]), model: 'm' },
+      tables: { 'voyage-4': { model: 'voyage-4', evaluationSet: 'set', points: [{ score: 0, probability: 0 }, { score: 1, probability: 1 }] } },
+      sourceStatus: async () => new Map([['KB-0001', { reviewed: true, overdueSince: null, replacedBy: null, retired: true }]]),
+      now: () => '2026-10-24T00:00:00.000Z',
+    });
+    expect(r.gate).toBe('stale_source');
+    expect(r.gate_reason).toBe('Cites KB-0001 (retired), so it is reviewed individually.');
+  });
+});

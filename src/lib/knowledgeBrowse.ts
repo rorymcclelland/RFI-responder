@@ -6,7 +6,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { entryMatches } from './knowledgeBase';
 
-export type EntryState = 'reviewed' | 'overdue' | 'waiting' | 'translation';
+export type EntryState = 'reviewed' | 'overdue' | 'waiting' | 'translation' | 'retired';
 export type OriginGroup = 'imported' | 'response' | 'manual';
 export type BrowseSort = 'number' | 'cited' | 'review';
 
@@ -14,7 +14,7 @@ export interface KnowledgeOverview {
   total: number;
   languages: { en: number; ja: number };
   contributors: number;
-  states: { reviewed: number; overdue: number; waiting: number; translations: number; proposals: number };
+  states: { reviewed: number; overdue: number; waiting: number; translations: number; proposals: number; retired: number };
   topics: { tag: string | null; entries: number; citations: number }[];
   /** `from` is the response's name; `replaces` is set when the entry is a proposed change to that entry. */
   learned: { ref: string; question: string; at: string; from: string | null; reviewed: boolean; replaces: string | null }[];
@@ -40,6 +40,7 @@ export const EMPTY_FILTERS: BrowseFilters = { query: '', states: [], languages: 
 
 export const STATE_LABEL: Record<EntryState, string> = {
   reviewed: 'Reviewed and current', overdue: 'Overdue for review', waiting: 'Waiting for review', translation: 'Translation to check',
+  retired: 'Retired',
 };
 
 export function originGroup(origin: string): OriginGroup {
@@ -48,16 +49,22 @@ export function originGroup(origin: string): OriginGroup {
 
 const UNKNOWN = { state: 'waiting' as EntryState, citations: 0, due: '' };
 
-/** The entries to show, filtered and sorted. An entry the overview does not know counts as waiting. */
+/** An entry number's place in order: KB-10000 comes after KB-9999 (Sprint 18, BUG-42). */
+const refNumber = (ref: string) => Number(/(\d+)$/.exec(ref)?.[1] ?? Number.MAX_SAFE_INTEGER);
+
+/**
+ * The entries to show, filtered and sorted. An entry the overview does not know counts as waiting.
+ * Retired answers are shown only when the Retired state is chosen (Sprint 18, S18-3).
+ */
 export function browse(entries: BrowseEntry[], info: KnowledgeOverview['entries'], f: BrowseFilters): BrowseEntry[] {
   const of = (e: BrowseEntry) => info[e.ref] ?? UNKNOWN;
   const out = entries.filter((e) =>
-    (!f.states.length || f.states.includes(of(e).state))
+    (f.states.length ? f.states.includes(of(e).state) : of(e).state !== 'retired')
     && (!f.languages.length || f.languages.includes(e.language))
     && (!f.origins.length || f.origins.includes(originGroup(e.origin)))
     && (f.topic === null || (f.topic === '' ? e.tags.length === 0 : e.tags.includes(f.topic)))
     && entryMatches({ id: e.ref, question: e.question, answer: e.answer, tags: e.tags }, f.query));
-  const byRef = (a: BrowseEntry, b: BrowseEntry) => a.ref.localeCompare(b.ref);
+  const byRef = (a: BrowseEntry, b: BrowseEntry) => refNumber(a.ref) - refNumber(b.ref) || a.ref.localeCompare(b.ref);
   if (f.sort === 'cited') return out.sort((a, b) => of(b).citations - of(a).citations || byRef(a, b));
   if (f.sort === 'review') return out.sort((a, b) => (of(a).due || '9999').localeCompare(of(b).due || '9999') || byRef(a, b));
   return out.sort(byRef);

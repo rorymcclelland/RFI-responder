@@ -20,7 +20,7 @@ describe('S17-3 knowledge_overview()', () => {
   it('1. on the demo data, every count matches the table', async () => {
     await asSuperuser(readFileSync(join(__dirname, '../../../supabase/demo-hosted.sql'), 'utf8'));
     const o = await overview(member);
-    const n = async (where: string) => (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL AND ${where}`)).n;
+    const n = async (where: string) => (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL AND retired_at IS NULL AND ${where}`)).n;
     expect(o.total).toBe(await n('true'));
     expect(o.languages).toEqual({ en: await n(`language = 'en'`), ja: await n(`language = 'ja'`) });
     expect(o.states).toEqual({
@@ -29,6 +29,8 @@ describe('S17-3 knowledge_overview()', () => {
       waiting: await n(`reviewed_at IS NULL AND translated_from IS NULL`),
       translations: await n(`reviewed_at IS NULL AND translated_from IS NOT NULL`),
       proposals: (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NOT NULL`)).n,
+      // Sprint 18 (S18-3): retired answers, counted apart.
+      retired: (await one<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL AND retired_at IS NOT NULL`)).n,
     });
     expect(o.contributors).toBe((await one<{ n: number }>(`SELECT count(DISTINCT created_by)::int AS n FROM kb_entries WHERE superseded_by IS NULL AND proposed_replacement_of IS NULL`)).n);
     expect(o.total).toBeGreaterThan(100);

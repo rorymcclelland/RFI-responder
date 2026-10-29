@@ -18,7 +18,7 @@ export interface AuditRow {
 export const AUDIT_GROUPS: Record<string, { label: string; actions: string[] }> = {
   exports: { label: 'Exports and changes after export', actions: ['response.exported', 'question.changed_after_export'] },
   responses: { label: 'Archives and deletions', actions: ['response.archived', 'response.deleted'] },
-  knowledge: { label: 'Knowledge-base reviews and changes', actions: ['kb.reviewed', 'kb.confirmed', 'kb.changed', 'kb.deleted'] },
+  knowledge: { label: 'Knowledge-base reviews and changes', actions: ['kb.reviewed', 'kb.confirmed', 'kb.changed', 'kb.deleted', 'kb.retired', 'kb.restored'] },
   holds: { label: 'Questions held and released', actions: ['question.held', 'question.released'] },
   settings: { label: 'Settings and prices', actions: ['settings.changed', 'prices.changed'] },
   people: { label: 'Admin rights and invitations', actions: ['user.admin_granted', 'user.admin_removed', 'user.invited'] },
@@ -86,6 +86,13 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
       return `Changed ${str(d.ref)} directly: ${changes(d.before, d.after)}.`;
     case 'kb.deleted':
       return `Deleted ${str(d.ref)} ("${str(d.question)}").`;
+    // Sprint 18 (S18-3): retiring, and declining a proposed change, with the reason.
+    case 'kb.retired':
+      return d.declined
+        ? `Declined ${str(d.ref)}, a proposed change to ${str(d.proposal_for)}. Reason: ${str(d.reason)}`
+        : `Retired ${str(d.ref)}. Reason: ${str(d.reason)}`;
+    case 'kb.restored':
+      return `Restored ${str(d.ref)}, retired earlier (${str(d.reason)}).`;
     case 'question.held':
       return `Held a question from bulk approval (${str(d.to ?? d.gate)}).`;
     case 'question.released':

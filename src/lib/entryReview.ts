@@ -82,6 +82,8 @@ export async function loadEntriesToReview(client: SupabaseClient): Promise<Entry
     .select('id, ref, question, answer, tags, source, origin, origin_ref, created_at, language, translated_from, added_by:user_profiles!kb_entries_created_by_fkey(display_name), replaces:proposed_replacement_of(ref, answer)')
     .is('reviewed_at', null)
     .is('superseded_by', null)
+    // Sprint 18 (S18-3): a retired answer, or a declined change, no longer waits for review.
+    .is('retired_at', null)
     .order('created_at', { ascending: true });
   if (error) throw new Error(`Entries to review could not be read: ${error.message}`);
   return (data ?? []).map((r) => toEntry(r as Record<string, unknown>));
