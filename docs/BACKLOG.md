@@ -770,6 +770,18 @@ Rory retook every screenshot on his PC (every view fits 768 px); the two new one
 - K-3 ask it a question: the draft the knowledge base would give, with confidence and sources, metered against the person's limits. It is the shortest demonstration of the value, and brings the search by meaning deferred from Sprint 17 (Q3).
 - BUG-42 joins it, since K-2 changes how entries are edited anyway.
 
+## Sprint 18: each answer's story, and asking the knowledge base a question (refined 29 October 2026)
+
+Refinement: `docs/refinement/sprint-18.md`. The second slice of option B (Sprint 16 spike); questions Q1 to Q5 waiting for Rory.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S18-1 | Entry numbers past KB-9999 | BUG-42 | Refined, Sprint 18 |
+| S18-2 | One answer and its history: where used, history, other languages, next review; mark as still correct and edit there | K-2 | Refined, Sprint 18 |
+| S18-3 | Retire an answer, or decline a proposed change, with a reason; restore | K-2 | Refined, Sprint 18 |
+| S18-4 | Ask it a question: the draft it would give, with confidence and sources, metered | K-3 | Refined, Sprint 18 |
+| S18-5 | Guide, introduction and screenshots for these screens | U-10 | Refined, Sprint 18 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
