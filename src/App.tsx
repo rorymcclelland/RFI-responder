@@ -1,3 +1,4 @@
+import { OPEN_ENTRY_EVENT } from './lib/openEntry';
 import { useState, useEffect, useRef } from 'react';
 import {
   Database, X, CheckCircle2,
@@ -41,6 +42,8 @@ export default function App() {
   // Sprint 17 (S17-3): changes when entries change elsewhere, so the knowledge page reloads.
   const [kbVersion, setKbVersion]                 = useState(0);
   const [showBulkUpload, setShowBulkUpload]       = useState(false);
+  // Sprint 18 (S18-2): an answer to open on the knowledge page, from a draft's sources or an ask.
+  const [openRef, setOpenRef]                     = useState<{ ref: string; n: number } | null>(null);
   const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
   const [view, setView]                           = useState<AppView>('responses');
@@ -185,6 +188,17 @@ export default function App() {
     setNavOpen(false);
     setHelpMenuOpen(false);
   };
+
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const ref = (e as CustomEvent<string>).detail;
+      if (typeof ref !== 'string') return;
+      navigate('knowledge');
+      setOpenRef((o) => ({ ref, n: (o?.n ?? 0) + 1 }));
+    };
+    window.addEventListener(OPEN_ENTRY_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_ENTRY_EVENT, onOpen);
+  }, []);
 
   const openGuide = (page: string, anchor: string | null) => {
     setHelpAt({ page, anchor });
@@ -457,6 +471,7 @@ export default function App() {
             onAdded={(m) => { showToast(m); refreshKB(); }}
             onIndexFailed={(m) => showToast(m, 'error')}
             onReview={() => setView('governance')}
+            openRef={openRef}
           />
         ) : view === 'inbox' ? (
           <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} />

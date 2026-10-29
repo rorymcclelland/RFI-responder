@@ -1,15 +1,16 @@
 /**
  * Sprint 17 (S17-3, K-1): the knowledge base as a page of its own, replacing the pop-up. An overview of
  * what the organisation knows, and a full-screen browse with filters and the selected answer beside the
- * list. Reviewing stays under Governance until each answer has its own page (K-2); admins get a link.
+ * list. Since Sprint 18 (S18-2, K-2) the selected answer is its whole page: history, use and actions.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Plus, Search, Upload } from 'lucide-react';
+import { Plus, Search, Upload } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import LanguageLabel from './LanguageLabel';
 import AddEntryForm from './knowledge/AddEntryForm';
+import EntryPanel from './knowledge/EntryPanel';
 import {
-  EMPTY_FILTERS, STATE_LABEL, browse, describeSource, loadBrowseEntries, loadKnowledgeOverview,
+  EMPTY_FILTERS, STATE_LABEL, browse, loadBrowseEntries, loadKnowledgeOverview,
   type BrowseEntry, type BrowseFilters, type BrowseSort, type EntryState, type KnowledgeOverview, type OriginGroup,
 } from './lib/knowledgeBrowse';
 
@@ -26,9 +27,25 @@ interface Props {
   onAdded: (message: string) => void;
   onIndexFailed: (message: string) => void;
   onReview: () => void;
+  /** Sprint 18 (S18-2): an answer to open, from elsewhere in the app; `n` changes on every request. */
+  openRef?: { ref: string; n: number } | null;
 }
 
-export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview }: Props) {
+/** True below the width at which the filters, the list and the answer fit side by side. */
+function useNarrow(query = '(max-width: 1040px)'): boolean {
+  const get = () => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches;
+  const [narrow, setNarrow] = useState(get);
+  useEffect(() => {
+    const m = window.matchMedia?.(query);
+    if (!m) return;
+    const on = () => setNarrow(m.matches);
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, [query]);
+  return narrow;
+}
+
+export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview, openRef = null }: Props) {
   const [view, setView] = useState<'overview' | 'browse'>('overview');
   const [overview, setOverview] = useState<KnowledgeOverview | null>(null);
   const [entries, setEntries] = useState<BrowseEntry[]>([]);
@@ -55,44 +72,50 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
   useEffect(() => { load(); }, [load, version]);
 
   const results = useMemo(() => browse(entries, overview?.entries ?? {}, filters), [entries, overview, filters]);
-  const current = results.find((e) => e.ref === selected) ?? results[0] ?? null;
-  const openBrowse = (f: Partial<BrowseFilters>) => { setFilters({ ...EMPTY_FILTERS, ...f }); setSelected(null); setView('browse'); };
-  // At phone width the selected answer sits below the list, out of sight (Rory's check, case 5.6):
-  // choosing an answer brings it into view, and a link goes back to it in the list.
+  // The answer shown beside the list: the one chosen (which may be outside the filters, such as a
+  // replaced entry or a proposal opened from another answer), else the first result.
+  const shownRef = selected ?? results[0]?.ref ?? null;
+  const current = results.find((e) => e.ref === shownRef) ?? null;
+  const openBrowse = (f: Partial<BrowseFilters>) => { setFilters({ ...EMPTY_FILTERS, ...f }); setSelected(null); setAnswerOnly(false); setView('browse'); };
+  // Sprint 18 (S18-2): on a narrow screen the answer's page replaces the list, with Back to the list
+  // (Rory's check, Sprint 17 case 5.6: below the list it was out of sight). Wide screens show both.
   const listRef = useRef<HTMLElement>(null);
   const answerRef = useRef<HTMLElement>(null);
-  const [stacked, setStacked] = useState(false);
-  const [picked, setPicked] = useState(0);
-  const pick = (ref: string) => { setSelected(ref); setPicked((n) => n + 1); };
+  const narrow = useNarrow();
+  const [answerOnly, setAnswerOnly] = useState(false);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+  const pick = (ref: string) => { setSelected(ref); setAnswerOnly(true); };
   useEffect(() => {
-    const measure = () => {
-      const list = listRef.current, answer = answerRef.current;
-      setStacked(!!list && !!answer && answer.offsetTop > list.offsetTop + 8);
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [view, current?.ref]);
+    if (!(narrow && answerOnly)) return;
+    window.scrollTo({ top: 0 });
+    answerRef.current?.focus({ preventScroll: true });
+  }, [narrow, answerOnly, shownRef]);
   useEffect(() => {
-    if (!picked) return;
-    const list = listRef.current, answer = answerRef.current;
-    if (!list || !answer || answer.offsetTop <= list.offsetTop + 8) return;
-    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    answer.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
-    answer.focus({ preventScroll: true });
-  }, [picked]);
-  const backToList = () => {
-    const item = listRef.current?.querySelector<HTMLElement>(`[data-ref="${current?.ref}"]`);
+    if (answerOnly || !returnTo) return;
+    const item = listRef.current?.querySelector<HTMLElement>(`[data-ref="${returnTo}"]`);
     item?.scrollIntoView({ block: 'center' });
     item?.focus({ preventScroll: true });
-  };
+    setReturnTo(null);
+  }, [answerOnly, returnTo]);
+  const backToList = () => { setReturnTo(shownRef); setAnswerOnly(false); };
+  const hideList = narrow && answerOnly;
+  const hideAnswer = narrow && !answerOnly;
+  useEffect(() => {
+    if (!openRef) return;
+    setFilters(EMPTY_FILTERS);
+    setView('browse');
+    pick(openRef.ref);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openRef?.n]);
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const header = (
     <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
       <div className="max-w-2xl">
         {view === 'browse' && (
-          <button onClick={() => setView('overview')} className="text-xs font-semibold text-ink-500 hover:text-ink-800 mb-2">Knowledge / All answers</button>
+          <p className="text-xs font-semibold text-ink-500 mb-2">
+            <button onClick={() => setView('overview')} className="hover:text-ink-800">Knowledge</button> / All answers{shownRef ? ` / ${shownRef}` : ''}
+          </p>
         )}
         <h1 className="text-3xl font-black text-ink-900 tracking-tight">{view === 'overview' ? 'What we know' : 'All answers'}</h1>
         {view === 'overview' && overview && (
@@ -182,7 +205,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
 
       {view === 'browse' && (
         <div className="space-y-5">
-          <label className="block">
+          <label className={`block ${hideList ? 'hidden' : ''}`}>
             <span className="text-sm font-bold text-ink-700">Search by number or words</span>
             <span className="relative block mt-1">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
@@ -192,7 +215,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
           </label>
 
           <div className="flex flex-wrap gap-6 items-start">
-            <aside aria-label="Filters" className="flex-[1_1_200px] max-w-xs space-y-5">
+            <aside aria-label="Filters" className={`flex-[1_1_200px] max-w-xs space-y-5 ${hideList ? 'hidden' : ''}`}>
               <fieldset className="space-y-2">
                 <legend className="section-label mb-2">State</legend>
                 {STATES.map((s) => (
@@ -234,7 +257,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
               )}
             </aside>
 
-            <section ref={listRef} aria-label="Answers" className="flex-[999_1_360px] min-w-0 space-y-2">
+            <section ref={listRef} aria-label="Answers" className={`flex-[999_1_360px] min-w-0 space-y-2 ${hideList ? 'hidden' : ''}`}>
               <p className="text-sm text-ink-500" role="status">{results.length} of {entries.length} answers</p>
               {results.length === 0 && <p className="text-sm text-ink-400 py-8 text-center">No answers match. Clear a filter or change the search.</p>}
               {results.slice(0, 200).map((e) => {
@@ -254,18 +277,11 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
               {results.length > 200 && <p className="text-xs text-ink-500">The first 200 are shown; narrow the search to see the rest.</p>}
             </section>
 
-            {current && (
-              <aside ref={answerRef} tabIndex={-1} aria-label="Selected answer" className="flex-[1_1_320px] max-w-md card p-6 space-y-3 border-2 border-ink-900 scroll-mt-24 outline-none">
-                {stacked && <button onClick={backToList} className="text-xs font-semibold text-ink-500 hover:text-ink-800">Back to the list</button>}
-                <p className="text-xs font-bold text-ink-500 flex items-center gap-2"><BookOpen size={12} /> {current.ref} · {STATE_LABEL[overview?.entries[current.ref]?.state ?? 'waiting']}</p>
-                <h2 className="text-lg font-black text-ink-900">{current.question}</h2>
-                <p className="text-sm text-ink-700 leading-relaxed whitespace-pre-line">{current.answer}</p>
-                {current.tags.length > 0 && <p className="text-xs text-ink-500">Topics: {current.tags.join(', ')}</p>}
-                {current.source && <p className="text-xs text-ink-500">Source: {current.source}</p>}
-                <p className="text-xs text-ink-500">{describeSource(current, names)}.</p>
-                {isAdmin && overview?.entries[current.ref] && ['waiting', 'overdue', 'translation'].includes(overview.entries[current.ref].state) && (
-                  <button onClick={onReview} className="btn-ghost text-xs">Review it under Governance</button>
-                )}
+            {shownRef && !hideAnswer && (
+              <aside ref={answerRef} tabIndex={-1} aria-label="Selected answer"
+                className={`flex-[1_1_360px] max-w-lg card p-6 border-2 border-ink-900 scroll-mt-24 outline-none ${narrow ? 'flex-1 max-w-none' : 'self-start sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto'}`}>
+                <EntryPanel refId={shownRef} names={names} isAdmin={isAdmin} onOpen={(r) => pick(r)}
+                  onChanged={(m) => { onAdded(m); load(); }} backToList={narrow ? backToList : null} />
               </aside>
             )}
           </div>

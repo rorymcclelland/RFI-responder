@@ -1,3 +1,4 @@
+import { openEntry } from './lib/openEntry';
 import { useState, useEffect } from 'react';
 import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
@@ -79,6 +80,8 @@ function KBArticleModal({ entry, score, onClose }: { entry: KnowledgeEntry; scor
               </div>
             </div>
           )}
+          {/* Sprint 18 (S18-2): its whole story is on its page under Knowledge. */}
+          <button onClick={() => { onClose(); openEntry(entry.id); }} className="btn-ghost text-xs">Open its page in Knowledge</button>
         </div>
       </div>
     </div>
