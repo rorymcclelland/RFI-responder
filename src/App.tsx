@@ -1,9 +1,9 @@
 import { OPEN_ENTRY_EVENT } from './lib/openEntry';
 import { OPEN_QUESTION_EVENT, type QuestionTarget } from './lib/openQuestion';
 import { loadResponse } from './lib/responses';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Database, X, CheckCircle2,
+  Database, X, CheckCircle2, Home,
   ChevronLeft, Briefcase,
   Inbox, Users, LogOut, Menu, Sparkles, AlertTriangle, Scale, HelpCircle,
 } from 'lucide-react';
@@ -12,6 +12,7 @@ import { importEntries, describeImport, indexNewEntries, type KbOrigin, type New
 import { Opportunity, UserProfile } from './types';
 import BulkUploadModal from './BulkUploadModal';
 import RFIWorkspace from './RFIWorkspace';
+import HomePage from './HomePage';
 import OpportunitiesDashboard from './OpportunitiesDashboard';
 import AuthPage from './AuthPage';
 import UserInbox from './UserInbox';
@@ -34,7 +35,7 @@ import type { Session } from '@supabase/supabase-js';
 // BUG-30: read before the Supabase client clears the address's fragment.
 const ARRIVED_FOR = linkPurpose(window.location.hash);
 
-type AppView = 'responses' | 'knowledge' | 'inbox' | 'users' | 'governance' | 'help';
+type AppView = 'home' | 'responses' | 'knowledge' | 'inbox' | 'users' | 'governance' | 'help';
 
 export default function App() {
   const [session, setSession]                     = useState<Session | null>(null);
@@ -46,11 +47,15 @@ export default function App() {
   const [showBulkUpload, setShowBulkUpload]       = useState(false);
   // Sprint 18 (S18-2): an answer to open on the knowledge page, from a draft's sources or an ask.
   const [openRef, setOpenRef]                     = useState<{ ref: string; n: number } | null>(null);
+  // One map of names for every page, kept while the people are the same (Home reloads when it changes).
+  const names = useMemo(() => new Map(allUsers.map((u) => [u.id, u.displayName])), [allUsers]);
   // Sprint 19 (S19-2): a question to open the response at, from Home or questions for you.
   const [focus, setFocus]                         = useState<(QuestionTarget & { n: number; used?: boolean }) | null>(null);
   const [toast, setToast]                         = useState<{ msg: string; tone: 'ok' | 'error' } | null>(null);
   const [activeOpportunity, setActiveOpportunity] = useState<Opportunity | null>(null);
-  const [view, setView]                           = useState<AppView>('responses');
+  // Sprint 19 (S19-3, Q5): everyone lands on Home.
+  const [view, setView]                           = useState<AppView>('home');
+  const [forYouId, setForYouId]                   = useState<string | null>(null);
   // S4-1: admins are warned past the budget's warning point; everyone is told when it is reached.
   const [usage, setUsage]                         = useState<UsageStatus | null>(null);
   const [navOpen, setNavOpen]                     = useState(false);
@@ -76,7 +81,7 @@ export default function App() {
         setCurrentUser(null);
         setAllUsers([]);
         setActiveOpportunity(null);
-        setView('responses');
+        setView('home');
         setHelpAt(null);
         setIntroOpen(false);
         setUsage(null);
@@ -183,7 +188,7 @@ export default function App() {
     await supabase.auth.signOut();
     setNavOpen(false);
     setActiveOpportunity(null);
-    setView('responses');
+    setView('home');
   };
 
   const navigate = (v: AppView) => {
@@ -257,6 +262,7 @@ export default function App() {
   }
 
   const navItems: { key: AppView; icon: React.ReactNode; label: string }[] = [
+    { key: 'home', icon: <Home size={18} />, label: 'Home' },
     { key: 'responses', icon: <Briefcase size={18} />, label: 'Responses' },
     { key: 'knowledge', icon: <Database size={18} />, label: 'Knowledge' },
     { key: 'inbox',         icon: <Inbox size={18} />,     label: 'Assignments' },
@@ -485,7 +491,7 @@ export default function App() {
           </>
         ) : view === 'knowledge' ? (
           <KnowledgePage
-            names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
+            names={names}
             isAdmin={currentUser.isAdmin}
             version={kbVersion}
             onImport={() => setShowBulkUpload(true)}
@@ -497,11 +503,19 @@ export default function App() {
             onAsked={() => loadUsageStatus(supabase).then(setUsage).catch(() => undefined)}
           />
         ) : view === 'inbox' ? (
-          <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} names={new Map(allUsers.map((u) => [u.id, u.displayName]))} />
+          <UserInbox userId={currentUser.id} isAdmin={currentUser.isAdmin} names={names}
+            selected={forYouId} onSelected={() => setForYouId(null)} />
+        ) : view === 'home' ? (
+          <HomePage currentUser={currentUser} names={names}
+            onOpenForYou={(id) => { setForYouId(id); navigate('inbox'); }}
+            onOpenResponse={(opp) => { setActiveOpportunity(opp); setView('responses'); }}
+            onReview={() => navigate('governance')}
+            onKnowledge={() => navigate('knowledge')}
+            onAsked={() => loadUsageStatus(supabase).then(setUsage).catch(() => undefined)} />
         ) : view === 'users' ? (
           <UserManagement currentUserId={currentUser.id} isAdmin={currentUser.isAdmin} />
         ) : view === 'governance' && currentUser.isAdmin ? (
-          <GovernanceAdmin names={new Map(allUsers.map((u) => [u.id, u.displayName]))} onDemoReset={() => { setActiveOpportunity(null); refreshKB(); }} />
+          <GovernanceAdmin names={names} onDemoReset={() => { setActiveOpportunity(null); refreshKB(); }} />
         ) : view === 'help' ? (
           <HelpView
             page={helpAt?.page ?? startPage(currentUser.isAdmin)}

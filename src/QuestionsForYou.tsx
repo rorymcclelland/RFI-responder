@@ -19,10 +19,15 @@ import LanguageLabel from './LanguageLabel';
 const VERDICT: Record<string, string> = { yes: 'Yes', partly: 'Partly', no: 'No' };
 const day = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null);
 
-export default function QuestionsForYou({ names, onChanged }: { names: Map<string, string>; onChanged?: () => void }) {
+export default function QuestionsForYou({ names, onChanged, initial = null, onInitialUsed }: {
+  names: Map<string, string>; onChanged?: () => void;
+  /** An assignment to open first (from Home); used once. */
+  initial?: string | null; onInitialUsed?: () => void;
+}) {
   const [items, setItems] = useState<MyAssignment[] | null>(null);
   const [error, setError] = useState('');
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(initial);
+  useEffect(() => { if (initial) onInitialUsed?.(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [notice, setNotice] = useState<{ text: string; tone: 'ok' | 'error' } | null>(null);
   const seq = useRef(0);
 

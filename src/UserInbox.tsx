@@ -193,10 +193,10 @@ function AssignmentCard({ assignment, tab, onNotesUpdate }: {
 
 // ─── Main inbox ───────────────────────────────────────────────────────────────
 
-interface Props { userId: string; isAdmin: boolean; names: Map<string, string> }
+interface Props { userId: string; isAdmin: boolean; names: Map<string, string>; selected?: string | null; onSelected?: () => void }
 type InboxTab = 'mine' | 'sent' | 'all';
 
-export default function UserInbox({ userId, isAdmin, names }: Props) {
+export default function UserInbox({ userId, isAdmin, names, selected = null, onSelected }: Props) {
   const [assignments, setAssignments] = useState<QuestionAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<InboxTab>('mine');
@@ -325,7 +325,7 @@ export default function UserInbox({ userId, isAdmin, names }: Props) {
 
       {/* Sprint 19 (S19-1): your own are answered here, one at a time; the lists are for the rest. */}
       {tab === 'mine' ? (
-        <QuestionsForYou names={names} onChanged={loadAssignments} />
+        <QuestionsForYou names={names} onChanged={loadAssignments} initial={selected} onInitialUsed={onSelected} />
       ) : loading ? (
         <div className="flex items-center justify-center py-24 text-ink-400 text-sm gap-2 font-medium">
           <RefreshCw size={16} className="animate-spin" /> Loading…
