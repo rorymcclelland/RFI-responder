@@ -51,11 +51,15 @@ export async function signIn(browser: Browser, person: Person, viewport?: { widt
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden' });
   }
+  // In CI the AI providers are off, so the first sign-in's indexing reports that it could not run;
+  // the notice is true but not what a test is about, and it would cover the recording.
+  const dismiss = page.getByRole('button', { name: 'Dismiss', exact: true });
+  if (await dismiss.isVisible({ timeout: 1500 }).catch(() => false)) await dismiss.click();
   return page;
 }
 
 /**
- * A caption across the bottom of the page, so a recording explains itself without sound (S20-4).
+ * A caption near the top of the page, below the menu (the app's notices appear at the bottom), so a recording explains itself without sound (S20-4).
  * Kept across page loads, and recorded as a step in the report.
  */
 export async function caption(page: Page, text: string): Promise<void> {
@@ -68,7 +72,7 @@ export async function caption(page: Page, text: string): Promise<void> {
         el = document.createElement('div');
         el.id = 'e2e-caption';
         el.setAttribute('aria-hidden', 'true');
-        el.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483647;pointer-events:none;'
+        el.style.cssText = 'position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:2147483647;pointer-events:none;'
           + 'background:rgba(17,24,39,.88);color:#fff;font:600 15px/1.4 system-ui,sans-serif;padding:8px 14px;border-radius:10px;max-width:90vw;text-align:center';
         document.body.appendChild(el);
       }
