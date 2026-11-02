@@ -62,19 +62,30 @@ describe('S6-5 a refused save is reported', () => {
   it('2. an error is reported as before', async () => {
     await expect(saveQuestionPatch(client(null, { message: 'boom' }).client, 'q1', { status: 'skipped' })).rejects.toThrow(/not saved: boom/);
   });
-  it('review finding 5: an answer saved but its approval refused says exactly that', async () => {
+  it('review finding 5: an answer saved but its decision refused says exactly that', async () => {
     let call = 0;
     const select = vi.fn(async () => (call++ === 0 ? { data: [{ id: 'q1' }], error: null } : { data: [], error: null }));
     const c = { from: () => ({ update: () => ({ eq: () => ({ select }) }) }) } as never;
-    const err = await saveQuestionPatch(c, 'q1', { finalAnswer: 'x', status: 'accepted' }).catch((e) => e);
+    const err = await saveQuestionPatch(c, 'q1', { finalAnswer: 'x', status: 'skipped' }).catch((e) => e);
     expect(err.message).toMatch(/edited answer was saved, but it was not approved/);
     expect(err.partial).toBe(true);
   });
 
   it('3. one row updated: saved, and the updated row is asked for', async () => {
     const c = client([{ id: 'q1' }]);
-    await expect(saveQuestionPatch(c.client, 'q1', { finalAnswer: 'x', status: 'accepted' })).resolves.toBeUndefined();
+    await expect(saveQuestionPatch(c.client, 'q1', { status: 'skipped' })).resolves.toBeUndefined();
     expect(c.select).toHaveBeenCalledWith('id');
+  });
+
+  it('BUG-45 (Sprint 21): approving an answer is one call, saving the text and the decision together', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: 'approved', error: null });
+    await expect(saveQuestionPatch({ rpc } as never, 'q1', { finalAnswer: 'x', status: 'accepted' })).resolves.toBeUndefined();
+    expect(rpc).toHaveBeenCalledWith('approve_answer', { p_question: 'q1', p_answer: 'x', p_only_pending: false });
+    await expect(saveQuestionPatch({ rpc: vi.fn().mockResolvedValue({ data: 'refused', error: null }) } as never, 'q1', { finalAnswer: 'x', status: 'accepted' }))
+      .rejects.toThrow('Your change was not saved: you cannot change this question.');
+    const err = await saveQuestionPatch({ rpc: vi.fn().mockResolvedValue({ data: null, error: { message: 'You cannot approve this question' } }) } as never, 'q1', { finalAnswer: 'x', status: 'accepted' }).catch((e) => e);
+    expect(err.message).toBe('Your change was not saved: You cannot approve this question.');
+    expect(err.partial).toBeUndefined();
   });
 });
 

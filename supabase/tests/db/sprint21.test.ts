@@ -129,3 +129,118 @@ describe('S21-2 knowledge_gaps()', () => {
     expect(find(list, /S21 8/).length).toBeGreaterThan(1500);
   }, 60000);
 });
+
+describe('BUG-45 approve_answer()', () => {
+  const approve = (u: TestUser | null, id: string, text: string, onlyPending = false) =>
+    as(u, async (q) => (await q(`SELECT public.approve_answer($1, $2, $3) AS r`, [id, text, onlyPending])).rows[0].r as string);
+  const state = (id: string) => one<{ status: string; final_answer: string | null }>(`SELECT status, final_answer FROM rfi_questions WHERE id = $1`, [id]);
+  let expert: TestUser;
+  beforeAll(async () => { expert = await createUser({ name: 'Lisa Expert' }); });
+
+  /** A question on the owner's response, assigned to the expert. */
+  async function assigned(text: string) {
+    const opp = await response(owner.id, { name: `Approve (${text})` });
+    const s = await session(opp);
+    const id = await question(s, { text, generated: 'The draft.' });
+    await one(`INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, status, question_text)
+      VALUES ($1, $2, $3, $4, $5, 'pending', $6) RETURNING id`, [id, s, opp, expert.id, owner.id, text]);
+    return id;
+  }
+
+  it('saves the text and approves it, recording who approved it', async () => {
+    const id = await assigned('Approve in one step (BUG-45 1)?');
+    expect(await as(owner, async (q) => {
+      expect((await q(`SELECT public.approve_answer($1, 'The owner''s answer.') AS r`, [id])).rows[0].r).toBe('approved');
+      return (await q(`SELECT q.status, q.final_answer, a.decided_by FROM rfi_questions q JOIN approvals a ON a.question_id = q.id WHERE q.id = $1`, [id])).rows[0];
+    })).toEqual({ status: 'accepted', final_answer: "The owner's answer.", decided_by: owner.id });
+  });
+
+  it('role matrix: the owner, an admin and the assignee may; another member, a visitor and the service role may not', async () => {
+    const id = await assigned('Who may approve (BUG-45 2)?');
+    expect(await approve(owner, id, 'A.')).toBe('approved');
+    expect(await approve(admin, id, 'A.')).toBe('approved');
+    expect(await approve(expert, id, 'A.')).toBe('approved');
+    expect(await approve(member, id, 'A.')).toBe('refused');
+    expect(await refused(approve(null, id, 'A.'))).toMatch(/permission denied/);
+    expect(await refused(asServiceRole((q) => q(`SELECT public.approve_answer($1, 'A.')`, [id])))).toMatch(/permission denied/);
+    expect(await state(id)).toEqual({ status: 'pending', final_answer: null });
+    const def = await one<{ definer: boolean; config: string[] }>(`SELECT prosecdef AS definer, proconfig AS config FROM pg_proc WHERE proname = 'approve_answer'`);
+    expect(def).toEqual({ definer: false, config: ['search_path=""'] });
+  });
+
+  it('only_pending: a question decided meanwhile is left as it is', async () => {
+    const id = await assigned('Decided meanwhile (BUG-45 3)?');
+    await asSuperuser(`UPDATE rfi_questions SET final_answer = 'The owner''s.', status = 'accepted' WHERE id = $1`, [id]);
+    expect(await approve(expert, id, 'Stale text.', true)).toBe('decided');
+    expect(await state(id)).toEqual({ status: 'accepted', final_answer: "The owner's." });
+  });
+
+  it('revising an approved answer approves the new text in one step', async () => {
+    const id = await assigned('Revise (BUG-45 4)?');
+    await asSuperuser(`UPDATE rfi_questions SET final_answer = 'First.' WHERE id = $1`, [id]);
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
+    // In one transaction (as() rolls back afterwards): the changed text reopens it, and it is approved again.
+    expect(await as(owner, async (q) => {
+      expect((await q(`SELECT public.approve_answer($1, 'Second.') AS r`, [id])).rows[0].r).toBe('approved');
+      return (await q(`SELECT status, final_answer FROM rfi_questions WHERE id = $1`, [id])).rows[0];
+    })).toEqual({ status: 'accepted', final_answer: 'Second.' });
+  });
+
+  it('a refused decision saves no text either', async () => {
+    const id = await assigned('Refused decision (BUG-45 5)?');
+    // A rule that refuses this question's decision (and nothing else), standing in for any rule that
+    // refuses a decision after the text was written.
+    await asSuperuser(`CREATE FUNCTION pg_temp_refuse() RETURNS trigger LANGUAGE plpgsql AS $f$
+      BEGIN IF NEW.id = '${id}' AND NEW.status = 'accepted' THEN RAISE EXCEPTION 'refused for the test'; END IF; RETURN NEW; END $f$`);
+    await asSuperuser(`CREATE TRIGGER zz_refuse_test BEFORE UPDATE OF status ON rfi_questions FOR EACH ROW EXECUTE FUNCTION pg_temp_refuse()`);
+    try {
+      // Outside a test transaction, so anything the call wrote would stay.
+      const c = await (await import('./harness')).getPool().connect();
+      try {
+        await c.query('SET ROLE authenticated');
+        await c.query(`SELECT set_config('request.jwt.claims', $1, false)`, [JSON.stringify({ sub: owner.id, role: 'authenticated' })]);
+        expect(await refused(c.query(`SELECT public.approve_answer($1, 'Text that must not stay.')`, [id]))).toMatch(/refused for the test/);
+      } finally {
+        await c.query('RESET ROLE').catch(() => undefined);
+        await c.query(`SELECT set_config('request.jwt.claims', '', false)`).catch(() => undefined);
+        c.release();
+      }
+      expect(await state(id)).toEqual({ status: 'pending', final_answer: null });
+    } finally {
+      await asSuperuser('DROP TRIGGER zz_refuse_test ON rfi_questions');
+      await asSuperuser('DROP FUNCTION pg_temp_refuse()');
+    }
+  });
+
+  it('the race that staging found: a second save waits for the first, then sees the decision', async () => {
+    const id = await assigned('The race (BUG-45 6)?');
+    const pool = (await import('./harness')).getPool();
+    const first = await pool.connect();
+    const second = await pool.connect();
+    const begin = async (c: typeof first, u: TestUser) => {
+      await c.query('BEGIN');
+      await c.query('SET LOCAL ROLE authenticated');
+      await c.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: u.id, role: 'authenticated' })]);
+    };
+    try {
+      await begin(first, owner);
+      expect((await first.query(`SELECT public.approve_answer($1, 'The owner''s answer.') AS r`, [id])).rows[0].r).toBe('approved');
+      await begin(second, expert);
+      // The expert's approval, from a screen opened before, waits on the owner's transaction.
+      const waiting = second.query(`SELECT public.approve_answer($1, 'The expert''s answer.', true) AS r`, [id]);
+      let settled = false;
+      void waiting.then(() => { settled = true; }, () => { settled = true; });
+      await new Promise((r) => setTimeout(r, 300));
+      expect(settled).toBe(false);
+      await first.query('COMMIT');
+      expect((await waiting).rows[0].r).toBe('decided');
+      await second.query('COMMIT');
+    } finally {
+      await first.query('ROLLBACK').catch(() => undefined);
+      await second.query('ROLLBACK').catch(() => undefined);
+      first.release();
+      second.release();
+    }
+    expect(await state(id)).toEqual({ status: 'accepted', final_answer: "The owner's answer." });
+  });
+});

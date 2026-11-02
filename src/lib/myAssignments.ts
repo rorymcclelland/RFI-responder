@@ -105,18 +105,18 @@ export async function startWorking(client: SupabaseClient, a: MyAssignment): Pro
 export const ALREADY_DECIDED = 'The owner has already decided this question since you opened it, so nothing was changed. The list now shows their decision.';
 
 /**
- * Approve: the question, with this text (as on the question card), then the assignment. Each write
- * applies only while the question is still to do (security review, M1): a screen opened before the
- * owner decided can no longer reopen and overwrite their decision.
+ * Approve: the question, with this text (as on the question card), then the assignment. The answer
+ * and the decision are one database call (BUG-45), which applies only while the question is still to
+ * do (security review, M1): a screen opened before the owner decided cannot overwrite their decision.
  */
 export async function approveAssigned(client: SupabaseClient, a: MyAssignment, text: string): Promise<void> {
   const problem = answerProblem(a, text);
   if (problem) throw new Error(problem);
-  for (const [i, patch] of [{ final_answer: text }, { status: 'accepted' }].entries()) {
-    const r = (await client.from('rfi_questions').update(patch).eq('id', a.question.id).eq('status', 'pending').select('id')) as unknown as Saved;
-    if (r.error) throw new Error(i === 0 ? `Your answer was not saved: ${r.error.message}.` : `Your answer was saved, but it was not approved: ${r.error.message}.`);
-    if (!r.data?.length) throw new Error(i === 0 ? ALREADY_DECIDED : 'Your answer was saved, but the question was decided meanwhile, so it was not approved.');
-  }
+  // Sprint 21 (BUG-45): the answer and the decision in one transaction, only while still to do.
+  const { data, error } = await client.rpc('approve_answer', { p_question: a.question.id, p_answer: text, p_only_pending: true });
+  if (error) throw new Error(`Your answer was not saved: ${error.message}${/[.!?]$/.test(error.message) ? '' : '.'}`);
+  if (data === 'decided') throw new Error(ALREADY_DECIDED);
+  if (data !== 'approved') throw new Error('Your answer was not saved: you cannot change this question.');
   try {
     await updateAssignment(client, a.id, { status: 'approved', answer_text: text, completed_at: new Date().toISOString() }, 'Your assignment');
   } catch (err) {

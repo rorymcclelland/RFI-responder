@@ -74,24 +74,25 @@ describe('answerProblem and handBackProblem (tests 5, 7, 8)', () => {
 });
 
 describe('the actions (tests 3 to 5)', () => {
-  it('3. approve: the answer, then the decision, then the assignment', async () => {
-    const c = client();
+  it('3. approve: the answer and the decision in one call, only while still to do (BUG-45), then the assignment', async () => {
+    const c = { ...client(), rpc: vi.fn().mockResolvedValue({ data: 'approved', error: null }) };
     await m.approveAssigned(c as never, a(), 'Yes, AES-256.');
+    expect(c.rpc).toHaveBeenCalledWith('approve_answer', { p_question: 'q1', p_answer: 'Yes, AES-256.', p_only_pending: true });
     expect(c.calls.map((x) => [x.table, Object.keys(x.patch).sort().join(',')])).toEqual([
-      ['rfi_questions', 'final_answer'], ['rfi_questions', 'status'], ['question_assignments', 'answer_text,completed_at,status,updated_at'],
+      ['question_assignments', 'answer_text,completed_at,status,updated_at'],
     ]);
-    expect(c.calls[1].patch.status).toBe('accepted');
-    // Security review, M1: both question writes apply only while it is still to do.
-    for (const call of c.calls.slice(0, 2)) expect((call as never as { filters: string[] }).filters).toEqual(['id=q1', 'status=pending']);
-    expect(c.calls[2].patch.status).toBe('approved');
+    expect(c.calls[0].patch.status).toBe('approved');
   });
   it('M1. a question the owner decided meanwhile is left alone, and the contributor is told', async () => {
-    const c = client([1]);
+    const c = { ...client(), rpc: vi.fn().mockResolvedValue({ data: 'decided', error: null }) };
     await expect(m.approveAssigned(c as never, a(), 'Stale text.')).rejects.toThrow(m.ALREADY_DECIDED);
-    expect(c.calls).toHaveLength(1);
+    expect(c.calls).toHaveLength(0);
+    await expect(m.approveAssigned({ ...client(), rpc: vi.fn().mockResolvedValue({ data: 'refused', error: null }) } as never, a(), 'Yes.'))
+      .rejects.toThrow('Your answer was not saved: you cannot change this question.');
   });
   it('3. says plainly when the question was approved but the assignment did not move', async () => {
-    await expect(m.approveAssigned(client([3]) as never, a(), 'Yes.')).rejects.toThrow(/^The question is approved, but your assignment was not saved/);
+    await expect(m.approveAssigned({ ...client([1]), rpc: vi.fn().mockResolvedValue({ data: 'approved', error: null }) } as never, a(), 'Yes.'))
+      .rejects.toThrow(/^The question is approved, but your assignment was not saved/);
   });
   it('4. send to the owner touches only the assignment', async () => {
     const c = client();

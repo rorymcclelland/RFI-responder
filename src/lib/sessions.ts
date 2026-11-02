@@ -45,8 +45,16 @@ export async function saveQuestionPatch(
   id: string,
   patch: { status?: string; finalAnswer?: string },
 ): Promise<void> {
-  // The answer first, then the decision: changing an accepted answer reopens the question in the
-  // database (security review, Sprint 2), so accepting the revised text is a separate, later step.
+  // Sprint 21 (BUG-45): an answer and its approval are saved together, in one database transaction
+  // that holds the question, so nobody's text can land between the two.
+  if (patch.status === 'accepted' && patch.finalAnswer !== undefined) {
+    const { data, error } = await client.rpc('approve_answer', { p_question: id, p_answer: patch.finalAnswer, p_only_pending: false });
+    if (error) throw new Error(`Your change was not saved: ${error.message}${/[.!?]$/.test(error.message) ? '' : '.'}`);
+    if (data !== 'approved') throw new Error('Your change was not saved: you cannot change this question.');
+    return;
+  }
+  // Otherwise one write: the answer first, then the decision, as before. Changing an accepted answer
+  // reopens the question in the database (security review, Sprint 2).
   const steps: Record<string, unknown>[] = [];
   if (patch.finalAnswer !== undefined) steps.push({ final_answer: patch.finalAnswer });
   if (patch.status !== undefined) steps.push({ status: patch.status });
