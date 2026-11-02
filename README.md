@@ -30,14 +30,16 @@ Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, w
 
 | | |
 |---|---|
+| ![Home: what needs you today](docs/screenshots/21-home.png) | ![A specialist's questions for you](docs/screenshots/5-assignments.png) |
+| Home: what needs you today, your responses, and what the organisation knows | A specialist answers an assigned question on one screen |
 | ![The knowledge page: what the organisation knows](docs/screenshots/17-knowledge.png) | ![All answers, with one chosen](docs/screenshots/18-knowledge-browse.png) |
 | The knowledge base: what the organisation knows, by topic and state | Every answer, searchable, with where it came from |
 | ![Asking the knowledge base a question](docs/screenshots/20-ask.png) | ![One answer, with a proposed change waiting and where it has been used](docs/screenshots/19-answer-page.png) |
 | Ask it a question: the draft it would give, its confidence and sources | One answer's history and where it has been used |
 | ![Overview of responses in flight](docs/screenshots/1-overview.png) | ![Review, lowest confidence first, with the bulk approval bar](docs/screenshots/2-review.png) |
 | Responses in flight, with owner, due date and progress | Review, lowest confidence first; bulk approval above a threshold |
-| ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![A specialist's questions for you](docs/screenshots/5-assignments.png) |
-| A pricing question, never drafted or bulk-approved | A specialist answers an assigned question on one screen |
+| ![A pricing question held for a person](docs/screenshots/4-pricing-held.png) | ![Assigning a question to a colleague, with suggested people](docs/screenshots/11-assign.png) |
+| A pricing question, never drafted or bulk-approved | Assigning a question, with the people best placed to answer it |
 | ![An exported response and what the knowledge base learned](docs/screenshots/6-export-and-learning.png) | ![The governance page: usage and limits](docs/screenshots/7-governance-usage.png) |
 | An exported response, and what the knowledge base learned | Spend, limits and prices on the governance page |
 

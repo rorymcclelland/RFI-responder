@@ -23,6 +23,8 @@ The bar at the top of every screen has:
 - **Help**: this guide, and the introduction.
 - Your name, and **Sign out** (the arrow icon).
 
+![Home: what needs you, your responses, and what the organisation knows](../screenshots/21-home.png)
+
 On a narrow window some of these show as icons only; hover over an icon to see its name. On a phone-sized screen they are in the menu (the three lines at the top right).
 
 ![The guide, opened from Help](../screenshots/15-help.png)
