@@ -31,7 +31,8 @@ export function repoMigrations(dir = 'supabase/migrations'): string[] {
 export function appliedMigrations(listOutput: string): string[] {
   const out: string[] = [];
   for (const line of listOutput.split(/\r?\n/)) {
-    const cols = line.split('|').map((c) => c.trim());
+    // Pipes or box-drawing bars, depending on how the CLI prints the table.
+    const cols = line.split(/[|│┃]/).map((c) => c.trim());
     if (cols.length >= 2 && /^\d{14}$/.test(cols[1])) out.push(cols[1]);
   }
   return out.sort();
@@ -79,7 +80,11 @@ async function main() {
   const listFile = process.argv[2];
   if (!listFile) throw new Error('Give the output of `supabase migration list` as a file.');
   const missing = missingMigrations(repoMigrations(), appliedMigrations(readFileSync(listFile, 'utf8')));
-  if (missing.length) problems.push(`Migrations not applied: ${missing.join(', ')}`);
+  if (missing.length) {
+    problems.push(`Migrations not applied: ${missing.join(', ')}`);
+    // If none was read, the table's format is the likelier cause: show its first lines (no secrets in it).
+    if (missing.length === repoMigrations().length) console.log(`The migration list began:\n${readFileSync(listFile, 'utf8').split(/\r?\n/).slice(0, 6).join('\n')}`);
+  }
   else console.log(`Migrations: all ${repoMigrations().length} applied.`);
 
   // 2. Functions.
