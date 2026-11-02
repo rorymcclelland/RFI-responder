@@ -77,13 +77,7 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-        run: |
-          # --debug names the endpoint if the scoped token lacks a permission (tokens are masked in the log).
-          supabase link --project-ref "$STAGING_REF" --debug 2>&1 | grep -vi "bearer" || true
-          supabase link --project-ref "$STAGING_REF"
-          supabase db push --yes
-          supabase functions deploy --project-ref "$STAGING_REF"
-          supabase migration list --linked > /tmp/migrations.txt
+        run: bash scripts/supabase-deploy.sh "$STAGING_REF" /tmp/migrations.txt
       # The staging app lives at one address (STAGING_APP_HOST, a Vercel domain tied to the branch
       # "staging"), so the staging functions' APP_ORIGIN never changes. This job moves that branch to
       # the sprint's commit; Vercel builds it. A push made with the job's token starts no workflow.
@@ -184,11 +178,7 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
-        run: |
-          supabase link --project-ref "$PRODUCTION_REF"
-          supabase db push --yes
-          supabase functions deploy --project-ref "$PRODUCTION_REF"
-          supabase migration list --linked > /tmp/migrations.txt
+        run: bash scripts/supabase-deploy.sh "$PRODUCTION_REF" /tmp/migrations.txt
       - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:

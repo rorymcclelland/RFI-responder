@@ -6,7 +6,7 @@
  *   tsx scripts/deploy-check.ts <migration-list-output-file>
  *
  * Checks, and fails the workflow with the reason:
- * 1. Every migration in supabase/migrations is applied (from `supabase migration list --linked`).
+ * 1. Every migration in supabase/migrations is applied (from `supabase migration list`).
  * 2. Every Edge Function in supabase/functions is deployed: an unsigned call gets 401 from Supabase's
  *    gateway, where a function that is not deployed gets 404.
  * 3. The app answers at APP_URL with its page, built from EXPECTED_SHA (waiting for Vercel's build).
@@ -25,7 +25,7 @@ export function repoMigrations(dir = 'supabase/migrations'): string[] {
 }
 
 /**
- * Versions the project has applied, from `supabase migration list --linked`, whose rows read
+ * Versions the project has applied, from `supabase migration list`, whose rows read
  * "  <local> | <remote> | <time>"; a migration only in the repository has an empty remote column.
  */
 export function appliedMigrations(listOutput: string): string[] {
@@ -77,7 +77,7 @@ async function main() {
 
   // 1. Migrations.
   const listFile = process.argv[2];
-  if (!listFile) throw new Error('Give the output of `supabase migration list --linked` as a file.');
+  if (!listFile) throw new Error('Give the output of `supabase migration list` as a file.');
   const missing = missingMigrations(repoMigrations(), appliedMigrations(readFileSync(listFile, 'utf8')));
   if (missing.length) problems.push(`Migrations not applied: ${missing.join(', ')}`);
   else console.log(`Migrations: all ${repoMigrations().length} applied.`);
