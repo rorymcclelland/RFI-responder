@@ -167,4 +167,14 @@ Order: S20-1, then S20-2 (needs Rory's set-up, which can happen while S20-1 is b
 
 **Returned to the backlog.** The main path from F-1 as a browser test (S20-1's "first content"): not built. Listed as case S20-1 6 so the demo page shows it.
 
-**Waiting on Rory.** The one-off set-up in DEPLOYING.md (Supabase, GitHub, Vercel). Until then the S20-2 and S20-3 cases that need staging show as "By hand" on the demo page.
+**Staging set up and running (2 November 2026, evening).** Rory did the one-off set-up with Claude talking him through it. Along the way:
+- Supabase now offers access tokens limited to one project and named permissions, so each GitHub environment has its own token for its own project; this closes H2 rather than leaving it as a stated gap.
+- Those tokens cannot read API keys, which `supabase link` needs, so the deploy no longer links: it pushes migrations over the session pooler with the database password and deploys functions by project ref (`scripts/supabase-deploy.sh`).
+- The hosted build's guard caught the service-role key pasted as the anon key in Vercel; Rory replaced the key and corrected the value.
+- Staging loads its own demo data when it has none (staging only).
+- The first full staging run found **BUG-44**: opening an asked question saved "Working on it" and then rebuilt the question panel, so on staging, where the save takes longer, a note the person had started typing vanished. Fixed: the stage updates in place, and the panel is rebuilt only after the person's own action.
+- Then both runs passed on build `ee613fb`: five tests on staging (the sixth needs a third person and is skipped there by design) and six on CI's local stack. The demo page combines them.
+
+**Also returned to the backlog.** The one real-AI step per staging run (Q2): no test asks a question on staging yet. Listed as case S20-4 5.
+
+**Agreed alongside the sprint (Rory, 2 November 2026).** Configuration is Claude's work as code, credentials and the production approval stay with Rory (backlog O-1); and one working agreement for all of Rory's build projects, kept as the `build-working-agreement` skill, which `CLAUDE.md` points to.

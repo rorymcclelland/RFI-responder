@@ -1,6 +1,7 @@
 # Sprint 19 and 20 review
 
-Build `d95dba3` on sprint-20, local run of 2026-11-02T15:14:02Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41468889772).
+Staging run: build `ee613fb` on sprint-20, 2026-11-02T20:55:02Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41522801604).
+Local run: build `ee613fb` on sprint-20, 2026-11-02T20:54:17Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41522802289).
 
 ## Sprint 19: Questions for you, and Home
 
@@ -10,9 +11,9 @@ Someone assigned a question answers it on one screen: approve it, send it to the
 
 | Case | What was checked | Result |
 |---|---|---|
-| S19 2 | A question for the member: Home lists it, Assignments opens on it, with notes (A question for the member, sent to the owner, and the owner uses their answer) | Passed |
-| S19 4 | Hand back with a note, seen on Home and on the question (Hand back, with a note) | Passed |
-| S19 5 | Approve; and when the owner decided first, nothing is overwritten (Approve, and when the owner was quicker) | Passed |
+| S19 2 | A question for the member: Home lists it, Assignments opens on it, with notes (A question for the member, sent to the owner, and the owner uses their answer; A question for the member, sent to the owner, and the owner uses their answer) | Passed |
+| S19 4 | Hand back with a note, seen on Home and on the question (Hand back, with a note; Hand back, with a note) | Passed |
+| S19 5 | Approve; and when the owner decided first, nothing is overwritten (Approve, and when the owner was quicker; Approve, and when the owner was quicker) | Passed |
 | S19 8 | A member who was not assigned does not see the question, and cannot decide it (A member who was not assigned cannot see or decide the question) | Passed |
 
 ### S19-2 Open a response at a question
@@ -21,7 +22,7 @@ From Home or a question for you, the response opens at that question, in whichev
 
 | Case | What was checked | Result |
 |---|---|---|
-| S19 3 | Send to the owner; the owner opens it from Home and uses their answer (A question for the member, sent to the owner, and the owner uses their answer) | Passed |
+| S19 3 | Send to the owner; the owner opens it from Home and uses their answer (A question for the member, sent to the owner, and the owner uses their answer; A question for the member, sent to the owner, and the owner uses their answer) | Passed |
 | S19 9 | A question in an earlier file opens in that file (src/workspace/openResponse.test.ts (firstView). The demo's Bluefin has one file, so the browser tests open only that one) | Checked in CI |
 
 ### S19-3 Home
@@ -30,8 +31,8 @@ Everyone lands on Home: what needs them today, their responses, and what the org
 
 | Case | What was checked | Result |
 |---|---|---|
-| S19 1 | Home, as an admin: landing page, the For admins line opening Knowledge filtered (Home, as an admin) | Passed |
-| S19 6 | At phone width nothing scrolls sideways; the Sent list has no manual stage buttons (On a phone, and the Sent list) | Passed |
+| S19 1 | Home, as an admin: landing page, the For admins line opening Knowledge filtered (Home, as an admin; Home, as an admin) | Passed |
+| S19 6 | At phone width nothing scrolls sideways; the Sent list has no manual stage buttons (On a phone, and the Sent list; On a phone, and the Sent list) | Passed |
 
 ### S19-4 Guide, introduction and screenshots
 
@@ -62,9 +63,9 @@ Each sprint is tried on a hosted copy of the app before it reaches the live demo
 
 | Case | What was checked | Result |
 |---|---|---|
-| S20-2 1 | A sprint branch's preview talks to staging, never the live demo (needs the staging project, which Rory sets up) | By hand |
+| S20-2 1 | The staging site talks to staging, never the live demo (the staging run: the browser tests signed in as people who exist only on staging, with every request to the live demo's hosts refused by the browser) | Checked in CI |
 | S20-2 2 | The live demo is untouched by staging runs (scripts/deploy-check.test.ts (stagingProblem refuses the live project) and the staging run's request guard) | Checked in CI |
-| S20-2 3 | A staging test user cannot sign in on the live demo (needs the staging project) | By hand |
+| S20-2 3 | A staging test user cannot sign in on the live demo (not tested: the test people exist only in staging's database, and their password changes after every run) | By hand |
 | S20-2 4 | No secret in the repository, a log, a recording or the bundle (the bundle check, masked passwords in scripts/e2e-staging-users.ts, and the security review) | Checked in CI |
 | S20-2 5 | Staging stays awake between sprints (needs a week to pass with staging set up) | By hand |
 
@@ -74,8 +75,8 @@ No hand-typed deploy commands; a missing migration or function fails the deploy,
 
 | Case | What was checked | Result |
 |---|---|---|
-| S20-3 1 | A sprint branch's migration reaches staging with no command typed (needs the staging project) | By hand |
-| S20-3 2 | A migration that fails on Supabase stops the deploy, the live demo untouched (needs the staging project) | By hand |
+| S20-3 1 | A sprint branch's migrations reach staging with no command typed (the staging runs of 2 November 2026: all 67 migrations applied by the workflow, and the deploy check confirmed them) | Checked in CI |
+| S20-3 2 | A failed deploy step stops the run before anything later, the live demo untouched (the staging runs of 2 November 2026: a refused access token and a failed build each stopped the run at that step; a failing migration itself was not tried) | Checked in CI |
 | S20-3 3 | An undeployed function fails the check (scripts/deploy-check.test.ts (a 404 means not deployed)) | Checked in CI |
 | S20-3 4 | Merging to main waits for Rory's approval (needs the production environment's required reviewer, which Rory sets) | By hand |
 | S20-3 5 | Forks and pull requests cannot deploy (.github/workflows/deploy.yml runs on pushes to this repository only) | Checked in CI |
@@ -90,6 +91,7 @@ This page: each story with its recordings, and every agreed case with its result
 | S20-4 2 | A failing test shows as failed, with its recording (scripts/demo-page.test.ts) | Checked in CI |
 | S20-4 3 | The recordings play and match the build named (Rory, watching this page) | By hand |
 | S20-4 4 | The page claims nothing the tests did not check (scripts/demo-page.test.ts (only browser cases take a result from the run)) | Checked in CI |
+| S20-4 5 | One step per staging run uses the real AI model (Q2) (not built in Sprint 20: no test asks a question on staging yet; returned to the backlog) | By hand |
 
 ### S20-5 The process, written down
 

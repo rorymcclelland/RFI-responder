@@ -48,9 +48,16 @@ describe('the demo page (Sprint 20, S20-4)', () => {
     expect(renderMarkdown([sprint], passing, build)).toContain('| S99 4 | Needs a person (Rory watches) | By hand |');
   });
 
-  it('says how the AI was used in the run', () => {
-    expect(renderHtml([sprint], tests, build, (p) => p)).toContain('every AI provider switched off');
-    expect(renderHtml([sprint], tests, { ...build, target: 'staging' }, (p) => p)).toContain('real AI model');
+  it('says what each run used, and names both runs', () => {
+    const html = renderHtml([sprint], tests, [build, { ...build, target: 'staging', sha: 'fedcba9876543' }], (p) => p);
+    expect(html).toContain('every AI provider switched off');
+    expect(html).toContain('hosted staging site');
+    expect(html).toContain('fedcba9');
+  });
+
+  it('a test skipped on a target says nothing about its case there', () => {
+    const skipped = { suites: [{ specs: [{ title: 'third person', tests: [{ annotations: [], results: [{ status: 'skipped', annotations: [{ type: 'case', description: 'S99 1' }], attachments: [] }] }] }] }] };
+    expect(readRun(skipped, '/res/staging', 'staging')).toEqual([]);
   });
 
   it('every agreed case has an id unique in its sprint, and a story that exists', () => {

@@ -4,7 +4,7 @@
  * (e2e/cases.ts), and writes one HTML page per review with the recordings beside it, plus a Markdown
  * summary for docs/testing/.
  *
- *   tsx scripts/demo-page.ts --results <folder> --sprints 19,20 --out <folder> [--markdown <file>]
+ *   tsx scripts/demo-page.ts --results <folder>[,<folder>] --sprints 19,20 --out <folder> [--markdown <file>]
  *
  * Rule 1: a case takes "passed" or "failed" only from a browser test that ran and named it; anything
  * else is shown as checked another way (with how), by hand (with why), or not checked, in red.
@@ -15,6 +15,8 @@ import { SPRINTS, type Case, type SprintCases } from '../e2e/cases';
 
 export interface RunTest {
   title: string;
+  /** Where it ran: local (CI's own stack) or staging. */
+  target?: string;
   status: 'passed' | 'failed';
   durationMs: number;
   cases: string[];
@@ -37,13 +39,14 @@ export function insideRoot(root: string, rel: string): string | null {
 }
 
 /** The tests in a Playwright JSON report, flattened. A test is failed if any attempt failed. */
-export function readRun(report: Result, root: string): RunTest[] {
+export function readRun(report: Result, root: string, target?: string): RunTest[] {
   const out: RunTest[] = [];
   const walk = (suite: Result) => {
     for (const spec of (suite.specs as Result[] | undefined) ?? []) {
       for (const t of (spec.tests as Result[] | undefined) ?? []) {
         const results = (t.results as Result[] | undefined) ?? [];
-        if (!results.length) continue;
+        // A test that did not run here (skipped on this target) says nothing about the case.
+        if (!results.length || results.every((r) => r.status === 'skipped')) continue;
         const annotations = [...((t.annotations as Result[]) ?? []), ...results.flatMap((r) => (r.annotations as Result[]) ?? [])];
         const last = results[results.length - 1];
         const failed = results.some((r) => r.status !== 'passed' && r.status !== 'skipped');
@@ -54,6 +57,7 @@ export function readRun(report: Result, root: string): RunTest[] {
         const err = ((last.errors as Result[]) ?? [])[0] as Result | undefined;
         out.push({
           title: String(spec.title),
+          ...(target ? { target } : {}),
           status: failed ? 'failed' : 'passed',
           durationMs: Number(last.duration ?? 0),
           cases: [...new Set(annotations.filter((a) => a.type === 'case').map((a) => String(a.description)))],
@@ -92,7 +96,8 @@ const LABEL: Record<Verdict['state'], string> = { passed: 'Passed', failed: 'Fai
 const detail = (v: Verdict) => (v.state === 'ci' ? v.by : v.state === 'hand' ? v.why : v.state === 'unchecked' ? 'No test names this case, and no other check is recorded.' : v.tests.map((t) => t.title).join('; '));
 
 /** The page. Videos are referenced as videos/<file>, copied there by `writeDemo`. */
-export function renderHtml(sprints: SprintCases[], tests: RunTest[], build: Build, video: (path: string) => string): string {
+export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuilds: Build | Build[], video: (path: string) => string): string {
+  const builds = Array.isArray(buildOrBuilds) ? buildOrBuilds : [buildOrBuilds];
   const all = sprints.flatMap((s) => s.cases.map((c) => verdict(c, tests)));
   const count = (st: Verdict['state']) => all.filter((v) => v.state === st).length;
   const shown = new Set<RunTest>();
@@ -103,9 +108,11 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], build: Buil
         const v = verdict(c, tests);
         return `<tr><td class="id">${esc(c.id)}</td><td>${esc(c.title)}<div class="how">${esc(detail(v))}</div></td><td><span class="chip ${v.state}">${LABEL[v.state]}</span></td></tr>`;
       }).join('');
-      const own = tests.filter((t) => !shown.has(t) && t.cases.some((id) => cases.some((c) => c.id === id)));
+      // One set of recordings per test: from the first run given (staging, when it ran there).
+      const own = tests.filter((t, i) => !shown.has(t) && t.cases.some((id) => cases.some((c) => c.id === id))
+        && !tests.slice(0, i).some((u) => u.title === t.title));
       own.forEach((t) => shown.add(t));
-      const clips = own.map((t) => `<figure class="clip"><figcaption><strong>${esc(t.title)}</strong> <span class="chip ${t.status}">${t.status === 'passed' ? 'Passed' : 'Failed'}</span> <span class="dur">${(t.durationMs / 1000).toFixed(1)} s</span></figcaption>`
+      const clips = own.map((t) => `<figure class="clip"><figcaption><strong>${esc(t.title)}</strong>${t.target ? ` <span class="dur">(${esc(t.target)})</span>` : ''} <span class="chip ${t.status}">${t.status === 'passed' ? 'Passed' : 'Failed'}</span> <span class="dur">${(t.durationMs / 1000).toFixed(1)} s</span></figcaption>`
         + (t.error ? `<p class="err">${esc(t.error)}</p>` : '')
         + `<div class="vids">${t.recordings.map((r) => `<div class="vid"><video src="${esc(video(r.path))}" controls preload="metadata" muted playsinline></video><span>${esc(r.label)}</span></div>`).join('')}</div>`
         + (t.steps.length ? `<details><summary>Steps (${t.steps.length})</summary><ol>${t.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : '')
@@ -116,9 +123,11 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], build: Buil
     }).join('');
     return `<section class="sprint"><h2>Sprint ${s.sprint}: ${esc(s.title)}</h2>${stories}</section>`;
   }).join('');
-  const ai = build.target === 'staging'
-    ? 'This run used the staging site. One step asked the knowledge base a question with the real AI model; every other step used no AI.'
-    : 'This run used the local stack in CI with every AI provider switched off, so drafts and answers are the fallback ones, the same on every run.';
+  const aiNote: Record<string, string> = {
+    staging: 'The staging run used the hosted staging site, with its real sign-in, database and functions.',
+    local: 'The local run used the real Supabase stack in CI with every AI provider switched off, so drafts and answers are the fallback ones, the same on every run.',
+  };
+  const ai = builds.map((b) => aiNote[b.target] ?? '').filter(Boolean).join(' ');
   const title = `Sprint ${sprints.map((s) => s.sprint).join(' and ')} review`;
   return `<title>${esc(title)}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -169,18 +178,19 @@ a:focus-visible, summary:focus-visible, video:focus-visible { outline:2px solid 
 <main>
 <header>
 <h1>${esc(title)}</h1>
-<p class="meta">Build <span class="id">${esc(build.sha.slice(0, 7))}</span> on ${esc(build.branch)}, ${esc(build.target)} run of ${esc(build.at.replace('T', ' ').replace(/:\d\dZ$/, ' UTC'))}. <a href="${esc(build.run)}">The CI run</a>.</p>
+${builds.map((b) => `<p class="meta">${esc(b.target === 'staging' ? 'Staging' : 'Local')} run: build <span class="id">${esc(b.sha.slice(0, 7))}</span> on ${esc(b.branch)}, ${esc(b.at.replace('T', ' ').replace(/:\d\dZ$/, ' UTC'))}. <a href="${esc(b.run)}">The CI run</a>.</p>`).join('')}
 <div class="tally">${(['passed', 'failed', 'unchecked', 'ci', 'hand'] as const).filter((st) => count(st)).map((st) => `<span class="chip ${st}">${count(st)} ${LABEL[st].toLowerCase()}</span>`).join('')}</div>
-<p class="note">${esc(ai)} A result of Passed or Failed comes only from a browser test that ran in this build; Checked in CI and By hand say how else a case is covered.</p>
+<p class="note">${esc(ai)} A result of Passed or Failed comes only from browser tests that ran in these builds, and a case passes only if it passed in every run that tested it; Checked in CI and By hand say how else a case is covered.</p>
 </header>
 ${body}
 </main>`;
 }
 
 /** The same, as Markdown, without the recordings. */
-export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], build: Build): string {
+export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], buildOrBuilds: Build | Build[]): string {
+  const builds = Array.isArray(buildOrBuilds) ? buildOrBuilds : [buildOrBuilds];
   const lines = [`# Sprint ${sprints.map((s) => s.sprint).join(' and ')} review`, '',
-    `Build \`${build.sha.slice(0, 7)}\` on ${build.branch}, ${build.target} run of ${build.at}. [The CI run](${build.run}).`, ''];
+    ...builds.map((b) => `${b.target === 'staging' ? 'Staging' : 'Local'} run: build \`${b.sha.slice(0, 7)}\` on ${b.branch}, ${b.at}. [The CI run](${b.run}).`), ''];
   for (const s of sprints) {
     lines.push(`## Sprint ${s.sprint}: ${s.title}`, '');
     for (const st of s.stories) {
@@ -208,10 +218,15 @@ function main() {
   const dir = arg('results');
   const out = arg('out');
   const which = (arg('sprints') ?? '').split(',').map(Number).filter(Boolean);
-  if (!dir || !out || !which.length) throw new Error('Usage: --results <folder> --sprints 19,20 --out <folder> [--markdown <file>]');
-  const build = JSON.parse(readFileSync(join(dir, 'build.json'), 'utf8')) as Build;
-  const report = join(dir, build.target, 'results.json');
-  const tests = existsSync(report) ? readRun(JSON.parse(readFileSync(report, 'utf8')), join(dir, build.target)) : [];
+  if (!dir || !out || !which.length) throw new Error('Usage: --results <folder>[,<folder>] --sprints 19,20 --out <folder> [--markdown <file>]');
+  const builds: Build[] = [];
+  const tests: RunTest[] = [];
+  for (const d of dir.split(',')) {
+    const build = JSON.parse(readFileSync(join(d, 'build.json'), 'utf8')) as Build;
+    builds.push(build);
+    const report = join(d, build.target, 'results.json');
+    if (existsSync(report)) tests.push(...readRun(JSON.parse(readFileSync(report, 'utf8')), join(d, build.target), build.target));
+  }
   const sprints = SPRINTS.filter((s) => which.includes(s.sprint));
   mkdirSync(join(out, 'videos'), { recursive: true });
   const names = new Map<string, string>();
@@ -219,10 +234,10 @@ function main() {
     if (!names.has(path)) names.set(path, `videos/${names.size + 1}-${basename(path)}`);
     return names.get(path)!;
   };
-  writeFileSync(join(out, 'index.html'), renderHtml(sprints, tests, build, video));
+  writeFileSync(join(out, 'index.html'), renderHtml(sprints, tests, builds, video));
   for (const [from, to] of names) if (existsSync(from)) copyFileSync(from, join(out, to));
   const md = arg('markdown');
-  if (md) writeFileSync(md, renderMarkdown(sprints, tests, build) + '\n');
+  if (md) writeFileSync(md, renderMarkdown(sprints, tests, builds) + '\n');
   console.log(`Wrote ${join(out, 'index.html')} with ${names.size} recordings from ${tests.length} tests.`);
 }
 
