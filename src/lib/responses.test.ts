@@ -1,6 +1,29 @@
 // Sprint 3: responses through the database functions; the database enforces the rules.
 import { describe, expect, it, vi } from 'vitest';
-import { archiveResponse, deleteResponse, describeLearning, recordExport, suggestExperts, toResponse, updateResponse } from './responses';
+import { archiveResponse, deleteResponse, describeLearning, recordExport, sendPreview, suggestExperts, toResponse, updateResponse } from './responses';
+
+// Sprint 21 (S21-1): what the Mark as sent confirmation says beforehand.
+describe('sendPreview', () => {
+  type Q = { id: string; status: string; gate?: string | null; src: 'draft' | 'edited' | 'person' };
+  const qs: Q[] = [
+    { id: 'a', status: 'accepted', src: 'edited' },
+    { id: 'b', status: 'accepted', src: 'person' },
+    { id: 'c', status: 'accepted', src: 'draft' },
+    { id: 'd', status: 'accepted', gate: 'pricing', src: 'person' },
+    { id: 'e', status: 'skipped', src: 'person' },
+  ];
+  it('counts edited and written answers, never pricing, and the open assignments', () => {
+    expect(sendPreview(qs, [{ status: 'pending' }, { status: 'in_review' }, { status: 'closed' }, { status: 'answered' }, { status: 'approved' }], (q) => q.src))
+      .toEqual({ written: 2, pricing: 1, openAssignments: 2 });
+  });
+  it('on a second marking, counts only the answers changed since (the rest were considered before)', () => {
+    const again = qs.map((q) => ({ ...q, learnedAt: q.id === 'a' ? null : '2026-11-01T10:00:00Z' }));
+    expect(sendPreview(again, [], (q) => q.src)).toEqual({ written: 1, pricing: 0, openAssignments: 0 });
+  });
+  it('counts nothing for an empty response', () => {
+    expect(sendPreview([] as Q[], [], (q) => q.src)).toEqual({ written: 0, pricing: 0, openAssignments: 0 });
+  });
+});
 
 describe('responses', () => {
   it('maps an overview row', () => {
@@ -31,7 +54,7 @@ describe('responses', () => {
   it('describes what learning did', () => {
     expect(describeLearning({ accepted: 5, skipped: 0, added: 2, confirmed: 2, not_learned_pricing: 1 }))
       .toBe('Knowledge base: 2 added as new entries; 2 confirmed existing entries unchanged; 1 not learned (pricing).');
-    expect(describeLearning({ accepted: 0, skipped: 3 })).toBe('Knowledge base: nothing new to learn from this export.');
+    expect(describeLearning({ accepted: 0, skipped: 3 })).toBe('Knowledge base: nothing new to learn from this response.');
     // Sprint 4 security review: a non-admin's replacement is proposed, not applied.
     expect(describeLearning({ accepted: 2, skipped: 0, proposed: 1, not_confirmed_source: 1 })).toBe(
       "Knowledge base: 1 proposed as replacements for existing entries, waiting for an admin to review; 1 did not confirm their entries (the entries need an admin's review).",

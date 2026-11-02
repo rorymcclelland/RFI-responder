@@ -63,19 +63,19 @@ The message after it says why each group was held: below the threshold, pricing,
 
 ### There is no bulk bar, or no Approve
 
-Only the response's owner or an admin can approve in bulk; others see a line saying so instead of the bar, and **Record export** is shown only to the owner and admins. The bulk buttons are greyed out for them only when no question to do could be approved in bulk. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
+Only the response's owner or an admin can approve in bulk; others see a line saying so instead of the bar, and the downloads and **Mark as sent** are shown only to the owner and admins. The bulk buttons are greyed out for them only when no question to do could be approved in bulk. Only they, and people the question is assigned to, can decide a question; everyone else can read it.
 
 ### I cannot approve a question with no draft
 
 Write its answer first; a placeholder is not an answer.
 
-### Record export is not available
+### There is nothing to download, or no Mark as sent
 
-Every question must be approved or left unanswered first; the line under the buttons says how many are still to do.
+Every question must be approved or left unanswered first; the line under the bulk buttons says how many are still to do. Only the owner and admins see the downloads and **Mark as sent**.
 
 ### I cannot archive a response as Won or Lost
 
-Record the export first. A response never sent can only be **Withdrawn**.
+Mark the response as sent first. A response never sent can only be **Withdrawn**.
 
 ### An archived response cannot be changed
 
@@ -85,7 +85,7 @@ That is deliberate: it is the record of what was sent.
 
 ### My change to an assignment was not saved
 
-The inbox says why, for example when the response has been exported and its assignments closed. The list reloads to show what was saved.
+The inbox says why, for example when the response has been marked as sent and its assignments closed. The list reloads to show what was saved.
 
 ### Nobody is suggested for a question
 

@@ -86,7 +86,7 @@ export function describeUse(u: EntryDetail['used'][number]): string {
   const decision = u.status === 'accepted' ? (u.edited ? 'approved after editing' : 'approved as drafted')
     : u.status === 'skipped' ? 'not answered' : 'still to do';
   const outcome = u.outcome === 'won' ? 'won' : u.outcome === 'lost' ? 'lost' : u.outcome === 'withdrawn' ? 'withdrawn'
-    : u.archivedAt ? 'archived' : u.exportedAt ? 'exported' : 'in progress';
+    : u.archivedAt ? 'archived' : u.exportedAt ? 'sent' : 'in progress';
   return `${decision}; the response is ${outcome}`;
 }
 

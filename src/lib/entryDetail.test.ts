@@ -33,7 +33,7 @@ describe('describeUse', () => {
   it('says how the answer was used, and how the response ended', () => {
     expect(describeUse(u({ outcome: 'won', exportedAt: 'x', archivedAt: 'x' }))).toBe('approved as drafted; the response is won');
     expect(describeUse(u({ edited: true }))).toBe('approved after editing; the response is in progress');
-    expect(describeUse(u({ status: 'skipped', exportedAt: 'x' }))).toBe('not answered; the response is exported');
+    expect(describeUse(u({ status: 'skipped', exportedAt: 'x' }))).toBe('not answered; the response is sent');
     expect(describeUse(u({ status: 'pending', archivedAt: 'x', outcome: 'withdrawn' }))).toBe('still to do; the response is withdrawn');
   });
 });

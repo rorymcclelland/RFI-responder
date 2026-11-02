@@ -87,14 +87,14 @@ export const INTRO_STEPS: IntroStep[] = [
   },
   {
     id: 'export',
-    title: 'Export, and the knowledge base learns',
+    title: 'Send, and the knowledge base learns',
     body: [
-      'When every question is decided, **Record export** and download the answers. Each file records how every answer was produced and who approved it.',
+      'When every question is decided, download the answers, and **Mark as sent** once they have gone to the customer. Each file records how every answer was produced and who approved it.',
       'Most answers people edited or wrote are added to the knowledge base, so later responses can draw on them; pricing answers never are.',
     ],
     image: '6-export-and-learning.png',
-    imageAlt: 'An exported response and what the knowledge base learned',
-    guide: { page: 'running-a-response.md', anchor: '5-record-the-export', label: 'Recording the export' },
+    imageAlt: 'A response marked as sent, and what the knowledge base learned',
+    guide: { page: 'running-a-response.md', anchor: '5-download-and-mark-as-sent', label: 'Downloading and marking as sent' },
   },
   {
     id: 'knowledge',

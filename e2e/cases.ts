@@ -85,6 +85,13 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S21-4', title: 'One real-AI step on staging', forTheUser: 'Each staging run asks one question with the real models, proving the whole pipeline end to end.' },
     ],
     cases: [
+      { id: 'S21-1 1', story: 'S21-1', title: 'With questions still to do: no Download, no Mark as sent, and the reason', how: browser },
+      { id: 'S21-1 2', story: 'S21-1', title: 'Download works without marking anything as sent (Q1)', how: browser },
+      { id: 'S21-1 3', story: 'S21-1', title: 'Mark as sent says what will happen, with counts; Cancel changes nothing', how: browser },
+      { id: 'S21-1 4', story: 'S21-1', title: 'Confirming marks it Sent, records who and when, closes the assignment, says what was learned', how: browser },
+      { id: 'S21-1 5', story: 'S21-1', title: 'A change after sending shows Changed since sent; Mark as sent again records it', how: browser },
+      { id: 'S21-1 6', story: 'S21-1', title: 'No visible text says Exported, Record export or export recorded (Q2)', how: { kind: 'ci', by: 'docs/glossary.test.ts' } },
+      { id: 'S21-1 7', story: 'S21-1', title: 'A member who does not own the response sees neither button', how: browser },
       { id: 'S21-4 1', story: 'S21-4', title: 'On staging: a calibrated confidence, the checker\'s verdict and a cited entry', how: browser },
       { id: 'S21-4 2', story: 'S21-4', title: 'Locally: the fallback answer, not calibrated', how: browser },
       { id: 'S21-4 3', story: 'S21-4', title: 'The ask is recorded and the daily cap applies', how: { kind: 'ci', by: 'supabase/tests/db and the Supabase job in CI (since Sprint 18)' } },

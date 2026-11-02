@@ -66,10 +66,10 @@ export function describeAudit(r: Pick<AuditRow, 'action' | 'details'> & { target
   switch (r.action) {
     case 'response.exported': {
       const learned = ['added', 'superseded', 'proposed', 'translated', 'confirmed'].filter((k) => d[k]).map((k) => `${d[k]} ${k}`).join(', ');
-      return `${d.re_export === true ? 'Recorded the export again after changes' : 'Recorded the export'}: ${str(d.accepted) || 0} approved, ${str(d.skipped) || 0} not answered${learned ? `; learned ${learned}` : ''}.`;
+      return `${d.re_export === true ? 'Marked as sent again after changes' : 'Marked as sent'}: ${str(d.accepted) || 0} approved, ${str(d.skipped) || 0} not answered${learned ? `; learned ${learned}` : ''}.`;
     }
     case 'question.changed_after_export':
-      return `Changed a question after its export was recorded: ${d.answer_changed ? 'the answer' : 'the decision'}${d.status_from !== d.status_to ? ` (${str(d.status_from)} to ${str(d.status_to)})` : ''}.`;
+      return `Changed a question after the response was marked as sent: ${d.answer_changed ? 'the answer' : 'the decision'}${d.status_from !== d.status_to ? ` (${str(d.status_from)} to ${str(d.status_to)})` : ''}.`;
     case 'demo.reset':
       return `Reset the demo: ${str(d.entries)} knowledge-base entries and ${str(d.responses)} responses loaded again; all other responses and entries removed.`;
     case 'user.invited':

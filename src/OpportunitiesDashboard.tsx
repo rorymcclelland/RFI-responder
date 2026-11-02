@@ -87,9 +87,9 @@ const STAGE: Record<ResponseStage, { label: string; pill: string; accent: string
   new:       { label: 'No questions yet',       pill: 'bg-sky-50 text-sky-700 border-sky-200',             accent: 'border-l-sky-300' },
   in_review: { label: 'In progress', pill: 'bg-amber-50 text-amber-700 border-amber-200',       accent: 'border-l-amber-300' },
   ready:     { label: 'Ready to send',     pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', accent: 'border-l-emerald-400' },
-  exported:  { label: 'Exported',  pill: 'bg-ink-900 text-white border-ink-900',              accent: 'border-l-ink-700' },
+  exported:  { label: 'Sent',  pill: 'bg-ink-900 text-white border-ink-900',              accent: 'border-l-ink-700' },
   // Sprint 11 (S11-1): answers changed after the export was recorded; record it again.
-  changed:   { label: 'Changed since export', pill: 'bg-amber-50 text-amber-800 border-amber-300', accent: 'border-l-amber-400' },
+  changed:   { label: 'Changed since sent', pill: 'bg-amber-50 text-amber-800 border-amber-300', accent: 'border-l-amber-400' },
   archived:  { label: 'Archived',  pill: 'bg-ink-50 text-ink-500 border-ink-200',             accent: 'border-l-ink-200' },
 };
 const OUTCOME_LABEL: Record<ResponseOutcome, string> = { won: 'Won', lost: 'Lost', withdrawn: 'Withdrawn' };
@@ -173,7 +173,7 @@ function ArchiveModal({ opp, onClose, onDone }: { opp: Opportunity; onClose: () 
             const disabled = o !== 'withdrawn' && !opp.exportedAt;
             return (
               <button key={o} role="radio" aria-checked={outcome === o} disabled={disabled} onClick={() => setOutcome(o)}
-                title={disabled ? 'Record the export first; a response never sent can only be withdrawn' : undefined}
+                title={disabled ? 'Mark the response as sent first; a response never sent can only be withdrawn' : undefined}
                 className={`px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                   outcome === o ? 'border-ink-900 bg-ink-900 text-white' : 'border-ink-200 text-ink-600 hover:bg-ink-50'}`}>
                 {OUTCOME_LABEL[o]}
@@ -182,8 +182,8 @@ function ArchiveModal({ opp, onClose, onDone }: { opp: Opportunity; onClose: () 
           })}
         </div>
         {/* Sprint 17 (S17-2): the reason is shown, not only on hover. */}
-        {!opp.exportedAt && <p className="text-xs text-ink-500 font-medium">Won and Lost need the export recorded first; a response never sent can only be withdrawn.</p>}
-        {opp.exportedAt && opp.stage === 'changed' && <p className="text-xs text-ink-500 font-medium">An answer changed after the export was recorded: record the export again before archiving it as won or lost.</p>}
+        {!opp.exportedAt && <p className="text-xs text-ink-500 font-medium">Won and Lost need the response marked as sent first; a response never sent can only be withdrawn.</p>}
+        {opp.exportedAt && opp.stage === 'changed' && <p className="text-xs text-ink-500 font-medium">An answer changed after the response was marked as sent: mark it as sent again before archiving it as won or lost.</p>}
         {error && <p role="alert" className="text-xs text-coral-600 font-medium">{error}</p>}
       </div>
       <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ink-100 rounded-b-3xl bg-ink-50">

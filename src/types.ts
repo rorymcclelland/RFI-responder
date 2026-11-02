@@ -87,6 +87,8 @@ export interface RFIQuestion {
   skip?: { by: string | null; at: string } | null;
   /** What learning at export did with this question (Sprint 3, S3-4). */
   learnOutcome: string | null;
+  /** When marking as sent last considered this answer for learning; cleared by any change after (Sprint 11). Sprint 21 (S21-1). */
+  learnedAt?: string | null;
   /** The answerability checker's verdict, chosen entry and one-sentence reason (Sprint 6, S6-3). */
   checker: { verdict: 'yes' | 'partly' | 'no' | null; bestRef: string | null; reason: string | null };
 }
@@ -126,7 +128,7 @@ export interface OpportunityContributor {
   profile?: UserProfile;
 }
 
-/** 'closed' is set only when the response's export is recorded (Sprint 5, F-26). */
+/** 'closed' is set only when the response is marked as sent (Sprint 5, F-26). */
 export type AssignmentStatus = 'pending' | 'in_review' | 'answered' | 'approved' | 'closed';
 
 export interface QuestionAssignment {

@@ -25,13 +25,13 @@ Under the question, **Your answer** starts with the answer you sent before, or t
 
 **Add Notes** (or **Edit Notes**) keeps notes on the assignment, which you and the owner both see and can change. If the owner decides the question while you have it open, **Approve** changes nothing and says so.
 
-A question the owner has already decided moves to **Decided**, and needs nothing more from you. Assignments are closed when the response's export is recorded, and then leave the list.
+A question the owner has already decided moves to **Decided**, and needs nothing more from you. Assignments are closed when the response is marked as sent, and then leave the list.
 
-You cannot approve questions in bulk, assign others, or record the export: those are the owner's.
+You cannot approve questions in bulk, assign others, or mark the response as sent: those are the owner's.
 
 ## Assignments you sent, and all assignments
 
-**Sent** lists the questions you have assigned to others, and admins also see **All**. Filter them by stage: **Asked**, **Working on it**, **Answered**, **Approved**, and **Closed** for assignments closed when their response was exported. Choose one to see its answer and notes; **Add Notes** (or **Edit Notes**) changes the notes, which the person answering sees too.
+**Sent** lists the questions you have assigned to others, and admins also see **All**. Filter them by stage: **Asked**, **Working on it**, **Answered**, **Approved**, and **Closed** for assignments closed when their response was marked as sent. Choose one to see its answer and notes; **Add Notes** (or **Edit Notes**) changes the notes, which the person answering sees too.
 
 ## Getting suggested for the right questions
 

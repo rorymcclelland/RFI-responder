@@ -32,7 +32,7 @@ Drafts are written only from the knowledge base, so its quality is the quality o
 The answer you choose opens its own page beside the list (on a phone, in place of the list, with **Back to the list**). It shows the answer, its state, topics and source and its **Next review**, and then:
 
 - **A proposed change is waiting**, when a response proposed a different answer to the same question and an admin has not yet looked at it.
-- **Where it has been used**: each response whose draft cited it, the question, whether the answer was approved as drafted, approved after editing, not answered or still to do, and how the response stands (in progress, exported, won, lost, withdrawn or archived).
+- **Where it has been used**: each response whose draft cited it, the question, whether the answer was approved as drafted, approved after editing, not answered or still to do, and how the response stands (in progress, sent, won, lost, withdrawn or archived).
 - **History**, oldest first: how it was added, imported or learned; each review, with the earlier text when it was corrected; changes of topics or source; each confirmation by use (an export that approved it unedited); retirement and restoring; and what it replaced.
 - **Other languages**: the translations made from it, or the entries it was translated from.
 
@@ -57,7 +57,7 @@ Everyone sees the same page, history included; the rest of the audit log stays w
 
 New entries are indexed for meaning-based search straight away. If indexing fails (a provider problem, or your daily indexing limit), the app says so. Entries without an index are indexed before questions are next matched, as far as the person's limit allows; a question matched while some are still missing says so and is not approved in bulk.
 
-Entries are also learned from responses when their export is recorded ([Running a response](running-a-response.md#what-the-knowledge-base-learns)).
+Entries are also learned from responses when they are marked as sent ([Running a response](running-a-response.md#what-the-knowledge-base-learns)).
 
 ## Governance
 
@@ -101,6 +101,6 @@ Only where the demo data was loaded, as on the hosted demo. Under **Governance**
 
 ## The audit log
 
-Exports (and exports recorded again), changes after an export, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices, admin changes, invitations and demo resets are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.
+Responses marked as sent (and marked again after changes), changes after that, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices, admin changes, invitations and demo resets are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.
 
 ![The audit log on the governance page](../screenshots/16-audit-log.png)

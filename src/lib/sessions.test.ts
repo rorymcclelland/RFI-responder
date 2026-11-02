@@ -120,10 +120,10 @@ describe('exportNotice (Sprint 11, S11-1)', () => {
     expect(exportNotice({ exportedAt: null, changedSinceExportAt: null }, 'review')).toBeNull();
   });
   it('warns on the export step that a change reopens the export', () => {
-    expect(exportNotice({ exportedAt: at, changedSinceExportAt: null }, 'export')).toMatch(/reopens the export/);
+    expect(exportNotice({ exportedAt: at, changedSinceExportAt: null }, 'export')).toMatch(/reopens the response/);
     expect(exportNotice({ exportedAt: at, changedSinceExportAt: null }, 'review')).toBeNull();
   });
   it('after a change, asks for the export to be recorded again', () => {
-    expect(exportNotice({ exportedAt: at, changedSinceExportAt: at }, 'review')).toMatch(/Record export again/);
+    expect(exportNotice({ exportedAt: at, changedSinceExportAt: at }, 'review')).toMatch(/Mark as sent again/);
   });
 });

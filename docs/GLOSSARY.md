@@ -20,7 +20,7 @@ The words RFI Respond uses on screen, in the guide and in the introduction, one 
 
 | Of | Stages, in order |
 |---|---|
-| A response | **No questions yet**, **In progress**, **Ready to send**, **Exported**, **Changed since export**, **Archived** (with **Won**, **Lost** or **Withdrawn**) |
+| A response | **No questions yet**, **In progress**, **Ready to send**, **Sent**, **Changed since sent**, **Archived** (with **Won**, **Lost** or **Withdrawn**) |
 | A question | **To do**, **Approved**, **Not answered** |
 | An assignment | **Asked**, **Working on it**, **Answered**, **Approved**, **Closed** |
 
@@ -28,6 +28,6 @@ The words RFI Respond uses on screen, in the guide and in the introduction, one 
 
 The same three bands in the filter and on the bulk buttons: **High** at least 80%, **Medium** 60 to 80%, **Low** under 60%, and **Not calibrated** when no confidence could be measured.
 
-## Export words
+## Sending
 
-"Export", **Record export** and **Exported** stay until downloading and marking a response as sent are separated (U-6, planned for Sprint 20).
+Since Sprint 21 (S21-1, U-6), downloading and marking as sent are separate: **Download** (Excel, CSV, Word) gives the files once every question is decided, and **Mark as sent** records that the response went to the customer, which is when the knowledge base learns and the assignments close. Say **Sent**, **mark as sent**, **Changed since sent**; not "Exported", "Record export" or "export recorded". "Export" stays for the downloaded files' format ("exported as Not answered").

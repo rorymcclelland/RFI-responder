@@ -18,7 +18,8 @@ import { CONF_GROUPS, inGroup, type ConfidenceGroup } from './workspace/confiden
 import { exportReason, workspaceControls } from './workspace/controls';
 import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
-import { describeLearning, recordExport } from './lib/responses';
+import { describeLearning, recordExport, sendPreview } from './lib/responses';
+import { answerSource } from './lib/answerLabel';
 import { supabase } from './lib/supabase';
 import type { RFIQuestion, RFISession, UserProfile } from './types';
 import RFIQuestionCard from './RFIQuestionCard';
@@ -277,7 +278,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     setQuestions((prev) => prev.map((q) => {
       if (q.id !== id) return q;
       previous = q;
-      return { ...q, ...patch };
+      // As the database's trigger does (Sprint 11): a changed answer is considered again when the
+      // response is next marked as sent, so the confirmation counts it (S21-1).
+      return { ...q, ...patch, learnedAt: null };
     }));
     saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).then(async () => {
       // A change to an exported session reopens its export (S11-1): show the review again, with why.
@@ -333,6 +336,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     if (!sessionId) return;
     setUploadError(''); setNotice('');
     try {
+      // Mark as sent (S21-1): the database records it, learns and closes the assignments.
       const summary = await recordExport(supabase, sessionId);
       setExportState(await loadExportState(supabase, sessionId));
       setLearning(describeLearning(summary));
@@ -499,10 +503,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           canApprove={canAssign}
           eligible={questions.filter(bulkEligible).length}
           held={pending.filter((q) => !bulkEligible(q)).length}
-          showFinish={step === 'review' && canAssign}
+          showFinish={step === 'review' && canAssign && !allDone}
           finishBlockedBy={exportReason(allDone ? 0 : pendingCount)}
           onBulk={runBulkAccept}
-          onFinish={finishSession}
         />
       )}
 
@@ -640,7 +643,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         )}
       </div>
 
-      {step === 'export' && (
+      {/* Sprint 21 (S21-1, U-6): download once every question is decided; marking as sent is separate. */}
+      {(step === 'review' || step === 'export') && canAssign && totalCount > 0 && allDone && (
         <ExportPanel
           questions={questions}
           fileName={fileName}
@@ -648,7 +652,11 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           skippedCount={skippedCount}
           learning={learning}
           names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
-          onStartNew={archived ? undefined : startNew}
+          sentAt={exportState.exportedAt}
+          changed={exportState.changedSinceExportAt !== null}
+          preview={sendPreview(questions, questions.flatMap((q) => assignments[q.id] ?? []), answerSource)}
+          onMarkSent={archived ? undefined : finishSession}
+          onStartNew={archived || step !== 'export' ? undefined : startNew}
         />
       )}
     </div>

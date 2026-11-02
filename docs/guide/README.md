@@ -5,7 +5,7 @@ How to use RFI Respond: answering requests for information (RFIs), requests for 
 ## Start here
 
 - [Getting started](getting-started.md): signing in, the screens, and what each role can do.
-- [Running a response](running-a-response.md): from a customer's questionnaire to an exported answer, for the person who owns the response.
+- [Running a response](running-a-response.md): from a customer's questionnaire to the answers sent back, for the person who owns the response.
 - [Answering assigned questions](specialists.md): for a colleague asked to answer or check a question.
 - [Administering RFI Respond](admin.md): people, the knowledge base, spend, limits and reviews.
 - [The question card](question-card.md): every label on a question, and what it means.
@@ -16,7 +16,7 @@ How to use RFI Respond: answering requests for information (RFIs), requests for 
 | Role | Who | What they can do |
 |---|---|---|
 | Member | Everyone with an account | Start a response and own it; read every response; answer questions assigned to them; add entries to the knowledge base |
-| Response owner | The member who started a response | Upload its questions, approve them one at a time or in bulk, assign them to colleagues, record the export, archive it |
+| Response owner | The member who started a response | Upload its questions, approve them one at a time or in bulk, assign them to colleagues, download the answers and mark the response as sent, archive it |
 | Admin | Members given admin access | Everything an owner can do, on every response; review knowledge-base entries; set limits and the budget; give and remove admin access; delete a response created in error |
 
 Accounts are by invitation only: an admin invites people (see [Administering RFI Respond](admin.md)).

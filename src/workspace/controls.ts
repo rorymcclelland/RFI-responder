@@ -23,10 +23,10 @@ export function workspaceControls(o: { canManage: boolean; archived: boolean; ow
   };
 }
 
-/** Why the export cannot be recorded yet, shown beside the button (not only on hover), or null. */
+/** Why the answers cannot be downloaded or the response marked as sent yet, shown as text, or null. */
 export function exportReason(toDo: number): string | null {
   if (toDo === 0) return null;
   return toDo === 1
-    ? '1 question is still to do: approve it or leave it unanswered before recording the export.'
-    : `${toDo} questions are still to do: approve each or leave them unanswered before recording the export.`;
+    ? '1 question is still to do: approve it or leave it unanswered before downloading the answers or marking the response as sent.'
+    : `${toDo} questions are still to do: approve each or leave them unanswered before downloading the answers or marking the response as sent.`;
 }

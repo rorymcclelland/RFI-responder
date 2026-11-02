@@ -83,27 +83,29 @@ When a question needs a specialist, open its card and under **Expert Assignment*
 
 The question appears under **Questions for you** in their **Assignments** ([Answering assigned questions](specialists.md)). They can approve it themselves, send their answer to you, or hand it back with a note. An answer they send shows on the question's card as "<their name> marked it answered, with this answer:", with **Use their answer**, which puts it in the editor for you to approve; a handed-back question shows their note. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
 
-## 5. Record the export
+## 5. Download and mark as sent
 
-When every question is approved or left unanswered, choose **Record export** on the bulk bar. Until then it is greyed out, and the line under it says how many are still to do. Recording the export:
+When every question is approved or left unanswered, the response shows **Ready to send**, with the downloads and **Mark as sent**. Until then the line under the bulk buttons says how many are still to do. Only the owner and admins see them.
 
-- marks the response as exported;
-- closes its open assignments;
-- lets the knowledge base learn from it (below).
+Download the answers whenever you need them: **Excel (.xlsx)**, **CSV (.csv)** or **Word (.doc)**. Downloading does not mark the response as sent. Each file records how every answer was produced (drafted by a model, edited, or written by a person, with the model and prompt version) and who approved it, when and how: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV. Questions left unanswered are exported as "Not answered", and the customer's own question numbers are kept. The translation label the app adds to a draft is left out of the exported answer wherever it is, and so is the reference list at the end of a draft, exactly as the app wrote it; anything a person wrote stays. Instead, each file records which answers were drafted from entries in another language, under **Translation** in the provenance.
 
-Then download the answers: **Excel (.xlsx)**, **CSV (.csv)** or **Word (.doc)**. Each file records how every answer was produced (drafted by a model, edited, or written by a person, with the model and prompt version) and who approved it, when and how: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV. Questions left unanswered are exported as "Not answered", and the customer's own question numbers are kept. The translation label the app adds to a draft is left out of the exported answer wherever it is, and so is the reference list at the end of a draft, exactly as the app wrote it; anything a person wrote stays. Instead, each file records which answers were drafted from entries in another language, under **Translation** in the provenance.
+The app never sends anything to the customer: you send the files. When you have, choose **Mark as sent**. Before anything happens it says what marking as sent will do, with the numbers for this response:
 
-The app never sends anything to the customer: you send the files.
+- record that it was sent, with your name and the time, in the audit log;
+- let the knowledge base learn from the answers people edited or wrote (below);
+- close the response's open assignments.
 
-![An exported response and what the knowledge base learned](../screenshots/6-export-and-learning.png)
+Choose **Confirm: mark as sent** to go ahead, or **Cancel** to change nothing. The response then shows **Sent** on the overview.
 
-### Changing an answer after the export
+![A response marked as sent, and what the knowledge base learned](../screenshots/6-export-and-learning.png)
 
-If you find a mistake after recording the export, you can still change an answer or a decision; the owner, an admin or the person the question is assigned to can. The change reopens the export: it is recorded in the audit log with who made it, the response shows **Changed since export** on the overview, and the response says the files already downloaded no longer match. Approve the changed answer, then choose **Record export** again and download the answers again. Only the changed answers are learned the second time: an admin's correction replaces the entry learned before, and anyone else's waits beside it for an admin's review.
+### Changing an answer after it was sent
+
+If you find a mistake after marking the response as sent, you can still change an answer or a decision; the owner, an admin or the person the question is assigned to can. The change reopens the response: it is recorded in the audit log with who made it, the response shows **Changed since sent** on the overview, and the response says the files already downloaded no longer match. Approve the changed answer, download the answers again, and choose **Mark as sent** again. Only the changed answers are learned the second time: an admin's correction replaces the entry learned before, and anyone else's waits beside it for an admin's review.
 
 ### What the knowledge base learns
 
-Recording the export turns edited and person-written answers into knowledge-base entries, linked to this response. The panel says what happened to each kind of answer. In short:
+Marking a response as sent turns edited and person-written answers into knowledge-base entries, linked to this response. The panel says what happened to each kind of answer. In short:
 
 - an answer that matches an existing entry closely replaces it, keeping the old one on record;
 - otherwise it is added as a new entry;
@@ -117,6 +119,6 @@ Recording the export turns edited and person-written answers into knowledge-base
 
 Choose **Add a file** (or **Add another file** after the export) to add another file to the same response (only the owner or an admin can; anyone else sees **Other files** when there are several); earlier files stay under **Files in this response** (the ten most recent are listed), where **Resume** or **View** reopens them. The response opens on the most recent file.
 
-When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the export recorded first, and recorded again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
+When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the response marked as sent first, and marked again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 
 A response created by mistake can be deleted by an admin (see [Administering RFI Respond](admin.md)).

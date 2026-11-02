@@ -161,10 +161,10 @@ export function exportNotice(s: ExportState, step: 'review' | 'export' | string)
   if (!s.exportedAt) return null;
   const when = new Date(s.exportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
   if (s.changedSinceExportAt) {
-    return `Answers have changed since the export was recorded on ${when}, so the files already downloaded do not show them. When you are ready, choose Record export again and download the answers again.`;
+    return `Answers have changed since the response was marked as sent on ${when}, so the files already downloaded do not show them. When you are ready, download the answers again and choose Mark as sent again.`;
   }
   if (step === 'export') {
-    return 'Changing an answer or a decision now reopens the export: the change is recorded in the audit log, and the export must be recorded again.';
+    return 'Changing an answer or a decision now reopens the response: the change is recorded in the audit log, and it must be marked as sent again.';
   }
   return null;
 }

@@ -134,9 +134,12 @@ const ASSIGNMENT_BADGE: Record<string, string> = {
   in_review: 'bg-amber-50 text-amber-700 border-amber-200',
   answered:  'bg-sky-50 text-sky-700 border-sky-200',
   approved:  'bg-emerald-50 text-emerald-700 border-emerald-200',
+  closed:    'bg-ink-50 text-ink-400 border-ink-200',
 };
 const ASSIGNMENT_LABEL: Record<string, string> = {
   pending: 'Asked', in_review: 'Working on it', answered: 'Answered', approved: 'Approved',
+  // Sprint 21 (S21-1): closed when the response was marked as sent (it showed no word before).
+  closed: 'Closed',
 };
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
@@ -193,7 +196,7 @@ function AssignmentPanel({
                   {u?.jobTitle && <span className="text-xs text-ink-400 ml-1.5 font-medium">{u.jobTitle}</span>}
                 </div>
                 <span className={`status-pill text-2xs ${ASSIGNMENT_BADGE[a.status]}`}>{ASSIGNMENT_LABEL[a.status]}</span>
-                {a.status !== 'approved' && (
+                {a.status !== 'approved' && a.status !== 'closed' && (
                   <button onClick={() => onUnassign(a.id)} className="w-5 h-5 flex items-center justify-center text-ink-300 hover:text-coral-500 transition-colors flex-shrink-0" title="Remove">
                     <X size={12} />
                   </button>

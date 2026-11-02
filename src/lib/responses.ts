@@ -95,7 +95,7 @@ export function describeLearning(s: ExportSummary): string {
   add(s.not_learned_empty, 'not learned (no answer)');
   add(s.not_learned_unchecked, 'not learned (not fully checked)');
   add(s.not_confirmed_source, 'did not confirm their entries (the entries need an admin\'s review)');
-  return parts.length ? `Knowledge base: ${parts.join('; ')}.` : 'Knowledge base: nothing new to learn from this export.';
+  return parts.length ? `Knowledge base: ${parts.join('; ')}.` : 'Knowledge base: nothing new to learn from this response.';
 }
 
 export interface ExpertSuggestion { userId: string; displayName: string; score: number; reasons: string[] }
@@ -105,4 +105,23 @@ export async function suggestExperts(client: SupabaseClient, questionId: string)
   if (error) return [];
   return (data as { user_id: string; display_name: string; score: number; reasons: string[] }[])
     .map((r) => ({ userId: r.user_id, displayName: r.display_name, score: r.score, reasons: r.reasons }));
+}
+
+/**
+ * Sprint 21 (S21-1, U-6): what marking a response as sent will do, from what is on screen, said
+ * before the person confirms. The database decides what is actually learned (record_export), so this
+ * counts the answers of the kinds it learns from (edited or written by a person, not pricing) and the
+ * assignments it will close; it does not promise each is learned (rule 1).
+ */
+export function sendPreview<Q extends { status: string; gate?: string | null; learnedAt?: string | null }>(
+  questions: Q[],
+  assignments: { status: string }[],
+  source: (q: Q) => 'draft' | 'edited' | 'person',
+): { written: number; pricing: number; openAssignments: number } {
+  // As record_export: approved answers not yet considered (on a second marking, those changed since).
+  const approved = questions.filter((q) => q.status === 'accepted' && !q.learnedAt);
+  const pricing = approved.filter((q) => q.gate === 'pricing').length;
+  const written = approved.filter((q) => q.gate !== 'pricing' && source(q) !== 'draft').length;
+  // The same assignments record_export closes: those still pending or in review.
+  return { written, pricing, openAssignments: assignments.filter((a) => a.status === 'pending' || a.status === 'in_review').length };
 }

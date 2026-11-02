@@ -206,7 +206,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
 
             <section aria-labelledby="learned" className="card p-6 space-y-3 flex-[1_1_320px] min-w-0">
               <h2 id="learned" className="text-lg font-black text-ink-900">Learned recently</h2>
-              {overview.learned.length === 0 && <p className="text-sm text-ink-500">Nothing learned from responses yet. Answers are learned when a response's export is recorded.</p>}
+              {overview.learned.length === 0 && <p className="text-sm text-ink-500">Nothing learned from responses yet. Answers are learned when a response is marked as sent.</p>}
               {overview.learned.map((l) => (
                 <button key={l.ref} onClick={() => { openBrowse({}); pick(l.replaces ?? l.ref); }}
                   className="block w-full text-left border-b border-ink-50 last:border-0 pb-3">

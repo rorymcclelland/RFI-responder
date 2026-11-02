@@ -32,6 +32,7 @@ export interface QuestionRow {
   calibration_set?: string | null;
   processed_at?: string | null;
   learn_outcome?: string | null;
+  learned_at?: string | null;
   skipped_by?: string | null;
   skipped_at?: string | null;
 }
@@ -76,6 +77,7 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
       ? { by: approval.decided_by, at: approval.decided_at, kind: approval.kind, threshold: num(approval.threshold) }
       : null,
     learnOutcome: r.learn_outcome ?? null,
+    learnedAt: r.learned_at ?? null,
     checker: {
       verdict: r.verdict === 'yes' || r.verdict === 'partly' || r.verdict === 'no' ? r.verdict : null,
       bestRef: r.judge_best_ref ?? null,

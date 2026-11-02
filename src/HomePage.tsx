@@ -18,7 +18,7 @@ const GROUP_TITLE: Record<NeedItem['group'], string> = {
   for_you: 'Questions for you', answered: 'Answered by colleagues', responses: 'Your responses at risk or overdue', review: 'For admins',
 };
 const STAGE_LABEL: Record<string, string> = {
-  new: 'No questions yet', in_review: 'In progress', ready: 'Ready to send', exported: 'Exported', changed: 'Changed since export', archived: 'Archived',
+  new: 'No questions yet', in_review: 'In progress', ready: 'Ready to send', exported: 'Sent', changed: 'Changed since sent', archived: 'Archived',
 };
 const day = (iso: string | null) => (iso ? new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : null);
 
