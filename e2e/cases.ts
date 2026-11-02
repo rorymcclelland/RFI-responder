@@ -72,7 +72,22 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S20-4 2', story: 'S20-4', title: 'A failing test shows as failed, with its recording', how: { kind: 'ci', by: 'scripts/demo-page.test.ts' } },
       { id: 'S20-4 3', story: 'S20-4', title: 'The recordings play and match the build named', how: { kind: 'hand', why: 'Rory, watching this page' } },
       { id: 'S20-4 4', story: 'S20-4', title: 'The page claims nothing the tests did not check', how: { kind: 'ci', by: 'scripts/demo-page.test.ts (only browser cases take a result from the run)' } },
-      { id: 'S20-4 5', story: 'S20-4', title: 'One step per staging run uses the real AI model (Q2)', how: { kind: 'hand', why: 'not built in Sprint 20: no test asks a question on staging yet; returned to the backlog' } },
+      { id: 'S20-4 5', story: 'S20-4', title: 'One step per staging run uses the real AI model (Q2)', how: { kind: 'hand', why: 'not built in Sprint 20: returned to the backlog as F-67, built in Sprint 21 (S21-4)' } },
+    ],
+  },
+  {
+    sprint: 21,
+    title: 'Sending made plain, gaps, and configuration as code',
+    stories: [
+      { id: 'S21-1', title: 'Download separate from Mark as sent', forTheUser: 'An owner downloads the answers once every question is decided, and marks the response as sent separately; Mark as sent says beforehand what it will do. The stages read Sent and Changed since sent.' },
+      { id: 'S21-2', title: 'Gaps', forTheUser: 'Knowledge shows what the knowledge base could not answer in recent responses, grouped by wording, with where each stands.' },
+      { id: 'S21-3', title: 'Configuration as code, checked; a set-up script', forTheUser: 'Every deploy checks the hosted sign-in settings against the repository; a script stores the keys in GitHub without anyone copying them.' },
+      { id: 'S21-4', title: 'One real-AI step on staging', forTheUser: 'Each staging run asks one question with the real models, proving the whole pipeline end to end.' },
+    ],
+    cases: [
+      { id: 'S21-4 1', story: 'S21-4', title: 'On staging: a calibrated confidence, the checker\'s verdict and a cited entry', how: browser },
+      { id: 'S21-4 2', story: 'S21-4', title: 'Locally: the fallback answer, not calibrated', how: browser },
+      { id: 'S21-4 3', story: 'S21-4', title: 'The ask is recorded and the daily cap applies', how: { kind: 'ci', by: 'supabase/tests/db and the Supabase job in CI (since Sprint 18)' } },
     ],
   },
 ];

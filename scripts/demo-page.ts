@@ -17,6 +17,8 @@ export interface RunTest {
   title: string;
   /** Where it ran: local (CI's own stack) or staging. */
   target?: string;
+  /** The test used the real AI models (Sprint 20, Q2). */
+  realAi?: boolean;
   status: 'passed' | 'failed';
   durationMs: number;
   cases: string[];
@@ -58,6 +60,7 @@ export function readRun(report: Result, root: string, target?: string): RunTest[
         out.push({
           title: String(spec.title),
           ...(target ? { target } : {}),
+          ...(annotations.some((a) => a.type === 'real-ai') ? { realAi: true } : {}),
           status: failed ? 'failed' : 'passed',
           durationMs: Number(last.duration ?? 0),
           cases: [...new Set(annotations.filter((a) => a.type === 'case').map((a) => String(a.description)))],
@@ -112,7 +115,7 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
       const own = tests.filter((t, i) => !shown.has(t) && t.cases.some((id) => cases.some((c) => c.id === id))
         && !tests.slice(0, i).some((u) => u.title === t.title));
       own.forEach((t) => shown.add(t));
-      const clips = own.map((t) => `<figure class="clip"><figcaption><strong>${esc(t.title)}</strong>${t.target ? ` <span class="dur">(${esc(t.target)})</span>` : ''} <span class="chip ${t.status}">${t.status === 'passed' ? 'Passed' : 'Failed'}</span> <span class="dur">${(t.durationMs / 1000).toFixed(1)} s</span></figcaption>`
+      const clips = own.map((t) => `<figure class="clip"><figcaption><strong>${esc(t.title)}</strong>${t.target ? ` <span class="dur">(${esc(t.target)})</span>` : ''}${t.realAi ? ' <span class="chip hand">Real AI model</span>' : ''} <span class="chip ${t.status}">${t.status === 'passed' ? 'Passed' : 'Failed'}</span> <span class="dur">${(t.durationMs / 1000).toFixed(1)} s</span></figcaption>`
         + (t.error ? `<p class="err">${esc(t.error)}</p>` : '')
         + `<div class="vids">${t.recordings.map((r) => `<div class="vid"><video src="${esc(video(r.path))}" controls preload="metadata" muted playsinline></video><span>${esc(r.label)}</span></div>`).join('')}</div>`
         + (t.steps.length ? `<details><summary>Steps (${t.steps.length})</summary><ol>${t.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : '')
@@ -124,7 +127,7 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
     return `<section class="sprint"><h2>Sprint ${s.sprint}: ${esc(s.title)}</h2>${stories}</section>`;
   }).join('');
   const aiNote: Record<string, string> = {
-    staging: 'The staging run used the hosted staging site, with its real sign-in, database and functions.',
+    staging: 'The staging run used the hosted staging site, with its real sign-in, database and functions; a test marked Real AI model asked one question with the real models, and no other step used AI.',
     local: 'The local run used the real Supabase stack in CI with every AI provider switched off, so drafts and answers are the fallback ones, the same on every run.',
   };
   const ai = builds.map((b) => aiNote[b.target] ?? '').filter(Boolean).join(' ');
