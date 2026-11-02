@@ -73,7 +73,7 @@ export default function HomePage({ currentUser, names, onOpenForYou, onOpenRespo
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-8">
       <div>
-        <h1 className="text-3xl font-black text-ink-900 tracking-tight">Hello, {first}</h1>
+        <h1 className="text-3xl font-black text-ink-900 tracking-tight">Welcome</h1>
         <p className="text-ink-500 mt-1.5 text-sm font-medium">What needs you today, your responses, and what the organisation knows.</p>
       </div>
       {error && <p role="alert" className="text-sm text-coral-600">{error} <button onClick={load} className="btn-ghost text-xs ml-2">Try again</button></p>}
