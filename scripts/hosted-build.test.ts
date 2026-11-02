@@ -85,7 +85,7 @@ describe('S14-7 the keep-alive workflow', () => {
     expect([...wf.matchAll(/\$URL\/rest\/v1\/[\w/]+/g)].map((m) => m[0])).toEqual(['$URL/rest/v1/rpc/keepalive']);
     expect(wf).toMatch(/sb_secret_\*\) echo "::error::/);
     expect(wf).toMatch(/\^https:\/\/\[a-z0-9\]\{20\}\\\.supabase\\\.co\$/);
-    expect([...wf.matchAll(/secrets\.(\w+)/g)].map((m) => m[1])).toEqual(['DEMO_SUPABASE_ANON_KEY']);
+    expect([...wf.matchAll(/secrets\.(\w+)/g)].map((m) => m[1])).toEqual(['DEMO_SUPABASE_ANON_KEY', 'STAGING_SUPABASE_ANON_KEY']);
   });
   it('refuses a legacy service-role key (a JWT), and says so when Supabase cannot be reached', () => {
     expect(wf).toMatch(/"role"\[\[:space:\]\]\*:\[\[:space:\]\]\*"service_role"/);

@@ -28,3 +28,31 @@ Until Sprint 14 RFI Respond ran only locally. Sprint 14 sets up an invite-only h
 4. Build the app with the hosted project's URL and anon key (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) using `npm run build:hosted`, which refuses a local or missing address and the secret key, and serve `dist/` with every path falling back to `index.html` and the security headers in [`vercel.json`](../vercel.json) (Vercel reads that file as it is).
 5. Invite the first admin, and set the limits on the Governance page.
 6. Load the organisation's own knowledge base through **Import KB**, and recalibrate on an evaluation set drawn from it: the calibration tables shipped here are fitted to the synthetic set and will not carry over ([`docs/evals/README.md`](evals/README.md)).
+
+## Staging and automated deploys
+
+Since Sprint 20, a second Supabase project, **staging**, holds a hosted copy of the app on synthetic data, and [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) deploys by itself:
+
+- **A push to a `sprint-*` branch** applies the migrations and deploys every Edge Function to staging, moves the branch `staging` to the same commit (Vercel builds it at the staging address), checks the deploy ([`scripts/deploy-check.ts`](../scripts/deploy-check.ts): every migration applied, every function deployed, the app answering, no error from Supabase's security advisor), makes two test people with a password made for the run and resets the demo data ([`scripts/e2e-staging-users.ts`](../scripts/e2e-staging-users.ts)), then runs the browser acceptance tests there. The results go to the branch `e2e-results/staging/<branch>` for the sprint's demo page.
+- **A push to `main`** does the same deploy and checks on the live demo, in the GitHub environment `production`, which waits for the owner's approval before anything runs.
+
+Until the settings below exist, each job says so and passes, and the live demo is deployed by hand as in [Then](#then).
+
+What lives where. No value is ever written in this repository, typed into the app, or pasted into a chat.
+
+| Setting | Where | What |
+|---|---|---|
+| `SUPABASE_ACCESS_TOKEN` | GitHub, repository secret | A Supabase personal access token, used by the CLI to deploy and to read the security advisor |
+| `STAGING_SUPABASE_ANON_KEY` | GitHub, repository secret | Staging's public anon key (also used by the keep-awake ping) |
+| `STAGING_DB_PASSWORD`, `STAGING_SERVICE_ROLE_KEY`, `VERCEL_BYPASS_SECRET` | GitHub, environment `staging` secrets | Staging's database password and service key (to make the test people), and Vercel's protection-bypass secret |
+| `PRODUCTION_DB_PASSWORD` | GitHub, environment `production` secret | The live demo's database password, readable only by the approved job |
+| `STAGING_PROJECT_REF`, `STAGING_APP_HOST`, `PRODUCTION_PROJECT_REF`, `PRODUCTION_APP_HOST` | GitHub, repository variables | The two projects' refs and the two apps' host names, so each run can refuse the other |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Vercel, Preview environment | Staging's address and anon key (Production keeps the live demo's) |
+| `APP_ORIGIN`, `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY` | Staging's Edge Function secrets | As for the live demo, with the staging address. AI calls on staging are few: indexing after each reset and one question asked per run |
+
+Setting it up, once (the owner's steps; about 30 minutes):
+
+1. **Supabase.** Pause `campaign-studio` (kept only as a rollback since its move to Neon), so the Free plan has a slot. Create `rfi-respond-staging` in London on the Free plan and keep its database password in your password manager. Under Authentication, turn off new sign-ups and set the site address to the staging address (step 3). Under Edge Functions, Secrets, set `APP_ORIGIN` to `https://<staging address>` and the two AI keys (keys made for staging, each with a low spend limit, are best).
+2. **GitHub**, repository settings. Under Environments, create `staging`, and `production` with yourself as required reviewer and deployments from `main` only. **Do this before adding `PRODUCTION_DB_PASSWORD`**, so the secret is never readable without your approval. Then add the secrets and variables in the table.
+3. **Vercel**, the project's settings. Under Domains, add a `.vercel.app` name for staging (such as `rfi-responder-staging.vercel.app`) tied to the Git branch `staging`. Under Environment Variables, give Preview the staging address and anon key. Under Deployment Protection, create a Protection Bypass for Automation secret and put it in GitHub as `VERCEL_BYPASS_SECRET`.
+4. **The first run.** Push to a sprint branch (or re-run the Deploy workflow): it applies every migration to staging. Then, once, in staging's SQL Editor, run [`supabase/demo-hosted.sql`](../supabase/demo-hosted.sql), which loads the demo and stores the script the reset uses. Re-run the workflow: from then on every run resets the demo itself.

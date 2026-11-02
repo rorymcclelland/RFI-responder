@@ -23,8 +23,9 @@ function files(dir: string, test: (name: string) => boolean): string[] {
 
 /** Every environment variable the code reads, however it reads it. */
 function variablesInCode(): Set<string> {
-  const code = ['src', 'supabase/functions', 'supabase/tests', 'eval', 'scripts']
+  const code = ['src', 'supabase/functions', 'supabase/tests', 'eval', 'scripts', 'e2e']
     .flatMap((d) => files(d, (n) => /\.(ts|tsx|mjs)$/.test(n) && !/\.test\./.test(n)))
+    .concat(['playwright.config.ts'])
     .map(read)
     .join('\n');
   const found = new Set<string>();

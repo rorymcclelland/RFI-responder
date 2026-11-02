@@ -51,6 +51,33 @@ Read from the shell, and by the evaluation scripts also from `.env` in `supabase
 | `SEED_PASSWORD` | The seed users' local password | [`scripts/screenshots.ts`](../../scripts/screenshots.ts) | The password of the seed users in [`supabase/seed.sql`](../../supabase/seed.sql); for local use only |
 | `DB_TEST_URL` | `postgres://postgres@localhost:5432/postgres` | [`supabase/tests/db/harness.ts`](../../supabase/tests/db/harness.ts) | A Postgres 16 superuser connection for `npm run test:db`. The tests drop and recreate a database called `rfi_test` on that server |
 
+## Browser tests, staging and deploys (Sprint 20)
+
+Read by the browser acceptance tests ([`e2e/`](../../e2e)) and the deploy scripts. Locally none is needed: `npm run test:e2e` runs against the local app as the seed users. On staging, CI sets them from the repository's variables and secrets ([Deploying](../DEPLOYING.md#staging-and-automated-deploys)); none is ever typed into the app or this repository.
+
+| Variable | Default | Read by | What it does |
+|---|---|---|---|
+| `E2E_TARGET` | `local` | [`e2e/target.ts`](../../e2e/target.ts) | `local` or `staging` |
+| `E2E_BASE_URL` | `http://127.0.0.1:5173` | [`e2e/target.ts`](../../e2e/target.ts) | The app to test. Locally it must be on this machine; on staging, the sprint's Vercel preview |
+| `E2E_FORBIDDEN_HOSTS` | None | [`e2e/target.ts`](../../e2e/target.ts) | On staging, the live demo's app and Supabase hosts, comma-separated: the run refuses to start against them and the browser refuses every request to them |
+| `E2E_ADMIN_EMAIL` | The seed admin | [`e2e/target.ts`](../../e2e/target.ts) | On staging, the test admin, set by [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) |
+| `E2E_ADMIN_NAME` | `Test Admin` | [`e2e/target.ts`](../../e2e/target.ts) | The test admin's display name |
+| `E2E_MEMBER_EMAIL` | A seed member | [`e2e/target.ts`](../../e2e/target.ts) | On staging, the test member |
+| `E2E_MEMBER_NAME` | `Test Member` | [`e2e/target.ts`](../../e2e/target.ts) | The test member's display name |
+| `E2E_PASSWORD` | The seed users' local password | [`e2e/target.ts`](../../e2e/target.ts) | On staging, the password made for the run, masked in the log |
+| `E2E_VERCEL_BYPASS` | None | [`e2e/support.ts`](../../e2e/support.ts) | Vercel's protection-bypass secret for previews, sent only to the app's own host |
+| `E2E_SLOW_MO` | `150` | [`playwright.config.ts`](../../playwright.config.ts) | Milliseconds between browser actions, so the recordings can be followed |
+| `E2E_NO_SERVER` | None | [`playwright.config.ts`](../../playwright.config.ts) | Set when the app is already running, so the tests do not start it |
+| `STAGING_SUPABASE_URL` | None | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | The staging project's address |
+| `STAGING_SUPABASE_ANON_KEY` | None | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | The staging project's public key, to sign in as the test admin and reset the demo |
+| `STAGING_SERVICE_ROLE_KEY` | None | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | The staging project's service key, to make the test people. Only ever in CI; never the live demo's |
+| `PRODUCTION_SUPABASE_REF` | None | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | The live demo's project ref, which the script refuses |
+| `GITHUB_ENV` | Set by GitHub Actions | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | Where the script passes the test people to the next step |
+| `SUPABASE_URL` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | After a deploy, the project to check (also an Edge Function variable, above) |
+| `APP_URL` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | After a deploy, the app to check (also the screenshot script's, above) |
+| `SUPABASE_ACCESS_TOKEN` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | A Supabase personal access token: the CLI uses it to deploy, and the check to read the security advisor |
+| `VERCEL_BYPASS` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | Vercel's protection-bypass secret, to load a protected preview |
+
 ## Settings in the database
 
 Changed by admins under **Governance**, **Usage and limits**, and read by the database functions that enforce them. Every change is recorded in the audit log. [Data model and access](DATA-MODEL.md) has the access rules.
