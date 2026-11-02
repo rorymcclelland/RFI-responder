@@ -185,6 +185,12 @@ test('Approve, and when the owner was quicker', async ({ browser }) => {
   const c = card(boss, STALE);
   await c.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(c.getByText(approvedBy(admin.name))).toBeVisible();
+  // The card shows the decision at once and saves it in the background; this case is about a decision
+  // already saved, so wait until the database has it (the staging run of 7651216 pressed Approve between
+  // the two, and got the other, also true, message).
+  await boss.reload();
+  await openResponse(boss, BLUEFIN);
+  await expect((await expand(boss, STALE)).getByText(approvedBy(admin.name))).toBeVisible();
 
   await caption(m, `${member.name}, on the screen opened before, presses Approve: nothing is overwritten`);
   const other = 'A different answer, written on a screen opened before the owner decided.';
