@@ -143,8 +143,8 @@ The work is planned in [the backlog](../BACKLOG.md), with the project's rules at
 
 1. **Refine.** The sprint's stories are written up in [`docs/refinement/`](../refinement), one page per sprint, with agreed test cases, risks and open questions, and signed off before building.
 2. **Build** on a `sprint-N` branch, test first, one commit per story with a message that says what changed and why.
-3. **Review.** A separate agent that has not seen the work reviews it for security and for claims the code does not support; every finding is fixed or logged.
-4. **Check end to end** on a local install, on a real browser.
+3. **Review.** A separate agent that has not seen the work reviews it for security and for claims the code does not support; another checks the browser tests against the agreed cases. Every finding is fixed or logged.
+4. **Check end to end.** Since Sprint 20 ([decision 0008](../decisions/0008-claude-as-qa.md)), the agreed cases run as browser tests in CI and on staging, and the sprint's demo page ([`scripts/demo-page.ts`](../../scripts/demo-page.ts)) shows each story's recordings and every agreed case with its result. Rory watches it and signs off; hand checks come as a test pack only for what cannot be automated.
 5. **Close.** Delivered items are marked done, unfinished ones go back to the backlog, and findings are logged in the backlog.
 
 British spelling and no em dashes in the documentation and the app's text; the tests check the documentation and the introduction's text.

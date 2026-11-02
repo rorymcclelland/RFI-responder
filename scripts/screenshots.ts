@@ -207,6 +207,8 @@ async function main() {
   writeFileSync(join(OUT, 'layout-check.json'), JSON.stringify({ width: NARROW.width, checkedAt: new Date().toISOString(), views: layout }, null, 1) + '\n');
   const misfits = layout.filter((v) => !v.fits);
   console.log(misfits.length ? `${misfits.length} views do not fit 768 px: ${misfits.map((v) => v.view).join(', ')}` : 'Every view fits 768 px.');
+  // Sprint 20 (QA review): a view that does not fit fails the run, so CI reports it.
+  if (misfits.length) process.exitCode = 1;
 }
 
 main().catch((e) => {

@@ -6,6 +6,7 @@ Read `docs/PRODUCT.md` (what and why), `docs/BACKLOG.md` (project rules and spri
 
 - Claude writes the code; Rory reads and questions it. Explain each new concept as it is introduced.
 - Sprints are refined before building (agreed test cases first), and closed with a review. Undelivered items go back to the backlog.
+- Claude is the QA team (decision 0008): agreed cases become browser tests in `e2e/` (tagged with `checks('S20-1 2')`, listed in `e2e/cases.ts`); a separate reviewer checks them; the sprint review is a demo page built by `scripts/demo-page.ts` from the results on branch `e2e-results/<target>/<branch>`. Hand test packs only for what cannot be automated.
 - Work on a `sprint-N` branch; commit per story with a message that says what changed and why.
 - British spelling, no em dashes, in docs and UI copy.
 
@@ -24,6 +25,7 @@ npm install -g npm@11      # npm 10 fails on this dependency tree
 npm ci
 npm run typecheck && npm run lint -- --max-warnings 0 && npm test
 DB_TEST_URL=postgres://postgres@localhost:5432/postgres npm run test:db
+npm run test:e2e          # browser tests; needs the local Supabase stack (npx supabase start, db reset)
 ```
 
 In a workspace without Docker, run the database tests against any Postgres 16 superuser connection; the shim in `supabase/tests/shim/` stands in for Supabase.

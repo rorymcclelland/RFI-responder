@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advisorErrors, appliedMigrations, functionVerdict, missingMigrations, repoFunctions, repoMigrations } from './deploy-check';
+import { advisorErrors, appVersion, appliedMigrations, functionVerdict, missingMigrations, repoFunctions, repoMigrations } from './deploy-check';
 import { newPassword, stagingProblem } from './e2e-staging-users';
 
 describe('deploy checks (Sprint 20, S20-3)', () => {
@@ -26,6 +26,12 @@ describe('deploy checks (Sprint 20, S20-3)', () => {
     expect(functionVerdict(401)).toBe('deployed');
     expect(functionVerdict(404)).toBe('missing');
     expect(functionVerdict(500)).toBe('unexpected');
+  });
+
+  it('reads the commit a built page names, and nothing else', () => {
+    expect(appVersion('<head><meta name="app-version" content="a0be47f84216ce14766ee04a258dddbaf6d7e75a"></head>')).toBe('a0be47f84216ce14766ee04a258dddbaf6d7e75a');
+    expect(appVersion('<meta name="app-version" content="dev">')).toBeNull();
+    expect(appVersion('<div id="root"></div>')).toBeNull();
   });
 
   it('fails only on error-level advisor findings', () => {

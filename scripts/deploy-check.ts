@@ -9,7 +9,7 @@
  * 1. Every migration in supabase/migrations is applied (from `supabase migration list --linked`).
  * 2. Every Edge Function in supabase/functions is deployed: an unsigned call gets 401 from Supabase's
  *    gateway, where a function that is not deployed gets 404.
- * 3. The app answers at APP_URL with its page.
+ * 3. The app answers at APP_URL with its page, built from EXPECTED_SHA (waiting for Vercel's build).
  * 4. Supabase's security advisor reports no error-level finding (warnings are listed, not failed:
  *    the accepted ones are in docs/governance/RISK-REGISTER.md).
  *
@@ -57,6 +57,11 @@ export function functionVerdict(status: number): 'deployed' | 'missing' | 'unexp
   return 'unexpected';
 }
 
+/** The commit a built page names in its app-version meta tag (vite.config.ts), or null. */
+export function appVersion(html: string): string | null {
+  return html.match(/<meta name="app-version" content="([0-9a-f]{7,40})"/)?.[1] ?? null;
+}
+
 interface Lint { level?: string; name?: string; title?: string; detail?: string }
 
 /** Error-level advisor findings, as lines to print. */
@@ -85,14 +90,23 @@ async function main() {
     else problems.push(v === 'missing' ? `${fn} is not deployed (an unsigned call got 404).` : `${fn} answered an unsigned call with ${res.status}, not 401.`);
   }
 
-  // 3. The app.
+  // 3. The app, serving this commit's build (security review, L5). Vercel builds after the push, so
+  // this waits up to 15 minutes for the page to name the expected commit.
   const appUrl = process.env.APP_URL ?? '';
   if (appUrl) {
     const headers: Record<string, string> = process.env.VERCEL_BYPASS ? { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS } : {};
-    const res = await fetch(appUrl, { headers });
-    const body = await res.text();
-    if (res.status !== 200 || !body.includes('id="root"')) problems.push(`The app at ${appUrl} answered ${res.status} without its page.`);
-    else console.log(`App: ${appUrl} answers.`);
+    const expected = process.env.EXPECTED_SHA ?? '';
+    let last = { status: 0, version: null as string | null, page: false };
+    for (let i = 0; i < 60; i++) {
+      const res = await fetch(appUrl, { headers, cache: 'no-store' });
+      const body = await res.text();
+      last = { status: res.status, version: appVersion(body), page: body.includes('id="root"') };
+      if (!expected || (last.status === 200 && last.version === expected)) break;
+      await new Promise((r) => setTimeout(r, 15_000));
+    }
+    if (last.status !== 200 || !last.page) problems.push(`The app at ${appUrl} answered ${last.status} without its page.`);
+    else if (expected && last.version !== expected) problems.push(`The app at ${appUrl} serves build ${last.version ?? '(unnamed)'}, not ${expected.slice(0, 7)}, after 15 minutes.`);
+    else console.log(`App: ${appUrl} answers${expected ? `, serving ${expected.slice(0, 7)}` : ' (its build was not checked: EXPECTED_SHA is not set)'}.`);
   }
 
   // 4. The security advisor.

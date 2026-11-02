@@ -10,7 +10,7 @@
  * else is shown as checked another way (with how), by hand (with why), or not checked, in red.
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename, join, resolve, sep } from 'node:path';
 import { SPRINTS, type Case, type SprintCases } from '../e2e/cases';
 
 export interface RunTest {
@@ -26,6 +26,16 @@ export interface Build { sha: string; run: string; target: string; branch: strin
 
 type Result = Record<string, unknown>;
 
+/**
+ * A recording's path under the results folder, or null if it would leave it or is not a .webm file
+ * (security review, L6): the page copies these files, so a crafted report must not reach others.
+ */
+export function insideRoot(root: string, rel: string): string | null {
+  const base = resolve(root);
+  const full = resolve(base, rel);
+  return full.startsWith(base + sep) && full.endsWith('.webm') ? full : null;
+}
+
 /** The tests in a Playwright JSON report, flattened. A test is failed if any attempt failed. */
 export function readRun(report: Result, root: string): RunTest[] {
   const out: RunTest[] = [];
@@ -39,7 +49,8 @@ export function readRun(report: Result, root: string): RunTest[] {
         const failed = results.some((r) => r.status !== 'passed' && r.status !== 'skipped');
         const recordings = ((last.attachments as Result[]) ?? [])
           .filter((a) => a.contentType === 'video/webm' && typeof a.path === 'string')
-          .map((a) => ({ label: String(a.name).replace(/^recording: /, ''), path: join(root, String(a.path).replace(/^.*?e2e-results\//, '')) }));
+          .map((a) => ({ label: String(a.name).replace(/^recording: /, ''), path: insideRoot(root, String(a.path).replace(/^.*?e2e-results\//, '')) }))
+          .filter((r): r is { label: string; path: string } => r.path !== null);
         const err = ((last.errors as Result[]) ?? [])[0] as Result | undefined;
         out.push({
           title: String(spec.title),

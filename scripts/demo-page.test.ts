@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readRun, renderHtml, renderMarkdown, verdict, type Build, type RunTest } from './demo-page';
+import { insideRoot, readRun, renderHtml, renderMarkdown, verdict, type Build, type RunTest } from './demo-page';
 import { SPRINTS, type SprintCases } from '../e2e/cases';
 
 const build: Build = { sha: 'abcdef1234567', run: 'https://github.com/x/y/actions/runs/1', target: 'local', branch: 'sprint-20', at: '2026-11-02T15:00:00Z' };
@@ -58,5 +58,12 @@ describe('the demo page (Sprint 20, S20-4)', () => {
       expect(new Set(s.cases.map((c) => c.id)).size).toBe(s.cases.length);
       for (const c of s.cases) expect(s.stories.map((st) => st.id)).toContain(c.story);
     }
+  });
+
+  it('copies only .webm files inside the results folder (security review, L6)', () => {
+    expect(insideRoot('/res/local', 'artifacts/t/a.webm')).toBe('/res/local/artifacts/t/a.webm');
+    expect(insideRoot('/res/local', '../../../root/.config/gh/hosts.yml')).toBeNull();
+    expect(insideRoot('/res/local', 'artifacts/../../x.webm')).toBeNull();
+    expect(insideRoot('/res/local', 'artifacts/t/a.zip')).toBeNull();
   });
 });

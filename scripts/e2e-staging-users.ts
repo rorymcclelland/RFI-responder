@@ -78,8 +78,31 @@ async function main() {
   }
 }
 
+/**
+ * After the run (security review, H1): each test person signs out everywhere, which revokes every
+ * refresh token they hold, then gets a new random password that is never written down.
+ */
+async function finish() {
+  const problem = stagingProblem(process.env);
+  if (problem) throw new Error(problem);
+  const url = process.env.STAGING_SUPABASE_URL!.trim();
+  const service = createClient(url, process.env.STAGING_SERVICE_ROLE_KEY!.trim(), { auth: { persistSession: false, autoRefreshToken: false } });
+  const password = process.env.E2E_PASSWORD ?? '';
+  const { data: list } = await service.auth.admin.listUsers({ perPage: 1000 });
+  for (const p of TEST_PEOPLE) {
+    if (password) {
+      const anon = createClient(url, process.env.STAGING_SUPABASE_ANON_KEY!.trim(), { auth: { persistSession: false, autoRefreshToken: false } });
+      const { error } = await anon.auth.signInWithPassword({ email: p.email, password });
+      if (!error) await anon.auth.signOut({ scope: 'global' });
+    }
+    const user = list?.users.find((u) => u.email?.toLowerCase() === p.email);
+    if (user) await service.auth.admin.updateUserById(user.id, { password: newPassword() });
+  }
+  console.log('The test people are signed out everywhere, with passwords nobody knows.');
+}
+
 if (process.argv[1]?.endsWith('e2e-staging-users.ts')) {
-  main().catch((e) => {
+  (process.argv.includes('--finish') ? finish() : main()).catch((e) => {
     console.error(`::error::${(e as Error).message}`);
     process.exit(1);
   });

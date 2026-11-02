@@ -36,7 +36,9 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S19 4', story: 'S19-1', title: 'Hand back with a note, seen on Home and on the question', how: browser },
       { id: 'S19 5', story: 'S19-1', title: 'Approve; and when the owner decided first, nothing is overwritten', how: browser },
       { id: 'S19 6', story: 'S19-3', title: 'At phone width nothing scrolls sideways; the Sent list has no manual stage buttons', how: browser },
-      { id: 'S19 7', story: 'S19-4', title: 'The screenshots retaken, every view fitting 768 px', how: { kind: 'ci', by: 'the e2e job runs npm run screenshots on the fresh seed and keeps layout-check.json' } },
+      { id: 'S19 7', story: 'S19-4', title: 'The screenshots retaken, every view fitting 768 px', how: { kind: 'ci', by: 'the e2e job runs npm run screenshots on the fresh seed, which fails if any view does not fit 768 px' } },
+      { id: 'S19 8', story: 'S19-1', title: 'A member who was not assigned does not see the question, and cannot decide it', how: browser },
+      { id: 'S19 9', story: 'S19-2', title: 'A question in an earlier file opens in that file', how: { kind: 'ci', by: 'src/workspace/openResponse.test.ts (firstView). The demo\'s Bluefin has one file, so the browser tests open only that one' } },
     ],
   },
   {
@@ -52,9 +54,10 @@ export const SPRINTS: SprintCases[] = [
     cases: [
       { id: 'S20-1 1', story: 'S20-1', title: 'The suite passes on a fresh local stack, in CI', how: { kind: 'suite' } },
       { id: 'S20-1 2', story: 'S20-1', title: 'A failure shows with its screenshot and recording; no retries', how: { kind: 'ci', by: 'playwright.config.ts (retries 0, screenshot on, a recording per session attached by e2e/support.ts)' } },
-      { id: 'S20-1 3', story: 'S20-1', title: 'The suite refuses a non-local address', how: { kind: 'ci', by: 'e2e/support.test.ts (targetProblem) and the browser\'s request guard' } },
-      { id: 'S20-1 4', story: 'S20-1', title: 'A deliberately broken build fails a test', how: { kind: 'ci', by: 'a throwaway commit with Home\'s heading removed, recorded in the refinement\'s close' } },
+      { id: 'S20-1 3', story: 'S20-1', title: 'The suite refuses a non-local address', how: { kind: 'ci', by: 'e2e/target.test.ts (targetProblem and the request guard)' } },
+      { id: 'S20-1 4', story: 'S20-1', title: 'A deliberately broken build fails a test', how: { kind: 'ci', by: 'a throwaway branch with Home\'s heading changed: all five tests failed (CI run 41464775277, 2 November 2026)' } },
       { id: 'S20-1 5', story: 'S20-1', title: 'Recordings show only synthetic people and data', how: { kind: 'hand', why: 'Claude looks at the recordings before publishing this page' } },
+      { id: 'S20-1 6', story: 'S20-1', title: 'The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test', how: { kind: 'hand', why: 'not built in Sprint 20: returned to the backlog' } },
       { id: 'S20-2 1', story: 'S20-2', title: 'A sprint branch\'s preview talks to staging, never the live demo', how: { kind: 'hand', why: 'needs the staging project, which Rory sets up' } },
       { id: 'S20-2 2', story: 'S20-2', title: 'The live demo is untouched by staging runs', how: { kind: 'ci', by: 'scripts/deploy-check.test.ts (stagingProblem refuses the live project) and the staging run\'s request guard' } },
       { id: 'S20-2 3', story: 'S20-2', title: 'A staging test user cannot sign in on the live demo', how: { kind: 'hand', why: 'needs the staging project' } },

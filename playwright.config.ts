@@ -27,7 +27,9 @@ export default defineConfig({
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:5173',
     screenshot: 'on',
-    trace: 'retain-on-failure',
+    // A trace records what was typed and every request, so a staging run (whose password and Vercel
+    // bypass must stay secret) keeps none (Sprint 20 security review, H1).
+    trace: staging ? 'off' : 'retain-on-failure',
     // A little slower than a machine would go, so the recordings can be followed (S20-4).
     launchOptions: { slowMo: Number(process.env.E2E_SLOW_MO ?? 150) },
   },

@@ -3,10 +3,14 @@
 # - A push to a sprint-* branch deploys its migrations and Edge Functions to the staging project, moves
 #   the branch "staging" to the same commit and waits for Vercel's build of it (served at
 #   STAGING_APP_HOST, talking to staging), checks the deploy, then runs the browser acceptance tests
-#   there with test users made for the run, keeping the recordings.
-# - A push to main deploys to the live demo, but only after Rory approves it: the job uses the GitHub
-#   environment "production", which he sets to require his review (Q1 of the Sprint 20 refinement).
+#   there with test people made for the run, and publishes the results for the demo page.
+# - A push to main deploys the migrations and Edge Functions to the live demo, in the GitHub
+#   environment "production", which must require Rory's approval (Q1 of the Sprint 20 refinement): the
+#   job refuses to run if it does not. Vercel publishes the app itself from main as before, without
+#   waiting (docs/DEPLOYING.md says so).
 #
+# Secrets are passed only to the steps that need them, never to `npm ci` (security review, H2), and
+# are environment secrets, so a job outside that environment cannot read them.
 # Set up once by the repository owner (docs/DEPLOYING.md, "Staging and automated deploys"). Until the
 # settings exist each job says so and passes, so nothing is deployed by accident.
 # Runs only on pushes to this repository: forks and pull requests get no secrets and no environment.
@@ -19,11 +23,6 @@ on:
 
 permissions:
   contents: read
-  deployments: read
-
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   staging:
@@ -32,22 +31,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: staging
-    # Write access only to push the results to their own branch, for the demo page.
+    # One staging project, so one run at a time across all branches (security review, M4).
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    # Write access only to move the staging branch and push the results to their own branch.
     permissions:
       contents: write
       deployments: read
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
       STAGING_REF: ${{ vars.STAGING_PROJECT_REF }}
+      STAGING_APP_HOST: ${{ vars.STAGING_APP_HOST }}
       PRODUCTION_SUPABASE_REF: ${{ vars.PRODUCTION_PROJECT_REF }}
       PRODUCTION_APP_HOST: ${{ vars.PRODUCTION_APP_HOST }}
-      STAGING_APP_HOST: ${{ vars.STAGING_APP_HOST }}
     steps:
       - name: Is staging set up?
         id: ready
+        env:
+          HAS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
+          HAS_DB: ${{ secrets.STAGING_DB_PASSWORD != '' }}
         run: |
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$STAGING_REF" ] || [ -z "$PRODUCTION_SUPABASE_REF" ] || [ -z "$PRODUCTION_APP_HOST" ] || [ -z "$STAGING_APP_HOST" ]; then
+          if [ "$HAS_TOKEN" != true ] || [ "$HAS_DB" != true ] || [ -z "$STAGING_REF" ] || [ -z "$PRODUCTION_SUPABASE_REF" ] || [ -z "$PRODUCTION_APP_HOST" ] || [ -z "$STAGING_APP_HOST" ]; then
             echo "::notice::Staging is not set up yet (docs/DEPLOYING.md, Staging and automated deploys); nothing deployed."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
@@ -68,44 +72,33 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: 2.121.0
-      - name: Migrations to staging
+      - name: Migrations and Edge Functions to staging
         if: steps.ready.outputs.ok == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
         run: |
           supabase link --project-ref "$STAGING_REF"
           supabase db push --yes
-      - name: Edge Functions to staging
-        if: steps.ready.outputs.ok == 'true'
-        run: supabase functions deploy --project-ref "$STAGING_REF"
+          supabase functions deploy --project-ref "$STAGING_REF"
+          supabase migration list --linked > /tmp/migrations.txt
       # The staging app lives at one address (STAGING_APP_HOST, a Vercel domain tied to the branch
       # "staging"), so the staging functions' APP_ORIGIN never changes. This job moves that branch to
       # the sprint's commit; Vercel builds it. A push made with the job's token starts no workflow.
       - name: Move the staging branch to this commit
         if: steps.ready.outputs.ok == 'true'
-        run: git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "${{ github.sha }}:refs/heads/staging"
-      - name: Wait for Vercel's staging build of this commit
-        if: steps.ready.outputs.ok == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          for i in $(seq 1 60); do
-            url=$(gh api "repos/${{ github.repository }}/deployments?sha=${{ github.sha }}&ref=staging&per_page=10" --jq '.[0].statuses_url // ""')
-            if [ -n "$url" ]; then
-              state=$(gh api "$url" --jq '.[0].state // ""')
-              if [ "$state" = "success" ]; then echo "Vercel built staging."; exit 0; fi
-              if [ "$state" = "failure" ] || [ "$state" = "error" ]; then echo "::error::Vercel's staging build failed"; exit 1; fi
-            fi
-            sleep 15
-          done
-          echo "::error::No Vercel build of the staging branch after 15 minutes"; exit 1
-      - name: Check the deploy
+          TOKEN: ${{ github.token }}
+        run: git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/staging"
+      - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:
           SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
           APP_URL: https://${{ vars.STAGING_APP_HOST }}
+          EXPECTED_SHA: ${{ github.sha }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
-        run: |
-          supabase migration list --linked > /tmp/migrations.txt
-          npx tsx scripts/deploy-check.ts /tmp/migrations.txt
+        run: npx tsx scripts/deploy-check.ts /tmp/migrations.txt
       - name: Test people for this run, and a demo reset
         if: steps.ready.outputs.ok == 'true'
         env:
@@ -124,18 +117,19 @@ jobs:
           E2E_FORBIDDEN_HOSTS: ${{ vars.PRODUCTION_APP_HOST }},${{ vars.PRODUCTION_PROJECT_REF }}.supabase.co
           E2E_VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
         run: npm run test:e2e
-      - name: Publish the results for the demo page
+      - name: Sign the test people out everywhere
+        if: always() && steps.ready.outputs.ok == 'true'
+        env:
+          STAGING_SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
+          STAGING_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+          STAGING_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SERVICE_ROLE_KEY }}
+        run: npx tsx scripts/e2e-staging-users.ts --finish
+      - name: Publish the results for the demo page (searched for secrets first)
         if: always() && steps.ready.outputs.ok == 'true'
         env:
           TOKEN: ${{ github.token }}
+          E2E_VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
         run: bash scripts/publish-e2e-results.sh staging
-      - name: Keep the report and recordings
-        if: always() && steps.ready.outputs.ok == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-staging
-          retention-days: 14
-          path: e2e-results/
 
   production:
     name: The live demo (after Rory's approval)
@@ -143,18 +137,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      actions: read
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
       PRODUCTION_REF: ${{ vars.PRODUCTION_PROJECT_REF }}
       PRODUCTION_APP_HOST: ${{ vars.PRODUCTION_APP_HOST }}
     steps:
-      - name: Is the deploy set up?
+      - name: Is the deploy set up, and does it wait for approval?
         id: ready
+        env:
+          HAS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
+          HAS_DB: ${{ secrets.PRODUCTION_DB_PASSWORD != '' }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$PRODUCTION_REF" ] || [ -z "$PRODUCTION_APP_HOST" ]; then
+          if [ "$HAS_TOKEN" != true ] || [ "$HAS_DB" != true ] || [ -z "$PRODUCTION_REF" ] || [ -z "$PRODUCTION_APP_HOST" ]; then
             echo "::notice::The production deploy is not set up yet (docs/DEPLOYING.md); deploy by hand as before."
             echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Security review, M3: refuse to deploy unless the environment requires a reviewer.
+          reviewers=$(gh api "repos/${GITHUB_REPOSITORY}/environments/production" --jq '[.protection_rules[]? | select(.type == "required_reviewers")] | length' || echo 0)
+          if [ "${reviewers:-0}" -lt 1 ]; then
+            echo "::error::The production environment does not require a reviewer, so nothing was deployed. Add yourself under Settings, Environments, production."; exit 1
           fi
           echo "ok=true" >> "$GITHUB_OUTPUT"
       - if: steps.ready.outputs.ok == 'true'
@@ -170,19 +177,21 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: 2.121.0
-      - name: Migrations to the live demo
+      - name: Migrations and Edge Functions to the live demo
         if: steps.ready.outputs.ok == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
         run: |
           supabase link --project-ref "$PRODUCTION_REF"
           supabase db push --yes
-      - name: Edge Functions to the live demo
-        if: steps.ready.outputs.ok == 'true'
-        run: supabase functions deploy --project-ref "$PRODUCTION_REF"
-      - name: Check the deploy
+          supabase functions deploy --project-ref "$PRODUCTION_REF"
+          supabase migration list --linked > /tmp/migrations.txt
+      - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:
           SUPABASE_URL: https://${{ vars.PRODUCTION_PROJECT_REF }}.supabase.co
           APP_URL: https://${{ vars.PRODUCTION_APP_HOST }}
-        run: |
-          supabase migration list --linked > /tmp/migrations.txt
-          npx tsx scripts/deploy-check.ts /tmp/migrations.txt
+          EXPECTED_SHA: ${{ github.sha }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: npx tsx scripts/deploy-check.ts /tmp/migrations.txt
