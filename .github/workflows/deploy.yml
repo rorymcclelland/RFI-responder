@@ -129,6 +129,14 @@ jobs:
           TOKEN: ${{ github.token }}
           E2E_VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
         run: bash scripts/publish-e2e-results.sh staging
+      # Sprint 21 (S21-3, Q4): the hosted sign-in settings, read-only, against supabase/hosted-auth.json.
+      # Last, so a difference fails the run without hiding the test results.
+      - name: Sign-in settings match the repository
+        if: always() && steps.ready.outputs.ok == 'true'
+        env:
+          SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: npx tsx scripts/deploy-check.ts --auth staging
 
   production:
     name: The live demo (after Rory's approval)
@@ -190,3 +198,9 @@ jobs:
           EXPECTED_SHA: ${{ github.sha }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: npx tsx scripts/deploy-check.ts /tmp/migrations.txt
+      - name: Sign-in settings match the repository
+        if: always() && steps.ready.outputs.ok == 'true'
+        env:
+          SUPABASE_URL: https://${{ vars.PRODUCTION_PROJECT_REF }}.supabase.co
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: npx tsx scripts/deploy-check.ts --auth production

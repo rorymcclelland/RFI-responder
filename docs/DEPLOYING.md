@@ -40,11 +40,11 @@ Until the settings below exist, each job says so and passes, and the live demo i
 
 What lives where. No value is ever written in this repository, typed into the app, or pasted into a chat.
 
-**The access tokens (security review, H2).** Each environment has its own token, limited to its own Supabase project, so the staging job cannot reach the live demo, and neither token can read keys, change sign-in or touch data outside migrations. Each expires after a year; the deploy then fails with Supabase's message, and a new token goes in the same place.
+**The access tokens (security review, H2).** Each environment has its own token, limited to its own Supabase project, so the staging job cannot reach the live demo, and neither token can read keys, change sign-in or touch data outside migrations. Since Sprint 21 each can read its project's sign-in settings, and only read them (**Auth Config: Read**), so the deploy can check them. Each expires after a year; the deploy then fails with Supabase's message, and a new token goes in the same place ([Rotating the keys](#rotating-the-keys)).
 
 | Setting | Where | What |
 |---|---|---|
-| `SUPABASE_ACCESS_TOKEN` | GitHub, a secret in **each** environment, `staging` and `production` (not a repository secret) | A Supabase access token **limited to that environment's project** (Supabase's project-scoped tokens): read project settings, advisors, API keys, Data API, database and pooling configuration; read and write migrations and Edge Functions; nothing else. Given only to the deploy and check steps, never to `npm ci` or the tests |
+| `SUPABASE_ACCESS_TOKEN` | GitHub, a secret in **each** environment, `staging` and `production` (not a repository secret) | A Supabase access token **limited to that environment's project** (Supabase's project-scoped tokens): read project settings, advisors, API keys, Data API, database and pooling configuration, and (since Sprint 21) sign-in configuration (**Auth Config: Read**); read and write migrations and Edge Functions; nothing else. Given only to the deploy and check steps, never to `npm ci` or the tests |
 | `STAGING_SUPABASE_ANON_KEY` | GitHub, environment `staging` secret, and a repository secret for the keep-awake ping | Staging's public anon key |
 | `STAGING_DB_PASSWORD`, `STAGING_SERVICE_ROLE_KEY`, `VERCEL_BYPASS_SECRET` | GitHub, environment `staging` secrets | Staging's database password and service key (to make the test people), and Vercel's protection-bypass secret |
 | `PRODUCTION_DB_PASSWORD` | GitHub, environment `production` secret | The live demo's database password, readable only by the approved job |
@@ -58,3 +58,20 @@ Setting it up, once (the owner's steps; about 30 minutes):
 2. **GitHub**, repository settings. Under Environments, create `staging`, and `production` with yourself as required reviewer and deployments from `main` only. **Do this before adding `PRODUCTION_DB_PASSWORD`**, so the secret is never readable without your approval. Then add the secrets and variables in the table.
 3. **Vercel**, the project's settings. `vercel.json` already tells Vercel not to build the `e2e-results/*` branches. Under Domains, add a `.vercel.app` name for staging (such as `rfi-responder-staging.vercel.app`) tied to the Git branch `staging`. Under Environment Variables, add the staging address and anon key as Config variables for Preview, branch `staging` only. Under Deployment Protection, create a Protection Bypass for Automation secret and put it in GitHub as `VERCEL_BYPASS_SECRET`.
 4. **The first run.** Push to a sprint branch (or re-run the Deploy workflow): it applies every migration to staging and, finding no demo data there, loads [`supabase/demo-hosted.sql`](../supabase/demo-hosted.sql) itself (staging only; the live demo's data is never loaded or reset by the workflow). From then on every run resets the demo.
+
+### Sign-in settings, checked on every deploy
+
+Since Sprint 21 (S21-3), the hosted projects' sign-in settings are written in [`supabase/hosted-auth.json`](../supabase/hosted-auth.json), one block per environment: new sign-ups off, the site address, and the redirect addresses. After every staging run, and after every approved production deploy, the workflow reads the project's settings with its own token (read-only) and fails, naming each difference and where to change it, if they do not match. Nothing is applied automatically (Rory, Q4): the tokens cannot change sign-in. To change a setting, change it in the Supabase dashboard (Authentication) and in `hosted-auth.json` in the same sprint.
+
+### Rotating the keys
+
+Who does what. Rory makes what only a dashboard issues and keeps the credentials; [`scripts/setup-secrets.ts`](../scripts/setup-secrets.ts), which Rory runs on his PC, puts them where the deploy reads them; Claude sets public, non-secret settings through the connectors, with Rory's approval each time, and never sees a value.
+
+| Step | Who | How |
+|---|---|---|
+| Make the access token (yearly, or when its permissions change) | Rory | Supabase, Account, Access Tokens: a token limited to the one project, with the permissions in the table above |
+| Store the access tokens, database passwords, the staging keys and Vercel's bypass secret | Rory, with the script | Signed in as himself (`npx supabase login`, `gh auth login`), in the repository's folder: `npx tsx scripts/setup-secrets.ts staging` lists what it would set, by name only; `npx tsx scripts/setup-secrets.ts staging --apply` sets them. The same for `production`. It reads the project's API keys with the Supabase command line, asks for the rest without showing what is typed (Enter leaves a secret as it is), refuses a key of the wrong kind and staging secrets for the live demo's project, and prints no value |
+| Rotate an AI key | Rory | Make it in the provider's console with its spend limit, then set it in the project's Edge Function secrets (`APP_ORIGIN`, `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`); these never go to GitHub |
+| Public settings (Vercel's preview variables, the repository variables) | Claude, with Rory's approval each time | The Vercel connector, or by hand from the table above |
+| Check | The workflow | The next push to a sprint branch runs the deploy checks, the browser tests and the sign-in check on staging |
+

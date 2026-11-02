@@ -1,0 +1,15 @@
+{
+  "about": "Sprint 21 (S21-3, O-1): the hosted projects' sign-in settings, as they must be. Every deploy reads each project's settings (read-only, with the project's own access token) and fails, naming the difference, if they do not match; nothing here is applied automatically (Q4). Change a setting in the Supabase dashboard (Authentication) and here in the same change. Field names are the Management API's (GET /v1/projects/{ref}/config/auth).",
+  "environments": {
+    "staging": {
+      "disable_signup": true,
+      "site_url": "https://rfi-responder-staging.vercel.app",
+      "uri_allow_list": ["https://rfi-responder-staging.vercel.app/**"]
+    },
+    "production": {
+      "disable_signup": true,
+      "site_url": "https://rfi-responder.vercel.app",
+      "uri_allow_list": ["https://rfi-responder.vercel.app/**"]
+    }
+  }
+}

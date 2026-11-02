@@ -15,6 +15,13 @@
  *
  * Needs SUPABASE_URL (https://<ref>.supabase.co), APP_URL, SUPABASE_ACCESS_TOKEN; VERCEL_BYPASS for a
  * protected preview. Prints no secret.
+ *
+ * Sprint 21 (S21-3, O-1, Q4):
+ *
+ *   tsx scripts/deploy-check.ts --auth <staging|production>
+ *
+ * reads the project's sign-in settings (read-only: the token has Auth Config: Read and nothing more
+ * on sign-in) and fails, naming each difference, unless they match supabase/hosted-auth.json.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -69,6 +76,68 @@ interface Lint { level?: string; name?: string; title?: string; detail?: string 
 /** Error-level advisor findings, as lines to print. */
 export function advisorErrors(lints: Lint[]): string[] {
   return lints.filter((l) => (l.level ?? '').toUpperCase() === 'ERROR').map((l) => `${l.name ?? l.title ?? 'finding'}: ${l.detail ?? ''}`.trim());
+}
+
+export type Environment = 'staging' | 'production';
+export interface AuthSettings { disable_signup: boolean; site_url: string; uri_allow_list: string[] }
+
+/** The sign-in settings the repository says an environment must have. */
+export function expectedAuth(env: Environment, file = 'supabase/hosted-auth.json'): AuthSettings {
+  const all = JSON.parse(readFileSync(file, 'utf8')) as { environments: Record<string, AuthSettings> };
+  const e = all.environments[env];
+  if (!e) throw new Error(`${file} has no settings for ${env}.`);
+  return e;
+}
+
+/** The Management API gives the redirect addresses as one comma-separated string. */
+const addresses = (v: unknown): string[] =>
+  (Array.isArray(v) ? v.map(String) : typeof v === 'string' ? v.split(',') : []).map((x) => x.trim()).filter(Boolean).sort();
+
+/** Each way the project's settings differ from the repository's, in words that say what to change. */
+export function authDifferences(expected: AuthSettings, actual: Record<string, unknown>): string[] {
+  const out: string[] = [];
+  if (actual.disable_signup !== expected.disable_signup) {
+    out.push(expected.disable_signup
+      ? 'New sign-ups are allowed; the repository says off. Turn off "Allow new users to sign up" (Authentication, Sign In / Providers).'
+      : 'New sign-ups are off; the repository says allowed.');
+  }
+  if (String(actual.site_url ?? '').replace(/\/$/, '') !== expected.site_url.replace(/\/$/, '')) {
+    out.push(`The site address is "${String(actual.site_url ?? '')}"; the repository says "${expected.site_url}" (Authentication, URL Configuration).`);
+  }
+  const have = addresses(actual.uri_allow_list);
+  const want = addresses(expected.uri_allow_list);
+  const extra = have.filter((x) => !want.includes(x));
+  const missing = want.filter((x) => !have.includes(x));
+  if (missing.length) out.push(`Redirect addresses missing: ${missing.join(', ')} (Authentication, URL Configuration).`);
+  if (extra.length) out.push(`Redirect addresses not in the repository: ${extra.join(', ')}. Remove them, or add them to supabase/hosted-auth.json.`);
+  return out;
+}
+
+/** Reads a project's sign-in settings and compares them. Prints the three settings, never the token. */
+export async function checkAuth(env: Environment, ref: string, token: string, get: typeof fetch = fetch, log: (s: string) => void = console.log): Promise<string[]> {
+  const res = await get(`https://api.supabase.com/v1/projects/${ref}/config/auth`, { headers: { Authorization: `Bearer ${token}` } });
+  if (res.status === 401 || res.status === 403) {
+    return [`The ${env} access token cannot read the sign-in settings (${res.status}). Make it again with Auth Config: Read added (docs/DEPLOYING.md, "Rotating the keys").`];
+  }
+  if (!res.ok) return [`The ${env} sign-in settings could not be read (${res.status}).`];
+  const actual = (await res.json()) as Record<string, unknown>;
+  const problems = authDifferences(expectedAuth(env), actual);
+  log(`Sign-in settings (${env}): sign-ups ${actual.disable_signup === true ? 'off' : 'on'}; site ${String(actual.site_url ?? '')}; redirects ${addresses(actual.uri_allow_list).join(', ') || 'none'}.`);
+  return problems;
+}
+
+async function authMain(env: string) {
+  if (env !== 'staging' && env !== 'production') throw new Error('Say which environment: --auth staging, or --auth production.');
+  const ref = (process.env.SUPABASE_URL ?? '').match(/^https:\/\/([a-z0-9]{20})\.supabase\.co\/?$/)?.[1];
+  if (!ref) throw new Error('SUPABASE_URL must be https://<project-ref>.supabase.co.');
+  const token = process.env.SUPABASE_ACCESS_TOKEN ?? '';
+  if (!token) throw new Error('SUPABASE_ACCESS_TOKEN is needed to read the sign-in settings.');
+  const problems = await checkAuth(env, ref, token);
+  if (problems.length) {
+    for (const p of problems) console.error(`::error::${p}`);
+    process.exit(1);
+  }
+  console.log(`The ${env} sign-in settings match supabase/hosted-auth.json.`);
 }
 
 async function main() {
@@ -137,7 +206,8 @@ async function main() {
 }
 
 if (process.argv[1]?.endsWith('deploy-check.ts')) {
-  main().catch((e) => {
+  const auth = process.argv.indexOf('--auth');
+  (auth > 0 ? authMain(process.argv[auth + 1] ?? '') : main()).catch((e) => {
     console.error(`::error::${(e as Error).message}`);
     process.exit(1);
   });
