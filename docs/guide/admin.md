@@ -20,7 +20,7 @@ Drafts are written only from the knowledge base, so its quality is the quality o
 
 ![The knowledge page: what the organisation knows](../screenshots/17-knowledge.png)
 
-- **What we know**, the overview: how many answers there are, in which languages and added by how many people; four counts that open the matching answers (**reviewed and current**, **waiting for an admin’s review**, **machine translations to check**, **overdue for review**); the answers **By topic**, from their tags, with how often each topic was cited in responses; and what was **Learned recently** from responses. A proposed change to an existing answer (learned from a response) is not counted as an answer of its own: it waits for review, and the answer it would change stays as it is until then.
+- **What we know**, the overview: how many answers there are, in which languages and added by how many people; four counts that open the matching answers (**reviewed and current**, **waiting for an admin’s review**, **machine translations to check**, **overdue for review**), and the count of gaps **Not answered yet**, which opens **Gaps** (below); the answers **By topic**, from their tags, with how often each topic was cited in responses; and what was **Learned recently** from responses. A proposed change to an existing answer (learned from a response) is not counted as an answer of its own: it waits for review, and the answer it would change stays as it is until then.
 - **Browse all answers**: search by entry number (`KB-0101`, or just `101`) or by the words of questions, answers and tags; filter by state, language and where an answer came from (**Imported**, **Learned from responses**, **Added by hand**); and sort by number, most cited or oldest review first. Retired answers are left out unless you tick **Retired**. Searching by meaning is what **Ask it a question** does (below). An entry written in Japanese is marked **Japanese**; the app works out an entry's language from its text, so there is nothing to choose.
 - **Add an answer** adds one question and answer, with tags and a source. An admin's entry counts as reviewed at once; a member's waits for review (below).
 - **Import a spreadsheet** adds many at once from a spreadsheet (.xlsx or .csv) with a question column and an answer column, and optionally tags and source. Map the columns, choose **Preview Import** to check the rows, untick any you do not want, then import. Rows without a question or answer are left out, and so is any question already in the knowledge base in the same language (ignoring case and spacing): an English question imported with a Japanese answer is a new, Japanese entry.
@@ -46,6 +46,18 @@ Everyone sees the same page, history included; the rest of the audit log stays w
 - **Retire** an answer that is no longer true (a lapsed certificate, a closed office), saying why in 5 to 500 characters. A retired answer is no longer matched, drafted from or learned onto, its question is free for a new answer, and any draft still to do that cites it is held for a person. It stays readable, marked **Retired**, with its reason and history. **Restore** brings it back, unless another answer now has its question or it has been replaced since. Retiring an answer also declines any change proposed for it. Declining a proposed change retires it in the same way, and leaves the answer it would have changed as it is. Both are recorded in the audit log.
 
 **Governance** (below) still lists everything waiting for review in one queue.
+
+### Gaps
+
+**Gaps** (Sprint 21) lists the questions from responses in the last 90 days that the knowledge base could not answer: those whose draft said a person needs to write the answer. Pricing questions are never listed. Questions worded the same, ignoring case, spaces and punctuation, are one line, with how many responses asked them; questions that mean the same in other words stay separate. Each line says where it stands:
+
+- **Not answered yet**: still to do in its response. **Open it in the response** opens the response at that question, to write the answer or assign it to someone who knows.
+- **Answered, learned when sent**: a person approved an answer; the knowledge base learns it when the response is marked as sent.
+- **Learned**: the answer is now in the knowledge base; its number opens its page.
+- **Answered, not added**: considered when the response was marked as sent, but not added (for instance the same answer as before).
+- **Left unanswered**: the owner chose not to answer it, or its response was archived first.
+
+Nothing is learned on this page: answers are learned only when their response is marked as sent, with a record of where they came from.
 
 ### Asking it a question
 

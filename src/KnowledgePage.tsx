@@ -10,6 +10,8 @@ import LanguageLabel from './LanguageLabel';
 import AddEntryForm from './knowledge/AddEntryForm';
 import EntryPanel from './knowledge/EntryPanel';
 import AskBox from './knowledge/AskBox';
+import GapsView from './knowledge/GapsView';
+import { gapCounts, loadKnowledgeGaps, type Gap, type GapState } from './lib/knowledgeGaps';
 import {
   EMPTY_FILTERS, STATE_LABEL, browse, loadBrowseEntries, loadKnowledgeOverview,
   type BrowseEntry, type BrowseFilters, type BrowseSort, type EntryState, type KnowledgeOverview, type OriginGroup,
@@ -54,7 +56,10 @@ function useNarrow(query = '(max-width: 1040px)'): boolean {
 }
 
 export default function KnowledgePage({ names, isAdmin, version, onImport, onAdded, onIndexFailed, onReview, openRef = null, onOpenedRef, onAsked, openStates = null, onOpenedStates }: Props) {
-  const [view, setView] = useState<'overview' | 'browse'>('overview');
+  const [view, setView] = useState<'overview' | 'browse' | 'gaps'>('overview');
+  // Sprint 21 (S21-2): what the knowledge base could not answer, and which states the view opens on.
+  const [gaps, setGaps] = useState<Gap[]>([]);
+  const [gapStates, setGapStates] = useState<{ states: GapState[]; n: number }>({ states: [], n: 0 });
   const [overview, setOverview] = useState<KnowledgeOverview | null>(null);
   const [entries, setEntries] = useState<BrowseEntry[]>([]);
   const [error, setError] = useState('');
@@ -69,10 +74,11 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
     const seq = ++loadSeq.current;
     setError('');
     try {
-      const [o, e] = await Promise.all([loadKnowledgeOverview(supabase), loadBrowseEntries(supabase)]);
+      const [o, e, g] = await Promise.all([loadKnowledgeOverview(supabase), loadBrowseEntries(supabase), loadKnowledgeGaps(supabase)]);
       if (seq !== loadSeq.current) return;
       setOverview(o);
       setEntries(e);
+      setGaps(g);
     } catch (err) {
       if (seq === loadSeq.current) setError((err as Error).message);
     }
@@ -84,6 +90,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
   // replaced entry or a proposal opened from another answer), else the first result.
   const shownRef = selected ?? results[0]?.ref ?? null;
   const current = results.find((e) => e.ref === shownRef) ?? null;
+  const openGaps = (states: GapState[]) => { setGapStates((g) => ({ states, n: g.n + 1 })); setView('gaps'); window.scrollTo({ top: 0 }); };
   const openBrowse = (f: Partial<BrowseFilters>) => { setFilters({ ...EMPTY_FILTERS, ...f }); setSelected(null); setAnswerOnly(false); setView('browse'); };
   // Sprint 18 (S18-2): on a narrow screen the answer's page replaces the list, with Back to the list
   // (Rory's check, Sprint 17 case 5.6: below the list it was out of sight). Wide screens show both.
@@ -132,16 +139,22 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
             <button onClick={() => setView('overview')} className="hover:text-ink-800">Knowledge</button> / All answers{shownRef ? ` / ${shownRef}` : ''}
           </p>
         )}
-        <h1 className="text-3xl font-black text-ink-900 tracking-tight">{view === 'overview' ? 'What we know' : 'All answers'}</h1>
+        {view === 'gaps' && (
+          <p className="text-xs font-semibold text-ink-500 mb-2">
+            <button onClick={() => setView('overview')} className="hover:text-ink-800">Knowledge</button> / Gaps
+          </p>
+        )}
+        <h1 className="text-3xl font-black text-ink-900 tracking-tight">{view === 'overview' ? 'What we know' : view === 'gaps' ? 'Gaps' : 'All answers'}</h1>
         {view === 'overview' && overview && (
           <p className="text-ink-500 mt-1.5 text-sm font-medium">
             {overview.total} answers, {overview.languages.en} in English and {overview.languages.ja} in Japanese, added by {overview.contributors} {overview.contributors === 1 ? 'person' : 'people'}.
-            Every one says where it came from. Recording a response's export can add its approved answers.
+            Every one says where it came from. Marking a response as sent can add its approved answers.
           </p>
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
         {view === 'overview' && <button onClick={() => openBrowse({})} className="btn-ghost text-sm"><Search size={15} /> Browse all answers</button>}
+        {view !== 'gaps' && <button onClick={() => openGaps([])} className="btn-ghost text-sm">Gaps</button>}
         <button onClick={() => setAdding(true)} className="btn-ghost text-sm"><Plus size={15} /> Add an answer</button>
         <button onClick={onImport} className="btn-primary text-sm"><Upload size={15} /> Import a spreadsheet</button>
       </div>
@@ -163,7 +176,7 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
 
       {view === 'overview' && overview && (
         <>
-          <section aria-label="Health" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <section aria-label="Health" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {([
               ['reviewed', overview.states.reviewed, 'reviewed and current'],
               ['waiting', overview.states.waiting, 'waiting for an admin’s review'],
@@ -176,6 +189,12 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
                 <p className="text-sm text-ink-600 font-medium mt-2">{text}</p>
               </button>
             ))}
+            {/* Sprint 21 (S21-2): the open gaps, beside the other states. */}
+            <button onClick={() => openGaps(['open'])}
+              className="p-5 rounded-2xl border border-ink-100 text-left bg-white shadow-card hover:shadow-card-hover transition-all">
+              <p className={`text-3xl font-black leading-none ${gapCounts(gaps).open > 0 ? 'text-coral-600' : 'text-ink-900'}`}>{gapCounts(gaps).open}</p>
+              <p className="text-sm text-ink-600 font-medium mt-2">{gapCounts(gaps).open === 1 ? 'gap' : 'gaps'} not answered yet</p>
+            </button>
           </section>
           {overview.states.proposals > 0 && (
             <p className="text-sm text-ink-600">
@@ -217,6 +236,10 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
             </section>
           </div>
         </>
+      )}
+
+      {view === 'gaps' && (
+        <GapsView key={gapStates.n} gaps={gaps} initial={gapStates.states} onOpenEntry={(r) => { openBrowse({}); pick(r); }} />
       )}
 
       {view === 'browse' && (

@@ -143,3 +143,67 @@ test('Changed since sent, download, the confirmation, and marking as sent again'
   await expect(entry).toBeVisible();
   await expect(entry).toContainText(admin.name);
 });
+
+// ── S21-2: Gaps ──────────────────────────────────────────────────────────────────────────────────
+
+const REGIONS = 'In which regions is customer data stored?'; // Larkspur: no draft; a person's answer, learned when sent
+
+test('Gaps: what the knowledge base could not answer, where each stands, and one step to act', async ({ browser }) => {
+  checks('S21-2 4', 'S21-2 5');
+  // The admin, who can act on what they open (every member sees the same gaps: database case 6).
+  const page = await signIn(browser, admin);
+  await nav(page, 'Knowledge');
+  await caption(page, 'Knowledge counts the gaps not answered yet, beside the other states');
+  const count = page.getByRole('region', { name: 'Health' }).getByRole('button', { name: /gaps? not answered yet/ });
+  await expect(count).toContainText(/^[1-9]\d*/);
+  await count.click();
+  await expect(page.getByRole('heading', { name: 'Gaps', exact: true })).toBeVisible();
+  const list = page.getByRole('region', { name: 'Gaps' });
+  await expect(page.getByRole('checkbox', { name: /^Not answered yet/ })).toBeChecked();
+
+  await caption(page, 'Every state, with how many responses asked each question');
+  for (const label of ['Answered, learned when sent', 'Learned', 'Answered, not added', 'Left unanswered']) {
+    await page.getByRole('checkbox', { name: new RegExp(`^${label} \\(`) }).check();
+  }
+  const learned = list.getByRole('article', { name: REGIONS });
+  await expect(learned).toContainText('Learned');
+  await expect(learned).toContainText('Asked in 1 response');
+  const ref = learned.getByRole('button', { name: /^KB-\d{4,}$/ });
+  const entryRef = (await ref.textContent())!.trim();
+
+  await caption(page, 'A learned gap opens the answer it became');
+  await ref.click();
+  await expect(page.getByRole('complementary', { name: 'Selected answer' })).toContainText(entryRef);
+  await expect(page.getByRole('complementary', { name: 'Selected answer' })).toContainText(REGIONS);
+
+  await caption(page, 'One not answered yet opens in its response, at that question');
+  await nav(page, 'Knowledge');
+  await page.getByRole('button', { name: 'Gaps', exact: true }).click();
+  const open = list.getByRole('article').filter({ hasText: 'Not answered yet' }).first();
+  const question = (await open.getByRole('paragraph').first().textContent())!.trim();
+  await open.getByRole('button', { name: 'Open it in the response' }).click();
+  const c = card(page, question);
+  await expect(c).toBeVisible();
+  // Opened at that question: its card is open, with what can be done next.
+  await expect(c.getByRole('button', { name: /^(Approve|Write an answer|Edit First)$/ }).first()).toBeVisible();
+});
+
+test('Gaps show a question\'s markup as text', async ({ browser }) => {
+  checks('S21-2 7');
+  const page = await signIn(browser, member);
+  const markup = '<img src=x onerror="document.title=\'pwned\'"> <b>Do you scan uploads?</b>';
+  // The database returns question text as written (database case 7); here one with markup is added
+  // to what it returned, as a hostile upload would put it there, to see how the page shows it.
+  await page.route('**/rest/v1/rpc/knowledge_gaps', async (route) => {
+    const res = await route.fetch();
+    const gaps = (await res.json()) as Record<string, unknown>[];
+    const first = gaps[0] ?? { state: 'open', responses: 1, lastAsked: new Date().toISOString(), entryRef: null, responseId: 'x', response: 'x', sessionId: 'x' };
+    await route.fulfill({ response: res, json: [{ ...first, question: markup, questionId: 'markup-test', state: 'open' }, ...gaps] });
+  });
+  await nav(page, 'Knowledge');
+  await page.getByRole('button', { name: 'Gaps', exact: true }).click();
+  await caption(page, 'A question containing markup shows as the text it is');
+  await expect(page.getByRole('region', { name: 'Gaps' }).getByText(markup, { exact: true })).toBeVisible();
+  await expect(page.locator('section[aria-label="Gaps"] img, section[aria-label="Gaps"] b')).toHaveCount(0);
+  expect(await page.title()).not.toBe('pwned');
+});
