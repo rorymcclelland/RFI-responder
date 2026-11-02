@@ -113,7 +113,7 @@ test('Changed since sent, download, the confirmation, and marking as sent again'
   expect((await download).suggestedFilename()).toMatch(/\.xlsx$/);
   await expect(panel.getByText('Downloading does not mark the response as sent.')).toBeVisible();
   await expect(panel.getByRole('heading', { name: 'Changed since sent' })).toBeVisible();
-  await expect(card(page, TEST_DATA).getByText('Asked', { exact: true })).toBeVisible();
+  await expect((await expand(page, TEST_DATA)).getByText('Asked', { exact: true })).toBeVisible();
 
   await caption(page, 'Mark as sent says first what it will do; Cancel changes nothing');
   await panel.getByRole('button', { name: 'Mark as sent', exact: true }).click();
