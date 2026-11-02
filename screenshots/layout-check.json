@@ -1,0 +1,132 @@
+{
+ "width": 768,
+ "checkedAt": "2026-11-02T14:48:10.952Z",
+ "views": [
+  {
+   "view": "overview",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "review list",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "card expanded",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "pricing card",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "assigning a question",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "upload",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "column mapping",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "home",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "questions for you",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "exported response",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "governance usage",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "entries to review",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "governance limits",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "audit log",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "knowledge overview",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "knowledge browse",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "an answer and its history",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "asking it a question",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "knowledge-base import",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "help",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  },
+  {
+   "view": "introduction",
+   "scrollWidth": 768,
+   "clientWidth": 768,
+   "fits": true
+  }
+ ]
+}
