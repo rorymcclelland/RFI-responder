@@ -6,6 +6,8 @@
  */
 export type How =
   | { kind: 'browser' }
+  /** Passes when every browser test in the run passed. */
+  | { kind: 'suite' }
   /** Checked in CI by other tests (unit, database or the Supabase job), named in `by`. */
   | { kind: 'ci'; by: string }
   /** Needs a person, or a set-up that does not exist yet; `why` says which. */
@@ -48,7 +50,7 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S20-5', title: 'The process, written down', forTheUser: 'Decision 0008, the development guide and the sprint skills describe the new way a sprint runs.' },
     ],
     cases: [
-      { id: 'S20-1 1', story: 'S20-1', title: 'The suite passes on a fresh local stack, in CI', how: browser },
+      { id: 'S20-1 1', story: 'S20-1', title: 'The suite passes on a fresh local stack, in CI', how: { kind: 'suite' } },
       { id: 'S20-1 2', story: 'S20-1', title: 'A failure shows with its screenshot and recording; no retries', how: { kind: 'ci', by: 'playwright.config.ts (retries 0, screenshot on, a recording per session attached by e2e/support.ts)' } },
       { id: 'S20-1 3', story: 'S20-1', title: 'The suite refuses a non-local address', how: { kind: 'ci', by: 'e2e/support.test.ts (targetProblem) and the browser\'s request guard' } },
       { id: 'S20-1 4', story: 'S20-1', title: 'A deliberately broken build fails a test', how: { kind: 'ci', by: 'a throwaway commit with Home\'s heading removed, recorded in the refinement\'s close' } },

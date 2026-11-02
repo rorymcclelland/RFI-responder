@@ -299,7 +299,7 @@ export default function App() {
             ? <AlertTriangle size={16} className="text-coral-400 flex-shrink-0" />
             : <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />}
           <span className="font-medium">{toast.msg}</span>
-          <button onClick={() => setToast(null)} className="ml-2 text-ink-400 hover:text-white transition-colors">
+          <button onClick={() => setToast(null)} aria-label="Dismiss" className="ml-2 text-ink-400 hover:text-white transition-colors">
             <X size={14} />
           </button>
         </div>

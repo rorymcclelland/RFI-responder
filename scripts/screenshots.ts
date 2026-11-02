@@ -86,6 +86,9 @@ async function openResponse(page: Page, name: string) {
 
 async function shoot(page: Page, file: string, view: string) {
   await page.waitForTimeout(600);
+  // A passing notice (for example, indexing that could not reach an AI provider in CI) is not part of the view.
+  const dismiss = page.getByRole('button', { name: 'Dismiss', exact: true });
+  if (await dismiss.isVisible().catch(() => false)) await dismiss.click();
   await page.screenshot({ path: join(OUT, file) });
   await page.setViewportSize(NARROW);
   await page.waitForTimeout(500);
