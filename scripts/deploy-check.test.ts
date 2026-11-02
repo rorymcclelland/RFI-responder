@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest';
+import { advisorErrors, appliedMigrations, functionVerdict, missingMigrations, repoFunctions, repoMigrations } from './deploy-check';
+import { newPassword, stagingProblem } from './e2e-staging-users';
+
+describe('deploy checks (Sprint 20, S20-3)', () => {
+  const list = [
+    '',
+    '   Local          | Remote         | Time (UTC)',
+    '  ----------------|----------------|---------------------',
+    '   20261106120000 | 20261106120000 | 2026-11-06 12:00:00',
+    '   20261107100000 |                | 2026-11-07 10:00:00',
+  ].join('\n');
+
+  it('reads the applied migrations, and names one only in the repository (test case 2)', () => {
+    expect(appliedMigrations(list)).toEqual(['20261106120000']);
+    expect(missingMigrations(['20261106120000', '20261107100000'], appliedMigrations(list))).toEqual(['20261107100000']);
+  });
+
+  it('finds every migration and function in the repository', () => {
+    expect(repoMigrations().length).toBeGreaterThan(60);
+    expect(repoMigrations()).toContain('20261107100000');
+    expect(repoFunctions()).toEqual(['ask-knowledge', 'embed', 'embed-entries', 'extract-questions', 'invite-user', 'process-questions']);
+  });
+
+  it('a 404 to an unsigned call means the function is not deployed (test case 3)', () => {
+    expect(functionVerdict(401)).toBe('deployed');
+    expect(functionVerdict(404)).toBe('missing');
+    expect(functionVerdict(500)).toBe('unexpected');
+  });
+
+  it('fails only on error-level advisor findings', () => {
+    expect(advisorErrors([{ level: 'WARN', name: 'function_search_path_mutable' }, { level: 'ERROR', name: 'rls_disabled_in_public', detail: 'public.x' }]))
+      .toEqual(['rls_disabled_in_public: public.x']);
+  });
+});
+
+describe('staging test people (Sprint 20, S20-2)', () => {
+  const ok = {
+    STAGING_SUPABASE_URL: 'https://abcdefghijklmnopqrst.supabase.co',
+    PRODUCTION_SUPABASE_REF: 'mnlbqsnekdzvmkxvjiti',
+    STAGING_SUPABASE_ANON_KEY: 'anon', STAGING_SERVICE_ROLE_KEY: 'service',
+  };
+  it('refuses the live demo, and anything not a Supabase project (test case 2)', () => {
+    expect(stagingProblem(ok)).toBeNull();
+    expect(stagingProblem({ ...ok, STAGING_SUPABASE_URL: 'https://mnlbqsnekdzvmkxvjiti.supabase.co' })).toMatch(/live demo/);
+    expect(stagingProblem({ ...ok, STAGING_SUPABASE_URL: 'http://127.0.0.1:54321' })).toMatch(/must be/);
+    expect(stagingProblem({ ...ok, PRODUCTION_SUPABASE_REF: '' })).toMatch(/PRODUCTION_SUPABASE_REF/);
+    expect(stagingProblem({ ...ok, STAGING_SERVICE_ROLE_KEY: '' })).toMatch(/needed/);
+  });
+  it('makes a new long random password each time', () => {
+    const a = newPassword(), b = newPassword();
+    expect(a).toMatch(/^[A-Za-z0-9_-]{32}$/);
+    expect(a).not.toBe(b);
+  });
+});

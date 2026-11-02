@@ -154,7 +154,8 @@ test('Approve, and when the owner was quicker', async ({ browser }) => {
   await expect(m.getByText('Decided', { exact: true })).toBeVisible();
 
   await boss.reload();
-  await expect(card(boss, STALE).getByText(draft.slice(0, 60), { exact: false })).toBeVisible();
+  await openResponse(boss, BLUEFIN);
+  await expect((await expand(boss, STALE)).getByText(draft.slice(0, 60), { exact: false })).toBeVisible();
 
   await caption(boss, `A question nobody else is deciding: ${member.name} writes the answer and approves it`);
   await assign(boss, APPROVE);
@@ -164,6 +165,7 @@ test('Approve, and when the owner was quicker', async ({ browser }) => {
   await p2.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(m.getByText('Approved. The owner will see it as decided.')).toBeVisible();
   await boss.reload();
+  await openResponse(boss, BLUEFIN);
   const c2 = await expand(boss, APPROVE);
   await expect(c2.getByText(/^Approved/).first()).toBeVisible();
   await expect(c2.getByText(new RegExp(`by ${member.name}`))).toBeVisible();

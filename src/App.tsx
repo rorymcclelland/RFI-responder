@@ -305,10 +305,11 @@ export default function App() {
         </div>
       )}
 
-      {/* Mobile nav overlay */}
+      {/* Mobile nav overlay: below the header (z-30), which holds the menu, so the menu can be used
+          (BUG-43, found by the Sprint 20 browser tests: it covered the menu at phone width). */}
       {navOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 sm:hidden"
+          className="fixed inset-0 bg-black/40 z-20 sm:hidden"
           onClick={() => setNavOpen(false)}
         />
       )}

@@ -9,64 +9,21 @@
  *   reads them. Requests to the live demo's Supabase project are refused by the browser itself.
  */
 import { test as base, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { allowedRequest, isLocalUrl } from '../scripts/local-only';
 
-export type Target = 'local' | 'staging';
-export const TARGET: Target = process.env.E2E_TARGET === 'staging' ? 'staging' : 'local';
-export const BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:5173';
-
-export interface Person { email: string; name: string }
-
-/** The people the tests play: an admin, and a member who owns nothing and is assigned questions. */
-export const PEOPLE: { admin: Person; member: Person } = TARGET === 'staging'
-  ? {
-    admin: { email: process.env.E2E_ADMIN_EMAIL ?? '', name: process.env.E2E_ADMIN_NAME ?? 'Test Admin' },
-    member: { email: process.env.E2E_MEMBER_EMAIL ?? '', name: process.env.E2E_MEMBER_NAME ?? 'Test Member' },
-  }
-  : {
-    admin: { email: 'sarah.chen@example.com', name: 'Sarah Chen' },
-    member: { email: 'tom.richardson@example.com', name: 'Tom Richardson' },
-  };
-
-const PASSWORD = TARGET === 'staging' ? process.env.E2E_PASSWORD ?? '' : 'LocalDev2026pw';
-
-/** Hosts a staging run must never reach: the live demo's app and Supabase project. */
-const FORBIDDEN = (process.env.E2E_FORBIDDEN_HOSTS ?? '').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean);
-
-/** Why this run must not start, or null. Checked once, before any browser opens. */
-export function targetProblem(): string | null {
-  if (TARGET === 'local') {
-    if (!isLocalUrl(BASE_URL)) return `Refusing to sign in to ${BASE_URL}: the seed users and their password exist only on a local install.`;
-    return null;
-  }
-  let u: URL;
-  try { u = new URL(BASE_URL); } catch { return `E2E_BASE_URL is not an address: ${BASE_URL}`; }
-  if (u.protocol !== 'https:') return 'A staging run needs an https address.';
-  if (!FORBIDDEN.length) return 'A staging run needs E2E_FORBIDDEN_HOSTS (the live demo\'s hosts), so it can refuse them.';
-  if (FORBIDDEN.includes(u.hostname.toLowerCase())) return `Refusing to run against ${u.hostname}: it is the live demo.`;
-  if (!PEOPLE.admin.email || !PEOPLE.member.email || !PASSWORD) return 'A staging run needs E2E_ADMIN_EMAIL, E2E_MEMBER_EMAIL and E2E_PASSWORD from CI.';
-  return null;
-}
-
-/** Whether the browser may make this request. */
-export function requestAllowed(url: string): boolean {
-  if (TARGET === 'local') return allowedRequest(url);
-  if (url.startsWith('data:') || url.startsWith('blob:')) return true;
-  try {
-    const host = new URL(url).hostname.toLowerCase();
-    return !FORBIDDEN.includes(host);
-  } catch { return false; }
-}
+import { BASE_URL, PASSWORD, requestAllowed } from './target';
+export { TARGET, BASE_URL, PEOPLE, targetProblem, type Person } from './target';
+import type { Person } from './target';
 
 const BYPASS = process.env.E2E_VERCEL_BYPASS ?? '';
 
 /** A fresh browser session, with the request guard and (on staging) Vercel's bypass header for the app's own host only. */
-export async function newSession(browser: Browser, viewport = { width: 1280, height: 860 }): Promise<BrowserContext> {
+export async function newSession(browser: Browser, viewport = { width: 1280, height: 860 }, label = 'session'): Promise<BrowserContext> {
   const context = await browser.newContext({
     viewport,
     baseURL: BASE_URL,
     recordVideo: { dir: test.info().outputPath('videos'), size: viewport },
   });
+  opened.push({ context, label });
   const appHost = new URL(BASE_URL).host;
   await context.route('**/*', (route) => {
     const url = route.request().url();
@@ -81,7 +38,7 @@ export async function newSession(browser: Browser, viewport = { width: 1280, hei
 
 /** Signs in and lands on Home, with the first-sign-in introduction closed. */
 export async function signIn(browser: Browser, person: Person, viewport?: { width: number; height: number }): Promise<Page> {
-  const context = await newSession(browser, viewport);
+  const context = await newSession(browser, viewport, `${person.name}${viewport && viewport.width < 600 ? ', phone' : ''}`);
   const page = await context.newPage();
   await caption(page, `${person.name} signs in`);
   await page.goto('/');
@@ -148,7 +105,8 @@ export function card(page: Page, question: string) {
 export async function expand(page: Page, question: string) {
   const c = card(page, question);
   await c.scrollIntoViewIfNeeded();
-  if (!(await c.getByText(/Proposed Response|Edit Response|Written answer|Approved|Draft/).first().isVisible().catch(() => false))) {
+  // An open card shows its decision buttons; a closed one shows none.
+  if (!(await c.getByRole('button', { name: /^(Approve|Write an answer|Revise Answer|Restore|Edit)$/ }).first().isVisible().catch(() => false))) {
     await c.getByText(question, { exact: true }).click();
   }
   return c;
@@ -164,5 +122,23 @@ export function checks(...cases: string[]) {
   for (const c of cases) test.info().annotations.push({ type: 'case', description: c });
 }
 
-export const test = base;
+/** The browser sessions a test opened, closed at its end so each recording is saved and attached. */
+const opened: { context: BrowserContext; label: string }[] = [];
+
+export const test = base.extend<{ recordings: void }>({
+  // Playwright reads a fixture's needs from its first argument, so it must be a pattern.
+  // eslint-disable-next-line no-empty-pattern
+  recordings: [async ({}, use, testInfo) => {
+    opened.length = 0;
+    await use();
+    for (const { context, label } of opened.splice(0)) {
+      const pages = context.pages();
+      await context.close();
+      for (const [i, p] of pages.entries()) {
+        const path = await p.video()?.path().catch(() => null);
+        if (path) await testInfo.attach(`recording: ${label}${pages.length > 1 ? ` ${i + 1}` : ''}`, { path, contentType: 'video/webm' });
+      }
+    }
+  }, { auto: true }],
+});
 export { expect };

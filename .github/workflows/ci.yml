@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: ['**', '!e2e-results/**']
   pull_request:
 
 permissions:
@@ -207,6 +207,9 @@ jobs:
     name: Browser acceptance tests and screenshots on the real Supabase stack
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Write access only to push the results to their own branch (below), for the demo page.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -251,6 +254,11 @@ jobs:
           path: |
             e2e-results/
             docs/screenshots/
+      - name: Publish the results for the demo page (Sprint 20, S20-4)
+        if: always() && github.event_name == 'push'
+        env:
+          TOKEN: ${{ github.token }}
+        run: bash scripts/publish-e2e-results.sh local
       - name: Logs on failure
         if: failure()
         run: tail -n 80 /tmp/functions.log /tmp/vite.log || true

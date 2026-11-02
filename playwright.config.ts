@@ -12,6 +12,7 @@ const staging = process.env.E2E_TARGET === 'staging';
 
 export default defineConfig({
   testDir: 'e2e',
+  testMatch: '*.spec.ts',
   outputDir: 'e2e-results/artifacts',
   fullyParallel: false,
   workers: 1,
