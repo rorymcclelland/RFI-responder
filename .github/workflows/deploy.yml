@@ -79,7 +79,7 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
         run: |
           # --debug names the endpoint if the scoped token lacks a permission (tokens are masked in the log).
-          supabase link --project-ref "$STAGING_REF" --debug 2>&1 | grep -vi "authorization" || true
+          supabase link --project-ref "$STAGING_REF" --debug 2>&1 | grep -vi "bearer" || true
           supabase link --project-ref "$STAGING_REF"
           supabase db push --yes
           supabase functions deploy --project-ref "$STAGING_REF"
