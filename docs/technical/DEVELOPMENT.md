@@ -69,6 +69,7 @@ The local mail viewer (usually `http://127.0.0.1:54324`) catches the emails Supa
 | `npm run demo:seed` | Regenerates the seed's knowledge base and demo sections |
 | `npm run demo:hosted` | Writes the hosted demo data and its reset (`supabase/demo-hosted.sql`, `supabase/demo-hosted-reset.sql`) from the seed, with the fictional people unable to sign in (Sprint 14) |
 | `npm run screenshots` | The screenshots for the README and the guide, and the 768 px layout check |
+| `npm run test:e2e` | The browser acceptance tests (Sprint 20), against the local app and Supabase stack |
 
 [Evaluations](../evals/README.md) has what each evaluation found and how its report is laid out. Evaluations call the AI providers and cost a little; the keys come from `.env` in `supabase/functions/`.
 
@@ -77,6 +78,7 @@ The local mail viewer (usually `http://127.0.0.1:54324`) catches the emails Supa
 - **Unit tests** (`npm test`) run in Node with no network. They cover file reading and hostile uploads ([`src/lib/spreadsheet.ts`](../../src/lib/spreadsheet.ts), [`src/lib/wordDocument.ts`](../../src/lib/wordDocument.ts)), the server pipeline with its AI clients replaced by test doubles, the export, the evaluation maths, and the documentation: the figures in the evaluations summary against their reports, every link and path, every label the guide names against the app, and every setting against the code ([`docs/docs.test.ts`](../docs.test.ts), [`docs/guide.test.ts`](../guide.test.ts), [`docs/technical.test.ts`](../technical.test.ts)).
 - **Database tests** (`npm run test:db`) build a database from the shim and every migration, then run statements as real users the way the API does, so row-level security and column grants are what is tested. Each test's statements run in a transaction that is rolled back. Without Docker, point `DB_TEST_URL` at any Postgres 16 superuser connection.
 - **The Edge Functions** are type-checked with Deno in CI, and called on the real Supabase stack there.
+- **Browser acceptance tests** (`npm run test:e2e`, Sprint 20) sign in as the seed users and walk through each sprint's agreed cases in a real browser, against the local app and the local Supabase stack, recording each one. They are in [`e2e/`](../../e2e), one file per sprint; each test names the agreed cases it checks. They run one at a time on one database, with no retries, so a test that fails once is reported as failed. Like the screenshots, they refuse any address that is not local; on staging, CI runs them with users made for the run (see [Deploying](../DEPLOYING.md)). Run `npx playwright install chromium` once, then `npm run db:reset` before a run, since the tests change the demo data.
 
 Write the test first. Each sprint's refinement lists the agreed test cases before anything is built.
 
@@ -118,11 +120,12 @@ npm run db:reset
 
 ## Continuous integration
 
-[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to any branch and on pull requests, in three jobs:
+[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push to any branch and on pull requests, in four jobs:
 
 1. Type check, lint, unit tests with coverage, an audit of production dependencies, the build, and a search of the built bundle for provider details and secret keys.
 2. The database tests, on Postgres with the shim.
 3. On the real Supabase stack: every migration and the seed applied from scratch, sign-up refused, the seeded admin able to sign in, and the Edge Functions refusing unsigned calls, enforcing their limits, and failing safely when a provider cannot be reached, without echoing a key. The Edge Functions are type-checked with Deno first.
+4. The browser acceptance tests and the guide's screenshots, on the real Supabase stack with the seed and every AI provider failing (so the drafts and answers are the fallback ones, the same every run). The report, recordings and screenshots are kept for 14 days as the run's `e2e-local` artefact.
 
 [`.github/workflows/keepalive.yml`](../../.github/workflows/keepalive.yml) (Sprint 14) calls the hosted demo's `public.keepalive()` four times a day, meant to keep Supabase from pausing the Free project for inactivity (Supabase does not say what activity it counts). It needs the repository variable `DEMO_SUPABASE_URL` and the secret `DEMO_SUPABASE_ANON_KEY` (the public anon key); until both are set it passes and says so. GitHub disables scheduled workflows in a public repository after 60 days without repository activity, and runs them only from the default branch.
 

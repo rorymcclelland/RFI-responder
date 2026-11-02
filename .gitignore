@@ -25,3 +25,6 @@ coverage
 
 # Evaluation vector cache (rebuildable)
 eval/.cache/
+
+# Browser acceptance test results (Sprint 20)
+e2e-results/

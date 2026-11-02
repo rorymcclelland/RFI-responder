@@ -417,6 +417,8 @@ export default function App() {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setNavOpen((o) => !o)}
+              aria-label="Menu"
+              aria-expanded={navOpen}
               className="sm:hidden w-9 h-9 flex items-center justify-center text-ink-600 hover:bg-ink-100 rounded-xl transition-colors"
             >
               <Menu size={18} />

@@ -32,7 +32,7 @@ export default tseslint.config(
   },
   {
     // Evaluation scripts run on Node.
-    files: ['eval/**/*.ts', 'eval/**/*.mjs'],
+    files: ['eval/**/*.ts', 'eval/**/*.mjs', 'e2e/**/*.ts', 'scripts/**/*.ts', 'playwright.config.ts'],
     languageOptions: { globals: globals.node },
   }
 );
