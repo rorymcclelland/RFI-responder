@@ -1,6 +1,16 @@
 // Sprint 3: responses through the database functions; the database enforces the rules.
 import { describe, expect, it, vi } from 'vitest';
-import { archiveResponse, deleteResponse, describeLearning, recordExport, sendPreview, suggestExperts, toResponse, updateResponse } from './responses';
+import { archiveResponse, deleteResponse, describeLearning, inAppWords, recordExport, sendPreview, suggestExperts, toResponse, updateResponse } from './responses';
+
+describe('inAppWords (Sprint 21 QA review, finding 10)', () => {
+  it('says the database\'s refusals in the app\'s words', () => {
+    expect(inAppWords('2 question(s) are still pending; accept or skip every question before exporting'))
+      .toBe('2 question(s) are still to do; approve each question or leave it unanswered before marking the response as sent');
+    expect(inAppWords('Only the response owner or an admin can record an export')).toBe('Only the response owner or an admin can mark the response as sent');
+    expect(inAppWords('Record the export before archiving as won or lost; use withdrawn for a response that was never sent'))
+      .toMatch(/^Mark the response as sent before archiving/);
+  });
+});
 
 // Sprint 21 (S21-1): what the Mark as sent confirmation says beforehand.
 describe('sendPreview', () => {
@@ -14,14 +24,14 @@ describe('sendPreview', () => {
   ];
   it('counts edited and written answers, never pricing, and the open assignments', () => {
     expect(sendPreview(qs, [{ status: 'pending' }, { status: 'in_review' }, { status: 'closed' }, { status: 'answered' }, { status: 'approved' }], (q) => q.src))
-      .toEqual({ written: 2, pricing: 1, openAssignments: 2 });
+      .toEqual({ written: 2, drafts: 1, pricing: 1, openAssignments: 2 });
   });
   it('on a second marking, counts only the answers changed since (the rest were considered before)', () => {
     const again = qs.map((q) => ({ ...q, learnedAt: q.id === 'a' ? null : '2026-11-01T10:00:00Z' }));
-    expect(sendPreview(again, [], (q) => q.src)).toEqual({ written: 1, pricing: 0, openAssignments: 0 });
+    expect(sendPreview(again, [], (q) => q.src)).toEqual({ written: 1, drafts: 0, pricing: 0, openAssignments: 0 });
   });
   it('counts nothing for an empty response', () => {
-    expect(sendPreview([] as Q[], [], (q) => q.src)).toEqual({ written: 0, pricing: 0, openAssignments: 0 });
+    expect(sendPreview([] as Q[], [], (q) => q.src)).toEqual({ written: 0, drafts: 0, pricing: 0, openAssignments: 0 });
   });
 });
 
@@ -43,7 +53,7 @@ describe('responses', () => {
     expect(rpc).toHaveBeenLastCalledWith('delete_response', { p_response: 'r1', p_reason: 'Created by mistake' });
     expect(await recordExport({ rpc } as never, 's1')).toMatchObject({ accepted: 3, added: 1 });
     const refused = vi.fn().mockResolvedValue({ data: null, error: { message: '2 question(s) are still pending' } });
-    await expect(recordExport({ rpc: refused } as never, 's1')).rejects.toThrow(/Export not recorded: 2 question/);
+    await expect(recordExport({ rpc: refused } as never, 's1')).rejects.toThrow(/Not marked as sent: 2 question/);
   });
 
   it('says plainly when a change applied to nothing (row-level security)', async () => {

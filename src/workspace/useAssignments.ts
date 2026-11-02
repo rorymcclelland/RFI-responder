@@ -96,5 +96,5 @@ export function useAssignments({ sessionId, opportunityId, questions, currentUse
     });
   }
 
-  return { assignments, handleAssign, handleUnassign };
+  return { assignments, handleAssign, handleUnassign, loadAssignments };
 }

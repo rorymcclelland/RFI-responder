@@ -54,8 +54,11 @@ Everyone sees the same page, history included; the rest of the audit log stays w
 - **Not answered yet**: still to do in its response. **Open it in the response** opens the response at that question, to write the answer or assign it to someone who knows.
 - **Answered, learned when sent**: a person approved an answer; the knowledge base learns it when the response is marked as sent.
 - **Learned**: the answer is now in the knowledge base; its number opens its page.
-- **Answered, not added**: considered when the response was marked as sent, but not added (for instance the same answer as before).
-- **Left unanswered**: the owner chose not to answer it, or its response was archived first.
+- **Learned as a proposed change**: the answer would change an existing entry, and waits for an admin's review; its number opens it.
+- **Answered, not in the knowledge base**: a person answered it, but the answer was not added when the response was marked as sent (for instance, not fully checked), was retired since, or the response was archived without being sent.
+- **Left unanswered**: the owner chose not to answer it, or its response was archived while it was still to do.
+
+At most 500 lines are listed, those not answered yet first, and each question is cut to 500 characters; the page says when there are more.
 
 Nothing is learned on this page: answers are learned only when their response is marked as sent, with a record of where they came from.
 
@@ -101,7 +104,7 @@ For each entry choose **Approve**, or **Correct** to fix the question or answer 
 
 ### Overdue for review
 
-Entries not reviewed or confirmed within the review interval. A draft that cites one is never approved in bulk until it is reviewed again. Each card shows the date it fell due and, if it was cited in the last 90 days, how often. Choose **Still correct**, or **Correct** it. An answer approved unedited at export also counts as a confirmation of the entries it cited.
+Entries not reviewed or confirmed within the review interval. A draft that cites one is never approved in bulk until it is reviewed again. Each card shows the date it fell due and, if it was cited in the last 90 days, how often. Choose **Still correct**, or **Correct** it. An answer approved unedited also counts as a confirmation of the entries it cited, when its response is marked as sent.
 
 ## Deleting a response
 

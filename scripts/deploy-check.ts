@@ -86,6 +86,9 @@ export function expectedAuth(env: Environment, file = 'supabase/hosted-auth.json
   const all = JSON.parse(readFileSync(file, 'utf8')) as { environments: Record<string, AuthSettings> };
   const e = all.environments[env];
   if (!e) throw new Error(`${file} has no settings for ${env}.`);
+  // Accounts are invite-only (decision 0003): a change to this file cannot make the check accept
+  // sign-ups (security review, Sprint 21).
+  if (e.disable_signup !== true) throw new Error(`${file} says new sign-ups are allowed on ${env}; they must stay off (decision 0003).`);
   return e;
 }
 

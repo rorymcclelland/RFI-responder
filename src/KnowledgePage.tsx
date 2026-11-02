@@ -59,6 +59,8 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
   const [view, setView] = useState<'overview' | 'browse' | 'gaps'>('overview');
   // Sprint 21 (S21-2): what the knowledge base could not answer, and which states the view opens on.
   const [gaps, setGaps] = useState<Gap[]>([]);
+  const [gapTotal, setGapTotal] = useState(0);
+  const [gapError, setGapError] = useState('');
   const [gapStates, setGapStates] = useState<{ states: GapState[]; n: number }>({ states: [], n: 0 });
   const [overview, setOverview] = useState<KnowledgeOverview | null>(null);
   const [entries, setEntries] = useState<BrowseEntry[]>([]);
@@ -74,11 +76,15 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
     const seq = ++loadSeq.current;
     setError('');
     try {
-      const [o, e, g] = await Promise.all([loadKnowledgeOverview(supabase), loadBrowseEntries(supabase), loadKnowledgeGaps(supabase)]);
+      // Gaps load on their own, so a failure there leaves the rest of the page working (security review).
+      const gapsLoad = loadKnowledgeGaps(supabase).then(
+        (g) => { if (seq === loadSeq.current) { setGaps(g.gaps); setGapTotal(g.total); setGapError(''); } },
+        (err: Error) => { if (seq === loadSeq.current) setGapError(err.message); });
+      const [o, e] = await Promise.all([loadKnowledgeOverview(supabase), loadBrowseEntries(supabase)]);
       if (seq !== loadSeq.current) return;
       setOverview(o);
       setEntries(e);
-      setGaps(g);
+      await gapsLoad;
     } catch (err) {
       if (seq === loadSeq.current) setError((err as Error).message);
     }
@@ -239,7 +245,8 @@ export default function KnowledgePage({ names, isAdmin, version, onImport, onAdd
       )}
 
       {view === 'gaps' && (
-        <GapsView key={gapStates.n} gaps={gaps} initial={gapStates.states} onOpenEntry={(r) => { openBrowse({}); pick(r); }} />
+        gapError ? <p role="alert" className="text-sm text-coral-600">{gapError} <button onClick={load} className="btn-ghost text-xs">Try again</button></p> :
+        <GapsView key={gapStates.n} gaps={gaps} total={gapTotal} initial={gapStates.states} onOpenEntry={(r) => { openBrowse({}); pick(r); }} />
       )}
 
       {view === 'browse' && (

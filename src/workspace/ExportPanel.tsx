@@ -9,7 +9,7 @@ import { CheckCircle2, Download, FileDown, FileText, Send, Sheet, Upload } from 
 import { exportCSV, exportExcel, exportWord } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
-export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, names, sentAt, changed, preview, onMarkSent, onStartNew }: {
+export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, names, sentAt, changed, preview, saving = false, onMarkSent, onStartNew }: {
   questions: RFIQuestion[];
   /** Approvers' names for the provenance record (Sprint 7, F-27). */
   names: Map<string, string>;
@@ -23,7 +23,9 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
   /** An answer or decision changed after it was marked as sent. */
   changed: boolean;
   /** What marking as sent will do, for the confirmation. */
-  preview: { written: number; pricing: number; openAssignments: number };
+  preview: { written: number; drafts: number; pricing: number; openAssignments: number };
+  /** A decision is still being saved: downloads wait, so a file holds only what the database has (rule 4). */
+  saving?: boolean;
   /** Absent when the person cannot mark it as sent (not the owner or an admin, or archived). */
   onMarkSent?: () => Promise<void>;
   /** Absent for an archived response, which takes no new uploads. */
@@ -53,19 +55,20 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
           <p className="section-label mb-1">Download</p>
           <p className="text-xs text-ink-500 mb-4">Downloading does not mark the response as sent. Each file records how every answer was produced (drafted by a model, edited or written by a person) and who approved it: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV.</p>
           <div className="flex flex-wrap gap-3">
-            <button onClick={() => exportExcel(questions, fileName, names)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-emerald-300 text-emerald-700 rounded-2xl hover:bg-emerald-50 transition-colors shadow-card">
+            <button disabled={saving} onClick={() => exportExcel(questions, fileName, names)}
+              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-emerald-300 text-emerald-700 rounded-2xl hover:bg-emerald-50 transition-colors shadow-card disabled:opacity-40">
               <Sheet size={18} /> Excel (.xlsx)
             </button>
-            <button onClick={() => exportCSV(questions, fileName, names)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-ink-200 text-ink-700 rounded-2xl hover:bg-ink-50 transition-colors shadow-card">
+            <button disabled={saving} onClick={() => exportCSV(questions, fileName, names)}
+              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-ink-200 text-ink-700 rounded-2xl hover:bg-ink-50 transition-colors shadow-card disabled:opacity-40">
               <FileText size={18} /> CSV (.csv)
             </button>
-            <button onClick={() => exportWord(questions, fileName, names)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-sky-300 text-sky-700 rounded-2xl hover:bg-sky-50 transition-colors shadow-card">
+            <button disabled={saving} onClick={() => exportWord(questions, fileName, names)}
+              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-sky-300 text-sky-700 rounded-2xl hover:bg-sky-50 transition-colors shadow-card disabled:opacity-40">
               <FileDown size={18} /> Word (.doc)
             </button>
           </div>
+          {saving && <p className="text-xs text-ink-500 mt-2" role="status">Saving a change; the downloads are ready again once it is saved.</p>}
         </div>
 
         {onMarkSent && needsMarking && (
@@ -74,7 +77,7 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
             {!confirming ? (
               <>
                 <p className="text-xs text-ink-500">When the answers have gone to the customer, mark the response as sent. You can download them again at any time.</p>
-                <button onClick={() => setConfirming(true)} className="btn-primary text-sm"><Send size={15} /> Mark as sent</button>
+                <button disabled={saving} onClick={() => setConfirming(true)} className="btn-primary text-sm disabled:opacity-40"><Send size={15} /> Mark as sent</button>
               </>
             ) : (
               <div role="group" aria-label="Confirm marking as sent" className="rounded-2xl border border-ink-200 p-4 space-y-3">
@@ -82,8 +85,8 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
                 <ul className="text-sm text-ink-700 list-disc pl-5 space-y-1">
                   <li>record that it was sent, with your name and the time, in the audit log;</li>
                   <li>
-                    teach the knowledge base from the answers people edited or wrote{sentAt ? ' since it was last marked as sent' : ''} ({plural(preview.written, 'answer', 'answers')} here){preview.pricing ? `; the ${plural(preview.pricing, 'pricing answer is', 'pricing answers are')} never learned` : ''}.
-                    {' '}Answers learned from anyone but an admin wait for an admin's review;
+                    give the knowledge base the approved answers{sentAt ? ' changed since it was last marked as sent' : ''}: {plural(preview.written, 'answer', 'answers')} edited or written by a person, which can become new entries or proposed changes, and {plural(preview.drafts, 'draft', 'drafts')} approved as written, which can confirm the entries they came from{preview.pricing ? `; ${plural(preview.pricing, 'pricing answer', 'pricing answers')}, never learned` : ''}.
+                    {' '}What each becomes is decided when you confirm, and shown here afterwards; anything learned from someone other than an admin waits for an admin&apos;s review;
                   </li>
                   <li>{preview.openAssignments ? `close the ${plural(preview.openAssignments, 'open assignment', 'open assignments')} on it.` : 'close any assignment on it (none is open now).'}</li>
                 </ul>

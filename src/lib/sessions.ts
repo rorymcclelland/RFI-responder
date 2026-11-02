@@ -53,8 +53,8 @@ export async function saveQuestionPatch(
     if (data !== 'approved') throw new Error('Your change was not saved: you cannot change this question.');
     return;
   }
-  // Otherwise one write: the answer first, then the decision, as before. Changing an accepted answer
-  // reopens the question in the database (security review, Sprint 2).
+  // Otherwise (leaving unanswered, restoring, a text alone) one or two writes as before: the answer
+  // first, then the decision. Changing an accepted answer reopens the question (security review, Sprint 2).
   const steps: Record<string, unknown>[] = [];
   if (patch.finalAnswer !== undefined) steps.push({ final_answer: patch.finalAnswer });
   if (patch.status !== undefined) steps.push({ status: patch.status });
@@ -65,7 +65,7 @@ export async function saveQuestionPatch(
     if (!problem) continue;
     // The answer saved but the decision did not: say so, so the screen reloads rather than rolling
     // back an answer that is in the database (Sprint 6 security review, finding 5).
-    if (i > 0) throw Object.assign(new Error(`Your edited answer was saved, but it was not approved: ${problem}.`), { partial: true });
+    if (i > 0) throw Object.assign(new Error(`Your edited answer was saved, but the decision was not: ${problem}.`), { partial: true });
     throw new Error(`Your change was not saved: ${problem}${error ? '' : '.'}`);
   }
 }

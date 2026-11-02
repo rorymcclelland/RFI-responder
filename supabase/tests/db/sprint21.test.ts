@@ -8,7 +8,8 @@ let member: TestUser;
 let admin: TestUser;
 
 interface Gap { question: string; state: string; responses: number; entryRef: string | null; responseId: string; response: string; sessionId: string; questionId: string }
-const gaps = (u: TestUser | null) => as(u, async (q) => (await q(`SELECT public.knowledge_gaps() AS g`)).rows[0].g as Gap[]);
+const result = (u: TestUser | null) => as(u, async (q) => (await q(`SELECT public.knowledge_gaps() AS g`)).rows[0].g as { total: number; gaps: Gap[] });
+const gaps = async (u: TestUser | null) => (await result(u)).gaps;
 const find = (list: Gap[], text: RegExp) => list.filter((g) => text.test(g.question));
 
 /** A question the knowledge base could not answer, in a new response's file. */
@@ -97,6 +98,37 @@ describe('S21-2 knowledge_gaps()', () => {
     expect(find(await gaps(member), /S21 4g/)).toMatchObject([{ state: 'answered', responses: 2, questionId: answered.id }]);
   });
 
+  it('4. (QA review) learned means a current entry: a proposed change and a retired entry say so; an answer in a response archived unsent is not learned', async () => {
+    const proposed = await gap('Proposed question (S21 4h)?', { final: 'A change.', status: 'accepted' });
+    const base = await entry({ question: 'Proposed question (S21 4h) base?' });
+    const p = await one<{ id: string }>(`INSERT INTO kb_entries (question, answer, tags, origin, proposed_replacement_of) VALUES ('Proposed question (S21 4h)?', 'A change.', '{}', 'response', $1) RETURNING id`, [base.id]);
+    await asSuperuser(`UPDATE rfi_questions SET learned_at = now(), learned_entry_id = $2 WHERE id = $1`, [proposed.id, p.id]);
+    const retired = await gap('Retired question (S21 4i)?', { final: 'Old.', status: 'accepted' });
+    const e = await entry({ question: 'Retired question (S21 4i)?', answer: 'Old.' });
+    await asSuperuser(`UPDATE kb_entries SET retired_at = now(), retired_reason = 'No longer true.' WHERE id = $1`, [e.id]);
+    await asSuperuser(`UPDATE rfi_questions SET learned_at = now(), learned_entry_id = $2 WHERE id = $1`, [retired.id, e.id]);
+    const unsent = await gap('Withdrawn question (S21 4j)?', { final: 'Answered.', status: 'accepted' });
+    await asSuperuser(`UPDATE opportunities SET archived_at = now(), outcome = 'withdrawn' WHERE id = $1`, [unsent.opp]);
+    const list = await gaps(member);
+    expect(find(list, /S21 4h/).map((g) => g.state)).toEqual(['proposed']);
+    expect(find(list, /S21 4i/).map((g) => g.state)).toEqual(['not_learned']);
+    expect(find(list, /S21 4j/).map((g) => g.state)).toEqual(['not_learned']);
+  });
+
+  it('(security review) at most 500 groups, still to do first, each question cut to 500 characters, with the total', async () => {
+    const opp = await response(owner.id, { name: 'Bounded (S21 sec5)' });
+    const s = await session(opp);
+    await asSuperuser(`INSERT INTO rfi_questions (session_id, position, question, generated_answer, status, language, draft_kind, processed_at)
+      SELECT $1, g, 'Bounded ' || g || ' (S21 sec5)? ' || repeat('x', 2000), 'Insufficient evidence.', 'pending', 'en', 'insufficient_evidence', now()
+        FROM generate_series(1, 600) g`, [s]);
+    const r = await result(member);
+    expect(r.gaps).toHaveLength(500);
+    expect(r.total).toBeGreaterThan(600);
+    expect(Math.max(...r.gaps.map((g) => g.question.length))).toBeLessThanOrEqual(500);
+    expect(r.gaps.every((g) => g.state === 'open')).toBe(true);
+    await asSuperuser(`DELETE FROM rfi_questions WHERE session_id = $1`, [s]);
+  }, 60000);
+
   it('6. every member sees the same gaps; a visitor and the service role are refused', async () => {
     await gap('Who sees this (S21 6)?');
     const forMember = await gaps(member);
@@ -126,7 +158,7 @@ describe('S21-2 knowledge_gaps()', () => {
     const t = Date.now();
     const list = await gaps(member);
     expect(Date.now() - t).toBeLessThan(1000);
-    expect(find(list, /S21 8/).length).toBeGreaterThan(1500);
+    expect(find(list, /S21 8/).length).toBeGreaterThan(400);
   }, 60000);
 });
 
@@ -210,6 +242,44 @@ describe('BUG-45 approve_answer()', () => {
       await asSuperuser('DROP TRIGGER zz_refuse_test ON rfi_questions');
       await asSuperuser('DROP FUNCTION pg_temp_refuse()');
     }
+  });
+
+  it('(security review) refuses to approve no text', async () => {
+    const id = await assigned('No text (BUG-45 7)?');
+    expect(await refused(approve(owner, id, '   '))).toMatch(/Write the answer/);
+    expect(await refused(as(owner, (q) => q(`SELECT public.approve_answer($1, NULL)`, [id])))).toMatch(/Write the answer/);
+  });
+
+  it('(QA review) the other direction: the owner waits for a specialist\'s approval, then approves their own text', async () => {
+    const id = await assigned('The race, reversed (BUG-45 8)?');
+    const pool = (await import('./harness')).getPool();
+    const first = await pool.connect();
+    const second = await pool.connect();
+    const begin = async (c: typeof first, u: TestUser) => {
+      await c.query('BEGIN');
+      await c.query('SET LOCAL ROLE authenticated');
+      await c.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: u.id, role: 'authenticated' })]);
+    };
+    try {
+      await begin(first, expert);
+      expect((await first.query(`SELECT public.approve_answer($1, 'The expert''s answer.', true) AS r`, [id])).rows[0].r).toBe('approved');
+      await begin(second, owner);
+      const waiting = second.query(`SELECT public.approve_answer($1, 'The owner''s answer.') AS r`, [id]);
+      let settled = false;
+      void waiting.then(() => { settled = true; }, () => { settled = true; });
+      await new Promise((r) => setTimeout(r, 300));
+      expect(settled).toBe(false);
+      await first.query('COMMIT');
+      expect((await waiting).rows[0].r).toBe('approved');
+      await second.query('COMMIT');
+    } finally {
+      await first.query('ROLLBACK').catch(() => undefined);
+      await second.query('ROLLBACK').catch(() => undefined);
+      first.release();
+      second.release();
+    }
+    // The owner's approval is of the owner's own text, never of the expert's text unseen.
+    expect(await state(id)).toEqual({ status: 'accepted', final_answer: "The owner's answer." });
   });
 
   it('the race that staging found: a second save waits for the first, then sees the decision', async () => {

@@ -90,7 +90,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [drafts, setDrafts]               = useState<Draft[]>([]);
   const [extraction, setExtraction]       = useState<{ summary: string; ruleBased: boolean }>({ summary: '', ruleBased: false });
 
-  const { assignments, handleAssign, handleUnassign } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
+  const { assignments, handleAssign, handleUnassign, loadAssignments } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
   /** Returns false if the questions could not be read; the caller decides what to show. */
   const openSession = useCallback(async (session: RFISession, given?: number): Promise<boolean> => {
@@ -273,6 +273,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   // ── Review actions ────────────────────────────────────────────────────────
 
   // Show the change at once; if saving fails, put the question back and say why (F-9).
+  // Decisions being saved: downloads wait for them (security review, Sprint 21: rule 4).
+  const [saving, setSaving] = useState(0);
   const updateQuestion = useCallback((id: string, patch: Partial<RFIQuestion>) => {
     let previous: RFIQuestion | undefined;
     setQuestions((prev) => prev.map((q) => {
@@ -282,6 +284,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       // response is next marked as sent, so the confirmation counts it (S21-1).
       return { ...q, ...patch, learnedAt: null };
     }));
+    setSaving((n) => n + 1);
     saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).then(async () => {
       // A change to an exported session reopens its export (S11-1): show the review again, with why.
       if (!sessionId || !exportState.exportedAt) return;
@@ -298,7 +301,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       } else if (previous) {
         setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
       }
-    });
+    }).finally(() => setSaving((n) => n - 1));
   }, [sessionId, exportState.exportedAt]);
 
   // The database records the approval (S3-2); show the same record at once rather than after a reload.
@@ -341,6 +344,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       setExportState(await loadExportState(supabase, sessionId));
       setLearning(describeLearning(summary));
       setQuestions(await loadQuestions(supabase, sessionId));
+      // The database closed the open assignments: show it (QA review, Sprint 21).
+      await loadAssignments(sessionId);
       if (summary.added || summary.superseded) {
         const indexed = await indexNewEntries();
         if (!indexed.ok) setNotice(`The new entries are saved but not yet indexed for meaning-based search (${indexed.reason}); they will be indexed on the next sign-in.`);
@@ -654,6 +659,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
           sentAt={exportState.exportedAt}
           changed={exportState.changedSinceExportAt !== null}
+          saving={saving > 0}
           preview={sendPreview(questions, questions.flatMap((q) => assignments[q.id] ?? []), answerSource)}
           onMarkSent={archived ? undefined : finishSession}
           onStartNew={archived || step !== 'export' ? undefined : startNew}

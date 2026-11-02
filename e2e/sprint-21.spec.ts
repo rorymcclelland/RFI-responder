@@ -2,6 +2,7 @@
  * Sprint 21's agreed cases (docs/refinement/sprint-21.md), as browser tests.
  */
 import { test, expect, PEOPLE, TARGET, signIn, caption, checks, nav, openResponse, card, expand } from './support';
+import { requestAllowed } from './target';
 import type { Page } from '@playwright/test';
 
 const { admin, member } = PEOPLE;
@@ -23,6 +24,9 @@ test('Ask it a question: the real pipeline on staging, the fallback locally', as
   if (TARGET === 'staging') {
     await expect(confidence).not.toContainText('Not calibrated');
     await expect(confidence).toContainText('Checker:');
+    // Drafted by the real model, not assembled from the entries (QA review), and citing one.
+    await expect(ask.getByText('Drafting was unavailable', { exact: false })).toHaveCount(0);
+    await expect(ask.getByRole('listitem').filter({ hasText: '(cited in the draft)' }).first()).toBeVisible();
   } else {
     await expect(confidence).toContainText('Not calibrated');
   }
@@ -58,6 +62,10 @@ test('Nothing to download or mark as sent while questions are still to do', asyn
 
 test('A member who does not own the response sees neither Download nor Mark as sent', async ({ browser }) => {
   checks('S21-1 7');
+  // The control (QA review): the admin sees both on the same response.
+  const boss = await signIn(browser, admin);
+  await openResponse(boss, LARKSPUR);
+  await expect(sendPanel(boss).getByRole('button', { name: /^Excel/ })).toBeVisible();
   const page = await signIn(browser, member);
   await caption(page, `${member.name} opens Larkspur, which they do not own`);
   await openResponse(page, LARKSPUR);
@@ -112,15 +120,20 @@ test('Changed since sent, download, the confirmation, and marking as sent again'
   await panel.getByRole('button', { name: /^Excel/ }).click();
   expect((await download).suggestedFilename()).toMatch(/\.xlsx$/);
   await expect(panel.getByText('Downloading does not mark the response as sent.')).toBeVisible();
+  // As the database has it, after a reload (QA review): still not sent, the assignment still open.
+  await page.reload();
+  await openResponse(page, LARKSPUR);
   await expect(panel.getByRole('heading', { name: 'Changed since sent' })).toBeVisible();
+  await showQuestions(page);
   await expect((await expand(page, TEST_DATA)).getByText('Asked', { exact: true })).toBeVisible();
 
   await caption(page, 'Mark as sent says first what it will do; Cancel changes nothing');
   await panel.getByRole('button', { name: 'Mark as sent', exact: true }).click();
   const confirm = panel.getByRole('group', { name: 'Confirm marking as sent' });
   await expect(confirm).toContainText('record that it was sent, with your name and the time');
-  await expect(confirm).toContainText('the answers people edited or wrote since it was last marked as sent (2 answers here)');
-  await expect(confirm).toContainText('the 1 pricing answer is never learned');
+  await expect(confirm).toContainText('the approved answers changed since it was last marked as sent: 2 answers edited or written by a person');
+  await expect(confirm).toContainText('0 drafts approved as written');
+  await expect(confirm).toContainText('1 pricing answer, never learned');
   await expect(confirm).toContainText('close the 1 open assignment on it');
   await confirm.getByRole('button', { name: 'Cancel' }).click();
   await expect(confirm).toHaveCount(0);
@@ -130,7 +143,8 @@ test('Changed since sent, download, the confirmation, and marking as sent again'
   await panel.getByRole('button', { name: 'Mark as sent', exact: true }).click();
   await confirm.getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(panel.getByRole('heading', { name: /^Sent on / })).toBeVisible();
-  await expect(panel.getByText(/^Knowledge base: .*1 not learned \(pricing\)/)).toBeVisible();
+  // Something was learned from the two edited answers, and the pricing answer was not (QA review).
+  await expect(panel.getByText(/^Knowledge base: (?=.*(added as new entries|replaced an older entry|proposed as replacements)).*1 not learned \(pricing\)/)).toBeVisible();
   await expect(panel.getByRole('button', { name: 'Mark as sent', exact: true })).toHaveCount(0);
   await showQuestions(page);
   await expand(page, TEST_DATA);
@@ -142,16 +156,26 @@ test('Changed since sent, download, the confirmation, and marking as sent again'
   const entry = page.getByRole('listitem').filter({ hasText: /^Marked as sent again after changes/ }).first();
   await expect(entry).toBeVisible();
   await expect(entry).toContainText(admin.name);
+  await expect(entry).toContainText('response.exported');
+  // Today, as the page writes dates (QA review: not an older row).
+  const today = await page.evaluate(() => new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }));
+  await expect(entry).toContainText(today);
 });
 
 // ── S21-2: Gaps ──────────────────────────────────────────────────────────────────────────────────
 
 const REGIONS = 'In which regions is customer data stored?'; // Larkspur: no draft; a person's answer, learned when sent
+const PHISHING = 'フィッシング攻撃をどのように検知し、対応していますか？'; // Bluefin: no draft; approved by the member in sprint-19.spec.ts
+const DETECT = 'What is your mean time to detect a security incident?'; // Bluefin: no draft; left unanswered here
 
 test('Gaps: what the knowledge base could not answer, where each stands, and one step to act', async ({ browser }) => {
   checks('S21-2 4', 'S21-2 5');
   // The admin, who can act on what they open (every member sees the same gaps: database case 6).
   const page = await signIn(browser, admin);
+  await caption(page, 'First, one question the knowledge base could not answer is left unanswered');
+  await openResponse(page, BLUEFIN);
+  await (await expand(page, DETECT)).getByRole('button', { name: 'Leave unanswered' }).click();
+  await expect(card(page, DETECT).getByText('Not answered', { exact: true })).toBeVisible();
   await nav(page, 'Knowledge');
   await caption(page, 'Knowledge counts the gaps not answered yet, beside the other states');
   const count = page.getByRole('region', { name: 'Health' }).getByRole('button', { name: /gaps? not answered yet/ });
@@ -162,9 +186,12 @@ test('Gaps: what the knowledge base could not answer, where each stands, and one
   await expect(page.getByRole('checkbox', { name: /^Not answered yet/ })).toBeChecked();
 
   await caption(page, 'Every state, with how many responses asked each question');
-  for (const label of ['Answered, learned when sent', 'Learned', 'Answered, not added', 'Left unanswered']) {
+  for (const label of ['Answered, learned when sent', 'Learned', 'Learned as a proposed change', 'Answered, not in the knowledge base', 'Left unanswered']) {
     await page.getByRole('checkbox', { name: new RegExp(`^${label} \\(`) }).check();
   }
+  // Each state as the page shows it (QA review: not only the filter labels).
+  await expect(list.getByRole('article', { name: PHISHING })).toContainText('Answered, learned when sent');
+  await expect(list.getByRole('article', { name: DETECT })).toContainText('Left unanswered');
   const learned = list.getByRole('article', { name: REGIONS });
   await expect(learned).toContainText('Learned');
   await expect(learned).toContainText('Asked in 1 response');
@@ -195,10 +222,12 @@ test('Gaps show a question\'s markup as text', async ({ browser }) => {
   // The database returns question text as written (database case 7); here one with markup is added
   // to what it returned, as a hostile upload would put it there, to see how the page shows it.
   await page.route('**/rest/v1/rpc/knowledge_gaps', async (route) => {
+    // The request guard first (security review): this handler runs before the session's own.
+    if (!requestAllowed(route.request().url())) return route.abort('blockedbyclient');
     const res = await route.fetch();
-    const gaps = (await res.json()) as Record<string, unknown>[];
-    const first = gaps[0] ?? { state: 'open', responses: 1, lastAsked: new Date().toISOString(), entryRef: null, responseId: 'x', response: 'x', sessionId: 'x' };
-    await route.fulfill({ response: res, json: [{ ...first, question: markup, questionId: 'markup-test', state: 'open' }, ...gaps] });
+    const body = (await res.json()) as { total: number; gaps: Record<string, unknown>[] };
+    const first = body.gaps[0] ?? { state: 'open', responses: 1, lastAsked: new Date().toISOString(), entryRef: null, responseId: 'x', response: 'x', sessionId: 'x' };
+    await route.fulfill({ response: res, json: { total: body.total + 1, gaps: [{ ...first, question: markup, questionId: 'markup-test', state: 'open' }, ...body.gaps] } });
   });
   await nav(page, 'Knowledge');
   await page.getByRole('button', { name: 'Gaps', exact: true }).click();

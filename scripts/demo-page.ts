@@ -127,7 +127,7 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
     return `<section class="sprint"><h2>Sprint ${s.sprint}: ${esc(s.title)}</h2>${stories}</section>`;
   }).join('');
   const aiNote: Record<string, string> = {
-    staging: 'The staging run used the hosted staging site, with its real sign-in, database and functions; a test marked Real AI model asked one question with the real models, and no other step used AI.',
+    staging: 'The staging run used the hosted staging site, with its real sign-in, database and functions; a test marked Real AI model asked one question with the real models; besides that, answers learned when a response was marked as sent were indexed with the real embedding model, and nothing else used AI.',
     local: 'The local run used the real Supabase stack in CI with every AI provider switched off, so drafts and answers are the fallback ones, the same on every run.',
   };
   const ai = builds.map((b) => aiNote[b.target] ?? '').filter(Boolean).join(' ');

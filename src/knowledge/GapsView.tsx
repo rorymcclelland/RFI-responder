@@ -13,12 +13,15 @@ const PILL: Record<GapState, string> = {
   open: 'bg-coral-50 text-coral-700 border-coral-200',
   answered: 'bg-sky-50 text-sky-700 border-sky-200',
   learned: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  proposed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   not_learned: 'bg-ink-50 text-ink-600 border-ink-200',
   unanswered: 'bg-ink-50 text-ink-500 border-ink-200',
 };
 
-export default function GapsView({ gaps, initial = [], onOpenEntry }: {
+export default function GapsView({ gaps, total, initial = [], onOpenEntry }: {
   gaps: Gap[];
+  /** How many groups there are in all; at most 500 are returned (security review, Sprint 21). */
+  total: number;
   /** States to show first (the overview's count opens the open ones). */
   initial?: GapState[];
   onOpenEntry: (ref: string) => void;
@@ -48,7 +51,7 @@ export default function GapsView({ gaps, initial = [], onOpenEntry }: {
       <section aria-label="Gaps" className="space-y-2">
         <p className="text-sm text-ink-500" role="status">
           {gaps.length === 0 ? 'No gaps: in responses from the last 90 days, every question but pricing had a draft from the knowledge base.'
-            : `${shown.length} of ${gaps.length} ${gaps.length === 1 ? 'question' : 'questions'}`}
+            : `${shown.length} of ${gaps.length} ${gaps.length === 1 ? 'question' : 'questions'}${total > gaps.length ? `; the first ${gaps.length} of ${total} are listed, those still to do first` : ''}`}
         </p>
         {gaps.length > 0 && shown.length === 0 && <p className="text-sm text-ink-400 py-6 text-center">None in the states chosen. Tick another state above.</p>}
         {shown.map((g) => (
@@ -69,12 +72,12 @@ export default function GapsView({ gaps, initial = [], onOpenEntry }: {
                   Open it in the response <ArrowRight size={13} />
                 </button>
               )}
-              {g.state === 'learned' && g.entryRef && (
+              {(g.state === 'learned' || g.state === 'proposed') && g.entryRef && (
                 <button className="btn-ghost text-xs py-2" onClick={() => onOpenEntry(g.entryRef!)}>
                   {g.entryRef}
                 </button>
               )}
-              {g.state !== 'open' && g.state !== 'learned' && (
+              {g.state !== 'open' && g.state !== 'learned' && g.state !== 'proposed' && (
                 <button className="btn-ghost text-xs py-2"
                   onClick={() => openQuestion({ responseId: g.responseId, sessionId: g.sessionId, questionId: g.questionId })}>
                   See it in the response

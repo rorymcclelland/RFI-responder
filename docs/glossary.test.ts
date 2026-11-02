@@ -21,7 +21,7 @@ export const RETIRED: [RegExp, string][] = [
   [/\b(skip|skips|skipped|skipping)\b/i, 'not answered, leave unanswered'],
   // Sprint 21 (S21-1, U-6): sending is its own step.
   [/\bRecord export\b|\bExported\b|\bChanged since export\b/, 'Mark as sent, Sent, Changed since sent'],
-  [/\bexport (was |is )?recorded\b|\brecord(ing)? the export\b/i, 'marked as sent, mark as sent'],
+  [/\bexport (was |is )?(not )?recorded\b|\brecord(ing)? (the |an )?export\b|\bat export\b/i, 'marked as sent, mark as sent'],
 ];
 
 function files(dir: string, ext: RegExp): string[] {

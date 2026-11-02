@@ -39,7 +39,18 @@ export async function loadResponse(client: SupabaseClient, id: string): Promise<
   return data ? toResponse(data as OverviewRow) : null;
 }
 
-const fail = (what: string, message: string) => new Error(`${what}: ${message}`);
+/**
+ * The database's own messages keep its names (record_export, Sprint 21 Q2: nothing migrates); what a
+ * person reads uses the app's words (QA review, Sprint 21, finding 10).
+ */
+export function inAppWords(message: string): string {
+  return message
+    .replace(/accept or skip every question before exporting/g, 'approve each question or leave it unanswered before marking the response as sent')
+    .replace(/question\(s\) are still pending/g, 'question(s) are still to do')
+    .replace(/can record an export/g, 'can mark the response as sent')
+    .replace(/Record the export before archiving/g, 'Mark the response as sent before archiving');
+}
+const fail = (what: string, message: string) => new Error(`${what}: ${inAppWords(message)}`);
 
 export async function createResponse(client: SupabaseClient, name: string, dueDate: string | null): Promise<string> {
   const { data, error } = await client.from('opportunities').insert({ name, due_date: dueDate || null }).select('id').single();
@@ -76,7 +87,7 @@ export interface ExportSummary {
 
 export async function recordExport(client: SupabaseClient, sessionId: string): Promise<ExportSummary> {
   const { data, error } = await client.rpc('record_export', { p_session: sessionId });
-  if (error) throw fail('Export not recorded', error.message);
+  if (error) throw fail('Not marked as sent', error.message);
   return data as ExportSummary;
 }
 
@@ -109,19 +120,21 @@ export async function suggestExperts(client: SupabaseClient, questionId: string)
 
 /**
  * Sprint 21 (S21-1, U-6): what marking a response as sent will do, from what is on screen, said
- * before the person confirms. The database decides what is actually learned (record_export), so this
- * counts the answers of the kinds it learns from (edited or written by a person, not pricing) and the
- * assignments it will close; it does not promise each is learned (rule 1).
+ * before the person confirms. The database decides what each answer becomes (record_export: a new
+ * entry, a proposed change, a confirmation, or nothing, by rules this screen cannot see in full), so
+ * this counts the answers it will consider, by kind, and the assignments it will close, and promises
+ * no number learned (rule 1; QA review, Sprint 21).
  */
 export function sendPreview<Q extends { status: string; gate?: string | null; learnedAt?: string | null }>(
   questions: Q[],
   assignments: { status: string }[],
   source: (q: Q) => 'draft' | 'edited' | 'person',
-): { written: number; pricing: number; openAssignments: number } {
+): { written: number; drafts: number; pricing: number; openAssignments: number } {
   // As record_export: approved answers not yet considered (on a second marking, those changed since).
   const approved = questions.filter((q) => q.status === 'accepted' && !q.learnedAt);
   const pricing = approved.filter((q) => q.gate === 'pricing').length;
   const written = approved.filter((q) => q.gate !== 'pricing' && source(q) !== 'draft').length;
+  const drafts = approved.filter((q) => q.gate !== 'pricing' && source(q) === 'draft').length;
   // The same assignments record_export closes: those still pending or in review.
-  return { written, pricing, openAssignments: assignments.filter((a) => a.status === 'pending' || a.status === 'in_review').length };
+  return { written, drafts, pricing, openAssignments: assignments.filter((a) => a.status === 'pending' || a.status === 'in_review').length };
 }

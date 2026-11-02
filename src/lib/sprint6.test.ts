@@ -67,7 +67,7 @@ describe('S6-5 a refused save is reported', () => {
     const select = vi.fn(async () => (call++ === 0 ? { data: [{ id: 'q1' }], error: null } : { data: [], error: null }));
     const c = { from: () => ({ update: () => ({ eq: () => ({ select }) }) }) } as never;
     const err = await saveQuestionPatch(c, 'q1', { finalAnswer: 'x', status: 'skipped' }).catch((e) => e);
-    expect(err.message).toMatch(/edited answer was saved, but it was not approved/);
+    expect(err.message).toMatch(/edited answer was saved, but the decision was not/);
     expect(err.partial).toBe(true);
   });
 
