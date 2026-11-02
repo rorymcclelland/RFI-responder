@@ -178,3 +178,7 @@ Order: S20-1, then S20-2 (needs Rory's set-up, which can happen while S20-1 is b
 **Also returned to the backlog.** The one real-AI step per staging run (Q2): no test asks a question on staging yet. Listed as case S20-4 5.
 
 **Agreed alongside the sprint (Rory, 2 November 2026).** Configuration is Claude's work as code, credentials and the production approval stay with Rory (backlog O-1); and one working agreement for all of Rory's build projects, kept as the `build-working-agreement` skill, which `CLAUDE.md` points to.
+
+## Review and close (2 November 2026)
+
+All five stories done; Rory signed off from the demo page (14 cases passed in the browser on CI and staging, 15 checked by other named checks, 6 by hand with the reason). The first deploy through the approval gate followed: approved by Rory, checked by the workflow (67 migrations, the app serving `ba97edf`, no advisor error). Returned to the backlog: F-66 (the main path as a browser test) and F-67 (the real-AI step on staging); new: F-68 (a failing migration not yet tried on staging). Proposed next: Sprint 21, O-1, U-6 and K-4 with F-67.

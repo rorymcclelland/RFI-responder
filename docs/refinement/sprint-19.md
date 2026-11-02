@@ -153,3 +153,7 @@ An independent review of `main..sprint-19` found no high issue, three medium and
 | L4 | A focus not used before leaving the response stuck, and one notice named the wrong file | A focus is dropped when its response is left; the two cases each have their own wording |
 | L5 | A bulk-approved question showed "Left unanswered." under Decided | It shows the approved answer, or "Left unanswered." only when it was |
 | L6 | The admin line opened Governance, not Knowledge; an empty hand-back note read oddly; an approved assignment reopened since was labelled "Asked" | The admin line opens Knowledge filtered to what waits for review; "no note"; "You approved it, but it has been reopened since" |
+
+## Review and close (2 November 2026)
+
+All four stories done, signed off by Rory from Sprint 20's first demo page (Q4): the six cases of `docs/testing/sprint-19-test-pack.md` ran as browser tests in CI and on the hosted staging site, and Sprint 19's screenshots were taken by CI. Two bugs in Sprint 19's screens were found by those tests and fixed in Sprint 20: BUG-43 (the phone menu, since the prototype) and BUG-44 (a note vanishing in Questions for you). Test counts at the close: 1091 unit, 377 database. Details in `docs/refinement/sprint-20.md`.

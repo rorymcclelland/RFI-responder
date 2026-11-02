@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in nineteen sprints (Sprints 0 to 18). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-one sprints (Sprints 0 to 20). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -78,6 +78,8 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 16 | The last rough edges (a response shows it is loading, adding an entry is confirmed at once, a steady knowledge-base box) and a UX spike: the app to be reorganised around people's jobs, with the knowledge base as a full place (`docs/ux/`) |
 | 17 | The first slice of the redesign: one vocabulary across the app (a glossary the tests enforce), controls only for those who can use them, and the knowledge base as a full page with an overview and browse, in place of the pop-up |
 | 18 | Each answer's story and asking the knowledge base: an answer's own page (history, where it was used, other languages; approve, mark still correct, edit), retiring and restoring answers and declining proposed changes, Ask it a question through the same pipeline as a response, and entry numbers past KB-9999 |
+| 19 | Questions for you and Home: a colleague answers, approves or hands back an assigned question on one screen, the owner sees and uses their answer, and everyone lands on what needs them |
+| 20 | Claude as the QA team: the agreed cases as browser tests in CI and on a hosted staging copy, deploys that check themselves (the live demo after the owner's approval), and a demo page with recordings for sign-off |
 
 Each sprint followed the same cycle:
 

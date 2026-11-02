@@ -19,6 +19,8 @@ name: Deploy
 on:
   push:
     branches: ['sprint-*', 'main']
+    # A push that changes only documentation deploys nothing (and asks for no approval).
+    paths-ignore: ['docs/**', '**/*.md']
   workflow_dispatch:
 
 permissions:

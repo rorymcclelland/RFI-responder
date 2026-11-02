@@ -825,10 +825,10 @@ Refinement: `docs/refinement/sprint-19.md`. The third slice of option B (Sprint 
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S19-1 | Questions for you: a contributor approves, sends to the owner or hands back an assigned question on one screen; the owner sees and uses their answer | U-3 | Ready, Sprint 19 |
-| S19-2 | Open a response at a question, in whichever file it is in | U-3, U-4 | Ready, Sprint 19 |
-| S19-3 | Home: Needs you, Your responses, What we know; everyone lands there | U-4 | Ready, Sprint 19 |
-| S19-4 | Guide, introduction and screenshots for these screens | U-10 | Ready, Sprint 19 |
+| S19-1 | Questions for you: a contributor approves, sends to the owner or hands back an assigned question on one screen; the owner sees and uses their answer | U-3 | Done, Sprint 19 |
+| S19-2 | Open a response at a question, in whichever file it is in | U-3, U-4 | Done, Sprint 19 |
+| S19-3 | Home: Needs you, Your responses, What we know; everyone lands there | U-4 | Done, Sprint 19 |
+| S19-4 | Guide, introduction and screenshots for these screens | U-10 | Done, Sprint 19 |
 
 ## Sprint 20: Claude as the QA team, and a sprint demo to sign off (asked for by Rory 2 November 2026)
 
@@ -836,11 +836,50 @@ Refinement: `docs/refinement/sprint-20.md`. Rory wants to spend less time testin
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S20-1 | Browser acceptance tests on the real local stack, in CI | F-1 | Ready, Sprint 20 |
-| S20-2 | A staging site | | Ready, Sprint 20 |
-| S20-3 | Automated deploys, with checks | | Ready, Sprint 20 |
-| S20-4 | The acceptance run on staging, and the sprint demo page | | Ready, Sprint 20 |
-| S20-5 | The new process, written down | | Ready, Sprint 20 |
+| S20-1 | Browser acceptance tests on the real local stack, in CI | F-1 | Done, Sprint 20 |
+| S20-2 | A staging site | | Done, Sprint 20 |
+| S20-3 | Automated deploys, with checks | | Done, Sprint 20 |
+| S20-4 | The acceptance run on staging, and the sprint demo page | | Done, Sprint 20 |
+| S20-5 | The new process, written down | | Done, Sprint 20 |
+
+### Sprint 19 and 20 review (2 November 2026)
+
+Sprint 19 was signed off from Sprint 20's first demo (Q4), so the two close together.
+
+**Checks, with evidence.**
+- 1091 unit and 377 database tests on `sprint-20`; lint and type check clean; CI green on every job, including the new browser tests.
+- The browser tests ran on build `ee613fb` in CI's local stack (six passed) and on the hosted staging site (five passed; the sixth needs a third person and runs locally only). The demo page combined both runs: 14 agreed cases passed in the browser, 15 checked by other named checks, 6 by hand with the reason, none failed or unchecked. Rory watched it and signed off.
+- A throwaway branch with Home's heading changed failed all five tests (CI run 41464775277).
+- The first deploy through the approval gate: Rory approved it in GitHub, and the workflow found the live demo's database up to date, deployed the six functions, and checked the deploy: 67 migrations, the app serving `ba97edf`, no error from the security advisor.
+- Independent reviews: Sprint 19's security review (three medium, six low, all fixed); Sprint 20's security review (two high, two medium, three low, all fixed, H2 closed by project-scoped tokens) and QA review of the tests (all fixed).
+
+**Found and fixed in the sprints.** BUG-43 (at phone width the menu's overlay covered the menu, since the prototype), found by the first phone test; BUG-44 (a note being typed in Questions for you vanished when the stage was saved), found by the first staging run; two controls with no accessible name; a screenshot run that passed when a view did not fit.
+
+### Where every Sprint 19 and 20 review item now lives
+
+| Item | Now |
+|---|---|
+| U-3, U-4, U-10 for these screens (S19-1 to S19-4) | Done in Sprint 19 |
+| S20-1 to S20-5 (browser tests, staging, deploys, the demo page, the process) | Done in Sprint 20 |
+| BUG-43, BUG-44 | Done in Sprint 20 |
+| Sprint 19 and Sprint 20 review findings | Done (review) |
+| F-66 The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test | Backlog, returned from Sprint 20 |
+| F-67 One step per staging run asks a question with the real AI model (Q2) | Backlog, returned from Sprint 20 |
+| F-68 A migration that fails on Supabase has not been tried on staging (the stop on failure has been seen for other steps) | Backlog, from Sprint 20 review |
+| O-1 Configuration as code, and set-up without copy and paste | Candidate, proposed for Sprint 21 |
+| The working agreement for all build projects | The `build-working-agreement` skill; `CLAUDE.md` points to it |
+
+**Not yet in a sprint, ranked at the Sprint 20 review.**
+1. O-1 configuration as code and the set-up script (Rory's time, and the one copy-and-paste slip of the set-up).
+2. U-6 sending made plain (small; the step every response ends with).
+3. K-4 gaps that make the knowledge base grow (the value proposition).
+4. F-67 the real-AI step on staging (small, with K-4's ask flows).
+5. U-8 **Try it** for demo visitors.
+6. F-66 the main path as a browser test.
+7. U-5, U-9 (the spike's last slice).
+8. F-68, then the earlier list: F-14 and F-15 (need people), F-59, F-20, F-34, F-60, F-62, F-8 (Pro plan), F-2, F-4.
+
+**Proposed next.** Sprint 21: O-1, U-6 and K-4, with F-67 alongside K-4. U-8 moves to Sprint 22 with U-5 and U-9: a visitor's own copy is best built once the response page it copies has settled.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -926,6 +965,11 @@ Refinement: `docs/refinement/sprint-20.md`. Rory wants to spend less time testin
 | BUG-40 | Done, Sprint 16 (S16-2). Adding a knowledge-base entry took about 10 seconds to confirm | Reported by Rory at the Sprint 15 hosted check. Likely cause, from the code: the form waits for the new entry to be indexed (`indexNewEntries`, an Edge Function that may start cold, then Voyage) before saying it was added. Measure first; then confirm the save at once and index afterwards, as imports do |
 | BUG-41 | Done, Sprint 15. Every reset from the live app failed with "UPDATE requires a WHERE clause" (Supabase's `pg_safeupdate`), and the partly typed confirmation looked frozen | Found at the Sprint 15 hosted check; fixed in `20261103140000` with a test that no function has an UPDATE or DELETE without a WHERE clause, and a hint under the box |
 | BUG-42 | Done, Sprint 18 (S18-1). An entry's number pads its sequence to four digits with `lpad`, which cuts longer text to four characters, so entry 10,000 would be numbered KB-1000 and refused as a repeat: the knowledge base cannot pass 9,999 entries | Found by the Sprint 17 security review (it predates Sprint 17). Widen the number (a fifth digit, or no padding past 9,999) in a migration that keeps existing numbers; test at 9,999 and 10,000 |
+| BUG-43 | Done, Sprint 20. At phone width the menu's dark overlay sat above the menu, so no menu item could be tapped | Since the prototype; found by Sprint 20's first phone-width browser test |
+| BUG-44 | Done, Sprint 20. In Questions for you, saving "Working on it" when a question was opened rebuilt the panel, so a note already being typed vanished | Found by the first browser test run on staging, where the save takes longer |
+| F-66 | The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test | Returned from Sprint 20 (S20-1's first content) |
+| F-67 | One step per staging run asks the knowledge base a question with the real AI model (Sprint 20, Q2) | Returned from Sprint 20 |
+| F-68 | A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
