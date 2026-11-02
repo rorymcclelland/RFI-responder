@@ -16,6 +16,10 @@ describe('deploy checks (Sprint 20, S20-3)', () => {
     expect(missingMigrations(['20261106120000', '20261107100000'], appliedMigrations(list))).toEqual(['20261107100000']);
   });
 
+  it('reads a plain list of versions, one per line', () => {
+    expect(appliedMigrations('20261106120000\n20261107100000\n')).toEqual(['20261106120000', '20261107100000']);
+  });
+
   it('reads the table however the CLI draws its column bars', () => {
     expect(appliedMigrations('  20261106120000 │ 20261106120000 │ 2026-11-06 12:00:00\n  20261107100000 │                │ 2026-11-07')).toEqual(['20261106120000']);
   });

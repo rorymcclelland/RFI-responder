@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sprint 20 (S20-3): applies the migrations and deploys every Edge Function to one Supabase project,
-# then lists the applied migrations for the deploy check.
+# then lists the applied migration versions for the deploy check.
 #
 #   bash scripts/supabase-deploy.sh <project-ref> <migration-list-output-file>
 #
@@ -25,5 +25,6 @@ done
 echo "::add-mask::$db_url"
 supabase db push --db-url "$db_url" --yes
 supabase functions deploy --project-ref "$ref"
-supabase migration list --db-url "$db_url" > "$out"
+# The applied versions, one per line, straight from the project's own record of them.
+psql "$db_url" -tAc "select version from supabase_migrations.schema_migrations order by 1" > "$out"
 echo "Migrations applied and functions deployed to $ref."

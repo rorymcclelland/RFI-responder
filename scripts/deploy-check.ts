@@ -6,7 +6,7 @@
  *   tsx scripts/deploy-check.ts <migration-list-output-file>
  *
  * Checks, and fails the workflow with the reason:
- * 1. Every migration in supabase/migrations is applied (from `supabase migration list`).
+ * 1. Every migration in supabase/migrations is applied (from the project's applied versions (scripts/supabase-deploy.sh), or `supabase migration list`).
  * 2. Every Edge Function in supabase/functions is deployed: an unsigned call gets 401 from Supabase's
  *    gateway, where a function that is not deployed gets 404.
  * 3. The app answers at APP_URL with its page, built from EXPECTED_SHA (waiting for Vercel's build).
@@ -25,13 +25,14 @@ export function repoMigrations(dir = 'supabase/migrations'): string[] {
 }
 
 /**
- * Versions the project has applied, from `supabase migration list`, whose rows read
+ * Versions the project has applied, from the project's applied versions (scripts/supabase-deploy.sh), or `supabase migration list`, whose rows read
  * "  <local> | <remote> | <time>"; a migration only in the repository has an empty remote column.
  */
 export function appliedMigrations(listOutput: string): string[] {
   const out: string[] = [];
   for (const line of listOutput.split(/\r?\n/)) {
     // Pipes or box-drawing bars, depending on how the CLI prints the table.
+    if (/^\s*\d{14}\s*$/.test(line)) { out.push(line.trim()); continue; } // one version per line
     const cols = line.split(/[|│┃]/).map((c) => c.trim());
     if (cols.length >= 2 && /^\d{14}$/.test(cols[1])) out.push(cols[1]);
   }
@@ -78,7 +79,7 @@ async function main() {
 
   // 1. Migrations.
   const listFile = process.argv[2];
-  if (!listFile) throw new Error('Give the output of `supabase migration list` as a file.');
+  if (!listFile) throw new Error('Give the applied migration versions (from scripts/supabase-deploy.sh) as a file.');
   const missing = missingMigrations(repoMigrations(), appliedMigrations(readFileSync(listFile, 'utf8')));
   if (missing.length) {
     problems.push(`Migrations not applied: ${missing.join(', ')}`);
