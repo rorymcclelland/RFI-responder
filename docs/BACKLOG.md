@@ -830,6 +830,18 @@ Refinement: `docs/refinement/sprint-19.md`. The third slice of option B (Sprint 
 | S19-3 | Home: Needs you, Your responses, What we know; everyone lands there | U-4 | Ready, Sprint 19 |
 | S19-4 | Guide, introduction and screenshots for these screens | U-10 | Ready, Sprint 19 |
 
+## Sprint 20: Claude as the QA team, and a sprint demo to sign off (asked for by Rory 2 November 2026)
+
+Refinement: `docs/refinement/sprint-20.md`. Rory wants to spend less time testing without losing quality: Claude tests, and demonstrates each sprint for him to sign off the business value. Option B's U-6, U-8 and K-4 move to Sprint 21. Q1 to Q3 answered by Rory as recommended; Q4: Sprint 19 is signed off from Sprint 20's first demo, and both close together.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S20-1 | Browser acceptance tests on the real local stack, in CI | F-1 | Ready, Sprint 20 |
+| S20-2 | A staging site | | Ready, Sprint 20 |
+| S20-3 | Automated deploys, with checks | | Ready, Sprint 20 |
+| S20-4 | The acceptance run on staging, and the sprint demo page | | Ready, Sprint 20 |
+| S20-5 | The new process, written down | | Ready, Sprint 20 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
