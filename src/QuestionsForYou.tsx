@@ -31,6 +31,9 @@ export default function QuestionsForYou({ names, onChanged, initial = null, onIn
   const [notice, setNotice] = useState<{ text: string; tone: 'ok' | 'error' } | null>(null);
   const seq = useRef(0);
 
+  // The question panel is rebuilt only after the person's own action has been saved and the list
+  // reloaded, never by a background change, so nothing they are typing is lost (BUG-44).
+  const [revision, setRevision] = useState(0);
   const load = useCallback(async () => {
     const n = ++seq.current;
     setError('');
@@ -50,7 +53,12 @@ export default function QuestionsForYou({ names, onChanged, initial = null, onIn
   // Opening an asked question moves it to Working on it.
   useEffect(() => {
     if (!current || current.status !== 'pending') return;
-    startWorking(supabase, current).then((moved) => { if (moved) load(); });
+    // Update the stage in place: reloading would rebuild the panel while the person may already be
+    // writing (BUG-44, found by the browser tests on staging, where the save takes longer).
+    const id = current.id;
+    startWorking(supabase, current).then((moved) => {
+      if (moved) setItems((prev) => prev?.map((x) => (x.id === id ? { ...x, status: 'in_review' } : x)) ?? prev);
+    });
   }, [current?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
@@ -91,8 +99,8 @@ export default function QuestionsForYou({ names, onChanged, initial = null, onIn
           <div aria-live="polite">
             {notice && <p role={notice.tone === 'error' ? 'alert' : undefined} className={`text-sm ${notice.tone === 'error' ? 'text-coral-600' : 'text-emerald-700'}`}>{notice.text}</p>}
           </div>
-          <QuestionPanel key={current.id + current.updatedAt + current.question.status} a={current} names={names}
-            onDone={(text, tone) => { setNotice({ text, tone }); load(); onChanged?.(); }} />
+          <QuestionPanel key={`${current.id}:${revision}`} a={current} names={names}
+            onDone={(text, tone) => { setNotice({ text, tone }); load().then(() => setRevision((r) => r + 1)); onChanged?.(); }} />
         </div>
       )}
     </div>
