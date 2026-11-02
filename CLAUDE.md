@@ -4,6 +4,7 @@ Read `docs/PRODUCT.md` (what and why), `docs/BACKLOG.md` (project rules and spri
 
 ## How Rory works on this
 
+- The working agreement for all of Rory's build projects (roles, who does what, credentials, approvals) is the `build-working-agreement` skill; read it first. Differences for this project are below and in the decision log.
 - Claude writes the code; Rory reads and questions it. Explain each new concept as it is introduced.
 - Sprints are refined before building (agreed test cases first), and closed with a review. Undelivered items go back to the backlog.
 - Claude is the QA team (decision 0008): agreed cases become browser tests in `e2e/` (tagged with `checks('S20-1 2')`, listed in `e2e/cases.ts`); a separate reviewer checks them; the sprint review is a demo page built by `scripts/demo-page.ts` from the results on branch `e2e-results/<target>/<branch>`. Hand test packs only for what cannot be automated.
