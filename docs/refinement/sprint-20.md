@@ -135,3 +135,36 @@ Order: S20-1, then S20-2 (needs Rory's set-up, which can happen while S20-1 is b
   - S20-1's first content is Sprint 19's six cases, and the first demo page has a Sprint 19 section;
   - the Sprint 19 screenshots (S19-4: `21-home.png`, the new `5-assignments.png`) are taken by the `e2e` CI job with `npm run screenshots` on the local stack, instead of on Rory's PC; Claude commits them. The "Ask it a question" picture shows the fallback answer, since providers are off in CI, and the guide says so;
   - Sprint 19 and Sprint 20 close together.
+
+## Build (2 November 2026)
+
+**What was built.**
+- **S20-1:** `e2e/` with Playwright: six tests for Sprint 19's agreed cases, captions in every recording, one recording per person, run in CI (job `e2e`) on the real Supabase stack with the seed and the AI providers off, after the guide's screenshots. The workspace Claude builds in cannot pull Supabase's containers, so the suite was developed against CI.
+- **S20-2:** `scripts/e2e-staging-users.ts` (test people with a password made for each run, a demo reset, and afterwards a sign-out everywhere and a new unknown password), the keep-awake ping for staging, and `docs/DEPLOYING.md`, "Staging and automated deploys", with Rory's one-off steps.
+- **S20-3:** `.github/workflows/deploy.yml` (staging on `sprint-*`, the live demo on `main` in the `production` environment) and `scripts/deploy-check.ts` (migrations, functions, the app serving this commit, the security advisor). Each job skips, saying so, until the settings exist; both skipped as designed on every push this sprint.
+- **S20-4:** `scripts/demo-page.ts` and `e2e/cases.ts`. CI's artefact storage cannot be reached from Claude's workspace, so each run's results are pushed to their own branch, `e2e-results/<target>/<branch>`, and fetched with git.
+- **S20-5:** decision 0008, `CLAUDE.md`, the development guide.
+
+**Found by the new tests.**
+- **BUG-43:** at phone width the menu's dark overlay sat above the menu itself, so no menu item could be tapped. Present since the prototype; fixed (the overlay now sits below the header) and covered by the phone test.
+- The phone menu button and the notice's close button had no accessible name; both have one now.
+- The screenshot run reported a view that did not fit 768 px but still passed; it now fails.
+
+**Test case 4 of S20-1.** A throwaway branch with Home's heading changed: all five tests failed (CI run 41464775277). The branch was deleted.
+
+**Reviews.**
+
+| Finding | Severity | Fixed |
+|---|---|---|
+| H1 A failed staging test's trace (and the HTML report) would publish the run's password and Vercel's bypass secret to a public branch | High | No traces or report on staging; only recordings, screenshots and results are published, after a search for both secrets; the test people are signed out everywhere after each run |
+| H2 A Supabase access token can manage every project, so the staging job could reach the live demo without approval | High | Environment secrets only, given only to the CLI steps; the remaining gap is stated in DEPLOYING.md and R-06 (closing it needs a separate Supabase account for staging) |
+| M3 "After Rory's approval" said more than the code did: Vercel publishes `main` at once, and an environment with no reviewer does not wait | Medium | The job refuses to run unless `production` requires a reviewer; DEPLOYING.md states what is and is not behind the approval |
+| M4 Staging runs from two branches could overlap | Medium | One staging run at a time across branches |
+| L5 The deploy check could pass against the previous build | Low | The page names its commit (`app-version`), and the check waits for it |
+| L6 The demo page could copy any file a crafted report pointed at | Low | Only `.webm` files inside the results folder |
+| L7 Results branches would start Vercel builds; `build.json` was written unescaped | Low | `vercel.json` skips `e2e-results/*`; written by node |
+| QA: weak checks (assigning, Decided, the stale answer, the Sent list, stacking), order dependence, two cases naming checks that did not exist | | Each fixed; each test assigns its own question; a test that a member not assigned cannot see or decide the question added |
+
+**Returned to the backlog.** The main path from F-1 as a browser test (S20-1's "first content"): not built. Listed as case S20-1 6 so the demo page shows it.
+
+**Waiting on Rory.** The one-off set-up in DEPLOYING.md (Supabase, GitHub, Vercel). Until then the S20-2 and S20-3 cases that need staging show as "By hand" on the demo page.
