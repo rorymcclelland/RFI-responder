@@ -881,22 +881,54 @@ Sprint 19 was signed off from Sprint 20's first demo (Q4), so the two close toge
 
 **Proposed next.** Sprint 21: O-1, U-6 and K-4, with F-67 alongside K-4. U-8 moves to Sprint 22 with U-5 and U-9: a visitor's own copy is best built once the response page it copies has settled.
 
-## Sprint 21: sending made plain, gaps, and configuration as code (refined 2 November 2026)
+## Sprint 21: sending made plain, gaps, and configuration as code (refined 2 November 2026; closed 3 November 2026)
 
 Refinement: `docs/refinement/sprint-21.md`. Q1 to Q4 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S21-1 | Download separate from **Mark as sent**, which says beforehand what it will do; the stage words become **Sent** and **Changed since sent** | U-6 | Ready, Sprint 21 |
-| S21-2 | Gaps: what the knowledge base could not answer in recent responses, grouped by wording, with where each stands | K-4 | Ready, Sprint 21 |
-| S21-3 | Hosted sign-in settings in code and checked by every deploy; a set-up and rotation script for the secrets | O-1 | Ready, Sprint 21 |
-| S21-4 | One real-AI step on each staging run | F-67 | Ready, Sprint 21 |
+| S21-1 | Download separate from **Mark as sent**, which says beforehand what it will do; the stage words become **Sent** and **Changed since sent** | U-6 | Done, Sprint 21 |
+| S21-2 | Gaps: what the knowledge base could not answer in recent responses, grouped by wording, with where each stands | K-4 | Done, Sprint 21 |
+| S21-3 | Hosted sign-in settings in code and checked by every deploy; a set-up and rotation script for the secrets | O-1 | Done, Sprint 21 |
+| S21-4 | One real-AI step on each staging run | F-67 | Done, Sprint 21 (case 3 returned as F-69) |
+
+### Sprint 21 review (3 November 2026)
+
+**Checks, with evidence.**
+- 1122 unit and 397 database tests on the merged build `b5eefa0`; lint and type check clean; CI green on every job.
+- The browser tests on `b5eefa0`: 12 passed in CI's local stack; 11 passed and 1 skipped (it needs a third person, locally only) on staging, where the real-AI step asked one question with the real models. The demo page (build `dfe9736`, with the same tests) showed every agreed case: passed in the browser, checked by a named check in CI, or by hand with the reason; none failed. Rory watched it and signed off.
+- The sign-in settings check passed on staging and, on the first approved deploy with the new read-only tokens, on the live demo, before any migration ran. The deploy found 71 migrations applied, deployed the six functions, and every deploy check passed.
+- S21-3 case 2 was seen with a real difference rather than a test one: staging had no redirect address, the check failed naming it, Rory added it and the next run passed.
+- Rory remade both access tokens with **Auth Config: Read**, stored them and the staging database password with the set-up script, and revoked the old tokens.
+- Independent QA review of the tests and security review of the sprint: every finding dealt with (commit "Sprint 21 reviews" and after).
+
+**Found and fixed in the sprint.** BUG-45 (approving wrote the text and the decision as two saves, so a second person's save could land between them), found by the staging run; three staging tests that read a screen before its save had answered; the set-up script refusing a pasted control character rather than storing it.
+
+### Where every Sprint 21 review item now lives
+
+| Item | Now |
+|---|---|
+| U-6, K-4, O-1, F-67 (S21-1 to S21-4) | Done in Sprint 21 |
+| BUG-45 | Done in Sprint 21 |
+| Sprint 21 QA and security review findings | Done (review) |
+| S21-4 case 3: the staging run reads the ask on Governance's usage line | F-69, Backlog, returned from Sprint 21 |
+| The old legacy command-line token on Rory's Supabase account | Rory's to revoke (advice at the close; not a code item) |
+
+**Not yet in a sprint, ranked at the Sprint 21 review.**
+1. U-5 the response as a journey (L, split at refinement): the spike's last big slice, and the page every response is worked on.
+2. U-9 plain settings with **Advanced**, and the audit log filtered by person and response (S; also gives the spend by function noted at Sprint 18).
+3. F-69 the usage line in the staging real-AI test (S; finishes S21-4).
+4. U-8 **Try it** for demo visitors (M): best built once U-5 has settled the response page it copies.
+5. F-66 the main path as a browser test.
+6. F-68, then the earlier list: F-14 and F-15 (need people), F-59, F-20, F-34, F-60, F-62, F-8 (Pro plan), F-2, F-4.
+
+**Proposed next.** Sprint 22: U-5 (its first slice, split at refinement), U-9 and F-69. U-8 follows in Sprint 23, on the rebuilt response page.
 
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
 |---|---|---|---|
-| O-1 | Ready, Sprint 21 (S21-3). Configuration as code, and set-up without copy and paste (asked for by Rory, 2 November 2026) | Supabase's sign-in settings (sign-ups off, site address, redirect addresses) live in `supabase/config.toml` and are applied by the deploy workflow, for staging and the live demo, with a check that they match; a one-off set-up and key-rotation script that Rory runs on his PC reads each key from Supabase with the Supabase CLI and writes it to the right GitHub secret with `gh`, so no key is copied by hand and none passes through Claude; public, non-secret dashboard settings (such as Vercel's public variables) are made by Claude through the connectors, with Rory's approval each time; Rory keeps account and project creation, credentials and the production approval | From the Sprint 20 staging set-up: of eleven hand steps, most were configuration that can be code, and one copy-and-paste slip (the service key in the anon key's place) was caught by the hosted build's guard. Standard practice: configuration in code, credentials held by the owner and handed to automation. Evaluate Supabase's Vercel integration for the Vercel variables. Candidate for Sprint 21 alongside U-6, U-8, K-4 |
+| O-1 | Done, Sprint 21 (S21-3). Configuration as code, and set-up without copy and paste (asked for by Rory, 2 November 2026) | Supabase's sign-in settings (sign-ups off, site address, redirect addresses) live in `supabase/config.toml` and are applied by the deploy workflow, for staging and the live demo, with a check that they match; a one-off set-up and key-rotation script that Rory runs on his PC reads each key from Supabase with the Supabase CLI and writes it to the right GitHub secret with `gh`, so no key is copied by hand and none passes through Claude; public, non-secret dashboard settings (such as Vercel's public variables) are made by Claude through the connectors, with Rory's approval each time; Rory keeps account and project creation, credentials and the production approval | From the Sprint 20 staging set-up: of eleven hand steps, most were configuration that can be code, and one copy-and-paste slip (the service key in the anon key's place) was caught by the hosted build's guard. Standard practice: configuration in code, credentials held by the owner and handed to automation. Evaluate Supabase's Vercel integration for the Vercel variables. Candidate for Sprint 21 alongside U-6, U-8, K-4 |
 | C-1 | Done, Sprint 12. Multilingual knowledge base (added 22 Oct; Sprint 1 measures Japanese-to-English retrieval as a first step) | Knowledge captured in any supported language is available in all of them: a question in one language retrieves answers held in another; drafts are written in the language of the incoming RFI; each entry keeps its original language, and translated answers are marked as such and need human review before being learned; retrieval and drafting quality are evaluated per language pair | Depends on Sprint 1's embedding model being multilingual (criterion added to the S0-9 spike) and Sprint 2's drafting. Likely sits with Sprint 3's learning loop or after it. A strong demonstration for organisations working across languages, such as Cookpad. Languages: English and Japanese to start (agreed 22 Oct); others later Refined as Sprint 12 (26 October 2026) |
 
 ## Follow-ups (F-1 to F-12 from Sprint 0, F-13 to F-15 from Sprint 1, F-16 to F-23 from Sprint 2, F-24 to F-26 from Sprint 3, F-27 to F-29 from Sprint 4, F-30 and F-31 from Sprint 5, F-32 to F-35 from Sprint 6, F-36 to F-39 from Sprint 7, F-40 and F-41 from Sprint 8, F-42 to F-56 from Sprint 10, F-57 from Sprint 11, F-58 to F-61 from Sprint 12, F-62 from Sprint 13, F-63 to F-65 from Sprint 14; none new from Sprint 15; ranked at each review; see "Where every review item now lives")
@@ -980,8 +1012,9 @@ Refinement: `docs/refinement/sprint-21.md`. Q1 to Q4 answered by Rory the same d
 | BUG-44 | Done, Sprint 20. In Questions for you, saving "Working on it" when a question was opened rebuilt the panel, so a note already being typed vanished | Found by the first browser test run on staging, where the save takes longer |
 | BUG-45 | Done, Sprint 21 (`approve_answer()`: the text and the decision in one transaction holding the question; a second save waits, then sees the decision). Approving wrote the answer, then the decision, as two saves. If a specialist approves their own answer to the same question between the owner's two saves, the owner's approval lands on the specialist's text, which the owner has not seen; the specialist is told their answer was saved but not approved. The two-save shape is also in Questions for you | Found by the Sprint 21 staging run (S19 5 pressed Approve between the owner's two saves; the test now waits for the save). Narrow window, two round trips. Fix: decide the answer and the decision in one database function that applies only to the text the person saw, with tests for both orders |
 | F-66 | The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test | Returned from Sprint 20 (S20-1's first content) |
-| F-67 | One step per staging run asks the knowledge base a question with the real AI model (Sprint 20, Q2) | Returned from Sprint 20 |
+| F-67 | Done, Sprint 21 (S21-4). One step per staging run asks the knowledge base a question with the real AI model (Sprint 20, Q2) | Returned from Sprint 20; its case 3 (the staging run reads the usage line) is F-69 |
 | F-68 | A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
+| F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Returned from Sprint 21: not built (QA review); the recording and the cap are checked by database tests since Sprint 18 |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 

@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-one sprints (Sprints 0 to 20). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-two sprints (Sprints 0 to 21). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -80,6 +80,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 18 | Each answer's story and asking the knowledge base: an answer's own page (history, where it was used, other languages; approve, mark still correct, edit), retiring and restoring answers and declining proposed changes, Ask it a question through the same pipeline as a response, and entry numbers past KB-9999 |
 | 19 | Questions for you and Home: a colleague answers, approves or hands back an assigned question on one screen, the owner sees and uses their answer, and everyone lands on what needs them |
 | 20 | Claude as the QA team: the agreed cases as browser tests in CI and on a hosted staging copy, deploys that check themselves (the live demo after the owner's approval), and a demo page with recordings for sign-off |
+| 21 | Sending made plain and gaps: download separate from **Mark as sent**, which says beforehand what it will do; Knowledge shows what it could not answer in recent responses and where each stands; approving an answer in one step; the hosted sign-in settings checked on every deploy, a script that stores the keys without copying, and one real-AI question on every staging run |
 
 Each sprint followed the same cycle:
 

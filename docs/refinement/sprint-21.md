@@ -120,3 +120,14 @@ Order: S21-4 (small, and it exercises staging's AI keys early), S21-1, S21-2, S2
 - **Q4:** (a). Checked on every deploy, read-only.
 
 **One consequence of Q4 for Rory.** Supabase's tokens cannot be changed once made, so S21-3 needs the two access tokens made again with one more permission, **Auth Config: Read**, and stored under the same names. It will be the first thing the set-up script (S21-3) does for him: he makes the two tokens in the dashboard, and the script stores them from a prompt.
+
+## Close (3 November 2026)
+
+All four stories are done, with BUG-45, found by the staging run, fixed in the sprint. Rory signed off from the demo page and approved the production deploy; the sign-in settings check passed on the live demo before any migration. The evidence is in the Sprint 21 review in `docs/BACKLOG.md` and on the demo page (`docs/testing/sprint-21-demo.md`).
+
+**What changed from the refinement while building.**
+- **S21-1 case 2** is checked on the seeded response Larkspur, which is already sent, inside one longer browser test that runs cases 2 to 5 in order: the admin changes three answers and assigns a question, which makes it **Changed since sent**; downloading then leaves it so, with nothing recorded, learned or closed. A fresh response with every question decided would have needed the whole upload and review path first (F-66).
+- **S21-1 case 3's counts.** The confirmation counts the answers the knowledge base will be given (edited or written by a person, and drafts approved as written) and the pricing answers it never learns, rather than how many will be learned: whether each becomes an entry is decided when it is marked as sent (an answer the same as an entry adds nothing), so a number of entries learned could not be known beforehand (rule 1, as the boundaries note asked).
+- **S21-2's states** gained **Learned as a proposed change** and **Answered, not in the knowledge base** (QA review: "Learned" now means a current entry), and the result is capped at 500 groups, those still to do first (security review).
+- **S21-3 case 2** was seen with a real difference rather than a test one: staging had no redirect address; the check failed naming it, Rory added it, and the next run passed. Sign-ups were not turned on for the test; the same rule is a unit test.
+- **S21-4 case 3** was not built: the staging test does not read the usage line on Governance. Returned as F-69; recording and the cap are covered by database tests since Sprint 18.
