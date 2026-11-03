@@ -155,6 +155,12 @@ const realRun: Run = (cmd, args, input) => {
     return { status: 1, stdout: '', stderr: `Refusing to run ${cmd}: a file of that name is in this folder.` };
   }
   const r = spawnSync(file, argv, { input, encoding: 'utf8', shell: false });
+  // Not installed, or not on the PATH (Rory's first run, Sprint 21): say so rather than failing silently.
+  if ((r.error as NodeJS.ErrnoException | undefined)?.code === 'ENOENT') {
+    return { status: 1, stdout: '', stderr: cmd === 'gh'
+      ? 'the GitHub command line (gh) is not installed: install it with "winget install --id GitHub.cli", open a new terminal, then "gh auth login"'
+      : `${cmd} is not installed` };
+  }
   return { status: r.status ?? 1, stdout: r.stdout ?? '', stderr: r.stderr ?? '' };
 };
 
@@ -183,8 +189,10 @@ const realAsk: Ask = (question) => new Promise((resolve, reject) => {
 });
 
 export async function setup(env: Environment, apply: boolean, run: Run = realRun, ask: Ask = realAsk, log: (s: string) => void = console.log, get: typeof fetch = fetch): Promise<number> {
+  // A variable holds a project ref, never a secret, so GitHub's reason for a failure can be shown.
   const variable = (name: string) => {
     const r = run('gh', ['variable', 'get', name, '--repo', REPO]);
+    if (r.status !== 0) log(`Could not read the repository variable ${name}: ${(r.stderr || r.stdout).trim().split(/\r?\n/)[0] || `the GitHub command line stopped (${r.status})`}`);
     return r.status === 0 ? r.stdout.trim() : '';
   };
   const productionRef = variable('PRODUCTION_PROJECT_REF');
