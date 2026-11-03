@@ -9,6 +9,8 @@ export interface AuditRow {
   id: number;
   at: string;
   action: string;
+  /** Who acted (kept after their profile is deleted), and their name, or null once it is. */
+  actorId: string | null;
   actorName: string | null;
   targetId: string | null;
   details: Record<string, unknown>;
@@ -27,27 +29,42 @@ export const AUDIT_GROUPS: Record<string, { label: string; actions: string[] }> 
 
 export const AUDIT_LIMIT = 200;
 
-export async function loadAuditLog(client: SupabaseClient, group: string | null): Promise<AuditRow[]> {
-  let query = client.from('audit_log')
-    .select('id, at, action, target_id, details, actor_profile:user_profiles(display_name)')
-    .order('at', { ascending: false })
-    .limit(AUDIT_LIMIT);
-  if (group && AUDIT_GROUPS[group]) query = query.in('action', AUDIT_GROUPS[group].actions);
-  const { data, error } = await query;
-  if (error) {
+/** Sprint 22 (S22-2): what to show. Any filter left out (or null) means any. */
+export interface AuditFilter { group?: string | null; actor?: string | null; response?: string | null }
+
+const READ_FAILED = 'The audit log could not be read. Try again, or check that you are still an admin.';
+
+/** The newest entries that match, at most AUDIT_LIMIT, and whether more match. */
+export async function loadAuditLog(client: SupabaseClient, f: AuditFilter): Promise<{ rows: AuditRow[]; more: boolean }> {
+  const group = f.group && AUDIT_GROUPS[f.group] ? AUDIT_GROUPS[f.group] : null;
+  const { data, error } = await client.rpc('audit_log_search', {
+    p_actions: group ? group.actions : null, p_actor: f.actor ?? null, p_response: f.response ?? null, p_limit: AUDIT_LIMIT,
+  });
+  if (error || !data) {
     // Security review, Sprint 11 (low 5): the database's message stays in the console.
     console.error('audit_log read failed', error);
-    throw new Error('The audit log could not be read. Try again, or check that you are still an admin.');
+    throw new Error(READ_FAILED);
   }
-  return ((data ?? []) as Record<string, unknown>[]).map((r) => {
-    const profile = r.actor_profile as { display_name?: string } | { display_name?: string }[] | null;
-    const name = Array.isArray(profile) ? profile[0]?.display_name : profile?.display_name;
-    return {
+  const d = data as { rows?: Record<string, unknown>[]; more?: boolean };
+  return {
+    more: Boolean(d.more),
+    rows: (d.rows ?? []).map((r) => ({
       id: Number(r.id), at: String(r.at), action: String(r.action),
-      actorName: name ?? null, targetId: (r.target_id as string | null) ?? null,
+      actorId: (r.actor as string | null) ?? null, actorName: (r.actorName as string | null) ?? null,
+      targetId: (r.targetId as string | null) ?? null,
       details: (r.details as Record<string, unknown>) ?? {},
-    };
-  });
+    })),
+  };
+}
+
+/** Everyone who has acted in the log, for the person filter; a deleted profile is a Former user. */
+export async function loadAuditPeople(client: SupabaseClient): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await client.rpc('audit_log_people');
+  if (error || !Array.isArray(data)) {
+    console.error('audit_log_people read failed', error);
+    throw new Error(READ_FAILED);
+  }
+  return (data as { id: string; name: string | null }[]).map((p) => ({ id: String(p.id), name: p.name ?? 'Former user' }));
 }
 
 const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));

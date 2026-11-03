@@ -13,6 +13,8 @@ export interface UsageStatus {
 export interface UsageReport {
   byUser: { userId: string | null; name: string | null; calls: number; spentGbp: number }[];
   byModel: { provider: string; model: string; kind: string; calls: number; inputTokens: number; outputTokens: number; spentGbp: number }[];
+  /** Sprint 22 (S22-2): calls and spend this month by the Edge Function that made them. */
+  byFunction: { function: string; calls: number; spentGbp: number }[];
   unpricedCalls: number;
   /** Sprint 11 (S11-6): the models those calls used, as 'provider model'. */
   unpricedModels: string[];
@@ -56,6 +58,7 @@ export async function loadUsageAdmin(client: SupabaseClient): Promise<{ report: 
     report: {
       byUser: r.byUser.map((u) => ({ ...u, spentGbp: num(u.spentGbp) })),
       byModel: r.byModel.map((m) => ({ ...m, spentGbp: num(m.spentGbp), inputTokens: num(m.inputTokens), outputTokens: num(m.outputTokens) })),
+      byFunction: (Array.isArray(r.byFunction) ? r.byFunction : []).map((f) => ({ function: String(f.function), calls: num(f.calls), spentGbp: num(f.spentGbp) })),
       unpricedCalls: num(r.unpricedCalls),
       unpricedModels: Array.isArray(r.unpricedModels) ? (r.unpricedModels as unknown[]).map(String) : [],
       questionsProcessed: num(r.questionsProcessed ?? 0),
@@ -64,6 +67,30 @@ export async function loadUsageAdmin(client: SupabaseClient): Promise<{ report: 
     settings: settings.data as AiSettings,
     prices: (prices.data ?? []) as AiPrice[],
   };
+}
+
+/**
+ * Sprint 22 (S22-2): what each Edge Function's calls were for, in plain words. A function not named
+ * here is shown under its own name, never dropped.
+ */
+const USE_LABEL: Record<string, string> = {
+  'process-questions': 'Processing responses',
+  'ask-knowledge': 'Asking the knowledge base',
+  embed: 'Indexing knowledge-base entries',
+  'embed-entries': 'Indexing knowledge-base entries',
+  'extract-questions': 'Reading Word documents',
+};
+
+/** Spend this month by use: functions with the same use added together, the most spent first. */
+export function spendByUse(byFunction: UsageReport['byFunction']): { label: string; calls: number; spentGbp: number }[] {
+  const uses = new Map<string, { label: string; calls: number; spentGbp: number }>();
+  for (const f of byFunction) {
+    const label = USE_LABEL[f.function] ?? f.function;
+    const u = uses.get(label) ?? { label, calls: 0, spentGbp: 0 };
+    u.calls += f.calls; u.spentGbp += f.spentGbp;
+    uses.set(label, u);
+  }
+  return [...uses.values()].sort((a, b) => b.spentGbp - a.spentGbp || a.label.localeCompare(b.label));
 }
 
 export type SettingsChange = Partial<Pick<AiSettings, 'daily_question_cap' | 'daily_embed_cap' | 'monthly_budget_gbp' | 'alert_share' | 'gbp_per_usd' | 'review_interval_months' | 'est_usd_per_question' | 'est_usd_per_embed_text' | 'daily_extract_cap' | 'est_usd_per_extract_kchar'>>;

@@ -83,14 +83,17 @@ Entries are also learned from responses when they are marked as sent ([Running a
 ### Usage and limits
 
 - **This month**: the estimated spend on AI so far against the monthly budget, from the token counts each provider reported and the prices listed below. A warning appears for admins from the warning point, and for everyone when the budget is reached.
-- **By person** and **By model and job**: who used what.
-- **Limits**: the caps the database enforces. Change them and choose **Save limits**; every change is recorded in the audit log.
+- **By person**: who used how much.
+- **Spend by use**: what the money was spent on this month, in calls and pounds: processing responses, asking the knowledge base, indexing knowledge-base entries and reading Word documents.
+- **Limits**: the caps the database enforces, and what you are most likely to change. Change them and choose **Save limits**; every change is recorded in the audit log.
   - Questions per person per day; knowledge-base texts indexed per person per day; Word documents read by AI per person per day. Each person's count resets at midnight UTC.
   - The monthly budget, and the share of it at which admins are warned. When the month's estimated spend reaches the budget, processing stops for everyone until the next month or until the budget is raised.
-  - How much each question, each knowledge-base text indexed, and each 1,000 characters of a Word document, reserves against the budget while it is processed (compare it with the measured average shown above).
-  - The exchange rate from US dollars, which providers price in.
   - How often knowledge-base entries fall due for review (in months).
-- **Prices**: the price per million tokens for each model, with the date it was checked. Local models cost nothing. If a call used a model with no price, **This month** names the model and says the figure is too low until its price is added. Set spending limits in the providers' own consoles as well.
+- **Advanced**, closed until you open it: how the spend is estimated. Change these and choose **Save advanced settings**; these changes are recorded in the audit log too.
+  - How much each question, each knowledge-base text indexed, and each 1,000 characters of a Word document, reserves against the budget while it is processed (compare it with the measured average under **This month**).
+  - The exchange rate from US dollars, which providers price in.
+  - **Spend by model**: the spend by model and the kind of call.
+  - The prices: the price per million tokens for each model, with the date it was checked. Local models cost nothing. If a call used a model with no price, **This month** names the model and says the figure is too low until its price is added. Set spending limits in the providers' own consoles as well.
 
 ![The limits on the governance page](../screenshots/13-governance-limits.png)
 
@@ -116,6 +119,12 @@ Only where the demo data was loaded, as on the hosted demo. Under **Governance**
 
 ## The audit log
 
-Responses marked as sent (and marked again after changes), changes after that, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices, admin changes, invitations and demo resets are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: the most recent 200 entries, newest first, each saying in plain words what happened, who did it and when. **Show** narrows it to one kind.
+Responses marked as sent (and marked again after changes), changes after that, archives, deletions, knowledge-base reviews, questions held and released, direct changes to knowledge-base entries, settings, prices, admin changes, invitations and demo resets are recorded by the database in its audit log, which only admins can read and which admins cannot change or delete. Read it under **Governance**, **Audit log**: newest first, at most 200 entries, each saying in plain words what happened, who did it and when. Three filters narrow it, together:
+
+- **Show**: one kind of entry.
+- **Person**: what one person did, including someone whose account has since been deleted (shown as a former user).
+- **Response**: what happened to one response, its files and its questions (marked as sent, held, changed after sending, archived). Entries about the knowledge base, settings or people belong to no response.
+
+When more than 200 entries match, the log says so; narrow the filters to see older ones. **Clear the filters** shows everything again.
 
 ![The audit log on the governance page](../screenshots/16-audit-log.png)

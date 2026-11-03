@@ -9,11 +9,11 @@ import { AlertTriangle, BarChart3, CheckCircle2, Pencil, RefreshCw, Save } from 
 import { supabase } from './lib/supabase';
 import LanguageLabel from './LanguageLabel';
 import {
-  formatGbp, loadUsageAdmin, loadUsageStatus, saveSettings,
+  formatGbp, loadUsageAdmin, loadUsageStatus, saveSettings, spendByUse,
   type AiPrice, type AiSettings, type SettingsChange, type UsageReport, type UsageStatus,
 } from './lib/usage';
 import { describeOrigin, loadEntriesToReview, loadOverdueEntries, reviewEntry, type EntryForReview } from './lib/entryReview';
-import { AUDIT_GROUPS, AUDIT_LIMIT, describeAudit, loadAuditLog, type AuditRow } from './lib/auditLog';
+import { AUDIT_GROUPS, AUDIT_LIMIT, describeAudit, loadAuditLog, loadAuditPeople, type AuditRow } from './lib/auditLog';
 import { RESET_PHRASE, confirmHint, isConfirmed, loadDemoStatus, resetDemo, type DemoStatus } from './lib/demoReset';
 
 type Tab = 'usage' | 'review' | 'overdue' | 'audit' | 'demo';
@@ -54,17 +54,19 @@ export default function GovernanceAdmin({ names = new Map(), onDemoReset }: { na
   );
 }
 
-const SETTING_FIELDS: { key: keyof SettingsChange; label: string; help: string; step: number; percent?: boolean }[] = [
+// Sprint 22 (S22-2, Q3): what an admin changes monthly is in view; what tunes the estimates (the
+// reserves and the exchange rate) is under Advanced.
+const SETTING_FIELDS: { key: keyof SettingsChange; label: string; help: string; step: number; percent?: boolean; advanced?: boolean }[] = [
   { key: 'daily_question_cap', label: 'Questions per person per day', help: 'Processing stops for that person at this number until tomorrow (UTC).', step: 1 },
   { key: 'daily_embed_cap', label: 'Knowledge-base texts indexed per person per day', help: 'Covers imports and new entries.', step: 1 },
   { key: 'daily_extract_cap', label: 'Word documents read by AI per person per day', help: 'Finding the questions in an uploaded Word document. Spreadsheets do not count.', step: 1 },
   { key: 'monthly_budget_gbp', label: 'Monthly budget (£)', help: 'Processing stops for everyone when this month\'s estimated spend reaches it.', step: 1 },
   { key: 'alert_share', label: 'Warn admins at (% of budget)', help: 'Admins see a warning from this point.', step: 5, percent: true },
-  { key: 'est_usd_per_question', label: 'Reserve per question (US$)', help: 'Held against the budget while a question is processed, until its real cost is recorded. Compare it with the measured average above.', step: 0.001 },
+  { key: 'est_usd_per_question', label: 'Reserve per question (US$)', help: 'Held against the budget while a question is processed, until its real cost is recorded. Compare it with the measured average above.', step: 0.001, advanced: true },
   // Sprint 11 (F-54): the last setting that was only reachable through the database.
-  { key: 'est_usd_per_embed_text', label: 'Reserve per knowledge-base text indexed (US$)', help: 'Held against the budget while knowledge-base entries are indexed, until the real cost is recorded.', step: 0.0001 },
-  { key: 'est_usd_per_extract_kchar', label: 'Reserve per 1,000 characters of a Word document (US$)', help: 'Held against the budget while the questions in a Word document are found, until the real cost is recorded.', step: 0.0001 },
-  { key: 'gbp_per_usd', label: 'Pounds per US dollar', help: 'Providers price in dollars. 1.00 counts each dollar as a pound, which overstates spend; set the current rate for a truer figure.', step: 0.01 },
+  { key: 'est_usd_per_embed_text', label: 'Reserve per knowledge-base text indexed (US$)', help: 'Held against the budget while knowledge-base entries are indexed, until the real cost is recorded.', step: 0.0001, advanced: true },
+  { key: 'est_usd_per_extract_kchar', label: 'Reserve per 1,000 characters of a Word document (US$)', help: 'Held against the budget while the questions in a Word document are found, until the real cost is recorded.', step: 0.0001, advanced: true },
+  { key: 'gbp_per_usd', label: 'Pounds per US dollar', help: 'Providers price in dollars. 1.00 counts each dollar as a pound, which overstates spend; set the current rate for a truer figure.', step: 0.01, advanced: true },
   { key: 'review_interval_months', label: 'Review knowledge-base entries every (months)', help: 'Entries past this are reported, and drafts citing them are held from bulk approval.', step: 1 },
 ];
 
@@ -78,7 +80,7 @@ function UsageTab() {
   const [notice, setNotice] = useState('');
   // BUG-35 (Sprint 14): the button shows it is saving, and the outcome appears beside it.
   const [saving, setSaving] = useState(false);
-  const [saveResult, setSaveResult] = useState<{ ok: boolean; text: string } | null>(null);
+  const [saveResult, setSaveResult] = useState<{ ok: boolean; text: string; from: 'limits' | 'advanced' } | null>(null);
 
   const load = useCallback(async () => {
     setError('');
@@ -95,7 +97,7 @@ function UsageTab() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const save = async () => {
+  const save = async (from: 'limits' | 'advanced') => {
     setError(''); setNotice(''); setSaveResult(null); setSaving(true);
     const change: SettingsChange = {};
     for (const f of SETTING_FIELDS) {
@@ -105,9 +107,9 @@ function UsageTab() {
     try {
       await saveSettings(supabase, change);
       await load();
-      setSaveResult({ ok: true, text: 'Saved. The change is in the audit log.' });
+      setSaveResult({ ok: true, text: 'Saved. The change is in the audit log.', from });
     } catch (err) {
-      setSaveResult({ ok: false, text: (err as Error).message });
+      setSaveResult({ ok: false, text: (err as Error).message, from });
     } finally {
       setSaving(false);
     }
@@ -159,15 +161,15 @@ function UsageTab() {
           )}
         </div>
         <div className="card p-5">
-          <p className="section-label mb-3">By model and job</p>
-          {report.byModel.length === 0 ? <p className="text-sm text-ink-400">No AI calls this month.</p> : (
-            <table className="w-full text-sm">
+          <p className="section-label mb-3">Spend by use</p>
+          {report.byFunction.length === 0 ? <p className="text-sm text-ink-400">No AI calls this month.</p> : (
+            <table className="w-full text-sm" aria-label="Spend by use">
               <tbody>
-                {report.byModel.map((m) => (
-                  <tr key={`${m.provider}/${m.model}/${m.kind}`} className="border-t border-ink-50">
-                    <td className="py-1.5 text-ink-700">{m.model} <span className="text-ink-400">({m.kind})</span></td>
-                    <td className="py-1.5 text-right text-ink-500">{(m.inputTokens + m.outputTokens).toLocaleString()} tokens</td>
-                    <td className="py-1.5 text-right font-bold text-ink-800">{formatGbp(m.spentGbp)}</td>
+                {spendByUse(report.byFunction).map((u) => (
+                  <tr key={u.label} className="border-t border-ink-50">
+                    <td className="py-1.5 text-ink-700">{u.label}</td>
+                    <td className="py-1.5 text-right text-ink-500">{u.calls} {u.calls === 1 ? 'call' : 'calls'}</td>
+                    <td className="py-1.5 text-right font-bold text-ink-800">{formatGbp(u.spentGbp)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -179,7 +181,7 @@ function UsageTab() {
       <div className="card p-5 space-y-4">
         <p className="section-label">Limits</p>
         <div className="grid md:grid-cols-2 gap-4">
-          {SETTING_FIELDS.map((f) => (
+          {SETTING_FIELDS.filter((f) => !f.advanced).map((f) => (
             <label key={f.key} className="block">
               <span className="text-sm font-bold text-ink-700">{f.label}</span>
               <input
@@ -198,32 +200,80 @@ function UsageTab() {
           <p className="text-xs text-ink-400">Last changed {new Date(settings.updated_at).toLocaleString()}.</p>
           <div className="flex items-center gap-3">
             <span role="status" aria-live="polite" className={`text-sm ${saveResult?.ok ? 'text-emerald-700' : 'text-coral-600'}`}>
-              {saveResult?.text ?? ''}
+              {saveResult?.from === 'limits' ? saveResult.text : ''}
             </span>
-            <button onClick={save} disabled={saving} aria-busy={saving} className="btn-primary text-sm disabled:opacity-60">
+            <button onClick={() => save('limits')} disabled={saving} aria-busy={saving} className="btn-primary text-sm disabled:opacity-60">
               <Save size={14} /> {saving ? 'Saving…' : 'Save limits'}
             </button>
           </div>
         </div>
       </div>
 
-      <div className="card p-5">
-        <p className="section-label mb-3">Prices used for the estimates (US dollars per million tokens)</p>
-        <table className="w-full text-sm">
-          <thead><tr className="text-left text-ink-400 text-xs"><th>Model</th><th className="text-right">Input</th><th className="text-right">Output</th><th className="text-right">Checked</th></tr></thead>
-          <tbody>
-            {prices.map((p) => (
-              <tr key={`${p.provider}/${p.model}`} className="border-t border-ink-50">
-                <td className="py-1.5"><a href={p.source_url} target="_blank" rel="noreferrer" className="text-ink-700 underline decoration-ink-200">{p.model}</a></td>
-                <td className="py-1.5 text-right">${Number(p.input_usd_per_mtok).toFixed(2)}</td>
-                <td className="py-1.5 text-right">${Number(p.output_usd_per_mtok).toFixed(2)}</td>
-                <td className="py-1.5 text-right text-ink-500">{p.checked_on}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="text-xs text-ink-400 mt-2">Local models (Ollama) cost nothing and are recorded at £0. Set spending limits in the providers' own consoles as well.</p>
-      </div>
+      <details className="card p-5 group">
+        <summary className="cursor-pointer text-sm font-bold text-ink-800">Advanced: reserves, exchange rate, prices and spend by model</summary>
+        <div className="space-y-6 mt-4">
+          <div className="space-y-4">
+            <p className="text-xs text-ink-500">How the spend is estimated. Change these when the measured cost or the exchange rate moves.</p>
+            <div className="grid md:grid-cols-2 gap-4">
+              {SETTING_FIELDS.filter((f) => f.advanced).map((f) => (
+                <label key={f.key} className="block">
+                  <span className="text-sm font-bold text-ink-700">{f.label}</span>
+                  <input
+                    type="number"
+                    step={f.step}
+                    min={0}
+                    value={draft[f.key] ?? ''}
+                    onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
+                    className="input mt-1"
+                  />
+                  <span className="text-xs text-ink-400">{f.help}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex items-center justify-end gap-3">
+              <span role="status" aria-live="polite" className={`text-sm ${saveResult?.ok ? 'text-emerald-700' : 'text-coral-600'}`}>
+                {saveResult?.from === 'advanced' ? saveResult.text : ''}
+              </span>
+              <button onClick={() => save('advanced')} disabled={saving} aria-busy={saving} className="btn-primary text-sm disabled:opacity-60">
+                <Save size={14} /> {saving ? 'Saving…' : 'Save advanced settings'}
+              </button>
+            </div>
+          </div>
+          <div>
+            <p className="section-label mb-3">Spend by model</p>
+            {report.byModel.length === 0 ? <p className="text-sm text-ink-400">No AI calls this month.</p> : (
+              <table className="w-full text-sm">
+                <tbody>
+                  {report.byModel.map((m) => (
+                    <tr key={`${m.provider}/${m.model}/${m.kind}`} className="border-t border-ink-50">
+                      <td className="py-1.5 text-ink-700">{m.model} <span className="text-ink-400">({m.kind})</span></td>
+                      <td className="py-1.5 text-right text-ink-500">{(m.inputTokens + m.outputTokens).toLocaleString()} tokens</td>
+                      <td className="py-1.5 text-right font-bold text-ink-800">{formatGbp(m.spentGbp)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+          <div>
+            <p className="section-label mb-3">Prices used for the estimates (US dollars per million tokens)</p>
+            <table className="w-full text-sm">
+              <thead><tr className="text-left text-ink-400 text-xs"><th>Model</th><th className="text-right">Input</th><th className="text-right">Output</th><th className="text-right">Checked</th></tr></thead>
+              <tbody>
+                {prices.map((p) => (
+                  <tr key={`${p.provider}/${p.model}`} className="border-t border-ink-50">
+                    <td className="py-1.5"><a href={p.source_url} target="_blank" rel="noreferrer" className="text-ink-700 underline decoration-ink-200">{p.model}</a></td>
+                    <td className="py-1.5 text-right">${Number(p.input_usd_per_mtok).toFixed(2)}</td>
+                    <td className="py-1.5 text-right">${Number(p.output_usd_per_mtok).toFixed(2)}</td>
+                    <td className="py-1.5 text-right text-ink-500">{p.checked_on}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="text-xs text-ink-400 mt-2">Local models (Ollama) cost nothing and are recorded at £0. Set spending limits in the providers' own consoles as well.</p>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
@@ -325,47 +375,94 @@ function ReviewCard({ entry, onApprove }: { entry: EntryForReview; onApprove: (e
   );
 }
 
-/** Sprint 11 (S11-9, F-53): the audit log, newest first, in plain words. Read-only. */
+/**
+ * Sprint 11 (S11-9, F-53): the audit log, newest first, in plain words. Read-only. Since Sprint 22
+ * (S22-2) it is filtered by person and by response as well as by kind, together, in the database.
+ */
 function AuditTab({ names }: { names: Map<string, string> }) {
   const [group, setGroup] = useState<string>('');
-  const [rows, setRows] = useState<AuditRow[] | null>(null);
+  const [actor, setActor] = useState<string>('');
+  const [response, setResponse] = useState<string>('');
+  const [people, setPeople] = useState<{ id: string; name: string }[]>([]);
+  const [responses, setResponses] = useState<{ id: string; name: string }[]>([]);
+  const [found, setFound] = useState<{ rows: AuditRow[]; more: boolean } | null>(null);
   const [error, setError] = useState('');
+
+  // The choices for the filters: everyone who has acted in the log, and every response, archived too.
+  useEffect(() => {
+    let live = true;
+    loadAuditPeople(supabase).then((p) => { if (live) setPeople(p); }).catch(() => undefined);
+    supabase.from('opportunities').select('id,name').order('name').then(({ data }) => {
+      if (live) setResponses(((data ?? []) as { id: string; name: string }[]).map((r) => ({ id: String(r.id), name: String(r.name) })));
+    });
+    return () => { live = false; };
+  }, []);
 
   useEffect(() => {
     let live = true;
-    setError('');
-    loadAuditLog(supabase, group || null)
-      .then((r) => { if (live) setRows(r); })
-      .catch((err: Error) => { if (live) { setRows([]); setError(err.message); } });
+    setError(''); setFound(null);
+    loadAuditLog(supabase, { group: group || null, actor: actor || null, response: response || null })
+      .then((r) => { if (live) setFound(r); })
+      .catch((err: Error) => { if (live) { setFound({ rows: [], more: false }); setError(err.message); } });
     return () => { live = false; };
-  }, [group]);
+  }, [group, actor, response]);
 
+  const filtered = Boolean(group || actor || response);
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="text-sm font-semibold text-ink-700" htmlFor="audit-group">Show</label>
-        <select id="audit-group" value={group} onChange={(e) => setGroup(e.target.value)} className="input w-auto text-sm py-2">
-          <option value="">Everything</option>
-          {Object.entries(AUDIT_GROUPS).map(([key, g]) => <option key={key} value={key}>{g.label}</option>)}
-        </select>
-        <p className="text-xs text-ink-500">The most recent {AUDIT_LIMIT} entries, newest first. Written by the database; admins cannot change or delete them.</p>
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <label htmlFor="audit-group" className="block text-sm font-semibold text-ink-700">Show</label>
+          <select id="audit-group" value={group} onChange={(e) => setGroup(e.target.value)} className="input w-auto text-sm py-2 mt-1">
+            <option value="">Everything</option>
+            {Object.entries(AUDIT_GROUPS).map(([key, g]) => <option key={key} value={key}>{g.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="audit-person" className="block text-sm font-semibold text-ink-700">Person</label>
+          <select id="audit-person" value={actor} onChange={(e) => setActor(e.target.value)} className="input w-auto max-w-[16rem] text-sm py-2 mt-1">
+            <option value="">Anyone</option>
+            {people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="audit-response" className="block text-sm font-semibold text-ink-700">Response</label>
+          <select id="audit-response" value={response} onChange={(e) => setResponse(e.target.value)} className="input w-auto max-w-[20rem] text-sm py-2 mt-1">
+            <option value="">Any response</option>
+            {responses.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </select>
+        </div>
+        {filtered && (
+          <button className="btn-ghost text-xs py-2" onClick={() => { setGroup(''); setActor(''); setResponse(''); }}>Clear the filters</button>
+        )}
       </div>
+      <p className="text-xs text-ink-500">
+        Newest first, at most {AUDIT_LIMIT} entries. Written by the database; admins cannot change or delete them.
+        {' '}A response&apos;s entries include those about its files and questions.
+      </p>
       {error && <p role="alert" className="text-sm text-coral-700">{error}</p>}
-      {rows === null ? (
+      {found === null ? (
         <p className="text-sm text-ink-400">Loading…</p>
-      ) : rows.length === 0 ? (
-        <p className="text-sm text-ink-400">Nothing recorded yet.</p>
+      ) : found.rows.length === 0 ? (
+        <p className="text-sm text-ink-400">{filtered ? 'Nothing recorded that matches these filters.' : 'Nothing recorded yet.'}</p>
       ) : (
-        <ul className="bg-white rounded-2xl border border-ink-100 shadow-card divide-y divide-ink-100">
-          {rows.map((r) => (
-            <li key={r.id} className="px-5 py-3">
-              <p className="text-sm text-ink-800">{describeAudit(r, names)}</p>
-              <p className="text-xs text-ink-500 mt-0.5">
-                {r.actorName ?? 'The system, or someone no longer a user'} · {new Date(r.at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · <code className="text-[0.85em]">{r.action}</code>
-              </p>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul aria-label="Audit log" className="bg-white rounded-2xl border border-ink-100 shadow-card divide-y divide-ink-100">
+            {found.rows.map((r) => (
+              <li key={r.id} className="px-5 py-3">
+                <p className="text-sm text-ink-800">{describeAudit(r, names)}</p>
+                <p className="text-xs text-ink-500 mt-0.5">
+                  {r.actorName ?? (r.actorId ? 'Former user' : 'The system')} · {new Date(r.at).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · <code className="text-[0.85em]">{r.action}</code>
+                </p>
+              </li>
+            ))}
+          </ul>
+          {found.more && (
+            <p role="status" className="text-xs text-ink-500">
+              These are the newest {AUDIT_LIMIT}; older entries match too. Choose a person, a response or a kind to see them.
+            </p>
+          )}
+        </>
       )}
     </div>
   );

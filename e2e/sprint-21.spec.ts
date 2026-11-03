@@ -7,11 +7,30 @@ import type { Page } from '@playwright/test';
 
 const { admin, member } = PEOPLE;
 
+/**
+ * Sprint 22 (S22-3, F-69): the calls recorded this month as Asking the knowledge base, from Spend by
+ * use on Governance (S22-2); 0 when there is no such line yet.
+ */
+async function askingCalls(page: Page): Promise<number> {
+  await nav(page, 'Governance');
+  const table = page.getByRole('table', { name: 'Spend by use' });
+  const none = page.getByText('No AI calls this month.').first();
+  await expect(table.or(none).first()).toBeVisible();
+  if (!(await table.isVisible())) return 0;
+  const row = table.getByRole('row').filter({ hasText: 'Asking the knowledge base' });
+  if ((await row.count()) === 0) return 0;
+  const calls = (await row.getByRole('cell').nth(1).innerText()).match(/\d+/);
+  return calls ? Number(calls[0]) : 0;
+}
+
 test('Ask it a question: the real pipeline on staging, the fallback locally', async ({ browser }) => {
-  checks(TARGET === 'staging' ? 'S21-4 1' : 'S21-4 2');
+  checks(...(TARGET === 'staging' ? ['S21-4 1', 'S22-3 1'] : ['S21-4 2', 'S22-3 2']));
   // The demo page names the step that used the real AI model (Sprint 20, Q2).
   if (TARGET === 'staging') test.info().annotations.push({ type: 'real-ai', description: 'Asks one question with the real models' });
   const page = await signIn(browser, admin);
+  await caption(page, 'Before asking: the calls recorded as Asking the knowledge base this month');
+  const before = await askingCalls(page);
+  await nav(page, 'Home');
   const ask = page.getByRole('region', { name: 'Ask it a question' });
   await caption(page, TARGET === 'staging'
     ? 'One question to the real models: matching, the checker and drafting'
@@ -30,6 +49,12 @@ test('Ask it a question: the real pipeline on staging, the fallback locally', as
   } else {
     await expect(confidence).toContainText('Not calibrated');
   }
+  // S22-3: the ask is recorded as spend the admin can see. Locally no real model is called, so the
+  // count is read but not compared (case 2).
+  await caption(page, 'After asking: the ask is recorded under Spend by use');
+  const after = await askingCalls(page);
+  if (TARGET === 'staging') expect(after).toBeGreaterThan(before);
+  else test.info().annotations.push({ type: 'note', description: `Locally the providers are off: calls ${before} before, ${after} after, not compared` });
 });
 
 // ── S21-1: download separate from Mark as sent ───────────────────────────────────────────────────

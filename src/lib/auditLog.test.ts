@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { AUDIT_GROUPS, describeAudit, loadAuditLog } from './auditLog';
+import { AUDIT_GROUPS, AUDIT_LIMIT, describeAudit, loadAuditLog, loadAuditPeople } from './auditLog';
 
 const MIGRATIONS = join(__dirname, '../../supabase/migrations');
 /** Every action a migration writes to the audit log. */
@@ -43,20 +43,29 @@ describe('the audit-log screen (Sprint 11, S11-9)', () => {
   });
 
   it('1. reads the newest entries, filtered by group, and reports a refusal', async () => {
-    const calls: unknown[][] = [];
-    const chain: Record<string, (...a: unknown[]) => unknown> = {};
-    for (const m of ['select', 'order', 'limit', 'in']) chain[m] = (...a: unknown[]) => { calls.push([m, ...a]); return chain; };
-    (chain as unknown as { then: unknown }).then = (resolve: (v: unknown) => void) =>
-      resolve({ data: [{ id: 1, at: '2026-10-25T10:00:00Z', action: 'response.archived', target_id: 'o1', details: { outcome: 'won' }, actor_profile: { display_name: 'Sarah Chen' } }], error: null });
-    const rows = await loadAuditLog({ from: vi.fn(() => chain) } as never, 'responses');
-    expect(rows[0]).toMatchObject({ actorName: 'Sarah Chen', action: 'response.archived' });
-    expect(calls).toContainEqual(['in', 'action', ['response.archived', 'response.deleted']]);
-    expect(calls).toContainEqual(['order', 'at', { ascending: false }]);
+    const rpc = vi.fn(async () => ({ data: { rows: [{ id: 1, at: '2026-10-25T10:00:00Z', action: 'response.archived', actor: 'u1', actorName: 'Sarah Chen', targetId: 'o1', details: { outcome: 'won' } }], more: false }, error: null }));
+    const found = await loadAuditLog({ rpc } as never, { group: 'responses' });
+    expect(found.rows[0]).toMatchObject({ actorName: 'Sarah Chen', action: 'response.archived', actorId: 'u1', targetId: 'o1' });
+    expect(found.more).toBe(false);
+    expect(rpc).toHaveBeenCalledWith('audit_log_search', { p_actions: ['response.archived', 'response.deleted'], p_actor: null, p_response: null, p_limit: AUDIT_LIMIT });
+    const refusing = { rpc: async () => ({ data: null, error: { message: 'permission denied' } }) };
+    await expect(loadAuditLog(refusing as never, {})).rejects.toThrow(/could not be read/);
+  });
 
-    const refusing: Record<string, unknown> = {};
-    for (const m of ['select', 'order', 'limit', 'in']) refusing[m] = () => refusing;
-    refusing.then = (resolve: (v: unknown) => void) => resolve({ data: null, error: { message: 'permission denied' } });
-    await expect(loadAuditLog({ from: () => refusing } as never, null)).rejects.toThrow(/could not be read/);
+  it('S22-2 3 to 5. filters by person and response together with the kind, and says when more match', async () => {
+    const rpc = vi.fn(async () => ({ data: { rows: [], more: true }, error: null }));
+    const found = await loadAuditLog({ rpc } as never, { group: 'holds', actor: 'u9', response: 'r9' });
+    expect(rpc).toHaveBeenCalledWith('audit_log_search', { p_actions: ['question.held', 'question.released'], p_actor: 'u9', p_response: 'r9', p_limit: AUDIT_LIMIT });
+    expect(found).toEqual({ rows: [], more: true });
+    // An unknown group is no filter, never an empty list.
+    await loadAuditLog({ rpc } as never, { group: 'nonsense' });
+    expect(rpc).toHaveBeenLastCalledWith('audit_log_search', expect.objectContaining({ p_actions: null }));
+  });
+
+  it('S22-2 3. lists the people in the log, a deleted profile as Former user', async () => {
+    const rpc = vi.fn(async () => ({ data: [{ id: 'u1', name: 'Sarah Chen' }, { id: 'u2', name: null }], error: null }));
+    expect(await loadAuditPeople({ rpc } as never)).toEqual([{ id: 'u1', name: 'Sarah Chen' }, { id: 'u2', name: 'Former user' }]);
+    expect(rpc).toHaveBeenCalledWith('audit_log_people');
   });
 });
 

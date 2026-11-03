@@ -1,6 +1,6 @@
 // Sprint 4, S4-1: the admin's view of usage and caps.
 import { describe, expect, it, vi } from 'vitest';
-import { formatGbp, loadUsageStatus, saveSettings, validateSettings } from './usage';
+import { formatGbp, loadUsageAdmin, loadUsageStatus, saveSettings, spendByUse, validateSettings } from './usage';
 
 describe('loadUsageStatus', () => {
   it('reads the caller\'s position; members get no spend figure', async () => {
@@ -62,5 +62,40 @@ describe('formatGbp', () => {
   it('shows small sums to four places and larger ones to two', () => {
     expect(formatGbp(0.0123)).toBe('£0.0123');
     expect(formatGbp(8.5)).toBe('£8.50');
+  });
+});
+
+describe('S22-2 spend by use', () => {
+  it('2. gives each function its plain name, an unknown one its own, the most spent first', () => {
+    const uses = spendByUse([
+      { function: 'process-questions', calls: 4, spentGbp: 0.03 },
+      { function: 'ask-knowledge', calls: 3, spentGbp: 0.01 },
+      { function: 'embed', calls: 2, spentGbp: 0.001 },
+      { function: 'embed-entries', calls: 1, spentGbp: 0.002 },
+      { function: 'extract-questions', calls: 1, spentGbp: 0.004 },
+      { function: 'a-new-function', calls: 1, spentGbp: 0 },
+    ]);
+    expect(uses.map((u) => u.label)).toEqual([
+      'Processing responses', 'Asking the knowledge base', 'Reading Word documents', 'Indexing knowledge-base entries', 'a-new-function']);
+    // Both indexing functions are one use, added together.
+    expect(uses.find((u) => u.label === 'Indexing knowledge-base entries')).toMatchObject({ calls: 3 });
+    expect(uses.find((u) => u.label === 'Indexing knowledge-base entries')!.spentGbp).toBeCloseTo(0.003, 6);
+    expect(uses.reduce((t, u) => t + u.spentGbp, 0)).toBeCloseTo(0.047, 6);
+  });
+
+  it('2. markup in an unknown function name stays text', () => {
+    expect(spendByUse([{ function: '<b>x</b>', calls: 1, spentGbp: 0 }])[0].label).toBe('<b>x</b>');
+  });
+
+  it('reads byFunction from the report, and an older report without it as none', async () => {
+    const report = (extra: object) => ({ byUser: [], byModel: [], unpricedCalls: 0, unpricedModels: [], ...extra });
+    const client = (r: object) => ({
+      rpc: async () => ({ data: r, error: null }),
+      from: () => ({ select: () => ({ single: async () => ({ data: {}, error: null }), order: () => ({ order: async () => ({ data: [], error: null }) }) }) }),
+    });
+    const a = await loadUsageAdmin(client(report({ byFunction: [{ function: 'ask-knowledge', calls: '2', spentGbp: '0.0100' }] })) as never);
+    expect(a.report.byFunction).toEqual([{ function: 'ask-knowledge', calls: 2, spentGbp: 0.01 }]);
+    const b = await loadUsageAdmin(client(report({})) as never);
+    expect(b.report.byFunction).toEqual([]);
   });
 });
