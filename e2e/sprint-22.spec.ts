@@ -181,7 +181,8 @@ test('The header says where the response stands, as its card on Responses does; 
   await caption(page, 'Bluefin on Responses: its stage, due date and progress');
   const cardText = await cardOnResponses.innerText();
   const decided = cardText.match(/(\d+) of (\d+) decided/)!;
-  const due = cardText.match(/Due \d{1,2} \w{3,4} \d{4}/)?.[0] ?? 'No due date';
+  // The browser's own date format: "Nov 5, 2026" or "5 Nov 2026".
+  const due = cardText.match(/Due (?:\w{3,4} \d{1,2}, \d{4}|\d{1,2} \w{3,4} \d{4})/)?.[0] ?? 'No due date';
   const stage = cardText.match(/In progress|Ready to send|Changed since sent|Sent|No questions yet/)![0];
 
   await openResponse(page, BLUEFIN);
@@ -267,7 +268,10 @@ test('A member who does not own the response sees where it stands, and no approv
 test('An archived response shows the same page, read-only', async ({ browser }) => {
   checks('S22-1 10');
   const page = await signIn(browser, admin);
-  await openResponse(page, HARBOUR);
+  await nav(page, 'Responses');
+  await page.getByRole('button', { name: /^Archived \(\d+\)$/ }).click();
+  await page.getByText(HARBOUR, { exact: true }).first().click();
+  await page.getByRole('heading', { name: 'Questions', level: 2 }).waitFor();
   await caption(page, 'An archived response: the same header and groups, with nothing to change');
   await expect(header(page)).toContainText('Archived');
   await expect(page.getByText('This response is archived. It is kept as a record and can no longer be changed.')).toBeVisible();
@@ -305,7 +309,11 @@ test('A question or file name containing markup shows as text', async ({ browser
     await route.fulfill({ response: res, json: body });
   };
   await page.route((url) => url.pathname.endsWith('/rest/v1/rfi_questions'), (route) => (route.request().method() === 'GET'
-    ? change(route, (rows) => { if ('question' in rows[0]) rows[0].question = markup; }) : route.fallback()));
+    ? change(route, (rows) => {
+      // A question still to do, so its card is not in a folded group.
+      const open = rows.find((r) => 'question' in r && r.status === 'pending');
+      if (open) open.question = markup;
+    }) : route.fallback()));
   await page.route((url) => url.pathname.endsWith('/rest/v1/rfi_sessions'), (route) => (route.request().method() === 'GET'
     ? change(route, (rows) => { for (const r of rows) if ('file_name' in r) r.file_name = markup; }) : route.fallback()));
   await openResponse(page, BLUEFIN);
