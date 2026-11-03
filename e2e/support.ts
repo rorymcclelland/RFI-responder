@@ -40,6 +40,9 @@ export async function newSession(browser: Browser, viewport = { width: 1280, hei
 export async function signIn(browser: Browser, person: Person, viewport?: { width: number; height: number }): Promise<Page> {
   const context = await newSession(browser, viewport, `${person.name}${viewport && viewport.width < 600 ? ', phone' : ''}`);
   const page = await context.newPage();
+  // The app asks before leaving while a decision is saving (Sprint 21); a test that reloads means to
+  // leave, and waits for its saves first. Any other dialog is dismissed, as before.
+  page.on('dialog', (d) => { void (d.type() === 'beforeunload' ? d.accept() : d.dismiss()); });
   await caption(page, `${person.name} signs in`);
   await page.goto('/');
   await page.locator('input[type=email]').fill(person.email);

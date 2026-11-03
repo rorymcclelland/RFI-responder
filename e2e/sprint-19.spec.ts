@@ -183,8 +183,12 @@ test('Approve, and when the owner was quicker', async ({ browser }) => {
 
   await caption(boss, `Meanwhile ${admin.name} approves the same question`);
   const c = card(boss, STALE);
+  // The save itself, not only the card (which shows the decision at once): a reload before the
+  // save answers would cut it off (the staging run of bd80749).
+  const saved = boss.waitForResponse((r) => r.url().includes('/rest/v1/rpc/approve_answer') && r.ok());
   await c.getByRole('button', { name: 'Approve', exact: true }).click();
   await expect(c.getByText(approvedBy(admin.name))).toBeVisible();
+  await saved;
   // The card shows the decision at once and saves it in the background; this case is about a decision
   // already saved, so wait until the database has it (the staging run of 7651216 pressed Approve between
   // the two, and got the other, also true, message).

@@ -231,6 +231,7 @@ export async function setup(env: Environment, apply: boolean, run: Run = realRun
       if (!value) { log(`  ${s.name} (${where}): left as it is`); continue; }
       // A paste that arrived as a control key (Ctrl+V in some Windows consoles) is never stored
       // (Rory's first run, Sprint 21); the count says something arrived without saying what.
+      // eslint-disable-next-line no-control-regex -- finding control characters is the point
       if (/[\u0000-\u001f\u007f]/.test(value)) {
         log(`  ${s.name} (${where}): not set; what arrived contains control keys, not text. In this window paste with a right-click (or Ctrl+Shift+V), then press Enter.`);
         failed += 1;

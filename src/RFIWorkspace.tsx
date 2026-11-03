@@ -275,6 +275,13 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   // Show the change at once; if saving fails, put the question back and say why (F-9).
   // Decisions being saved: downloads wait for them (security review, Sprint 21: rule 4).
   const [saving, setSaving] = useState(0);
+  // Leaving the page while a decision is saving would cut the save off: the browser asks first.
+  useEffect(() => {
+    if (!saving) return;
+    const stay = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', stay);
+    return () => window.removeEventListener('beforeunload', stay);
+  }, [saving]);
   const updateQuestion = useCallback((id: string, patch: Partial<RFIQuestion>) => {
     let previous: RFIQuestion | undefined;
     setQuestions((prev) => prev.map((q) => {
