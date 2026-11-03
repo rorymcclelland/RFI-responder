@@ -277,6 +277,8 @@ test('An archived response shows the same page, read-only', async ({ browser }) 
   await expect(page.getByText('This response is archived. It is kept as a record and can no longer be changed.')).toBeVisible();
   await expect(page.getByText('Approve in bulk:', { exact: true })).toHaveCount(0);
   await expect(header(page).getByRole('button', { name: 'Add a file' })).toHaveCount(0);
+  // A sent response's questions are behind Show N questions.
+  await page.getByRole('button', { name: /^Show \d+ questions$/ }).click();
   await unfold(page);
   const first = page.locator('[id^="question-"]').first();
   await first.locator('p').first().click();
