@@ -236,7 +236,11 @@ test('On a phone, and the Sent list', async ({ browser }) => {
   expect(know!.y).toBeGreaterThan(needs!.y);
   await nav(phone, 'Assignments');
   await caption(phone, 'Assignments stacks too: the list, then the question');
+  // Opening it saves "Working on it"; the owner's list below is read after that save answers
+  // (the staging run of 1aed1dc read it first).
+  const started = phone.waitForResponse((r) => r.url().includes('/rest/v1/question_assignments') && r.request().method() === 'PATCH' && r.ok());
   await forYouRow(phone, SENT).click();
+  await started;
   const list = await phone.getByRole('region', { name: 'Questions' }).boundingBox();
   const q = await phone.getByRole('complementary', { name: 'The question' }).boundingBox();
   expect(q!.y).toBeGreaterThan(list!.y);

@@ -108,7 +108,10 @@ test('Changed since sent, download, the confirmation, and marking as sent again'
   await c.getByRole('button', { name: 'Restore' }).click();
   await c.getByRole('button', { name: 'Write an answer' }).click();
   await c.locator('textarea').fill('Implementation is quoted per project; a typical project is fixed price.');
+  // The page is reloaded below: wait for this save to answer first.
+  const saved = page.waitForResponse((r) => r.url().includes('/rest/v1/rpc/approve_answer') && r.ok());
   await c.getByRole('button', { name: 'Save & approve' }).click();
+  await saved;
   await expect(c.getByText('Approved (written by a person)')).toBeVisible();
 
   await caption(page, 'A change after sending: the stage reads Changed since sent');
@@ -174,8 +177,11 @@ test('Gaps: what the knowledge base could not answer, where each stands, and one
   const page = await signIn(browser, admin);
   await caption(page, 'First, one question the knowledge base could not answer is left unanswered');
   await openResponse(page, BLUEFIN);
+  // Waits for the save, not only the card, before Gaps is read (the staging run of 1aed1dc).
+  const saved = page.waitForResponse((r) => r.url().includes('/rest/v1/rfi_questions') && r.request().method() === 'PATCH' && r.ok());
   await (await expand(page, DETECT)).getByRole('button', { name: 'Leave unanswered' }).click();
   await expect(card(page, DETECT).getByText('Not answered', { exact: true })).toBeVisible();
+  await saved;
   await nav(page, 'Knowledge');
   await caption(page, 'Knowledge counts the gaps not answered yet, beside the other states');
   const count = page.getByRole('region', { name: 'Health' }).getByRole('button', { name: /gaps? not answered yet/ });
