@@ -130,7 +130,7 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S22-1 9', story: 'S22-1', title: 'At phone width the header, the stages and the groups fit', how: browser },
       { id: 'S22-1 10', story: 'S22-1', title: 'An archived response shows the same page, read-only', how: browser },
       { id: 'S22-1 11', story: 'S22-1', title: 'A question or file name containing markup shows as text', how: browser },
-      { id: 'S22-1 12', story: 'S22-1', title: 'The glossary has the new words; the guide describes the page as it is; the screenshots are retaken', how: { kind: 'ci', by: 'docs/glossary.test.ts, docs/guide.test.ts and the screenshot run in CI' } },
+      { id: 'S22-1 12', story: 'S22-1', title: 'The glossary has the new words; the guide describes the page as it is; the screenshots are retaken', how: { kind: 'ci', by: 'docs/glossary.test.ts (the new words) and docs/guide.test.ts; the screenshots retaken by the CI screenshot run of c2ae75c and committed' } },
       { id: 'S22-2 1', story: 'S22-2', title: 'The everyday settings first; Advanced, closed until opened, holds the reserves, exchange rate, prices and spend by model; saving from either works and is audited', how: browser },
       { id: 'S22-2 2', story: 'S22-2', title: 'Spend by use: each function has its plain name, an unknown one its own, and the uses add up to the month\'s total', how: { kind: 'ci', by: 'src/lib/usage.test.ts and supabase/tests/db/sprint22.test.ts' } },
       { id: 'S22-2 3', story: 'S22-2', title: 'The person filter shows only what that person did, including someone whose profile was deleted since', how: browser },
