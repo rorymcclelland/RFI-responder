@@ -3,6 +3,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
 import { one, question, response, session } from './fixtures';
+import { bulkEligible } from '../../../src/workspace/questionRows';
+import type { RFIQuestion } from '../../../src/types';
 
 let owner: TestUser;
 let member: TestUser;
@@ -129,13 +131,56 @@ describe('S22-2 audit_log_search()', () => {
     expect(await refused(asServiceRole((q) => q(`SELECT public.audit_log_search(NULL, NULL, NULL, 10)`)))).toMatch(/permission denied/i);
   });
 
+  it('6. the response\'s owner, not an admin, gets nothing either, for their own response', async () => {
+    expect((await search(owner, { response: opp })).rows).toEqual([]);
+    expect(await as(owner, async (q) => (await q(`SELECT public.audit_log_people() AS p`)).rows[0].p)).toEqual([]);
+  });
+
+  it('a price\'s source must be an https link (security review, low 5)', async () => {
+    expect(await refused(asSuperuser(`UPDATE ai_prices SET source_url = 'javascript:alert(1)' WHERE ctid = (SELECT ctid FROM ai_prices LIMIT 1)`))).toMatch(/check constraint/i);
+  });
+
   it('8. with 50,000 audit rows the filtered read answers in under a second', async () => {
     await asSuperuser(`INSERT INTO audit_log (actor, action, target_id, details)
       SELECT $1, 'question.held', $2, jsonb_build_object('n', g) FROM generate_series(1, 50000) g`, [member.id, otherQ]);
-    for (const o of [{ response: opp }, { actor: owner.id }, { actions: ['settings.changed'] }, {}]) {
-      const t = Date.now();
-      await search(admin, o);
-      expect(Date.now() - t).toBeLessThan(1000);
-    }
+    // Security review, Sprint 22 (M1, M2): each filter reads by its index, not the whole log, so the
+    // bounds are far below the case's second, with room for a shared CI runner; a member's call stops at once.
+    const time = async (fn: () => Promise<unknown>) => { await fn(); const t = Date.now(); await fn(); return Date.now() - t; };
+    // A response or a person with a few rows is read by its index, in milliseconds, however long the log.
+    for (const o of [{ response: opp }, { actor: owner.id }]) expect(await time(() => search(admin, o)), JSON.stringify(o)).toBeLessThan(200);
+    // The response with all 50,000 rows sorts its own rows; the rest read the newest first. Both within the case's second.
+    for (const o of [{ response: other }, { actions: ['settings.changed'] }, {}]) expect(await time(() => search(admin, o)), JSON.stringify(o)).toBeLessThan(1000);
+    expect(await time(() => as(admin, (q) => q(`SELECT public.audit_log_people()`)))).toBeLessThan(200);
+    expect(await time(() => search(member, { response: opp }))).toBeLessThan(100);
+    expect(await time(() => search(member, {}))).toBeLessThan(100);
+    expect(await time(() => as(member, (q) => q(`SELECT public.audit_log_people()`)))).toBeLessThan(100);
+    // The people list still finds everyone after 50,000 rows by one person.
+    const people = await as(admin, async (q) => (await q(`SELECT public.audit_log_people() AS p`)).rows[0].p as { id: string }[]);
+    expect(people.map((p) => p.id)).toEqual(expect.arrayContaining([owner.id, admin.id, member.id]));
+  }, 60_000);
+});
+
+describe('S22-1 3 (QA review): Ready to approve is what bulk approval takes', () => {
+  it('bulk_accept(session, 0) approves exactly the questions bulkEligible accepts, over every combination, with no entry to re-check', async () => {
+    const opp = await response(owner.id, { name: 'Every combination (S22-1 3)' });
+    const s = await session(opp);
+    const combos: { id: string; q: RFIQuestion }[] = [];
+    for (const gate of [null, 'pricing', 'legal', 'unchecked', 'translation', 'unreviewed_source'])
+      for (const draftKind of [null, 'generated', 'assembled', 'insufficient_evidence', 'person_required'])
+        for (const verdict of [null, 'yes', 'partly', 'no'])
+          for (const confidence of [null, 0.5])
+            for (const processed of [true, false]) {
+              const id = await question(s, { text: `Combination ${combos.length} (S22-1 3)?`, gate, verdict, draftKind: draftKind ?? 'generated', cited: [] });
+              await asSuperuser(`UPDATE rfi_questions SET draft_kind = $2, confidence = $3, processed_at = CASE WHEN $4 THEN processed_at END WHERE id = $1`,
+                [id, draftKind, confidence, processed]);
+              combos.push({ id, q: { id, status: 'pending', processed, gate, draftKind, confidence, checker: { verdict, bestRef: null, reason: null } } as unknown as RFIQuestion });
+            }
+    const expected = combos.filter((c) => bulkEligible(c.q)).map((c) => c.id).sort();
+    expect(expected.length).toBeGreaterThan(0);
+    const approved = await as(owner, async (q) => {
+      await q(`SELECT bulk_accept($1, 0)`, [s]);
+      return (await q<{ id: string }>(`SELECT id FROM rfi_questions WHERE session_id = $1 AND status = 'accepted' ORDER BY id`, [s])).rows.map((r) => r.id);
+    });
+    expect(approved).toEqual(expected);
   }, 60_000);
 });

@@ -76,7 +76,8 @@ export async function loadUsageAdmin(client: SupabaseClient): Promise<{ report: 
 const USE_LABEL: Record<string, string> = {
   'process-questions': 'Processing responses',
   'ask-knowledge': 'Asking the knowledge base',
-  embed: 'Indexing knowledge-base entries',
+  // Called only by CI's checks; the app indexes through embed-entries (QA review, Sprint 22).
+  embed: 'Embedding, called directly',
   'embed-entries': 'Indexing knowledge-base entries',
   'extract-questions': 'Reading Word documents',
 };
@@ -117,7 +118,13 @@ export async function saveSettings(client: SupabaseClient, change: SettingsChang
   const problem = validateSettings(change);
   if (problem) throw new Error(problem);
   const { data, error } = await client.from('ai_settings').update(change).eq('id', true).select('id');
-  if (error) throw new Error(`The settings were not saved: ${error.message}`);
+  if (error) {
+    // Security review, Sprint 22 (low 3): the database's own message stays in the console.
+    console.error('ai_settings update failed', error);
+    throw new Error(error.code === '23514'
+      ? 'The settings were not saved: a value is outside what the database allows.'
+      : 'The settings were not saved. Try again, or check that you are still an admin.');
+  }
   if (!data || data.length === 0) throw new Error('The settings were not saved: only an admin can change them.');
 }
 

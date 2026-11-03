@@ -108,6 +108,8 @@ async function main() {
   await shoot(page, '1-overview.png', 'overview');
   await openResponse(page, 'Bluefin Freight (fictional): security questionnaire');
   await shoot(page, '2-review.png', 'review list');
+  // Sprint 22 (S22-1): the decided questions are folded while others are to do; the cards below include some.
+  for (const toggle of await page.locator('#stage-questions h3 button[aria-expanded="false"]').all()) await toggle.click();
   await page.getByText('How do you protect data at rest in your platform?', { exact: true }).click();
   await shoot(page, '3-draft-and-checker.png', 'card expanded');
   await page.getByText('What is the annual subscription price for 250 users?', { exact: true }).click();

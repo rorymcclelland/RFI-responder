@@ -211,9 +211,14 @@ export function replaceSection(file: string, name: string, body: string): string
   return `${file.slice(0, i + begin.length)}\n${body}\n${file.slice(j)}`;
 }
 
+/** The High bulk button's line (`BulkBar.tsx`): what a visitor presses on the demo. */
+export const HIGH_LINE = 0.8;
+
 /**
  * Sprint 8 (S8-4, F-37): per response approved in bulk, the questions bulk approval holds because the
- * checker said only "partly" (or "no"): drafted, ungated, and at or above the response's bulk line.
+ * checker said only "partly" (or "no"): drafted, ungated, and at or above the High button's line.
+ * Since Sprint 22 (QA review) the demo's own bulk approval is at 95%, leaving drafts Ready to approve,
+ * so the hold is measured where a visitor meets it: pressing High ≥80% on the response.
  */
 export function partlyHolds(plan: DemoPlan, recording: DemoRecording): Record<string, string[]> {
   const out: Record<string, string[]> = {};
@@ -223,7 +228,7 @@ export function partlyHolds(plan: DemoPlan, recording: DemoRecording): Record<st
     out[r.key] = r.questions.filter((q) => {
       const x = results.find((y) => y.id === `${r.key}-${q.ref}`);
       return !!x && x.gate === null && (x.draft_kind === 'generated' || x.draft_kind === 'assembled')
-        && x.confidence !== null && x.confidence >= r.bulkAt! && (x.verdict === 'partly' || x.verdict === 'no');
+        && x.confidence !== null && x.confidence >= HIGH_LINE && (x.verdict === 'partly' || x.verdict === 'no');
     }).map((q) => q.ref);
   }
   return out;

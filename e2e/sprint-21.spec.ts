@@ -9,18 +9,22 @@ const { admin, member } = PEOPLE;
 
 /**
  * Sprint 22 (S22-3, F-69): the calls recorded this month as Asking the knowledge base, from Spend by
- * use on Governance (S22-2); 0 when there is no such line yet.
+ * use on Governance (S22-2), and the admin's own calls, from Spend by person; 0 when there is no line.
  */
-async function askingCalls(page: Page): Promise<number> {
+async function askingCalls(page: Page): Promise<{ asking: number; mine: number }> {
   await nav(page, 'Governance');
   const table = page.getByRole('table', { name: 'Spend by use' });
   const none = page.getByText('No AI calls this month.').first();
   await expect(table.or(none).first()).toBeVisible();
-  if (!(await table.isVisible())) return 0;
-  const row = table.getByRole('row').filter({ hasText: 'Asking the knowledge base' });
-  if ((await row.count()) === 0) return 0;
-  const calls = (await row.getByRole('cell').nth(1).innerText()).match(/\d+/);
-  return calls ? Number(calls[0]) : 0;
+  if (!(await table.isVisible())) return { asking: 0, mine: 0 };
+  const calls = async (row: ReturnType<Page['getByRole']>) => {
+    if ((await row.count()) === 0) return 0;
+    const n = (await row.first().getByRole('cell').nth(1).innerText()).match(/\d+/);
+    return n ? Number(n[0]) : 0;
+  };
+  // The calls against the person who asked (S22-3's job), from Spend by person.
+  const mine = page.getByRole('table', { name: 'Spend by person' }).getByRole('row').filter({ hasText: admin.name });
+  return { asking: await calls(table.getByRole('row').filter({ hasText: 'Asking the knowledge base' })), mine: await calls(mine) };
 }
 
 test('Ask it a question: the real pipeline on staging, the fallback locally', async ({ browser }) => {
@@ -53,8 +57,12 @@ test('Ask it a question: the real pipeline on staging, the fallback locally', as
   // count is read but not compared (case 2).
   await caption(page, 'After asking: the ask is recorded under Spend by use');
   const after = await askingCalls(page);
-  if (TARGET === 'staging') expect(after).toBeGreaterThan(before);
-  else test.info().annotations.push({ type: 'note', description: `Locally the providers are off: calls ${before} before, ${after} after, not compared` });
+  if (TARGET === 'staging') {
+    expect(after.asking).toBeGreaterThan(before.asking);
+    expect(after.mine).toBeGreaterThan(before.mine);
+  } else {
+    test.info().annotations.push({ type: 'note', description: `Locally the providers are off: calls ${before.asking} before, ${after.asking} after, not compared` });
+  }
 });
 
 // ── S21-1: download separate from Mark as sent ───────────────────────────────────────────────────
@@ -255,7 +263,7 @@ test('Gaps show a question\'s markup as text', async ({ browser }) => {
   await page.route('**/rest/v1/rpc/knowledge_gaps', async (route) => {
     // The request guard first (security review): this handler runs before the session's own.
     if (!requestAllowed(route.request().url())) return route.abort('blockedbyclient');
-    const res = await route.fetch();
+    const res = await route.fetch({ maxRedirects: 0 });
     const body = (await res.json()) as { total: number; gaps: Record<string, unknown>[] };
     const first = body.gaps[0] ?? { state: 'open', responses: 1, lastAsked: new Date().toISOString(), entryRef: null, responseId: 'x', response: 'x', sessionId: 'x' };
     await route.fulfill({ response: res, json: { total: body.total + 1, gaps: [{ ...first, question: markup, questionId: 'markup-test', state: 'open' }, ...body.gaps] } });

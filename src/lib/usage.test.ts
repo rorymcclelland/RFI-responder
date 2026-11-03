@@ -76,10 +76,10 @@ describe('S22-2 spend by use', () => {
       { function: 'a-new-function', calls: 1, spentGbp: 0 },
     ]);
     expect(uses.map((u) => u.label)).toEqual([
-      'Processing responses', 'Asking the knowledge base', 'Reading Word documents', 'Indexing knowledge-base entries', 'a-new-function']);
-    // Both indexing functions are one use, added together.
-    expect(uses.find((u) => u.label === 'Indexing knowledge-base entries')).toMatchObject({ calls: 3 });
-    expect(uses.find((u) => u.label === 'Indexing knowledge-base entries')!.spentGbp).toBeCloseTo(0.003, 6);
+      'Processing responses', 'Asking the knowledge base', 'Reading Word documents', 'Indexing knowledge-base entries', 'Embedding, called directly', 'a-new-function']);
+    // Functions with the same use are added together.
+    const twice = spendByUse([{ function: 'ask-knowledge', calls: 1, spentGbp: 0.5 }, { function: 'ask-knowledge', calls: 2, spentGbp: 0.25 }]);
+    expect(twice).toEqual([{ label: 'Asking the knowledge base', calls: 3, spentGbp: 0.75 }]);
     expect(uses.reduce((t, u) => t + u.spentGbp, 0)).toBeCloseTo(0.047, 6);
   });
 

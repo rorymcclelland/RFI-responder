@@ -109,8 +109,18 @@ export function card(page: Page, question: string) {
   return page.locator('[id^="question-"]', { has: page.getByText(question, { exact: true }) });
 }
 
-/** Opens a question's card (expands it) if it is not open. */
+/**
+ * Sprint 22 (S22-1): Approved and Not answered are folded while questions are still to do. Unfolds
+ * them, so a decided question's card is on the page (QA review).
+ */
+export async function unfold(page: Page) {
+  const folded = page.locator('#stage-questions h3 button[aria-expanded="false"]');
+  while (await folded.count()) await folded.first().click();
+}
+
+/** Opens a question's card (expands it) if it is not open, unfolding its group first. */
 export async function expand(page: Page, question: string) {
+  if (!(await card(page, question).count())) await unfold(page);
   const c = card(page, question);
   await c.scrollIntoViewIfNeeded();
   // An open card shows its decision buttons; a closed one shows none.

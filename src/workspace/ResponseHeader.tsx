@@ -10,10 +10,12 @@ import { OUTCOME_LABEL, STAGE, formatDate } from '../lib/stage';
 
 export interface StageSummary { questions: string; experts: string; send: string }
 
-export default function ResponseHeader({ name, response, ownerName, files, openFileId, openFileName, onOpenFile, onAddFile, stages }: {
+export default function ResponseHeader({ name, response, readFailed = false, ownerName, files, openFileId, openFileName, onOpenFile, onAddFile, stages }: {
   name: string;
   /** The overview's row for this response; null until it is read. */
   response: Opportunity | null;
+  /** The overview could not be read: say so, rather than showing no owner or no due date (security review). */
+  readFailed?: boolean;
   ownerName: string | null;
   files: RFISession[];
   openFileId: string | null;
@@ -42,10 +44,15 @@ export default function ResponseHeader({ name, response, ownerName, files, openF
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-ink-500 font-medium">
-        <span className="flex items-center gap-1.5"><User size={12} aria-hidden="true" /> {ownerName ?? response?.ownerName ?? 'No owner'}</span>
-        <span className="flex items-center gap-1.5">
-          <CalendarClock size={12} aria-hidden="true" /> {response?.dueDate ? `Due ${formatDate(response.dueDate)}` : 'No due date'}
-        </span>
+        {(ownerName ?? response?.ownerName ?? (response ? 'No owner' : null)) && (
+          <span className="flex items-center gap-1.5"><User size={12} aria-hidden="true" /> {ownerName ?? response?.ownerName ?? 'No owner'}</span>
+        )}
+        {response && (
+          <span className="flex items-center gap-1.5">
+            <CalendarClock size={12} aria-hidden="true" /> {response.dueDate ? `Due ${formatDate(response.dueDate)}` : 'No due date'}
+          </span>
+        )}
+        {!response && readFailed && <span role="status" className="text-coral-600">This response&apos;s due date and progress could not be read. Reload the page to try again.</span>}
         {response?.overdue && <span className="status-pill bg-coral-50 text-coral-700 border-coral-200"><AlertTriangle size={11} aria-hidden="true" /> Overdue</span>}
         {response?.atRisk && <span className="status-pill bg-amber-50 text-amber-800 border-amber-200"><AlertTriangle size={11} aria-hidden="true" /> At risk</span>}
       </div>

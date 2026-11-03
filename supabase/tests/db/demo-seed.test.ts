@@ -72,7 +72,7 @@ describe('S7-5 demo responses, one per stage', () => {
       `SELECT q.customer_ref, q.status FROM rfi_questions q JOIN rfi_sessions s ON s.id = q.session_id JOIN opportunities o ON o.id = s.opportunity_id WHERE o.name LIKE 'Bluefin%' ORDER BY q.position`);
     const by = Object.fromEntries(st.rows.map((x) => [x.customer_ref, x.status]));
     expect(by).toMatchObject({ A1: 'accepted', A5: 'pending', A7: 'pending', A8: 'pending', A9: 'pending', A10: 'pending', A11: 'pending', A13: 'pending', A14: 'accepted' });
-    expect(await one(`SELECT count(*)::int AS n, bool_and(a.kind = 'bulk' AND a.threshold = 0.8) AS bulk, bool_and(u.email = 'priya.sharma@example.com') AS owner
+    expect(await one(`SELECT count(*)::int AS n, bool_and(a.kind = 'bulk' AND a.threshold = 0.95) AS bulk, bool_and(u.email = 'priya.sharma@example.com') AS owner
       FROM approvals a JOIN auth.users u ON u.id = a.decided_by JOIN opportunities o ON o.id = a.opportunity_id WHERE o.name LIKE 'Bluefin%'`)).toEqual({ n: 7, bulk: true, owner: true });
     expect((await asSuperuser<{ email: string; status: string }>(`SELECT u.email, a.status FROM question_assignments a JOIN auth.users u ON u.id = a.assigned_to JOIN opportunities o ON o.id = a.opportunity_id WHERE o.name LIKE 'Bluefin%' ORDER BY u.email`)).rows)
       .toEqual([{ email: 'james.okafor@example.com', status: 'in_review' }, { email: 'lisa.huang@example.com', status: 'pending' }]);

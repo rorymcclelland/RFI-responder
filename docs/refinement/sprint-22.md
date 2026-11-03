@@ -26,7 +26,7 @@ Refined 3 November 2026, as proposed at the Sprint 21 review: the first slice of
   - **Send**: the Sprint 21 send region (downloads, **Mark as sent** and its confirmation), unchanged.
 - The question card is unchanged, apart from showing its one reason first.
 
-**What changes.** A `needReason(q)` rule beside `bulkEligible` in `workspace/questionRows.ts` (one reason, from the gate, the draft kind, the checker's verdict, calibration and processing, in that order); a header and stage layout in `RFIWorkspace.tsx`, split into `workspace/ResponseHeader.tsx` and `workspace/WithExperts.tsx`; `ReadyForReviewBanner` retired; the glossary (new words: **Needs a person**, **Ready to approve**, **With experts**); the guide's response pages, the introduction's steps and their screenshots. No database change.
+**What changes.** A `needReason(q)` rule beside `bulkEligible` in `workspace/questionRows.ts` (one reason, in this order: not processed, the gate, no draft, not calibrated, the checker's verdict; corrected while building to match the code and the guide); a header and stage layout in `RFIWorkspace.tsx`, split into `workspace/ResponseHeader.tsx` and `workspace/WithExperts.tsx`; `ReadyForReviewBanner` retired; the glossary (new words: **Needs a person**, **Ready to approve**, **With experts**); the guide's response pages, the introduction's steps and their screenshots. No database change.
 
 **Test cases.**
 1. The header shows the response's name, owner, due date, progress and stage, matching its card on Responses, with **Overdue** or **At risk** when the card shows it (browser).

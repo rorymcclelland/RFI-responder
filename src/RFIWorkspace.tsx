@@ -75,6 +75,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [openGroups, setOpenGroups]       = useState<Set<'approved' | 'unanswered'>>(new Set());
   // The overview's row for this response, for the header (all its files).
   const [summary, setSummary]             = useState<Opportunity | null>(null);
+  const [summaryFailed, setSummaryFailed] = useState(false);
   const [search, setSearch]               = useState('');
   const [expandedId, setExpandedId]       = useState<string | null>(null);
   const [sessionId, setSessionId]         = useState<string | null>(null);
@@ -183,7 +184,9 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   // The header's figures are the whole response's, from the database's overview: read again once
   // no decision is being saved, so they match its card on Responses (S22-1, case 1).
   const refreshSummary = useCallback(() => {
-    loadResponse(supabase, opportunityId).then(setSummary).catch(() => undefined);
+    loadResponse(supabase, opportunityId)
+      .then((r) => { setSummary(r); setSummaryFailed(r === null); })
+      .catch((err) => { console.error('response overview read failed', err); setSummaryFailed(true); });
   }, [opportunityId]);
 
   // ── File parsing ─────────────────────────────────────────────────────────
@@ -531,6 +534,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       <ResponseHeader
         name={opportunityName}
         response={summary}
+        readFailed={summaryFailed}
         ownerName={ownerName}
         files={pastSessions}
         openFileId={sessionId}

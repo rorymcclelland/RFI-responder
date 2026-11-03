@@ -58,7 +58,7 @@ A response opens with its header, in the words of its card on **Responses**: the
 Under **Questions**, every question is in one group:
 
 - **Needs a person**: still to do, and never approved in bulk. Each card shows one reason first, such as **Pricing: a person answers**, **No draft: the knowledge base does not answer it** or **The checker found it partly answered**. [The question card](question-card.md#why-a-question-is-reviewed-one-at-a-time) lists them all.
-- **Ready to approve**: still to do, and nothing holds them from bulk approval, the most confident first, with the bulk bar.
+- **Ready to approve**: still to do, and nothing the page knows of holds them from bulk approval, the most confident first, with the bulk bar. Bulk approval checks each one's cited entries again when you use it, so one whose entry has since fallen overdue or been retired is held, and says so.
 - **Approved** and **Not answered**: decided. While any question is still to do these are folded; choose one to open it. A question you have open stays in view when you decide it.
 
 **Search questions** finds a question by its text or answer, in every group.

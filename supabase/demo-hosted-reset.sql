@@ -324,7 +324,7 @@ BEGIN
     ) AS v(ord, q, a, t, s, f)
    ORDER BY v.ord;
 END $kb$;
--- Demo responses, one per stage (sample-data/demo-plan.json 2026-10-25.2). Every company,
+-- Demo responses, one per stage (sample-data/demo-plan.json 2026-11-03.1). Every company,
 -- person and question is fictional.
 -- Drafts, verdicts and confidences recorded from a real run of the pipeline on 2026-10-25
 -- (plan 2026-10-25.2; models embedding voyage-4, judge claude-haiku-5-5, gate claude-haiku-5-5, draft claude-haiku-5-5;
@@ -436,7 +436,7 @@ BEGIN
     (owner, 'process-questions', 'draft', 'anthropic', 'claude-haiku-5-5', 1043, 685, sess, '2026-10-25T10:50:13.129Z'::timestamptz),
     (owner, 'process-questions', 'embed', 'voyage', 'voyage-4', 117, 0, sess, '2026-10-25T10:50:13.129Z'::timestamptz),
     (owner, 'process-questions', 'embed', 'voyage', 'voyage-4', 35, 0, sess, '2026-10-25T10:50:13.129Z'::timestamptz);
-  PERFORM public.bulk_accept(sess, 0.8);
+  PERFORM public.bulk_accept(sess, 0.95);
   INSERT INTO public.question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text, status)
   SELECT q.id::text, sess, opp, (SELECT id FROM auth.users WHERE email = 'james.okafor@example.invalid'), owner, q.question, 'in_review'
     FROM public.rfi_questions q WHERE q.id = (SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = 'A9');
@@ -908,7 +908,7 @@ BEGIN
     ) AS v(ord, q, a, t, s, f)
    ORDER BY v.ord;
 END $kb$;
--- Demo responses, one per stage (sample-data/demo-plan.json 2026-10-25.2). Every company,
+-- Demo responses, one per stage (sample-data/demo-plan.json 2026-11-03.1). Every company,
 -- person and question is fictional.
 -- Drafts, verdicts and confidences recorded from a real run of the pipeline on 2026-10-25
 -- (plan 2026-10-25.2; models embedding voyage-4, judge claude-haiku-5-5, gate claude-haiku-5-5, draft claude-haiku-5-5;
@@ -1020,7 +1020,7 @@ BEGIN
     (owner, 'process-questions', 'draft', 'anthropic', 'claude-haiku-5-5', 1043, 685, sess, '2026-10-25T10:50:13.129Z'::timestamptz),
     (owner, 'process-questions', 'embed', 'voyage', 'voyage-4', 117, 0, sess, '2026-10-25T10:50:13.129Z'::timestamptz),
     (owner, 'process-questions', 'embed', 'voyage', 'voyage-4', 35, 0, sess, '2026-10-25T10:50:13.129Z'::timestamptz);
-  PERFORM public.bulk_accept(sess, 0.8);
+  PERFORM public.bulk_accept(sess, 0.95);
   INSERT INTO public.question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, question_text, status)
   SELECT q.id::text, sess, opp, (SELECT id FROM auth.users WHERE email = 'james.okafor@example.invalid'), owner, q.question, 'in_review'
     FROM public.rfi_questions q WHERE q.id = (SELECT id FROM public.rfi_questions WHERE session_id = sess AND customer_ref = 'A9');

@@ -111,8 +111,9 @@ function UsageTab() {
 
   const save = async (from: 'limits' | 'advanced') => {
     setError(''); setNotice(''); setSaveResult(null); setSaving(true);
+    // Each part saves only its own fields, so an unsaved edit in the other is never saved with it (security review).
     const change: SettingsChange = {};
-    for (const f of SETTING_FIELDS) {
+    for (const f of SETTING_FIELDS.filter((x) => Boolean(x.advanced) === (from === 'advanced'))) {
       const v = Number(draft[f.key]);
       (change as Record<string, number>)[f.key] = f.percent ? v / 100 : v;
     }
@@ -159,7 +160,7 @@ function UsageTab() {
         <div className="card p-5">
           <p className="section-label mb-3">By person</p>
           {report.byUser.length === 0 ? <p className="text-sm text-ink-400">No AI calls this month.</p> : (
-            <table className="w-full text-sm">
+            <table className="w-full text-sm" aria-label="Spend by person">
               <tbody>
                 {report.byUser.map((u) => (
                   <tr key={u.userId ?? 'none'} className="border-t border-ink-50">
@@ -252,7 +253,9 @@ function UsageTab() {
               <tbody>
                 {prices.map((p) => (
                   <tr key={`${p.provider}/${p.model}`} className="border-t border-ink-50">
-                    <td className="py-1.5"><a href={p.source_url} target="_blank" rel="noreferrer" className="text-ink-700 underline decoration-ink-200">{p.model}</a></td>
+                    <td className="py-1.5">{/^https:\/\//.test(p.source_url)
+                      ? <a href={p.source_url} target="_blank" rel="noreferrer" className="text-ink-700 underline decoration-ink-200">{p.model}</a>
+                      : <span className="text-ink-700">{p.model}</span>}</td>
                     <td className="py-1.5 text-right">${Number(p.input_usd_per_mtok).toFixed(2)}</td>
                     <td className="py-1.5 text-right">${Number(p.output_usd_per_mtok).toFixed(2)}</td>
                     <td className="py-1.5 text-right text-ink-500">{p.checked_on}</td>
@@ -376,14 +379,18 @@ function AuditTab({ names }: { names: Map<string, string> }) {
   const [people, setPeople] = useState<{ id: string; name: string }[]>([]);
   const [responses, setResponses] = useState<{ id: string; name: string }[]>([]);
   const [found, setFound] = useState<{ rows: AuditRow[]; more: boolean } | null>(null);
+  const [filterError, setFilterError] = useState('');
   const [error, setError] = useState('');
 
   // The choices for the filters: everyone who has acted in the log, and every response, archived too.
   useEffect(() => {
     let live = true;
-    loadAuditPeople(supabase).then((p) => { if (live) setPeople(p); }).catch(() => undefined);
-    supabase.from('opportunities').select('id,name').order('name').then(({ data }) => {
-      if (live) setResponses(((data ?? []) as { id: string; name: string }[]).map((r) => ({ id: String(r.id), name: String(r.name) })));
+    loadAuditPeople(supabase).then((p) => { if (live) setPeople(p); })
+      .catch(() => { if (live) setFilterError('The people to filter by could not be read. Reload the page to try again.'); });
+    supabase.from('opportunities').select('id,name').order('name').then(({ data, error: err }) => {
+      if (!live) return;
+      if (err) { console.error('response list read failed', err); setFilterError('The responses to filter by could not be read. Reload the page to try again.'); return; }
+      setResponses(((data ?? []) as { id: string; name: string }[]).map((r) => ({ id: String(r.id), name: String(r.name) })));
     });
     return () => { live = false; };
   }, []);
@@ -430,6 +437,7 @@ function AuditTab({ names }: { names: Map<string, string> }) {
         Newest first, at most {AUDIT_LIMIT} entries. Written by the database; admins cannot change or delete them.
         {' '}A response&apos;s entries include those about its files and questions.
       </p>
+      {filterError && <p role="alert" className="text-sm text-coral-700">{filterError}</p>}
       {error && <p role="alert" className="text-sm text-coral-700">{error}</p>}
       {found === null ? (
         <p className="text-sm text-ink-400">Loading…</p>
@@ -449,7 +457,7 @@ function AuditTab({ names }: { names: Map<string, string> }) {
           </ul>
           {found.more && (
             <p role="status" className="text-xs text-ink-500">
-              These are the newest {AUDIT_LIMIT}; older entries match too. Choose a person, a response or a kind to see them.
+              These are the newest {AUDIT_LIMIT}; older entries match too and are not shown. A narrower filter may bring them into the newest {AUDIT_LIMIT}.
             </p>
           )}
         </>

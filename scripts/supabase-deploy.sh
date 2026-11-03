@@ -26,12 +26,16 @@ echo "::add-mask::$db_url"
 supabase db push --db-url "$db_url" --yes
 supabase functions deploy --project-ref "$ref"
 # Staging only (LOAD_DEMO_IF_MISSING=1, set by the staging job): a new staging project gets the
-# synthetic demo data once, exactly as the owner loads it at go-live, so each run can reset it.
+# synthetic demo data, exactly as the owner loads it at go-live, so each run can reset it. Since
+# Sprint 22 it is loaded again when the demo plan's version in supabase/demo-hosted.sql is not the
+# one staging holds, so a changed demo reaches staging's tests. The live demo is never touched here.
 if [ "${LOAD_DEMO_IF_MISSING:-}" = 1 ]; then
-  loaded=$(psql "$db_url" -tAc "select count(*) from private.demo_reload where script is not null")
-  if [ "$loaded" = 0 ]; then
+  version=$(grep -om1 'demo-plan.json [0-9][0-9.-]*' supabase/demo-hosted.sql | cut -d' ' -f2)
+  [ -n "$version" ] || { echo "::error::supabase/demo-hosted.sql names no demo plan version"; exit 1; }
+  current=$(psql "$db_url" -tAc "select count(*) from private.demo_reload where script like '%demo-plan.json ${version}%'")
+  if [ "$current" = 0 ]; then
     psql "$db_url" -q -v ON_ERROR_STOP=1 -f supabase/demo-hosted.sql
-    echo "Loaded the demo data (supabase/demo-hosted.sql) into $ref."
+    echo "Loaded the demo data (supabase/demo-hosted.sql, plan ${version}) into $ref."
   fi
 fi
 # The applied versions, one per line, straight from the project's own record of them.

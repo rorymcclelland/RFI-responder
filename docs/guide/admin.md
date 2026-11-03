@@ -84,7 +84,7 @@ Entries are also learned from responses when they are marked as sent ([Running a
 
 - **This month**: the estimated spend on AI so far against the monthly budget, from the token counts each provider reported and the prices listed below. A warning appears for admins from the warning point, and for everyone when the budget is reached.
 - **By person**: who used how much.
-- **Spend by use**: what the money was spent on this month, in calls and pounds: processing responses, asking the knowledge base, indexing knowledge-base entries and reading Word documents.
+- **Spend by use**: what the money was spent on this month, in calls and pounds: processing responses (including indexing the questions while they are matched), asking the knowledge base, indexing knowledge-base entries as they are added, and reading Word documents. Any other use shows under its own name.
 - **Limits**: the caps the database enforces, and what you are most likely to change. Change them and choose **Save limits**; every change is recorded in the audit log.
   - Questions per person per day; knowledge-base texts indexed per person per day; Word documents read by AI per person per day. Each person's count resets at midnight UTC.
   - The monthly budget, and the share of it at which admins are warned. When the month's estimated spend reaches the budget, processing stops for everyone until the next month or until the budget is raised.
@@ -125,6 +125,6 @@ Responses marked as sent (and marked again after changes), changes after that, a
 - **Person**: what one person did, including someone whose account has since been deleted (shown as a former user).
 - **Response**: what happened to one response, its files and its questions (marked as sent, held, changed after sending, archived). Entries about the knowledge base, settings or people belong to no response.
 
-When more than 200 entries match, the log says so; narrow the filters to see older ones. **Clear the filters** shows everything again.
+When more than 200 entries match, the log says so: only the newest 200 are shown, and a narrower filter may bring older ones into them. **Clear the filters** shows everything again.
 
 ![The audit log on the governance page](../screenshots/16-audit-log.png)
