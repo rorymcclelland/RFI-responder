@@ -924,6 +924,16 @@ Refinement: `docs/refinement/sprint-21.md`. Q1 to Q4 answered by Rory the same d
 
 **Proposed next.** Sprint 22: U-5 (its first slice, split at refinement), U-9 and F-69. U-8 follows in Sprint 23, on the rebuilt response page.
 
+## Sprint 22: the response as a journey, plain settings, and the ask's usage on staging (refined 3 November 2026)
+
+Refinement: `docs/refinement/sprint-22.md`. Q1 to Q4 answered by Rory the same day, each as recommended.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S22-1 | The response as a journey, first slice: a header, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each | U-5, U-10 | Ready, Sprint 22 |
+| S22-2 | Plain settings with **Advanced**, spend by use, and the audit log by person and response | U-9 | Ready, Sprint 22 |
+| S22-3 | The staging run's real-AI step reads the ask's usage | F-69 | Ready, Sprint 22 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
