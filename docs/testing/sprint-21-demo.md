@@ -1,7 +1,7 @@
 # Sprint 21 review
 
-Staging run: build `92f4307` on sprint-21, 2026-11-02T23:14:04Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41543080014).
-Local run: build `92f4307` on sprint-21, 2026-11-02T23:12:55Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41543079991).
+Staging run: build `dfe9736` on sprint-21, 2026-11-03T17:06:08Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41660351743).
+Local run: build `dfe9736` on sprint-21, 2026-11-03T15:11:04Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/41660351997).
 
 ## Sprint 21: Sending made plain, gaps, and configuration as code
 
@@ -40,8 +40,8 @@ Every deploy checks the hosted sign-in settings against the repository; a script
 
 | Case | What was checked | Result |
 |---|---|---|
-| S21-3 1 | The sign-in settings check passes on staging and the live demo as they are (NOT PASSED YET: the step "Sign-in settings match the repository" runs on every staging deploy and fails, because the access tokens cannot read sign-in settings until Rory makes them again with Auth Config: Read) | By hand |
-| S21-3 2 | With sign-ups turned on on staging the deploy fails and names it; turned back, it passes (changing a live sign-in setting is Rory's to do (once); the check's wording is also a unit test in scripts/setup-secrets.test.ts) | By hand |
+| S21-3 1 | The sign-in settings check passes on staging and the live demo as they are (the Deploy workflow, step "Sign-in settings match the repository": passed on staging on 3 November 2026 (run 41660351743); on the live demo it runs before the first approved deploy) | Checked in CI |
+| S21-3 2 | A setting that differs fails the deploy and names it; put right, it passes (seen on 3 November 2026 with a real difference rather than a test one: staging had no redirect address; the check failed naming it, Rory added it, and the next run passed. Sign-ups were not turned on for a test (the same rule, also a unit test)) | By hand |
 | S21-3 3 | The script's dry run lists the secrets it would set, by name only (scripts/setup-secrets.test.ts) | Checked in CI |
 | S21-3 4 | The script refuses a key of the wrong kind, and the live demo's project for staging (scripts/setup-secrets.test.ts) | Checked in CI |
 | S21-3 5 | Nothing the script or the check prints contains a key (scripts/setup-secrets.test.ts) | Checked in CI |
