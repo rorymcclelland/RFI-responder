@@ -116,6 +116,14 @@ describe('setup-secrets (S21-3)', () => {
     expect(secretSets(calls).map((c) => c.args[2])).not.toContain('SUPABASE_ACCESS_TOKEN');
   });
 
+  it('never stores a paste that arrived as control keys, and says how to paste', async () => {
+    const { run, calls } = fakeRun();
+    const out = collect();
+    expect(await setup('production', true, run, async () => '\u0016', out.log, reads(LIVE))).toBe(1);
+    expect(secretSets(calls)).toEqual([]);
+    expect(out.lines.join('\n')).toMatch(/control keys, not text.*right-click/);
+  });
+
   it('reads the keys from the Supabase command line\'s list', () => {
     expect(keysFrom(JSON.stringify([{ name: 'anon', api_key: ANON }, { name: 'service_role', api_key: SERVICE }, { name: 'other', api_key: 'x' }])))
       .toEqual({ anon: ANON, service_role: SERVICE });
