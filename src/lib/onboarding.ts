@@ -68,7 +68,7 @@ export const INTRO_STEPS: IntroStep[] = [
     title: 'Review, one at a time or in bulk',
     body: [
       '**Approve** a draft, **Edit First**, or **Write an answer** when there is none. The owner can approve many drafts at once above a confidence.',
-      'Some questions are never approved in bulk: pricing (a person always answers those), legal and translated questions, partly answered ones, and drafts that rely on an entry no admin has reviewed. Each card says why.',
+      'A response groups its questions by what they need: **Needs a person** (pricing, legal and translated questions, partly answered ones, drafts that rely on an entry no admin has reviewed; each says why) and **Ready to approve**. Its header says where it stands, and **With experts** and **Send** are the next stages.',
     ],
     image: '4-pricing-held.png',
     imageAlt: 'A pricing question held for a person to answer',

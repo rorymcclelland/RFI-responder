@@ -15,6 +15,9 @@ The words RFI Respond uses on screen, in the guide and in the introduction, one 
 | **not answered**, **leave unanswered** | A question decided not to answer; exported as "Not answered" | skip, skipped |
 | **owner** | The person responsible for a response | |
 | **colleague**, **asked** | Someone the owner asked to answer or check a question, through an assignment | |
+| **needs a person** | A question still to do that bulk approval never takes, with the one reason why (Sprint 22) | held, gated, blocked |
+| **ready to approve** | A question still to do that nothing holds from bulk approval (Sprint 22) | eligible |
+| **with experts** | The questions of a file asked of colleagues, and where each stands (Sprint 22) | assignments (as a place on the response) |
 
 ## Stages
 
@@ -23,10 +26,11 @@ The words RFI Respond uses on screen, in the guide and in the introduction, one 
 | A response | **No questions yet**, **In progress**, **Ready to send**, **Sent**, **Changed since sent**, **Archived** (with **Won**, **Lost** or **Withdrawn**) |
 | A question | **To do**, **Approved**, **Not answered** |
 | An assignment | **Asked**, **Working on it**, **Answered**, **Approved**, **Closed** |
+| A response's page (Sprint 22) | **Questions** (grouped as **Needs a person**, **Ready to approve**, **Approved**, **Not answered**), **With experts**, **Send** |
 
 ## Confidence bands
 
-The same three bands in the filter and on the bulk buttons: **High** at least 80%, **Medium** 60 to 80%, **Low** under 60%, and **Not calibrated** when no confidence could be measured.
+The same three bands on the question card and the bulk buttons: **High** at least 80%, **Medium** 60 to 80%, **Low** under 60%, and **Not calibrated** when no confidence could be measured.
 
 ## Sending
 

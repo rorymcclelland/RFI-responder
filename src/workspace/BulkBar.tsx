@@ -42,8 +42,7 @@ export default function BulkBar({ canApprove, eligible, held, showFinish, finish
       {showFinish && finishBlockedBy && <p className="text-xs text-ink-500 font-medium">{finishBlockedBy}</p>}
       {held > 0 && (
         <p className="text-xs text-ink-500 font-medium">
-          {held} question{held !== 1 ? 's' : ''} to do {held !== 1 ? 'are' : 'is'} never included in bulk approval (pricing, legal, translated or Japanese, not fully checked, matched before every entry was indexed, citing an unreviewed, overdue or replaced entry, judged
-          only partly answered or not answered by the checker, or not checked by one, without calibrated confidence, or with no draft) and must be approved one at a time.
+          {held} question{held !== 1 ? 's' : ''} to do {held !== 1 ? 'are' : 'is'} never included: {held !== 1 ? 'they need' : 'it needs'} a person, and each says why under Needs a person.
         </p>
       )}
     </div>

@@ -100,7 +100,8 @@ export async function nav(page: Page, name: string) {
 export async function openResponse(page: Page, name: string) {
   await nav(page, 'Responses');
   await page.getByText(name, { exact: true }).first().click();
-  await page.getByRole('button', { name: /^(To do|All)/ }).first().waitFor();
+  // Sprint 22 (S22-1): the response's page shows its stages once its questions are read.
+  await page.getByRole('heading', { name: 'Questions', level: 2 }).waitFor();
 }
 
 /** A question's card in an open response, found by its text. */

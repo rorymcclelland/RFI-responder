@@ -47,9 +47,21 @@ Processing stops if you reach your daily limit, or the organisation reaches its 
 
 ## 4. Review
 
-![Review, lowest confidence first, with the bulk approval bar](../screenshots/2-review.png)
+![A response: its header, the three stages, and the questions grouped by what they need](../screenshots/2-review.png)
 
-The questions are listed with those without a calibrated confidence first, then lowest confidence first, so the ones most likely to need you come first. Filter them by status (**To do**, **Approved**, **Not answered**), by confidence (**High ≥80%**, **Medium 60–80%**, **Low <60%**, and **Not calibrated** when there are any), or search them.
+A response opens with its header, in the words of its card on **Responses**: the name, the owner, the due date (with **Overdue** or **At risk** when it is), how many of its questions are decided, its stage, and its files, the open one marked; choose another file to open it. Below the header are three stages, each saying what it holds; choose one to go to it:
+
+- **Questions**: the open file's questions, grouped by what they need.
+- **With experts**: the questions asked of colleagues ([Asking a colleague](#asking-a-colleague)).
+- **Send**: downloading the answers and marking the response as sent ([Download and mark as sent](#5-download-and-mark-as-sent)).
+
+Under **Questions**, every question is in one group:
+
+- **Needs a person**: still to do, and never approved in bulk. Each card shows one reason first, such as **Pricing: a person answers**, **No draft: the knowledge base does not answer it** or **The checker found it partly answered**. [The question card](question-card.md#why-a-question-is-reviewed-one-at-a-time) lists them all.
+- **Ready to approve**: still to do, and nothing holds them from bulk approval, the most confident first, with the bulk bar.
+- **Approved** and **Not answered**: decided. While any question is still to do these are folded; choose one to open it. A question you have open stays in view when you decide it.
+
+**Search questions** finds a question by its text or answer, in every group.
 
 Choose a question to open its card: the checker's verdict and reason, the entries the draft came from (**Knowledge-base sources**; choose one to read it in full), the draft, and how it was produced. [The question card](question-card.md) explains every label.
 
@@ -73,7 +85,7 @@ The bulk bar approves every draft still to do at or above a confidence in one st
 - judged only partly answered, or not answered, by the checker, or not checked by a checker at all;
 - without calibrated confidence, or without a draft.
 
-The bar says how many are held, and why in general; each card says why for that question. They must be approved one at a time. After a bulk approval a message says how many were approved and why the rest were held.
+The bar says how many are held; each of them, under **Needs a person**, says why. They must be approved one at a time. After a bulk approval a message says how many were approved and why the rest were held.
 
 ## Asking a colleague
 
@@ -81,7 +93,7 @@ When a question needs a specialist, open its card and under **Expert Assignment*
 
 ![Assigning a question, with suggested people and their reasons](../screenshots/11-assign.png)
 
-The question appears under **Questions for you** in their **Assignments** ([Answering assigned questions](specialists.md)). They can approve it themselves, send their answer to you, or hand it back with a note. An answer they send shows on the question's card as "<their name> marked it answered, with this answer:", with **Use their answer**, which puts it in the editor for you to approve; a handed-back question shows their note. When a colleague adds notes, a banner at the top of the review list says how many assignments have notes to review; choose one to go to its question.
+The question appears under **Questions for you** in their **Assignments** ([Answering assigned questions](specialists.md)). They can approve it themselves, send their answer to you, or hand it back with a note. An answer they send shows on the question's card as "<their name> marked it answered, with this answer:", with **Use their answer**, which puts it in the editor for you to approve; a handed-back question shows their note. **With experts** lists every question of the open file asked of a colleague: who, where it stands (**Asked**, **Working on it**, **Answered**, **Approved** or **Closed**) and their note, those answered first. Choose one to open it at its question.
 
 ## 5. Download and mark as sent
 
@@ -117,7 +129,7 @@ Marking a response as sent turns edited and person-written answers into knowledg
 
 ## 6. Finish
 
-Choose **Add a file** (or **Add another file** after the export) to add another file to the same response (only the owner or an admin can; anyone else sees **Other files** when there are several); earlier files stay under **Files in this response** (the ten most recent are listed), where **Resume** or **View** reopens them. The response opens on the most recent file.
+Choose **Add a file** in the header (or **Add another file** after marking as sent) to add another file to the same response; only the owner or an admin can. The header lists the response's files (the ten most recent, and the open one), and choosing one opens it. The response opens on the most recent file.
 
 When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the response marked as sent first, and marked again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 

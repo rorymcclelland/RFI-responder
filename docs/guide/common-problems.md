@@ -39,9 +39,9 @@ In **Check the questions**, add the missing ones and use **Join the parts into o
 
 Each person has daily limits, and the organisation has a monthly budget. The message says which was reached. Wait until tomorrow (limits reset at midnight UTC), or ask an admin to raise the limit under **Governance**, **Usage and limits**. The questions not yet processed are kept.
 
-### Questions show "Not processed yet"
+### Questions show "Not checked and drafted yet"
 
-A batch failed or was stopped by a limit, or the response was started in an earlier version of the app. Choose **Process now** on the banner above the list.
+A batch failed or was stopped by a limit, or the response was started in an earlier version of the app. These questions are under **Needs a person**. The owner or an admin chooses **Process now** on the line above **Questions**.
 
 ### A question has no draft
 

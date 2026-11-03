@@ -1,3 +1,4 @@
+import { OUTCOME_LABEL, STAGE, formatDate } from './lib/stage';
 import { useEffect, useState } from 'react';
 import {
   AlertTriangle, Archive, ArrowRight, Briefcase, CalendarClock, Check, Clock, Pencil, Plus, RefreshCw, Search, Trash2, User, X,
@@ -82,19 +83,7 @@ function ContributorAvatars({ opportunityId }: { opportunityId: string }) {
 }
 
 // ─── Stage ─────────────────────────────────────────────────────────────────────
-
-const STAGE: Record<ResponseStage, { label: string; pill: string; accent: string }> = {
-  new:       { label: 'No questions yet',       pill: 'bg-sky-50 text-sky-700 border-sky-200',             accent: 'border-l-sky-300' },
-  in_review: { label: 'In progress', pill: 'bg-amber-50 text-amber-700 border-amber-200',       accent: 'border-l-amber-300' },
-  ready:     { label: 'Ready to send',     pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', accent: 'border-l-emerald-400' },
-  exported:  { label: 'Sent',  pill: 'bg-ink-900 text-white border-ink-900',              accent: 'border-l-ink-700' },
-  // Sprint 11 (S11-1): answers changed after the export was recorded; record it again.
-  changed:   { label: 'Changed since sent', pill: 'bg-amber-50 text-amber-800 border-amber-300', accent: 'border-l-amber-400' },
-  archived:  { label: 'Archived',  pill: 'bg-ink-50 text-ink-500 border-ink-200',             accent: 'border-l-ink-200' },
-};
-const OUTCOME_LABEL: Record<ResponseOutcome, string> = { won: 'Won', lost: 'Lost', withdrawn: 'Withdrawn' };
-
-const formatDate = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+// Sprint 22 (S22-1): the stage words, shared with the response's header (lib/stage.ts).
 
 // ─── Dialogs ───────────────────────────────────────────────────────────────────
 

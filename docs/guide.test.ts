@@ -64,10 +64,14 @@ describe('the guide covers the app', () => {
   const running = read(join(GUIDE, 'running-a-response.md'));
   const component = read(join(ROOT, 'src/RFIQuestionCard.tsx'));
 
-  it('explains every badge on the question card', () => {
-    const block = component.match(/const GATE_BADGE[\s\S]*?\n};/)![0];
-    const labels = [...block.matchAll(/label: '([^']+)'/g)].map((m) => m[1]);
-    expect(labels.length).toBeGreaterThanOrEqual(6);
+  it('explains every badge on the question card, and every reason a question needs a person (Sprint 22)', () => {
+    const journey = read(join(ROOT, 'src/workspace/journey.ts'));
+    const gates = [...journey.match(/export const GATE_LABEL[\s\S]*?\n};/)![0].matchAll(/: '([^']+)'/g)].map((m) => m[1]);
+    const reasons = [...journey.match(/export function needReason[\s\S]*?\n}/)![0].matchAll(/label: '([^']+)'/g)].map((m) => m[1]);
+    expect(gates.length).toBeGreaterThanOrEqual(8);
+    expect(reasons.length).toBeGreaterThanOrEqual(7);
+    expect(component).toContain('needReason(question)');
+    const labels = [...gates, ...reasons];
     for (const l of labels) expect(card, l).toContain(`| ${l} |`);
   });
 

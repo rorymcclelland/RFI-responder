@@ -35,10 +35,11 @@ When the verdict keeps a question out of bulk approval, a line under it says so,
 
 ## Why a question is reviewed one at a time
 
-These badges mean a question is never approved in bulk. Hover over the badge, or read **Held back from bulk approval** lower on the card, for the reason in full.
+A question still to do that is never approved in bulk shows one reason first on its card, under **Needs a person**: the first that applies, in the order below. Hover over a badge, or read **Held back from bulk approval** lower on the card, for the reason in full.
 
 | Badge | Why |
 |---|---|
+| Not checked and drafted yet | The server has not processed the question yet (a batch failed); the owner or an admin chooses **Process now**. |
 | Pricing: a person answers | It asks about price, cost or commercial terms. No draft is written, and the answer is never learned automatically. |
 | Legal: review individually | It touches contract terms, liability, indemnity, warranties and similar. A draft may be written, but a person checks it. |
 | Not fully checked | The pricing and legal classifier could not run, so only simple rules were applied; or the review status of the cited entries could not be read. |
@@ -47,6 +48,12 @@ These badges mean a question is never approved in bulk. Hover over the badge, or
 | Cites an unreviewed entry | The draft relies on a knowledge-base entry an admin has not reviewed yet. |
 | Cites an entry overdue for review | The draft relies on an entry overdue for its periodic review, or one that has since been replaced. |
 | Some entries not searched | Some knowledge-base entries were not yet indexed when the question was matched, so the best match may have been missed (the processing could not index them first, for example because of your daily limit). |
+| No draft: the knowledge base does not answer it | The matched entries do not answer the question, so no draft was written. A person writes the answer. |
+| No draft | The question has no draft (it was added before drafting, or drafting failed). A person writes the answer. |
+| Not calibrated | There is no measured confidence for the question, so it is never approved in bulk. |
+| The checker found it partly answered | The checker said the entries answer the question only in part. Approve it on its own if the draft is right. |
+| The checker found it not answered | The checker said the entries do not answer the question. |
+| Not checked by the checker | No checker verdict was recorded for the question. |
 
 Pricing and legal questions are found two ways, by rules (words such as "price" or "indemnity") and by a language model, and a question is held if either finds it.
 

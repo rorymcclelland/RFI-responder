@@ -1,3 +1,4 @@
+import { ASSIGNMENT_WORD, GATE_LABEL, needReason } from './workspace/journey';
 import { openEntry } from './lib/openEntry';
 import { confidenceBand } from './workspace/confidenceBands';
 import { useState, useEffect } from 'react';
@@ -101,18 +102,16 @@ function confidenceLabel(c: number | null): { label: string; dot: string; bar: s
   return               { label: 'Low',    dot: 'bg-coral-500',   bar: 'bg-coral-500',   text: 'text-coral-600' };
 }
 
-/** Why a question is never bulk-approved (S2-2a, S2-3), as the reviewer sees it. */
-const GATE_BADGE: Record<NonNullable<RFIQuestion['gate']>, { label: string; cls: string }> = {
-  pricing:     { label: 'Pricing: a person answers', cls: 'bg-coral-50 text-coral-700 border-coral-200' },
-  legal:       { label: 'Legal: review individually', cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-  unchecked:   { label: 'Not fully checked', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  translation: { label: 'Translated draft', cls: 'bg-sky-50 text-sky-700 border-sky-200' },
-  // Sprint 12 (S12-2): Japanese from Japanese entries, not translated, but unverified (Q2).
-  japanese: { label: 'Japanese: review individually', cls: 'bg-sky-50 text-sky-700 border-sky-200' },
-  unreviewed_source: { label: 'Cites an unreviewed entry', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  stale_source: { label: 'Cites an entry overdue for review', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  // Sprint 11 (S11-2): matched while some entries had no vector, so the best match may be missing.
-  unindexed_entries: { label: 'Some entries not searched', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+/** Why a question is never bulk-approved (S2-2a, S2-3): the label is the journey's (Sprint 22), the colour here. */
+const GATE_CLS: Record<NonNullable<RFIQuestion['gate']>, string> = {
+  pricing: 'bg-coral-50 text-coral-700 border-coral-200',
+  legal: 'bg-violet-50 text-violet-700 border-violet-200',
+  unchecked: 'bg-amber-50 text-amber-700 border-amber-200',
+  translation: 'bg-sky-50 text-sky-700 border-sky-200',
+  japanese: 'bg-sky-50 text-sky-700 border-sky-200',
+  unreviewed_source: 'bg-amber-50 text-amber-700 border-amber-200',
+  stale_source: 'bg-amber-50 text-amber-700 border-amber-200',
+  unindexed_entries: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
 /** What the Proposed Response box holds, for its tooltip. */
@@ -136,11 +135,8 @@ const ASSIGNMENT_BADGE: Record<string, string> = {
   approved:  'bg-emerald-50 text-emerald-700 border-emerald-200',
   closed:    'bg-ink-50 text-ink-400 border-ink-200',
 };
-const ASSIGNMENT_LABEL: Record<string, string> = {
-  pending: 'Asked', in_review: 'Working on it', answered: 'Answered', approved: 'Approved',
-  // Sprint 21 (S21-1): closed when the response was marked as sent (it showed no word before).
-  closed: 'Closed',
-};
+// The words for an assignment's stage are the journey's (Sprint 22), shared with With experts.
+const ASSIGNMENT_LABEL = ASSIGNMENT_WORD;
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
@@ -307,6 +303,7 @@ export default function RFIQuestionCard({
   const [editText, setEditText]   = useState(question.finalAnswer);
   const [kbArticle, setKbArticle] = useState<{ entry: KnowledgeEntry; score: number } | null>(null);
   const conf = confidenceLabel(question.confidence);
+  const reason = needReason(question);
   const source = answerSource(question);
   const pct  = question.confidence === null ? null : Math.round(question.confidence * 100);
 
@@ -354,15 +351,23 @@ export default function RFIQuestionCard({
             {question.question}
           </p>
           <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className={`text-2xs font-black uppercase tracking-wide ${conf.text}`}>
-              {pct === null ? conf.label : `${conf.label}: ${formatConfidence(question.confidence)}`}
-            </span>
-            {question.gate && (
-              <span title={question.gateReason ?? undefined} className={`status-pill text-2xs ${GATE_BADGE[question.gate].cls}`}>
-                {GATE_BADGE[question.gate].label}
+            {/* Sprint 22 (S22-1): the one reason a question still to do needs a person, first. */}
+            {reason ? (
+              <span title={question.gate ? question.gateReason ?? undefined : undefined} data-reason={reason.key}
+                className={`status-pill text-2xs ${question.gate ? GATE_CLS[question.gate] : 'bg-amber-50 text-amber-800 border-amber-200'}`}>
+                {reason.label}
+              </span>
+            ) : question.gate && (
+              <span title={question.gateReason ?? undefined} className={`status-pill text-2xs ${GATE_CLS[question.gate]}`}>
+                {GATE_LABEL[question.gate]}
               </span>
             )}
-            {!question.processed && <span className="status-pill text-2xs bg-ink-50 text-ink-500 border-ink-200">Not processed yet</span>}
+            {reason?.key !== 'uncalibrated' && (
+              <span className={`text-2xs font-black uppercase tracking-wide ${conf.text}`}>
+                {pct === null ? conf.label : `${conf.label}: ${formatConfidence(question.confidence)}`}
+              </span>
+            )}
+            {!question.processed && question.status !== 'pending' && <span className="status-pill text-2xs bg-ink-50 text-ink-500 border-ink-200">Not processed yet</span>}
             {question.status === 'accepted' && (
               <span className="flex items-center gap-1 text-2xs text-emerald-700 font-bold">
                 <CheckCircle2 size={11} />

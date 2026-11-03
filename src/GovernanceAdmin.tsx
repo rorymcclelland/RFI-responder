@@ -70,6 +70,18 @@ const SETTING_FIELDS: { key: keyof SettingsChange; label: string; help: string; 
   { key: 'review_interval_months', label: 'Review knowledge-base entries every (months)', help: 'Entries past this are reported, and drafts citing them are held from bulk approval.', step: 1 },
 ];
 
+/** One setting: its label names the box; the help describes it (Sprint 22, S22-2). */
+function SettingField({ f, value, onChange }: { f: (typeof SETTING_FIELDS)[number]; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label htmlFor={`setting-${f.key}`} className="text-sm font-bold text-ink-700">{f.label}</label>
+      <input id={`setting-${f.key}`} aria-describedby={`setting-${f.key}-help`} type="number" step={f.step} min={0}
+        value={value} onChange={(e) => onChange(e.target.value)} className="input mt-1" />
+      <p id={`setting-${f.key}-help`} className="text-xs text-ink-400">{f.help}</p>
+    </div>
+  );
+}
+
 function UsageTab() {
   const [status, setStatus] = useState<UsageStatus | null>(null);
   const [report, setReport] = useState<UsageReport | null>(null);
@@ -182,18 +194,7 @@ function UsageTab() {
         <p className="section-label">Limits</p>
         <div className="grid md:grid-cols-2 gap-4">
           {SETTING_FIELDS.filter((f) => !f.advanced).map((f) => (
-            <label key={f.key} className="block">
-              <span className="text-sm font-bold text-ink-700">{f.label}</span>
-              <input
-                type="number"
-                step={f.step}
-                min={0}
-                value={draft[f.key] ?? ''}
-                onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
-                className="input mt-1"
-              />
-              <span className="text-xs text-ink-400">{f.help}</span>
-            </label>
+            <SettingField key={f.key} f={f} value={draft[f.key] ?? ''} onChange={(v) => setDraft((d) => ({ ...d, [f.key]: v }))} />
           ))}
         </div>
         <div className="flex items-center justify-between">
@@ -216,18 +217,7 @@ function UsageTab() {
             <p className="text-xs text-ink-500">How the spend is estimated. Change these when the measured cost or the exchange rate moves.</p>
             <div className="grid md:grid-cols-2 gap-4">
               {SETTING_FIELDS.filter((f) => f.advanced).map((f) => (
-                <label key={f.key} className="block">
-                  <span className="text-sm font-bold text-ink-700">{f.label}</span>
-                  <input
-                    type="number"
-                    step={f.step}
-                    min={0}
-                    value={draft[f.key] ?? ''}
-                    onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
-                    className="input mt-1"
-                  />
-                  <span className="text-xs text-ink-400">{f.help}</span>
-                </label>
+                <SettingField key={f.key} f={f} value={draft[f.key] ?? ''} onChange={(v) => setDraft((d) => ({ ...d, [f.key]: v }))} />
               ))}
             </div>
             <div className="flex items-center justify-end gap-3">

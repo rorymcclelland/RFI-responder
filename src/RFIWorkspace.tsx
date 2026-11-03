@@ -5,8 +5,8 @@
  * Each step is its own component in ./workspace (F-5); this file holds the state that
  * crosses steps and the review list.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertTriangle, BarChart3, CheckCircle2, ChevronDown, RefreshCw, Search, Upload, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { AlertTriangle, CheckCircle2, ChevronDown, RefreshCw, Search, X } from 'lucide-react';
 import { parseSpreadsheet, SpreadsheetError, type Row } from './lib/spreadsheet';
 import { readWordDocument, WordDocumentError } from './lib/wordDocument';
 import { extractFromWord } from './lib/wordExtraction';
@@ -14,22 +14,23 @@ import { describeExtraction, fromExtraction, toInsertRows, type Draft } from './
 import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
 import { firstView, loadResponseSession, loadResponseSessions } from './workspace/openResponse';
-import { CONF_GROUPS, inGroup, type ConfidenceGroup } from './workspace/confidenceBands';
 import { exportReason, workspaceControls } from './workspace/controls';
 import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
-import { describeLearning, recordExport, sendPreview } from './lib/responses';
+import { describeLearning, loadResponse, recordExport, sendPreview } from './lib/responses';
 import { answerSource } from './lib/answerLabel';
 import { supabase } from './lib/supabase';
-import type { RFIQuestion, RFISession, UserProfile } from './types';
+import type { Opportunity, RFIQuestion, RFISession, UserProfile } from './types';
 import RFIQuestionCard from './RFIQuestionCard';
 import BulkBar from './workspace/BulkBar';
 import ExportPanel from './workspace/ExportPanel';
 import MappingStep from './workspace/MappingStep';
 import ProcessingStep from './workspace/ProcessingStep';
-import ReadyForReviewBanner from './workspace/ReadyForReviewBanner';
+import ResponseHeader, { type StageSummary } from './workspace/ResponseHeader';
+import WithExperts from './workspace/WithExperts';
+import { expertItems, groupQuestions } from './workspace/journey';
 import UploadStep from './workspace/UploadStep';
-import { bulkEligible, loadQuestions } from './workspace/questionRows';
+import { loadQuestions } from './workspace/questionRows';
 import { useAssignments } from './workspace/useAssignments';
 
 interface Props {
@@ -51,9 +52,6 @@ interface Props {
 
 // Sprint 16 (S16-1): 'loading' until the response's sessions are read; 'load_error' if they cannot be.
 type WorkflowStep    = 'loading' | 'load_error' | 'idle' | 'mapping' | 'preview' | 'processing' | 'review' | 'export';
-type FilterTab       = 'all' | 'pending' | 'accepted' | 'skipped';
-// Sprint 17 (S17-1): the glossary's words for the stored statuses.
-const FILTER_LABEL: Record<FilterTab, string> = { all: 'All', pending: 'To do', accepted: 'Approved', skipped: 'Not answered' };
 
 
 
@@ -73,8 +71,10 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [questions, setQuestions]         = useState<RFIQuestion[]>([]);
   const [progress, setProgress]           = useState(0);
   const [processMsg, setProcessMsg]       = useState('');
-  const [filter, setFilter]               = useState<FilterTab>('all');
-  const [confGroup, setConfGroup]         = useState<ConfidenceGroup>('all');
+  // Sprint 22 (S22-1): the folded groups the person has opened.
+  const [openGroups, setOpenGroups]       = useState<Set<'approved' | 'unanswered'>>(new Set());
+  // The overview's row for this response, for the header (all its files).
+  const [summary, setSummary]             = useState<Opportunity | null>(null);
   const [search, setSearch]               = useState('');
   const [expandedId, setExpandedId]       = useState<string | null>(null);
   const [sessionId, setSessionId]         = useState<string | null>(null);
@@ -114,7 +114,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     setStep(session.status === 'completed' ? 'export' : 'review');
     setLearning('');
     setListCollapsed(session.status === 'completed');
-    setFilter('all'); setSearch(''); setExpandedId(null); setNotice('');
+    setSearch(''); setExpandedId(null); setNotice(''); setOpenGroups(new Set());
     return true;
   }, []);
 
@@ -154,7 +154,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     if (!pendingFocus.missing && sessionId !== pendingFocus.sessionId) return;
     const found = !pendingFocus.missing && questions.some((q) => q.id === pendingFocus.questionId);
     if (found) {
-      setFilter('all'); setSearch(''); setListCollapsed(false); setExpandedId(pendingFocus.questionId);
+      setSearch(''); setListCollapsed(false); setExpandedId(pendingFocus.questionId);
       setTimeout(() => document.getElementById(`question-${pendingFocus.questionId}`)?.scrollIntoView({ block: 'center' }), 100);
     } else if (sessionId) {
       setNotice(pendingFocus.missing
@@ -166,6 +166,25 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     setPendingFocus(null);
     onFocused?.();
   }, [pendingFocus, sessionId, questions, onFocused]);
+
+  /** Sprint 22 (S22-1): open a question where it is: its group unfolded, the card open, in view. */
+  const openAt = useCallback((qId: string) => {
+    setSearch(''); setListCollapsed(false); setExpandedId(qId);
+    setTimeout(() => document.getElementById(`question-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+  }, []);
+
+  // The group of the open question stays unfolded, so a card just decided stays in view (S22-1).
+  useEffect(() => {
+    const q = expandedId ? questions.find((x) => x.id === expandedId) : null;
+    const key = q?.status === 'accepted' ? 'approved' : q?.status === 'skipped' ? 'unanswered' : null;
+    if (key) setOpenGroups((g) => (g.has(key) ? g : new Set(g).add(key)));
+  }, [expandedId, questions]);
+
+  // The header's figures are the whole response's, from the database's overview: read again once
+  // no decision is being saved, so they match its card on Responses (S22-1, case 1).
+  const refreshSummary = useCallback(() => {
+    loadResponse(supabase, opportunityId).then(setSummary).catch(() => undefined);
+  }, [opportunityId]);
 
   // ── File parsing ─────────────────────────────────────────────────────────
 
@@ -275,6 +294,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   // Show the change at once; if saving fails, put the question back and say why (F-9).
   // Decisions being saved: downloads wait for them (security review, Sprint 21: rule 4).
   const [saving, setSaving] = useState(0);
+  useEffect(() => { if (saving === 0) refreshSummary(); }, [saving, questions, exportState, refreshSummary]);
   // Leaving the page while a decision is saving would cut the save off: the browser asks first.
   useEffect(() => {
     if (!saving) return;
@@ -370,7 +390,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     setStep('idle'); setQuestions([]); setFileName(''); setHeaders([]);
     setQuestionCol(''); setProgress(0); setSessionId(null);
     setLearning(''); setListCollapsed(false); setNotice(''); setExportState({ exportedAt: null, changedSinceExportAt: null });
-    setFilter('all'); setConfGroup('all'); setSearch(''); setExpandedId(null);
+    setSearch(''); setExpandedId(null); setOpenGroups(new Set());
     loadPastSessions();
   };
 
@@ -378,11 +398,6 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   // review order (which is sorted by confidence).
   const uploadOrder = new Map([...questions].sort((x, y) => x.position - y.position).map((q, i) => [q.id, i]));
   const visible = questions.filter((q) => {
-    if (filter !== 'all' && q.status !== filter) return false;
-    if (confGroup !== 'all') {
-      const grp = CONF_GROUPS.find((g) => g.key === confGroup)!;
-      if (!inGroup(q.confidence, grp)) return false;
-    }
     if (search) {
       const s = search.toLowerCase();
       return q.question.toLowerCase().includes(s) || q.finalAnswer.toLowerCase().includes(s);
@@ -454,71 +469,81 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const skippedCount  = skipped.length;
   const totalCount    = questions.length;
   const allDone       = pendingCount === 0;
-  const assignmentsWithNotes = Object.values(assignments).flat().filter((a) => a.notes && a.notes.trim().length > 0);
+  const groups = groupQuestions(visible);
+  const allGroups = groupQuestions(questions);
+  const experts = expertItems(questions, assignments);
+  const expertsAnswered = experts.filter((i) => i.assignment.status === 'answered').length;
+  const sentWhen = exportState.exportedAt ? new Date(exportState.exportedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const stages: StageSummary = {
+    questions: allDone ? `All ${totalCount} decided` : `${allGroups.needs.length} need a person · ${allGroups.ready.length} ready to approve`,
+    experts: experts.length === 0 ? 'None asked' : `${experts.length} asked${expertsAnswered ? `, ${expertsAnswered} answered` : ''}`,
+    send: exportState.changedSinceExportAt ? 'Changed since sent' : exportState.exportedAt ? `Sent on ${sentWhen}` : allDone ? 'Ready to send' : 'When every question is decided',
+  };
+  // Approved and Not answered are folded while anything is still to do; a group opens for the
+  // question open in it, and stays open (Sprint 22, S22-1).
+  const folded = (key: 'approved' | 'unanswered') => !allDone && !openGroups.has(key);
+
+  const cardFor = (q: RFIQuestion) => (
+    <div key={q.id} id={`question-${q.id}`} className="scroll-mt-4">
+      <RFIQuestionCard
+        question={q}
+        index={uploadOrder.get(q.id) ?? 0}
+        isExpanded={expandedId === q.id}
+        onToggleExpand={() => setExpandedId(expandedId === q.id ? null : q.id)}
+        onAccept={(ans) => handleAccept(q.id, ans)}
+        onSkip={() => handleSkip(q.id)}
+        onUndoSkip={() => handleUndoSkip(q.id)}
+        users={allUsers}
+        assignments={assignments[q.id] ?? []}
+        canDecide={!archived && (canAssign || (assignments[q.id] ?? []).some((a) => a.assignedTo === currentUser.id))}
+        onAssign={canAssign && !archived ? handleAssign : undefined}
+        onUnassign={canAssign && !archived ? handleUnassign : undefined}
+      />
+    </div>
+  );
+  const group = (key: 'needs' | 'ready' | 'approved' | 'unanswered', title: string, explain: string, list: RFIQuestion[], extra?: ReactNode) => {
+    const foldable = key === 'approved' || key === 'unanswered';
+    const isFolded = foldable && folded(key);
+    if (list.length === 0 && !extra) return null;
+    return (
+      <section aria-labelledby={`group-${key}`} className="space-y-2">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          {foldable && !allDone ? (
+            <h3 id={`group-${key}`} className="text-sm font-black text-ink-800">
+              <button aria-expanded={!isFolded} onClick={() => setOpenGroups((g) => { const n = new Set(g); if (n.has(key)) n.delete(key); else n.add(key); return n; })}
+                className="inline-flex items-center gap-1.5 hover:text-ink-600">
+                <ChevronDown size={14} aria-hidden="true" className={`transition-transform ${isFolded ? '-rotate-90' : ''}`} /> {title} ({list.length})
+              </button>
+            </h3>
+          ) : (
+            <h3 id={`group-${key}`} className="text-sm font-black text-ink-800">{title} ({list.length})</h3>
+          )}
+          <p className="text-xs text-ink-500">{explain}</p>
+        </div>
+        {extra}
+        {!isFolded && list.map(cardFor)}
+      </section>
+    );
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-5">
-      {assignmentsWithNotes.length > 0 && (
-        <ReadyForReviewBanner
-          items={assignmentsWithNotes}
-          questions={questions}
-          onFocus={(qId) => {
-            setExpandedId(qId); setFilter('all'); setSearch('');
-            setTimeout(() => {
-              document.getElementById(`question-${qId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
-          }}
-        />
-      )}
-
-      {/* Stats bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <BarChart3 size={16} className="text-ink-400 flex-shrink-0" />
-          <p className="text-sm font-bold text-ink-700 truncate max-w-xs">{fileName}</p>
-          {/* F-23: start another upload for this response without finishing this one. */}
-          {controls.upload ? (
-            <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
-              <Upload size={12} /> Add a file
-            </button>
-          ) : pastSessions.length > 1 && (
-            <button onClick={startNew} className="btn-ghost text-xs py-1.5 flex-shrink-0">
-              <Upload size={12} /> Other files
-            </button>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap ml-auto">
-          {[
-            { label: `${totalCount}`, sub: 'total',    cls: 'bg-white border-ink-200 text-ink-700' },
-            { label: `${acceptedCount}`, sub: 'approved', cls: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-            { label: `${pendingCount}`, sub: 'to do',  cls: pendingCount > 0 ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-ink-100 text-ink-400' },
-            ...(skippedCount > 0 ? [{ label: `${skippedCount}`, sub: 'not answered', cls: 'bg-white border-ink-200 text-ink-500' }] : []),
-          ].map((s) => (
-            <span key={s.sub} className={`inline-flex items-baseline gap-1 px-3 py-1.5 rounded-xl border text-xs font-bold ${s.cls}`}>
-              {s.label} <span className="font-medium opacity-70">{s.sub}</span>
-            </span>
-          ))}
-        </div>
-      </div>
+      <ResponseHeader
+        name={opportunityName}
+        response={summary}
+        ownerName={ownerName}
+        files={pastSessions}
+        openFileId={sessionId}
+        openFileName={fileName}
+        onOpenFile={(f) => { openSession(f); }}
+        onAddFile={controls.upload ? startNew : undefined}
+        stages={stages}
+      />
 
       {archived && (
         <div role="status" className="flex items-center gap-2 text-sm text-ink-600 bg-ink-50 border border-ink-200 rounded-xl px-4 py-3 font-medium">
           <AlertTriangle size={14} className="flex-shrink-0" /> This response is archived. It is kept as a record and can no longer be changed.
         </div>
-      )}
-
-      {!archived && !controls.bulk && controls.bulkNote && (
-        <p className="text-xs text-ink-500 font-medium px-1">{controls.bulkNote}</p>
-      )}
-      {!archived && controls.bulk && (
-        <BulkBar
-          canApprove={canAssign}
-          eligible={questions.filter(bulkEligible).length}
-          held={pending.filter((q) => !bulkEligible(q)).length}
-          showFinish={step === 'review' && canAssign && !allDone}
-          finishBlockedBy={exportReason(allDone ? 0 : pendingCount)}
-          onBulk={runBulkAccept}
-        />
       )}
 
       {exportNotice(exportState, step) && (
@@ -536,11 +561,13 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
           <AlertTriangle size={14} className="flex-shrink-0" />
           <span className="flex-1">
             {unprocessed.length} question{unprocessed.length !== 1 ? 's' : ''} to do {unprocessed.length !== 1 ? 'have' : 'has'} not been checked and drafted by the server
-            (a batch failed, or the session was created by an earlier version of the app), so {unprocessed.length !== 1 ? 'they are' : 'it is'} not available for bulk approval.
+            (a batch failed, or the file was added by an earlier version of the app), so {unprocessed.length !== 1 ? 'they are' : 'it is'} not available for bulk approval.
           </span>
-          <button onClick={() => sessionId && processAndReload(sessionId, unprocessed.map((q) => q.id))} className="btn-ghost text-xs py-1.5">
-            <RefreshCw size={12} /> Process now
-          </button>
+          {canAssign && !archived && (
+            <button onClick={() => sessionId && processAndReload(sessionId, unprocessed.map((q) => q.id))} className="btn-ghost text-xs py-1.5">
+              <RefreshCw size={12} /> Process now
+            </button>
+          )}
         </div>
       )}
 
@@ -550,79 +577,33 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         </div>
       )}
 
-      {/* Filter + search */}
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex bg-white border border-ink-200 rounded-xl p-1 gap-0.5 shadow-card">
-            {(['all', 'pending', 'accepted', 'skipped'] as FilterTab[]).map((t) => {
-              const cnt: Record<FilterTab, number> = { all: totalCount, pending: pendingCount, accepted: acceptedCount, skipped: skippedCount };
-              return (
-                <button key={t} onClick={() => setFilter(t)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                    filter === t ? 'bg-ink-900 text-white' : 'text-ink-500 hover:text-ink-800 hover:bg-ink-50'
-                  }`}>
-                  {FILTER_LABEL[t]} <span className="opacity-60">({cnt[t]})</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="relative flex-1 min-w-[180px]">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" />
-            <input type="text" placeholder="Search questions…" value={search}
+      {/* ── Questions ─────────────────────────────────────────────────────────── */}
+      <section id="stage-questions" aria-labelledby="stage-questions-heading" className="space-y-4 scroll-mt-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h2 id="stage-questions-heading" className="text-lg font-black text-ink-900">Questions</h2>
+          <p className="text-xs text-ink-500 flex-1 min-w-[12rem]">
+            {totalCount} in {fileName ? 'this file' : 'this response'}: {pendingCount} to do, {acceptedCount} approved{skippedCount ? `, ${skippedCount} not answered` : ''}.
+          </p>
+          <div className="relative w-full sm:w-64">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" aria-hidden="true" />
+            <input type="text" aria-label="Search questions" placeholder="Search questions…" value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input pl-9 py-2 text-xs" />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700 transition-colors">
+              <button aria-label="Clear the search" onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700 transition-colors">
                 <X size={12} />
               </button>
             )}
           </div>
-
-          <span className="text-xs text-ink-400 font-bold flex-shrink-0">{visible.length}/{totalCount}</span>
         </div>
+        {!archived && !controls.bulk && controls.bulkNote && (
+          <p className="text-xs text-ink-500 font-medium">{controls.bulkNote}</p>
+        )}
 
-        {/* Confidence filter */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="section-label mr-1">Confidence:</span>
-          <button onClick={() => setConfGroup('all')}
-            className={`text-xs px-3 py-1.5 rounded-xl border font-bold transition-all ${
-              confGroup === 'all' ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-500 border-ink-200 hover:border-ink-400'
-            }`}>
-            All <span className="opacity-60">({totalCount})</span>
-          </button>
-          {CONF_GROUPS.map((g) => {
-            const cnt = questions.filter((q) => inGroup(q.confidence, g)).length;
-            if (g.key === 'uncalibrated' && cnt === 0) return null;
-            return (
-              <button key={g.key} onClick={() => setConfGroup(confGroup === g.key ? 'all' : g.key)}
-                className={`text-xs px-3 py-1.5 rounded-xl border font-bold transition-all flex items-center gap-1.5 ${
-                  confGroup === g.key ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-500 border-ink-200 hover:border-ink-400'
-                }`}>
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${confGroup === g.key ? 'bg-white' : g.dot}`} />
-                {g.label} <span className="opacity-60">({cnt})</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Low confidence alert */}
-      {questions.filter((q) => q.confidence !== null && q.confidence < 0.4 && q.status === 'pending').length > 0 && (
-        <div className="flex items-start gap-3 p-4 bg-coral-50 border border-coral-200 rounded-2xl">
-          <AlertTriangle size={16} className="flex-shrink-0 mt-0.5 text-coral-500" />
-          <p className="text-sm text-coral-700 font-medium">
-            <strong>{questions.filter((q) => q.confidence !== null && q.confidence < 0.4 && q.status === 'pending').length}</strong> questions have very low confidence (below 40%): the knowledge base probably does not answer them.
-          </p>
-        </div>
-      )}
-
-      {/* Question list */}
-      <div>
         {step === 'export' && (
           <button
             onClick={() => setListCollapsed((c) => !c)}
-            className="flex items-center gap-2 w-full px-4 py-3 bg-white border border-ink-100 rounded-2xl text-xs font-bold text-ink-600 hover:bg-ink-50 transition-colors mb-3 shadow-card"
+            className="flex items-center gap-2 w-full px-4 py-3 bg-white border border-ink-100 rounded-2xl text-xs font-bold text-ink-600 hover:bg-ink-50 transition-colors shadow-card"
           >
             <ChevronDown size={14} className={`transition-transform ${listCollapsed ? '' : 'rotate-180'}`} />
             {listCollapsed ? `Show ${visible.length} questions` : 'Collapse question list'}
@@ -630,48 +611,56 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         )}
 
         {!listCollapsed && (
-          <div className="space-y-2">
-            {visible.length === 0 ? (
-              <div className="text-center py-14 text-ink-400 text-sm font-medium">No questions match your filter.</div>
-            ) : visible.map((q) => (
-              <div key={q.id} id={`question-${q.id}`}>
-                <RFIQuestionCard
-                  question={q}
-                  index={uploadOrder.get(q.id) ?? 0}
-                  isExpanded={expandedId === q.id}
-                  onToggleExpand={() => setExpandedId(expandedId === q.id ? null : q.id)}
-                  onAccept={(ans) => handleAccept(q.id, ans)}
-                  onSkip={() => handleSkip(q.id)}
-                  onUndoSkip={() => handleUndoSkip(q.id)}
-                  users={allUsers}
-                  assignments={assignments[q.id] ?? []}
-                  canDecide={!archived && (canAssign || (assignments[q.id] ?? []).some((a) => a.assignedTo === currentUser.id))}
-                  onAssign={canAssign && !archived ? handleAssign : undefined}
-                  onUnassign={canAssign && !archived ? handleUnassign : undefined}
+          <div className="space-y-6">
+            {search && visible.length === 0 && <p className="text-center py-10 text-ink-400 text-sm font-medium">No question matches your search.</p>}
+            {group('needs', 'Needs a person', 'Held from bulk approval. Each says why; open it to answer, approve or assign it.', groups.needs)}
+            {group('ready', 'Ready to approve', 'Nothing holds these from bulk approval, the most confident first. Bulk approval checks each again when you use it.', groups.ready,
+              !archived && controls.bulk && allGroups.ready.length > 0 ? (
+                <BulkBar
+                  canApprove={canAssign}
+                  eligible={allGroups.ready.length}
+                  held={allGroups.needs.length}
+                  showFinish={false}
+                  finishBlockedBy={null}
+                  onBulk={runBulkAccept}
                 />
-              </div>
-            ))}
+              ) : undefined)}
+            {group('approved', 'Approved', 'Decided: each with who approved it and when.', groups.approved)}
+            {group('unanswered', 'Not answered', 'Left unanswered by the owner; nothing is sent for these.', groups.unanswered)}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Sprint 21 (S21-1, U-6): download once every question is decided; marking as sent is separate. */}
-      {(step === 'review' || step === 'export') && canAssign && totalCount > 0 && allDone && (
-        <ExportPanel
-          questions={questions}
-          fileName={fileName}
-          acceptedCount={acceptedCount}
-          skippedCount={skippedCount}
-          learning={learning}
-          names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
-          sentAt={exportState.exportedAt}
-          changed={exportState.changedSinceExportAt !== null}
-          saving={saving > 0}
-          preview={sendPreview(questions, questions.flatMap((q) => assignments[q.id] ?? []), answerSource)}
-          onMarkSent={archived ? undefined : finishSession}
-          onStartNew={archived || step !== 'export' ? undefined : startNew}
-        />
-      )}
+      {/* ── With experts ──────────────────────────────────────────────────────── */}
+      <WithExperts questions={questions} assignments={assignments} users={allUsers} onOpen={openAt} />
+
+      {/* ── Send ───────────────────────────────────────────────────────────────── */}
+      <section id="stage-send" aria-labelledby="stage-send-heading" className="space-y-3 scroll-mt-4">
+        <h2 id="stage-send-heading" className="text-lg font-black text-ink-900">Send</h2>
+        {/* Sprint 21 (S21-1, U-6): download once every question is decided; marking as sent is separate. */}
+        {canAssign && totalCount > 0 && allDone ? (
+          <ExportPanel
+            questions={questions}
+            fileName={fileName}
+            acceptedCount={acceptedCount}
+            skippedCount={skippedCount}
+            learning={learning}
+            names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
+            sentAt={exportState.exportedAt}
+            changed={exportState.changedSinceExportAt !== null}
+            saving={saving > 0}
+            preview={sendPreview(questions, questions.flatMap((q) => assignments[q.id] ?? []), answerSource)}
+            onMarkSent={archived ? undefined : finishSession}
+            onStartNew={archived || step !== 'export' ? undefined : startNew}
+          />
+        ) : (
+          <p className="text-sm text-ink-500">
+            {!canAssign
+              ? `Only the response owner${ownerName ? `, ${ownerName},` : ''} or an admin downloads the answers and marks the response as sent.`
+              : exportReason(pendingCount) ?? 'Nothing to download yet: this file has no questions.'}
+          </p>
+        )}
+      </section>
     </div>
   );
 }
