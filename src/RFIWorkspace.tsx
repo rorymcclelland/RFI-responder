@@ -235,13 +235,15 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       setProgress(Math.round((done / total) * 100));
     });
     if (failed.length) setUploadError(`${failed.length} question${failed.length !== 1 ? 's' : ''} could not be processed${reasons.length ? ` (${reasons.join('; ')})` : ''}.`);
+    // The header lists the response's files: read them again, so a file just added stays listed (Sprint 22, S22-1 7).
+    loadPastSessions();
     try {
       setQuestions(await loadQuestions(supabase, sid));
     } catch (err) {
       setUploadError((err as Error).message);
     }
     setStep('review');
-  }, []);
+  }, [loadPastSessions]);
 
   const runProcessing = useCallback(async () => {
     if (!questionCol) return;

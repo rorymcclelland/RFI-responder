@@ -208,14 +208,14 @@ test('A question that needs a person says why, first; Ready to approve holds the
   checks('S22-1 3');
   const page = await signIn(browser, admin);
   await openResponse(page, BLUEFIN);
-  const needs = page.locator('section', { has: groupHeading(page, 'Needs a person') });
+  const needs = page.locator('section[aria-labelledby="group-needs"]');
   await caption(page, 'Needs a person: one reason on each, first');
   const cards = needs.locator('[id^="question-"]');
   expect(await cards.count()).toBeGreaterThan(0);
   for (const c of await cards.all()) await expect(c.locator('[data-reason]')).toHaveCount(1);
   await expect(card(page, PRICING).locator('[data-reason]')).toHaveText('Pricing: a person answers');
   // Ready to approve has cards (two in the demo data since Sprint 22), and none carries a reason.
-  const ready = page.locator('section', { has: groupHeading(page, 'Ready to approve') });
+  const ready = page.locator('section[aria-labelledby="group-ready"]');
   await caption(page, 'Ready to approve: nothing holds these, so they carry no reason');
   expect(await ready.locator('[id^="question-"]').count()).toBeGreaterThan(0);
   await expect(ready.locator('[data-reason]')).toHaveCount(0);
@@ -269,7 +269,7 @@ test('An archived response shows the same page, read-only', async ({ browser }) 
   checks('S22-1 10');
   const page = await signIn(browser, admin);
   await nav(page, 'Responses');
-  await page.getByRole('button', { name: /^Archived \(\d+\)$/ }).click();
+  await page.getByRole('tab', { name: /^Archived \(\d+\)$/ }).click();
   await page.getByText(HARBOUR, { exact: true }).first().click();
   await page.getByRole('heading', { name: 'Questions', level: 2 }).waitFor();
   await caption(page, 'An archived response: the same header and groups, with nothing to change');
