@@ -1006,6 +1006,16 @@ Refinement: `docs/refinement/sprint-23.md`. Q1 to Q6 answered by Rory the same d
 
 **Proposed next.** Sprint 24: U-11, F-71 and F-72.
 
+## Sprint 24: one response, one list, sent as a whole (refined 4 November 2026)
+
+Refinement: `docs/refinement/sprint-24.md`. Q1 to Q5 answered by Rory the same day, each as recommended.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S24-1 | One list across a response's files, bulk approval and **Mark as sent** for the whole response; downloads stay one per file; no file added once sent | U-11 | Ready, Sprint 24 |
+| S24-2 | What was learned, kept with a sent response | F-71 | Ready, Sprint 24 |
+| S24-3 | The main path test seen failing on a broken step (CI only) | F-72 | Ready, Sprint 24 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
