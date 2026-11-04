@@ -933,6 +933,7 @@ Refinement: `docs/refinement/sprint-22.md`. Q1 to Q4 answered by Rory the same d
 | S22-1 | The response as a journey, first slice: a header, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each | U-5, U-10 | Ready, Sprint 22 |
 | S22-2 | Plain settings with **Advanced**, spend by use, and the audit log by person and response | U-9 | Ready, Sprint 22 |
 | S22-3 | The staging run's real-AI step reads the ask's usage | F-69 | Ready, Sprint 22 |
+| F-70 | Done, Sprint 22. Staging's builds stopped: Vercel's free plan limits deployments a day, and every push made up to four (the unused sprint-branch preview, staging, and both results branches, which failed to build because their commits had no `vercel.json`). The results commits now carry one turning deployments off, and `vercel.json` turns them off for `sprint-*`, so a push makes one, staging's | Found on 3 November 2026 by the staging runs of c2ae75c and 9e9ff12 (Vercel: "Deployment rate limited"). The account's other project shares the limit |
 
 ## Candidate stories (not yet placed in a sprint)
 
