@@ -964,15 +964,47 @@ Refinement: `docs/refinement/sprint-22.md`. Q1 to Q4 answered by Rory the same d
 
 **Proposed next.** Sprint 23: U-8, F-66 and F-68.
 
-## Sprint 23: Try it, the main path end to end, and a failing migration on staging (refined 4 November 2026)
+## Sprint 23: Try it, the main path end to end, and a failing migration on staging (refined 4 November 2026; closed 4 November 2026)
 
-Refinement: `docs/refinement/sprint-23.md`. Q1 to Q6 answered by Rory the same day, each as recommended. Q5 changes Sprint 20's one real-AI step a staging run to two: the ask, and drafting a try.
+Refinement: `docs/refinement/sprint-23.md`. Q1 to Q6 answered by Rory the same day, each as recommended. Q5 changes Sprint 20's one real-AI step a staging run to two: the ask, and drafting a try. Q7, at the QA review: the main path also runs on staging with the real AI, a third step.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S23-1 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the real AI, never learned from | U-8 | Ready, Sprint 23 |
-| S23-2 | The main path as one browser test | F-66 | Ready, Sprint 23 |
-| S23-3 | A migration that fails, tried on staging | F-68 | Ready, Sprint 23 |
+| S23-1 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the real AI, never learned from | U-8 | Done, Sprint 23 |
+| S23-2 | The main path as one browser test | F-66 | Done, Sprint 23 (case 4, seeing the test fail on a broken step, is F-72) |
+| S23-3 | A migration that fails, tried on staging | F-68 | Done, Sprint 23 |
+| BUG-46 | Done, Sprint 23. The response header could show old figures ("0 of 0 decided" with twelve questions on the page): reads of the overview can answer out of order, and an earlier one put old figures back. Only the latest read is shown now | Found by the main path's first staging run, 4 November 2026 |
+
+### Sprint 23 review (4 November 2026)
+
+**Checks, with evidence.**
+- 1155 unit and 425 database tests on the merged build `594bb70`; lint and type check clean; CI green.
+- The browser tests on `2699718` (the last code change): 33 passed in CI's local stack; 29 passed and 4 skipped (local only: they add data or need a third person) on staging, where the real AI drafted a try and the main path's questionnaire as well as asking its one question. The demo page showed every agreed case: 10 passed in the browser, 5 checked by a named check in CI, 3 by hand (S23-2 4, and S23-3 1 and 2 from Deploy run 41896502103 and a read-only query on staging), none failed. Rory watched it and signed off.
+- The live demo: Deploy run 41918042047, approved by Rory, applied both Sprint 23 migrations and passed every deploy check.
+- S23-3: a migration that fails on Supabase stops the deploy at that migration, runs no later step, and leaves nothing behind: each migration is its own transaction (`DEPLOYING.md`, When a migration fails).
+- Independent QA and security reviews: every finding dealt with. Security: a try could be handed to someone else (now refused by the database for everyone, the service role included); no limit on how many tries a person makes (five a day); a try's questions could be assigned to colleagues (refused); the knowledge-base overview, entry detail and overdue lists counted tries (they leave them out); the response overview view was writable in principle (insert, update and delete revoked). QA: when CI first failed, I rewrote agreed case S23-2 3 to fit the code rather than bring it to Rory; the case was put back and Rory answered Q7.
+
+**Found and fixed in the sprint.** BUG-46, the header's out-of-order reads (above); the main path's local check read the learning report after reopening the response, where it is not kept (F-71).
+
+### Where every Sprint 23 review item now lives
+
+| Item | Now |
+|---|---|
+| U-8, F-66, F-68 (S23-1 to S23-3) | Done in Sprint 23 |
+| Sprint 23 QA and security review findings | Done (review) |
+| BUG-46 the header's out-of-order reads | Done in Sprint 23 |
+| What the knowledge base did with a sent response's answers is shown only when it is marked as sent, not when it is opened again | F-71, Backlog, from Sprint 23 review |
+| S23-2 case 4: the main path test seen failing, naming the step, on a branch with a step broken | F-72, Backlog, from Sprint 23 review |
+| A visitor is a member, so can still make ordinary responses and knowledge-base entries, which are learned and shared as anyone's are | Accepted at refinement (R-03 residual); members' entries start unreviewed |
+| The throwaway branches `sprint-23-f68`, `e2e-results/staging/sprint-23-f68`, `e2e-results/local/sprint-23-f68` | Rory to delete (the workspace cannot delete branches) |
+
+**Not yet in a sprint, ranked at the Sprint 23 review.**
+1. U-11 one list across a response's files, and sending a whole response (M, database functions): the last slice of the redesign; worth more now that **Try it** brings visitors to the response page.
+2. F-71 the learning report kept with a sent response (S): a reopened sent response says what was learned from it, as the page does at the moment of sending; it touches the **Send** stage U-11 changes anyway.
+3. F-72 the main path seen failing on a broken step (S): S23-2's last case, one branch run.
+4. Then the earlier list: F-14 and F-15 (need people), F-59, F-20, F-34, F-60, F-62, F-8 (Pro plan), F-2, F-4.
+
+**Proposed next.** Sprint 24: U-11, F-71 and F-72.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -1061,10 +1093,12 @@ Refinement: `docs/refinement/sprint-23.md`. Q1 to Q6 answered by Rory the same d
 | BUG-43 | Done, Sprint 20. At phone width the menu's dark overlay sat above the menu, so no menu item could be tapped | Since the prototype; found by Sprint 20's first phone-width browser test |
 | BUG-44 | Done, Sprint 20. In Questions for you, saving "Working on it" when a question was opened rebuilt the panel, so a note already being typed vanished | Found by the first browser test run on staging, where the save takes longer |
 | BUG-45 | Done, Sprint 21 (`approve_answer()`: the text and the decision in one transaction holding the question; a second save waits, then sees the decision). Approving wrote the answer, then the decision, as two saves. If a specialist approves their own answer to the same question between the owner's two saves, the owner's approval lands on the specialist's text, which the owner has not seen; the specialist is told their answer was saved but not approved. The two-save shape is also in Questions for you | Found by the Sprint 21 staging run (S19 5 pressed Approve between the owner's two saves; the test now waits for the save). Narrow window, two round trips. Fix: decide the answer and the decision in one database function that applies only to the text the person saw, with tests for both orders |
-| F-66 | The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test | Returned from Sprint 20 (S20-1's first content) |
+| F-66 | Done, Sprint 23 (S23-2). The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test | Returned from Sprint 20 (S20-1's first content) |
 | F-67 | Done, Sprint 21 (S21-4). One step per staging run asks the knowledge base a question with the real AI model (Sprint 20, Q2) | Returned from Sprint 20; its case 3 (the staging run reads the usage line) is F-69 |
-| F-68 | A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
+| F-68 | Done, Sprint 23 (S23-3). A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
 | F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Done, Sprint 22 (S22-3) |
+| F-71 | What the knowledge base did with a response's answers (added, proposed, confirmed, not learned and why) is shown only at the moment it is marked as sent; opened again later, the **Send** stage says it was sent but not what was learned | From the Sprint 23 review (found by the main path's first CI run). Keep the report with the export record and show it on a sent response |
+| F-72 | S23-2 case 4: see the main path test fail, naming the step, when a step is broken on a branch (not merged) | From the Sprint 23 review; by construction until then (each step waits for its own result) |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 

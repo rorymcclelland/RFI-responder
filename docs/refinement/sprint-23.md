@@ -100,3 +100,13 @@ Order: S23-3 first (small, stands alone, and staging must be ordinary again befo
 - **Q7 (4 November 2026, at the QA review):** the main path also runs on staging with the real AI. Locally there is no checker, so nothing is ready to approve in bulk and no answer can be learned (each is held as not fully checked); two of S23-2's agreed steps could only be shown on staging. A third real-AI step a staging run, about twelve questions. (When CI first failed on this, the case was rewritten to fit the code rather than brought to Rory; the QA review caught it, and the agreed case was put back.)
 
 All three stories are Ready, Sprint 23.
+
+## Close (4 November 2026)
+
+All three stories are done. Rory signed off from the demo page and approved the production deploy, which applied both migrations and passed every deploy check. The evidence is in the Sprint 23 review in `docs/BACKLOG.md` and on the demo page (`docs/testing/sprint-23-demo.md`).
+
+**What changed from the refinement while building.**
+- **S23-1** gained limits from the security review: a try can never be given to someone else, a person makes at most five tries a day, a try's questions cannot be assigned to colleagues, and the knowledge-base overview, entry detail and overdue lists leave tries out. The try's banner says that anyone signed in could open it from a link (Q2).
+- **S23-2** runs on staging with the real AI (Q7), where bulk approval and learning can be shown; locally it checks the Excel file and that nothing was learned, and says why. Case 4 is by construction until seen failing on a branch (F-72).
+- **S23-3** is recorded in `DEPLOYING.md`, When a migration fails.
+- The main path's first staging run found BUG-46 (the header's out-of-order reads), fixed in the sprint; its first CI run found that the learning report is not kept once a response is closed (F-71).

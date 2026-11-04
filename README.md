@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-three sprints (Sprints 0 to 22). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-four sprints (Sprints 0 to 23). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -82,6 +82,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 20 | Claude as the QA team: the agreed cases as browser tests in CI and on a hosted staging copy, deploys that check themselves (the live demo after the owner's approval), and a demo page with recordings for sign-off |
 | 21 | Sending made plain and gaps: download separate from **Mark as sent**, which says beforehand what it will do; Knowledge shows what it could not answer in recent responses and where each stands; approving an answer in one step; the hosted sign-in settings checked on every deploy, a script that stores the keys without copying, and one real-AI question on every staging run |
 | 22 | The response as a journey: a header like its card, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each; plain settings with **Advanced**, spend by use, and the audit log by person and response; the staging real-AI step checks its usage is recorded |
+| 23 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the AI and never learned from; the main path as one browser test, on staging with the real AI; a failing migration tried on staging |
 
 Each sprint followed the same cycle:
 
