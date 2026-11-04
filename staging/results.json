@@ -1,0 +1,2142 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/22.23.4/x64/bin/node",
+      "/home/runner/work/RFI-responder/RFI-responder/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/home/runner/work/RFI-responder/RFI-responder/playwright.config.ts",
+    "rootDir": "/home/runner/work/RFI-responder/RFI-responder/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/home/runner/work/RFI-responder/RFI-responder/e2e/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/rorymcclelland/RFI-responder/commit/726d754bc12cf668aa1ad9f627f787d2cc13e434",
+        "commitHash": "726d754bc12cf668aa1ad9f627f787d2cc13e434",
+        "buildHref": "https://github.com/rorymcclelland/RFI-responder/actions/runs/41790182034"
+      },
+      "gitCommit": {
+        "shortHash": "726d754",
+        "hash": "726d754bc12cf668aa1ad9f627f787d2cc13e434",
+        "subject": "Backlog: F-70, the Vercel deployment limit",
+        "body": "Backlog: F-70, the Vercel deployment limit\n\nRecorded from the Sprint 22 staging runs, which Vercel's daily limit stopped; fixed in e59e988.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01WPpy6XYfi9BKBXrsw4t5HH\n",
+        "author": {
+          "name": "Rory McClelland",
+          "email": "email@mcclelland.info",
+          "time": 1793775728000
+        },
+        "committer": {
+          "name": "Rory McClelland",
+          "email": "email@mcclelland.info",
+          "time": 1793775728000
+        },
+        "branch": "sprint-22"
+      },
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/rorymcclelland/RFI-responder/commit/726d754bc12cf668aa1ad9f627f787d2cc13e434",
+            "commitHash": "726d754bc12cf668aa1ad9f627f787d2cc13e434",
+            "buildHref": "https://github.com/rorymcclelland/RFI-responder/actions/runs/41790182034"
+          },
+          "gitCommit": {
+            "shortHash": "726d754",
+            "hash": "726d754bc12cf668aa1ad9f627f787d2cc13e434",
+            "subject": "Backlog: F-70, the Vercel deployment limit",
+            "body": "Backlog: F-70, the Vercel deployment limit\n\nRecorded from the Sprint 22 staging runs, which Vercel's daily limit stopped; fixed in e59e988.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01WPpy6XYfi9BKBXrsw4t5HH\n",
+            "author": {
+              "name": "Rory McClelland",
+              "email": "email@mcclelland.info",
+              "time": 1793775728000
+            },
+            "committer": {
+              "name": "Rory McClelland",
+              "email": "email@mcclelland.info",
+              "time": 1793775728000
+            },
+            "branch": "sprint-22"
+          },
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/runner/work/RFI-responder/RFI-responder/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "e2e-results/report",
+          "open": "never"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "sprint-19.spec.ts",
+      "file": "sprint-19.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Home, as an admin",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3244,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 17
+                    },
+                    {
+                      "title": "Everyone lands on Home: what needs you, your responses, what we know",
+                      "duration": 4
+                    },
+                    {
+                      "title": "For admins: the answers waiting for review, as one line",
+                      "duration": 3
+                    },
+                    {
+                      "title": "It opens Knowledge, All answers, with those answers filtered",
+                      "duration": 5
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:11:06.416Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Home-as-an-admin/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Home-as-an-admin/attachments/recording-Ellis-Admin-test--2494a02b0362fa1b758563819dd225cab9aa1c2b.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-ba4b4bbb00ef1520530e",
+          "file": "sprint-19.spec.ts",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "A question for the member, sent to the owner, and the owner uses their answer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 2"
+                },
+                {
+                  "type": "case",
+                  "description": "S19 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15830,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 9
+                    },
+                    {
+                      "title": "Ellis Admin (test) assigns \"Do you give staff paid volunteering days each year?\" to Morgan Member (test)",
+                      "duration": 4
+                    },
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 21
+                    },
+                    {
+                      "title": "Morgan Member (test) lands on Home: the question is waiting for them",
+                      "duration": 4
+                    },
+                    {
+                      "title": "Assignments opens on that question, with everything needed to answer it",
+                      "duration": 7
+                    },
+                    {
+                      "title": "Notes for the owner",
+                      "duration": 3
+                    },
+                    {
+                      "title": "The answer, sent to the owner to decide",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Ellis Admin (test) sees it on Home, under Answered by colleagues",
+                      "duration": 3
+                    },
+                    {
+                      "title": "It opens the response at that question, still to do, with their answer and Use their answer",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:11:11.087Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 2"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S19 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/test-finished-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/attachments/recording-Ellis-Admin-test--5dbd13bf1ede22fd9fb1eeb49107d6bae3753f31.webm"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/attachments/recording-Morgan-Member-test--667dd53390fc4473f799041c90d792bdc4d7704f.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-157be60f201fac8629fa",
+          "file": "sprint-19.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "Hand back, with a note",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11167,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 5
+                    },
+                    {
+                      "title": "Ellis Admin (test) assigns \"What compliance certifications does your organization hold?\" to Morgan Member (test)",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 33
+                    },
+                    {
+                      "title": "The question has a draft, its confidence and checker, and the answers it was drawn from",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Morgan Member (test) is not the right person: Hand back, with a reason of at least 5 characters",
+                      "duration": 4
+                    },
+                    {
+                      "title": "Ellis Admin (test) sees it handed back, on Home and on the question",
+                      "duration": 3
+                    },
+                    {
+                      "title": "The answers it was drawn from open on their own page under Knowledge",
+                      "duration": 7
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:11:26.929Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/attachments/recording-Ellis-Admin-test--0e13e40a960de55a2c13fcc1127e7341b86354cb.webm"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/attachments/recording-Morgan-Member-test--b9aa20b137d704b0c73b84a1f4515bf92d8ce1de.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-f957f3d549e0d71c0741",
+          "file": "sprint-19.spec.ts",
+          "line": 136,
+          "column": 1
+        },
+        {
+          "title": "Approve, and when the owner was quicker",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21598,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 8
+                    },
+                    {
+                      "title": "Ellis Admin (test) assigns \"What endpoint protection solutions are deployed?\" to Morgan Member (test)",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 16
+                    },
+                    {
+                      "title": "Meanwhile Ellis Admin (test) approves the same question",
+                      "duration": 5
+                    },
+                    {
+                      "title": "Morgan Member (test), on the screen opened before, presses Approve: nothing is overwritten",
+                      "duration": 6
+                    },
+                    {
+                      "title": "A question nobody else is deciding: Morgan Member (test) writes the answer and approves it",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Ellis Admin (test) assigns \"フィッシング攻撃をどのように検知し、対応していますか？\" to Morgan Member (test)",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:11:38.111Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/attachments/recording-Ellis-Admin-test--9fd175867e894f49a117b8a45a2a203fde42f6ee.webm"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/attachments/recording-Morgan-Member-test--005c24c967b067cc4bfdf1c3c03bedf85047c44b.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-7bb42455a188d237da03",
+          "file": "sprint-19.spec.ts",
+          "line": 177,
+          "column": 1
+        },
+        {
+          "title": "On a phone, and the Sent list",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 6"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8636,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 5
+                    },
+                    {
+                      "title": "Ellis Admin (test) assigns \"What is the annual subscription price for 250 users?\" to Morgan Member (test)",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 27
+                    },
+                    {
+                      "title": "At phone width Home stacks and nothing scrolls sideways",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Assignments stacks too: the list, then the question",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Sent lists the questions you assigned, with their stages, and no buttons to move them on by hand",
+                      "duration": 2
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:11:59.723Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 6"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/test-finished-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/attachments/recording-Ellis-Admin-test--627245d3457ccd622b2c68ca4a1bf7c3e54229ee.webm"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test), phone",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/attachments/recording-Morgan-Member-test-phone-804b538b4d15aaca9c7e0801e62e16b6a4b1b94b.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-f3e9db14cad287bdaad6",
+          "file": "sprint-19.spec.ts",
+          "line": 226,
+          "column": 1
+        },
+        {
+          "title": "A member who was not assigned cannot see or decide the question",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Needs a third person: the seed has one, staging has two test people",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-19.spec.ts",
+                    "line": 262,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 2,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T07:12:08.375Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Needs a third person: the seed has one, staging has two test people",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-19.spec.ts",
+                        "line": 262,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-4b694c536e1e4164af7b",
+          "file": "sprint-19.spec.ts",
+          "line": 261,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-21.spec.ts",
+      "file": "sprint-21.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Ask it a question: the real pipeline on staging, the fallback locally",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-4 1"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-3 1"
+                },
+                {
+                  "type": "real-ai",
+                  "description": "Asks one question with the real models"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9457,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 5
+                    },
+                    {
+                      "title": "Before asking: the calls recorded as Asking the knowledge base this month",
+                      "duration": 3
+                    },
+                    {
+                      "title": "One question to the real models: matching, the checker and drafting",
+                      "duration": 6
+                    },
+                    {
+                      "title": "After asking: the ask is recorded under Spend by use",
+                      "duration": 2
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:08.397Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-4 1"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-3 1"
+                    },
+                    {
+                      "type": "real-ai",
+                      "description": "Asks one question with the real models"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Ask-it-a-questio-db637-taging-the-fallback-locally/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Ask-it-a-questio-db637-taging-the-fallback-locally/attachments/recording-Ellis-Admin-test--29320383f16eeb21c19ee2403fea7b5fb0363162.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-3ac9142945255c4cdd1a",
+          "file": "sprint-21.spec.ts",
+          "line": 30,
+          "column": 1
+        },
+        {
+          "title": "Nothing to download or mark as sent while questions are still to do",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-1 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4313,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "Bluefin still has questions to do: no download, no Mark as sent, and the reason",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:17.865Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-1 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Nothing-to-downl-49abe-e-questions-are-still-to-do/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Nothing-to-downl-49abe-e-questions-are-still-to-do/attachments/recording-Ellis-Admin-test--da77b68e0342876d4a57b64f2a669fff51ae2cc1.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-ceea179d9b7a85e1b4bf",
+          "file": "sprint-21.spec.ts",
+          "line": 85,
+          "column": 1
+        },
+        {
+          "title": "A member who does not own the response sees neither Download nor Mark as sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-1 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7455,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 11
+                    },
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "Morgan Member (test) opens Larkspur, which they do not own",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:22.190Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-1 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/attachments/recording-Ellis-Admin-test--0e34f0350e6857cb2c990c5d8854e16eb8a98417.webm"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/attachments/recording-Morgan-Member-test--6f85aeab2195f07b41db1b041019f8fc5ba397c8.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-b79f6c148ae344826da3",
+          "file": "sprint-21.spec.ts",
+          "line": 96,
+          "column": 1
+        },
+        {
+          "title": "Changed since sent, download, the confirmation, and marking as sent again",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-1 5"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-1 2"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-1 3"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-1 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14247,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "Larkspur was sent: the stage reads Sent, with the date",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Ellis Admin (test) assigns a question to Morgan Member (test), then edits two answers",
+                      "duration": 3
+                    },
+                    {
+                      "title": "The pricing question, left unanswered before, now gets an answer written by a person",
+                      "duration": 2
+                    },
+                    {
+                      "title": "A change after sending: the stage reads Changed since sent",
+                      "duration": 2
+                    },
+                    {
+                      "title": "Downloading does not mark it as sent",
+                      "duration": 2
+                    },
+                    {
+                      "title": "Mark as sent says first what it will do; Cancel changes nothing",
+                      "duration": 7
+                    },
+                    {
+                      "title": "Confirmed: Sent again, the assignment closed, and what the knowledge base learned",
+                      "duration": 2
+                    },
+                    {
+                      "title": "The audit log records who marked it as sent, and when",
+                      "duration": 2
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:29.657Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-1 5"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-1 2"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-1 3"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-1 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Changed-since-se-0bd30-n-and-marking-as-sent-again/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Changed-since-se-0bd30-n-and-marking-as-sent-again/attachments/recording-Ellis-Admin-test--fd3277a7b780368d471b583ab0b11ea33c58b4a8.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-6ff537a565d7c3b91d82",
+          "file": "sprint-21.spec.ts",
+          "line": 115,
+          "column": 1
+        },
+        {
+          "title": "Gaps: what the knowledge base could not answer, where each stands, and one step to act",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-2 4"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-2 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7543,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 7
+                    },
+                    {
+                      "title": "First, one question the knowledge base could not answer is left unanswered",
+                      "duration": 3
+                    },
+                    {
+                      "title": "Knowledge counts the gaps not answered yet, beside the other states",
+                      "duration": 4
+                    },
+                    {
+                      "title": "Every state, with how many responses asked each question",
+                      "duration": 3
+                    },
+                    {
+                      "title": "A learned gap opens the answer it became",
+                      "duration": 2
+                    },
+                    {
+                      "title": "One not answered yet opens in its response, at that question",
+                      "duration": 2
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:43.915Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-2 4"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-2 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-what-the-kn-40769--stands-and-one-step-to-act/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-what-the-kn-40769--stands-and-one-step-to-act/attachments/recording-Ellis-Admin-test--09d06819a0e15fc2e2244d373ea3c60583b745ae.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-30907c8e54a70809a22f",
+          "file": "sprint-21.spec.ts",
+          "line": 207,
+          "column": 1
+        },
+        {
+          "title": "Gaps show a question's markup as text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-2 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2366,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 8
+                    },
+                    {
+                      "title": "A question containing markup shows as the text it is",
+                      "duration": 4
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:51.468Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-2 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-show-a-question-s-markup-as-text/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-show-a-question-s-markup-as-text/attachments/recording-Morgan-Member-test--f57444e4c2365be4a0953e0b049b1c71fce8aa09.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-31f2015e1298a9e36aca",
+          "file": "sprint-21.spec.ts",
+          "line": 257,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-22.spec.ts",
+      "file": "sprint-22.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Plain settings first, the tuning under Advanced, and spend by use",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5261,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 11
+                    },
+                    {
+                      "title": "What an admin changes most often is in view: the budget, the warning point and the daily limits",
+                      "duration": 4
+                    },
+                    {
+                      "title": "Advanced holds the reserves, the exchange rate, the prices and the spend by model",
+                      "duration": 7
+                    },
+                    {
+                      "title": "Saving from either part works, and each save is in the audit log",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:53.868Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Plain-settings-f-c71dc-r-Advanced-and-spend-by-use/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Plain-settings-f-c71dc-r-Advanced-and-spend-by-use/attachments/recording-Ellis-Admin-test--e97bd2e0dfd9e4ade9f08dd882d11e5b635d914f.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-5f69af2bcfaf8cb73827",
+          "file": "sprint-22.spec.ts",
+          "line": 18,
+          "column": 1
+        },
+        {
+          "title": "The audit log by person and by response, with the kind, together",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 3"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-2 4"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-2 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3568,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 12
+                    },
+                    {
+                      "title": "One person: only what they did",
+                      "duration": 9
+                    },
+                    {
+                      "title": "One response: what happened to it, its files and its questions",
+                      "duration": 5
+                    },
+                    {
+                      "title": "All three together: marked as sent, by this admin, on this response",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:12:59.141Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 3"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-2 4"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-2 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-by-aed24-onse-with-the-kind-together/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-by-aed24-onse-with-the-kind-together/attachments/recording-Ellis-Admin-test--2cebdc7ee126c188792ea2cf38174d7c72378546.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-ab9ed7959f50b3b21ee1",
+          "file": "sprint-22.spec.ts",
+          "line": 62,
+          "column": 1
+        },
+        {
+          "title": "The audit log says when more entries match than it shows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2468,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "When more than 200 match, the log says so, and how to see older ones",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:02.722Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-sa-d3d8f-entries-match-than-it-shows/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-sa-d3d8f-entries-match-than-it-shows/attachments/recording-Ellis-Admin-test--8ed846820ddd1374a30f82b432e99ea903376fc4.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-77d5d6a0d1eaed3945cd",
+          "file": "sprint-22.spec.ts",
+          "line": 97,
+          "column": 1
+        },
+        {
+          "title": "Someone whose account was deleted is a former user in the person filter and the rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2666,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "A person whose account was deleted shows as a former user",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:05.201Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Someone-whose-ac-9543f--person-filter-and-the-rows/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Someone-whose-ac-9543f--person-filter-and-the-rows/attachments/recording-Ellis-Admin-test--b375b952837fddb83f23a61042b7ade30754d319.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-fa751906d2265b3daa8c",
+          "file": "sprint-22.spec.ts",
+          "line": 113,
+          "column": 1
+        },
+        {
+          "title": "Names with markup show as text in the audit log's filters and rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2424,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 8
+                    },
+                    {
+                      "title": "A name containing markup shows as the text it is, in the filters and in the log",
+                      "duration": 7
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:07.878Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Names-with-marku-46c50-udit-log-s-filters-and-rows/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Names-with-marku-46c50-udit-log-s-filters-and-rows/attachments/recording-Ellis-Admin-test--00205aa13a99a5b8c5dde0e9d7463bfcc0cbed38.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-c3c5d7c301c4291d39cb",
+          "file": "sprint-22.spec.ts",
+          "line": 135,
+          "column": 1
+        },
+        {
+          "title": "The header says where the response stands, as its card on Responses does; every question in one group",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 1"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-1 2"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3315,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 10
+                    },
+                    {
+                      "title": "Bluefin on Responses: its stage, due date and progress",
+                      "duration": 4
+                    },
+                    {
+                      "title": "The response opens with its header: owner, due date, progress, stage, files and the three stages",
+                      "duration": 2
+                    },
+                    {
+                      "title": "Every question is in one group, and the groups add up to the header's count",
+                      "duration": 2
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:10.311Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 1"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-1 2"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-header-says--0df04-every-question-in-one-group/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-header-says--0df04-every-question-in-one-group/attachments/recording-Ellis-Admin-test--4a91cf5872aaade508feb1cc1c4e4cea9585df3a.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-328a8f0a001d7ad928a0",
+          "file": "sprint-22.spec.ts",
+          "line": 176,
+          "column": 1
+        },
+        {
+          "title": "A question that needs a person says why, first; Ready to approve holds the rest",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3103,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "Needs a person: one reason on each, first",
+                      "duration": 4
+                    },
+                    {
+                      "title": "Ready to approve: nothing holds these, so they carry no reason",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:13.638Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-that--4f510-y-to-approve-holds-the-rest/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-that--4f510-y-to-approve-holds-the-rest/attachments/recording-Ellis-Admin-test--8f929c647c6a0ed7416369bc8531cc92033b4d6e.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-73d05c5308f80af166f2",
+          "file": "sprint-22.spec.ts",
+          "line": 207,
+          "column": 1
+        },
+        {
+          "title": "With experts: every question asked of a colleague, an answer first; choosing one opens it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4668,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "With experts: who was asked, where each stands, and their note",
+                      "duration": 55
+                    },
+                    {
+                      "title": "Choosing one opens it at its question",
+                      "duration": 25
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:16.752Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-With-experts-eve-67587-first-choosing-one-opens-it/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-With-experts-eve-67587-first-choosing-one-opens-it/attachments/recording-Ellis-Admin-test--b34a20a51cdfda6ba1f99fc5a112c6a15ba744c2.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-d98d0de93772126a6cfd",
+          "file": "sprint-22.spec.ts",
+          "line": 224,
+          "column": 1
+        },
+        {
+          "title": "A member who does not own the response sees where it stands, and no approval, assignment or send control",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 8"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3575,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Morgan Member (test) signs in",
+                      "duration": 6
+                    },
+                    {
+                      "title": "Morgan Member (test) sees the header, the groups and the reasons",
+                      "duration": 11
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:21.432Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 8"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-member-who-doe-f530b--assignment-or-send-control/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Morgan Member (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-member-who-doe-f530b--assignment-or-send-control/attachments/recording-Morgan-Member-test--21eabe52aef353a0f2b6a661a09abe088704c33a.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-71c86f5f849e4e2fc14f",
+          "file": "sprint-22.spec.ts",
+          "line": 250,
+          "column": 1
+        },
+        {
+          "title": "An archived response shows the same page, read-only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 10"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3768,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 10
+                    },
+                    {
+                      "title": "An archived response: the same header and groups, with nothing to change",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:25.018Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 10"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-An-archived-response-shows-the-same-page-read-only/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-An-archived-response-shows-the-same-page-read-only/attachments/recording-Ellis-Admin-test--0a205abf4a745d96aeb150b535c582283357b490.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-05dcc57f33f2a7d66098",
+          "file": "sprint-22.spec.ts",
+          "line": 268,
+          "column": 1
+        },
+        {
+          "title": "At phone width the header, the stages and the groups fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 9"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3337,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 7
+                    },
+                    {
+                      "title": "At phone width: the header, the stages and the groups, with no sideways scrolling",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:28.797Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 9"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-At-phone-width-t-7470e-e-stages-and-the-groups-fit/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test), phone",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-At-phone-width-t-7470e-e-stages-and-the-groups-fit/attachments/recording-Ellis-Admin-test-phone-32a16e42e12a389d8335208d06a1b94d7640a2f7.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-02a52ad50b1c521dfe45",
+          "file": "sprint-22.spec.ts",
+          "line": 288,
+          "column": 1
+        },
+        {
+          "title": "A question or file name containing markup shows as text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 11"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4129,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 7
+                    },
+                    {
+                      "title": "A question and a file name containing markup show as the text they are",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:32.144Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 11"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-or-fi-767bd-aining-markup-shows-as-text/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-or-fi-767bd-aining-markup-shows-as-text/attachments/recording-Ellis-Admin-test--5f4d58e7d0717e8ab339f76d47f21ca97b0d7330.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-00ca017ea67712f414ce",
+          "file": "sprint-22.spec.ts",
+          "line": 300,
+          "column": 1
+        },
+        {
+          "title": "A response with two files lists both in the header; choosing the other opens it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 7"
+                },
+                {
+                  "type": "skip",
+                  "description": "Adds a response and two files: run locally, where no AI is called and the data is thrown away",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-22.spec.ts",
+                    "line": 332,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T07:13:36.287Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 7"
+                    },
+                    {
+                      "type": "skip",
+                      "description": "Adds a response and two files: run locally, where no AI is called and the data is thrown away",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-22.spec.ts",
+                        "line": 332,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-5f6dcd77d85ed0296332",
+          "file": "sprint-22.spec.ts",
+          "line": 329,
+          "column": 1
+        },
+        {
+          "title": "Bulk approval takes only Ready to approve, and the groups update",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4337,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Ellis Admin (test) signs in",
+                      "duration": 5
+                    },
+                    {
+                      "title": "Approve in bulk at 80% or more: 2 ready to approve, 3 needing a person",
+                      "duration": 5
+                    },
+                    {
+                      "title": "Only Ready to approve was taken: Needs a person is unchanged",
+                      "duration": 3
+                    }
+                  ],
+                  "startTime": "2026-11-04T07:13:36.299Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Bulk-approval-ta-3eb6a-prove-and-the-groups-update/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Ellis Admin (test)",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Bulk-approval-ta-3eb6a-prove-and-the-groups-update/attachments/recording-Ellis-Admin-test--a1fd66d90ca535ef14ec1b539d83ade733e6a35c.webm"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-a243b3c02a4027a48ee2",
+          "file": "sprint-22.spec.ts",
+          "line": 359,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T07:11:05.638Z",
+    "duration": 155059.793,
+    "expected": 24,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
