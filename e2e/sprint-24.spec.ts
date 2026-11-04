@@ -133,7 +133,7 @@ test('A change after sending reopens the whole response, and it is marked as sen
   await changed.getByRole('button', { name: 'Leave unanswered' }).click();
   await save;
   await expect(header(page)).toContainText('Changed since sent');
-  await expect(send(page)).toContainText('This is what was learned when it was last marked as sent.');
+  await expect(send(page)).toContainText('This is what was learned up to the last time it was marked as sent.');
   await send(page).getByRole('button', { name: 'Mark as sent' }).click();
   await page.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(send(page).getByRole('heading', { name: /^Sent on/ })).toBeVisible();
