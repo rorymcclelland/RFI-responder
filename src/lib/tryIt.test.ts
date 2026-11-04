@@ -89,6 +89,15 @@ describe('S23-1 starting a try', () => {
   });
 });
 
+describe('Sprint 23 security review (L1)', () => {
+  it('the database\'s five-a-day refusal is said in the app\'s words', async () => {
+    const f = fakeClient(null, { code: '42501', message: 'You have made five tries today; open your try, or come back tomorrow' });
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await expect(startTry(f.client, 'me', 'Sam')).rejects.toThrow('You have made five tries today. Open your try, or come back tomorrow.');
+    spy.mockRestore();
+  });
+});
+
 describe('S23-1 5 (Q2): who sees a try in the lists', () => {
   it('your own tries and every ordinary response; an admin sees every try', () => {
     expect(showInLists({ trial: false, ownerId: 'x' }, 'me', false)).toBe(true);

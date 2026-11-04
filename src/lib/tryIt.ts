@@ -31,12 +31,15 @@ export interface TryStarted { responseId: string; sessionId: string; questionIds
 function failed(step: string, error: { code?: string; message?: string } | null): Error {
   console.error(`try it: ${step}`, error);
   if (error?.code === '23505') return new Error('You already have a try open. Open it from Responses, or start a new one.');
+  // Security review, Sprint 23 (L1): five tries a person a day, refused by the database.
+  if (error?.message?.includes('five tries today')) return new Error('You have made five tries today. Open your try, or come back tomorrow.');
   return new Error(`Your try could not be made (${step}). Try again in a moment.`);
 }
 
 /** Your open try, if you have one. */
 export async function openTry(client: SupabaseClient, me: string): Promise<{ responseId: string; sessionId: string | null } | null> {
-  const { data, error } = await client.from('opportunities').select('id').eq('owner_id', me).eq('trial', true).is('archived_at', null).maybeSingle();
+  // Made by you as well as owned by you (security review, M1: a try is never handed over).
+  const { data, error } = await client.from('opportunities').select('id').eq('owner_id', me).eq('created_by', me).eq('trial', true).is('archived_at', null).maybeSingle();
   if (error) throw failed('reading your try', error);
   if (!data) return null;
   const { data: s } = await client.from('rfi_sessions').select('id').eq('opportunity_id', data.id).order('created_at', { ascending: false }).limit(1).maybeSingle();

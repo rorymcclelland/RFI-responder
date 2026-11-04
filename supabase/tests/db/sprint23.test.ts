@@ -132,3 +132,78 @@ describe('S23-1 roles', () => {
     expect(Number(n)).toBeGreaterThan(0);
   });
 });
+
+describe('Sprint 23 reviews', () => {
+  it('security M1, QA 9: a try is never given to someone else, and trial never changes, for any role', async () => {
+    const giver = await createUser({ name: 'Giver (S23 review)' });
+    const tryId = (await asSuperuser(`INSERT INTO opportunities (name, owner_id, created_by, trial) VALUES ('Given try (S23 review)', $1, $1, true) RETURNING id`, [giver.id])).rows[0].id as string;
+    for (const u of [giver, admin]) {
+      expect(await refused(as(u, (q) => q(`UPDATE opportunities SET owner_id = $2 WHERE id = $1`, [tryId, other.id])))).toMatch(/cannot be given to someone else/);
+    }
+    expect(await refused(asServiceRole((q) => q(`UPDATE opportunities SET owner_id = $2 WHERE id = $1`, [tryId, other.id])))).toMatch(/cannot be given to someone else/);
+    expect(await refused(asServiceRole((q) => q(`UPDATE opportunities SET trial = false WHERE id = $1`, [tryId])))).toMatch(/stays a try/);
+    // An ordinary response can still be handed over, as before.
+    const o = await response(giver.id, { name: 'Handed over (S23 review)' });
+    await as(giver, (q) => q(`UPDATE opportunities SET owner_id = $2 WHERE id = $1`, [o, other.id]));
+  });
+
+  it('security L1: at most five tries a person a day', async () => {
+    const keen = await createUser({ name: 'Keen visitor (S23 review)' });
+    for (let i = 0; i < 5; i++) {
+      await asSuperuser(`INSERT INTO opportunities (name, owner_id, created_by, trial, archived_at, outcome) VALUES ($2, $1, $1, true, now(), 'withdrawn')`, [keen.id, `Try ${i} (S23 review)`]);
+    }
+    expect(await refused(makeTry(keen))).toMatch(/five tries today/);
+    // Tries older than a day do not count.
+    await asSuperuser(`UPDATE opportunities SET created_at = now() - interval '25 hours' WHERE owner_id = $1 AND trial`, [keen.id]);
+    expect(await makeTry(keen)).toBeTruthy();
+  });
+
+  it('QA 4: a try\'s questions cannot be assigned to a colleague; an ordinary response\'s can', async () => {
+    const solo = await createUser({ name: 'Solo visitor (S23 review)' });
+    const t = (await asSuperuser(`INSERT INTO opportunities (name, owner_id, created_by, trial) VALUES ('Solo try (S23 review)', $1, $1, true) RETURNING id`, [solo.id])).rows[0].id as string;
+    const s = await session(t);
+    const qid = await question(s, { text: 'Assigned in a try (S23 review)?' });
+    const assign = (u: TestUser, sess: string, opp: string, id: string) => as(u, (q) => q(
+      `INSERT INTO question_assignments (question_id, session_id, opportunity_id, assigned_to, assigned_by, status, question_text, answer_text)
+       VALUES ($1, $2, $3, $4, $5, 'pending', 'copy', '')`, [id, sess, opp, other.id, u.id]));
+    expect(await refused(assign(solo, s, t, qid))).toMatch(/cannot be assigned to colleagues/);
+    expect(await refused(assign(admin, s, t, qid))).toMatch(/cannot be assigned to colleagues/);
+    const o = await response(solo.id, { name: 'Solo ordinary (S23 review)' });
+    const s2 = await session(o);
+    const q2 = await question(s2, { text: 'Assigned in a response (S23 review)?' });
+    await assign(solo, s2, o, q2);
+  });
+
+  it('security L2: a try is not a use of the entries it cited, on the entry\'s page or in the overviews', async () => {
+    const cited = await entry({ question: 'Cited by a try (S23 review)?', answer: 'Yes.', lastReviewedAt: '2020-01-01' });
+    await asSuperuser(`UPDATE kb_entries SET tags = '{s23review}' WHERE id = $1`, [cited.id]);
+    const visitorR = await createUser({ name: 'Citing visitor (S23 review)' });
+    const t = (await asSuperuser(`INSERT INTO opportunities (name, owner_id, created_by, trial) VALUES ('Citing try (S23 review)', $1, $1, true) RETURNING id`, [visitorR.id])).rows[0].id as string;
+    await question(await session(t), { text: 'In the try (S23 review)?', sources: [cited.ref] });
+    const o = await response(visitorR.id, { name: 'Citing response (S23 review)' });
+    await question(await session(o), { text: 'In the response (S23 review)?', sources: [cited.ref] });
+
+    const detail = await as(other, async (q) => (await q<{ d: { used: { response: string }[] } }>(`SELECT entry_detail($1) AS d`, [cited.ref])).rows[0].d);
+    expect(detail.used.map((u) => u.response)).toEqual(['Citing response (S23 review)']);
+    const ov = await as(other, async (q) => (await q<{ o: { topics: { tag: string; citations: number }[] } }>(`SELECT knowledge_overview() AS o`)).rows[0].o);
+    expect(ov.topics.find((x) => x.tag === 's23review')).toMatchObject({ citations: 1 });
+    await asSuperuser(`UPDATE rfi_questions SET processed_at = now() WHERE cited_refs @> ARRAY[$1]`, [cited.ref]);
+    const overdue = await as(admin, async (q) => (await q<{ ref: string; recent_citations: string }>(`SELECT ref, recent_citations FROM overdue_entries()`)).rows.find((r) => r.ref === cited.ref));
+    expect(Number(overdue?.recent_citations)).toBe(1);
+  });
+
+  it('security L3: members hold only read on the overview view', async () => {
+    const r = await one<{ ins: boolean; upd: boolean; del: boolean; sel: boolean }>(
+      `SELECT has_table_privilege('authenticated', 'public.response_overview', 'INSERT') AS ins,
+              has_table_privilege('authenticated', 'public.response_overview', 'UPDATE') AS upd,
+              has_table_privilege('authenticated', 'public.response_overview', 'DELETE') AS del,
+              has_table_privilege('authenticated', 'public.response_overview', 'SELECT') AS sel`);
+    expect(r).toEqual({ ins: false, upd: false, del: false, sel: true });
+  });
+
+  it('security L6: an admin makes a try of their own like anyone, and no try for another', async () => {
+    const boss = await createUser({ admin: true, name: 'Trying admin (S23 review)' });
+    expect(await makeTry(boss)).toBeTruthy();
+    expect(await refused(as(boss, (q) => q(`INSERT INTO opportunities (name, owner_id, trial) VALUES ('For another (S23 review)', $1, true)`, [other.id])))).toMatch(/permission denied/i);
+  });
+});

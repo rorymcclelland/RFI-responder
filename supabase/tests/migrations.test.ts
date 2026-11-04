@@ -21,6 +21,10 @@ describe('what migrations insert', () => {
   const files = readdirSync(DIR).filter((f) => f.endsWith('.sql'));
   it('finds the migrations', () => expect(files.length).toBeGreaterThan(30));
 
+  it('S23-3 4: holds no throwaway probe (the failing migration tried on staging stays off main)', () => {
+    expect(files.filter((f) => /probe|f68/i.test(f))).toEqual([]);
+  });
+
   it('inserts only configuration rows', () => {
     const found: string[] = [];
     for (const f of files) {

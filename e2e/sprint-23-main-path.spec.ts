@@ -2,8 +2,13 @@
  * Sprint 23 (S23-2, F-66): the main path as one browser test, in order, on a response the test
  * makes: an owner adds a response, uploads a questionnaire and drafts it; a colleague answers the
  * question they were asked; the owner decides the rest, downloads the Excel file and marks the
- * response as sent, and the page says what the knowledge base did. Locally only (Q5): the providers
- * are off, and staging's real-AI steps are the ask and the try.
+ * response as sent, and the colleague's answer is learned with the response named as its source.
+ *
+ * On staging it runs with the real AI (Rory, at the Sprint 23 QA review: a third real-AI step a run),
+ * where drafts are checked, so bulk approval has something to take and an answer can be learned.
+ * Locally the providers are off: no checker classifies the questions, each is held as not fully
+ * checked, nothing is ready to approve in bulk, and learning rightly refuses the answers; there the
+ * test checks that the page says so and nothing reaches the knowledge base.
  */
 import { readFileSync } from 'node:fs';
 import ExcelJS from 'exceljs';
@@ -15,9 +20,10 @@ const NOT_ANSWERED = 'Not answered';
 const CHARTER = 'Do you hold the Coral Bay Retail Supplier Charter accreditation?';
 
 test('The main path, end to end: add, upload, draft, assign, answer, approve, download, mark as sent', async ({ browser }) => {
-  checks('S23-2 1', 'S23-2 2', 'S23-2 3');
-  test.skip(TARGET === 'staging', 'Locally only (Q5): it drafts a whole questionnaire');
-  test.setTimeout(420_000);
+  // Every step, in order, runs only on staging (bulk approval and learning need checked drafts).
+  checks(...(TARGET === 'staging' ? ['S23-2 1', 'S23-2 2', 'S23-2 3'] : ['S23-2 2']));
+  if (TARGET === 'staging') test.info().annotations.push({ type: 'real-ai', description: 'Drafts a whole questionnaire with the real models' });
+  test.setTimeout(480_000);
   const name = `Main path (S23-2) ${Date.now()}`;
   const answer = `No; we would apply for it within 90 days of contract (synthetic answer, ${Date.now()}).`;
 
@@ -28,7 +34,7 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   await owner.getByRole('button', { name: 'New response' }).click();
   await owner.getByLabel(/^Name/).fill(name);
   await owner.getByRole('button', { name: /^Create/ }).click();
-  await caption(owner, 'Uploads the customer\'s questionnaire, checks the question column, and drafts it');
+  await caption(owner, 'Uploads the customer\'s questionnaire and drafts it (the question column is found by its heading)');
   await owner.locator('input[type=file]').setInputFiles({ name: 'main-path-questionnaire.csv', mimeType: 'text/csv', buffer: readFileSync('sample-data/try-it-questionnaire.csv') });
   await owner.getByRole('button', { name: 'Match and draft' }).click();
   await owner.getByRole('heading', { name: 'Questions', level: 2 }).waitFor({ timeout: 240_000 });
@@ -58,6 +64,14 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   await caption(owner, `${admin.name} decides the rest: approves the drafts, leaves the others unanswered`);
   await owner.reload();
   await openResponse(owner, name);
+  if (TARGET === 'staging') {
+    await caption(owner, 'Approves in bulk the drafts nothing holds');
+    const ready = owner.locator('section[aria-labelledby="group-ready"] [id^="question-"]');
+    expect(await ready.count()).toBeGreaterThan(0);
+    await owner.getByRole('button', { name: 'All eligible' }).click();
+    await expect(owner.locator('section[aria-labelledby="group-ready"]')).toHaveCount(0);
+  }
+  await caption(owner, 'And the rest one at a time');
   for (let guard = 0; guard < total + 2; guard++) {
     const next = owner.locator('section[aria-labelledby="group-needs"] [id^="question-"], section[aria-labelledby="group-ready"] [id^="question-"]').first();
     if (!(await next.count())) break;
@@ -96,18 +110,28 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   expect(answers.filter((a) => a && a !== NOT_ANSWERED)).toHaveLength(approved);
   expect(answers).toContain(answer);
 
-  // 6. Mark as sent, and see what the knowledge base did with the answers. Locally the providers are
-  // off, so no checker classified the questions: each is held as not fully checked, and learning
-  // refuses such answers (the allow list, Sprint 3). The page must say so, and nothing may reach the
-  // knowledge base. That a checked answer becomes an entry is proven by the database tests
-  // (the workflow tests in supabase/tests/db/workflow.test.ts and the later sprints' tests).
+  // 6. Mark as sent, and see what the knowledge base did with the answers.
   await caption(owner, 'Marks the response as sent');
   await send.getByRole('button', { name: 'Mark as sent' }).click();
   await owner.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(send.getByRole('heading', { name: /^Sent on/ })).toBeVisible();
-  await caption(owner, 'The page says what the knowledge base did: here, with no checker, nothing was learned');
-  await expect(send).toContainText(/not learned \(not fully checked\)/);
   await nav(owner, 'Knowledge');
-  await expect(owner.getByRole('region', { name: 'Learned recently' })).toBeVisible();
-  await expect(owner.getByRole('region', { name: 'Learned recently' }).getByText(CHARTER)).toHaveCount(0);
+  const learned = owner.getByRole('region', { name: 'Learned recently' });
+  // The list has loaded once it shows an answer learned earlier in the run (Sprint 21, Larkspur).
+  await expect(learned.getByRole('button').first()).toBeVisible();
+  if (TARGET === 'staging') {
+    await caption(owner, `The knowledge base has ${member.name}'s answer, learned from this response`);
+    const entry = learned.getByRole('button').filter({ hasText: CHARTER }).first();
+    await expect(entry).toBeVisible();
+    await expect(entry).toContainText(`from ${name}`);
+  } else {
+    // Locally, with no checker, every answer is held as not fully checked and is not learned.
+    await caption(owner, 'Locally, with no checker, nothing was learned, and the page said so');
+    await nav(owner, 'Responses');
+    await openResponse(owner, name);
+    await expect(owner.getByRole('region', { name: 'Send the response' })).toContainText(/not learned \(not fully checked\)/);
+    await nav(owner, 'Knowledge');
+    await expect(learned.getByRole('button').first()).toBeVisible();
+    await expect(learned.getByText(CHARTER)).toHaveCount(0);
+  }
 });

@@ -14,6 +14,10 @@ const PRICING = 'What is the annual licence fee for 400 store managers?';
 const LEGAL = 'Will you accept unlimited liability for a breach of our customer data?';
 const QUESTIONS = readFileSync('sample-data/try-it-questionnaire.csv', 'utf8').trim().split('\n').length - 1;
 
+// The tests build on each other in order: the try made by the first is opened by the later ones
+// (QA review: said, not left implicit). One worker runs them in file order.
+test.describe.configure({ mode: 'serial' });
+
 const header = (page: Page) => page.locator('header[aria-label="Response"]');
 const tryPanel = (page: Page) => page.getByRole('region', { name: 'Try it' });
 const sendPanel = (page: Page) => page.getByRole('region', { name: 'Send the response' });
@@ -28,7 +32,8 @@ async function drafted(page: Page) {
 }
 
 test('Try it: your own response from the sample, drafted, worked through and marked as sent, learning nothing', async ({ browser }) => {
-  checks('S23-1 1', 'S23-1 2', 'S23-1 3');
+  // S23-1 2's bulk approval runs only on staging, where the drafts are checked (QA review).
+  checks(...(TARGET === 'staging' ? ['S23-1 1', 'S23-1 2', 'S23-1 3'] : ['S23-1 1', 'S23-1 3']));
   if (TARGET === 'staging') test.info().annotations.push({ type: 'real-ai', description: 'Drafts the try with the real models (Q5)' });
   test.setTimeout(420_000);
   const page = await signIn(browser, member);
@@ -72,7 +77,11 @@ test('Try it: your own response from the sample, drafted, worked through and mar
     // A card's id may start with a digit, so it is matched as an attribute, not with #.
     await expect(page.locator(`section[aria-labelledby="group-needs"] [id="${id}"], section[aria-labelledby="group-ready"] [id="${id}"]`)).toHaveCount(0);
   }
+  // An approved answer, so marking as sent has something the database must refuse to learn (QA review).
+  expect(approvedOne).toBe(true);
   await expect(header(page)).toContainText(`${QUESTIONS} of ${QUESTIONS} decided`);
+  // Nobody can be asked to help on a try (QA review): its cards offer no assignment.
+  await expect(page.getByRole('button', { name: /^Assign (for review|another)/ })).toHaveCount(0);
 
   await caption(page, 'Download, then mark as sent: the confirmation says a try teaches the knowledge base nothing');
   const download = page.waitForEvent('download');
@@ -84,7 +93,8 @@ test('Try it: your own response from the sample, drafted, worked through and mar
   await confirm.getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await caption(page, 'Sent, and nothing was learned');
   await expect(sendPanel(page).getByRole('heading', { name: /^Sent on/ })).toBeVisible();
-  await expect(sendPanel(page)).toContainText('Nothing was learned: this is a try.');
+  // What the database reported: nothing learned, because it is a try (QA review: not the flag alone).
+  await expect(sendPanel(page)).toContainText(/\d+ not learned \(a try\)/);
 });
 
 test('A try is in its owner\'s lists and every admin\'s, marked Try; not in other members\'', async ({ browser }) => {
@@ -101,13 +111,20 @@ test('A try is in its owner\'s lists and every admin\'s, marked Try; not in othe
   await caption(visitor, `${member.name} sees their own try`);
   await expect(visitor.getByText(tryOf(member.name), { exact: true }).first()).toBeVisible();
 
+});
+
+test('Another member does not see someone else\'s try in their lists', async ({ browser }) => {
+  checks('S23-1 5');
   test.skip(TARGET === 'staging', 'Needs a third person: the seed has one, staging has two test people');
   const other = await signIn(browser, { email: 'maya.patel@example.com', name: 'Maya Patel' });
   await caption(other, 'Another member does not see it, on Responses or on Home');
   await nav(other, 'Responses');
-  await expect(other.getByRole('heading', { name: 'Responses', level: 1 })).toBeVisible();
+  // The list has loaded once a seeded response shows (QA review: an empty list proves nothing).
+  await expect(other.getByText('Bluefin Freight (fictional): security questionnaire', { exact: true }).first()).toBeVisible();
   await expect(other.getByText(tryOf(member.name), { exact: true })).toHaveCount(0);
   await nav(other, 'Home');
+  await expect(other.getByRole('heading', { name: 'Your responses' })).toBeVisible();
+  await expect(other.getByText(/^(Loading…)$/)).toHaveCount(0);
   await expect(other.getByText(tryOf(member.name), { exact: true })).toHaveCount(0);
 });
 

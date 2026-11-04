@@ -45,7 +45,7 @@ export default function ResponseHeader({ name, response, readFailed = false, own
 
       {response?.trial && (
         <p className="text-xs text-sky-800 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2">
-          <span className="font-bold">A try.</span> Work through it as you would a real response: nothing you do here is learned by the knowledge base, and other members do not see it in their lists.
+          <span className="font-bold">A try.</span> Work through it as you would a real response: nothing you do here is learned by the knowledge base. Other members do not see it in their lists of responses, though anyone signed in could open it from a link. Its questions cannot be assigned to colleagues.
         </p>
       )}
 

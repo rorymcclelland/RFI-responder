@@ -60,6 +60,15 @@ describe.each(PAGES)('docs/guide/%s', (page) => {
 });
 
 describe('the guide covers the app', () => {
+  it('Sprint 23 (S23-1 10): names Try it\'s labels, as the app shows them', () => {
+    const start = read(join(GUIDE, 'getting-started.md'));
+    const tryIt = read(join(ROOT, 'src/TryIt.tsx'));
+    for (const label of ['Try it with a sample questionnaire', 'Open your try', 'Start a new try']) {
+      expect(start, label).toContain(`**${label}**`);
+      expect(tryIt, label).toContain(label);
+    }
+  });
+
   const card = read(join(GUIDE, 'question-card.md'));
   const running = read(join(GUIDE, 'running-a-response.md'));
   const component = read(join(ROOT, 'src/RFIQuestionCard.tsx'));

@@ -36,7 +36,7 @@ export const INTRO_STEPS: IntroStep[] = [
     body: [
       '**Home** shows what needs you today: questions colleagues have assigned to you, answers they have sent you, and your responses at risk or overdue. Each opens the place to act on it.',
       '**Responses** lists every response in progress. Choose **New response** to start one; anyone can start a response and owns the ones they start.',
-      'New here? **Try it with a sample questionnaire** gives you your own response to work through, drafted for you. Nothing you do in a try is learned by the knowledge base.',
+      'New here? **Try it with a sample questionnaire** gives you your own response to work through, drafted for you. Nothing you do in a try is learned by the knowledge base, and only you and admins see it listed.',
     ],
     image: '21-home.png',
     imageAlt: 'Home: the questions waiting for you, your responses, and what the organisation knows',

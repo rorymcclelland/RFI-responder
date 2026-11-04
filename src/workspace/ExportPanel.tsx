@@ -113,7 +113,8 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
             <p className="section-label mb-3">Knowledge base</p>
             <div className="flex items-start gap-2.5 text-sm text-ink-700 font-medium">
               <CheckCircle2 size={17} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-              <span>{trial ? 'Nothing was learned: this is a try.' : learning || 'The knowledge base learned from this response when it was marked as sent.'}</span>
+              {/* What the database did when it was marked as sent; for a try, it says nothing was learned (QA review). */}
+              <span>{learning || (trial ? 'Nothing was learned: this is a try.' : 'The knowledge base learned from this response when it was marked as sent.')}</span>
             </div>
             <p className="text-xs text-ink-400 mt-2 font-medium">
               {trial ? 'A try never teaches the knowledge base, so what you write here stays here.'

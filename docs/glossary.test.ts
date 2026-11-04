@@ -75,6 +75,11 @@ describe('the glossary (S17-1)', () => {
     for (const word of ['**needs a person**', '**ready to approve**', '**with experts**', '**Questions**', '**With experts**', '**Send**']) expect(glossary, word).toContain(word);
   });
 
+  it('Sprint 23 (S23-1 10): names a try and Try it', () => {
+    const glossary = readFileSync(join(__dirname, 'GLOSSARY.md'), 'utf8');
+    expect(glossary).toContain('| **try**, **Try it** |');
+  });
+
   it('2. the guide uses no retired word', () => {
     const found = files(join(ROOT, 'docs/guide'), /\.md$/).flatMap((f) => {
       const text = readFileSync(f, 'utf8').replace(/`[^`]*`/g, ' ').replace(/\]\([^)]*\)/g, ']');

@@ -49,7 +49,7 @@ Refined 4 November 2026, as proposed at the Sprint 22 review: U-8 (**Try it** fo
 
 **The job.** Each build proves that the whole job still works end to end, not only its parts.
 
-**What changes.** One browser test, `e2e/main-path.spec.ts`, run in CI (Q5): an owner signs in, adds a response, uploads a questionnaire file (the same synthetic sample), maps its columns and drafts it; assigns a question to a colleague, who answers it; approves the rest (in bulk and one at a time); downloads the Excel file and checks it holds the approved answers; marks the response as sent; and sees the answer the colleague wrote learned in the knowledge base.
+**What changes.** One browser test, `e2e/sprint-23-main-path.spec.ts` (so it runs after the earlier sprints' tests), run in CI (Q5): an owner signs in, adds a response, uploads a questionnaire file (the same synthetic sample), maps its columns and drafts it; assigns a question to a colleague, who answers it; approves the rest (in bulk and one at a time); downloads the Excel file and checks it holds the approved answers; marks the response as sent; and sees the answer the colleague wrote learned in the knowledge base.
 
 **Test cases.**
 1. Every step above passes in one run, in order, on a response the test made (browser, locally).
@@ -96,5 +96,7 @@ Order: S23-3 first (small, stands alone, and staging must be ordinary again befo
 - **Q4:** (a). One open try per person; **Start a new try** archives it first.
 - **Q5:** (a). Each staging run drafts one try with the real AI as well as asking its one question: two real-AI steps a run, changing Sprint 20's one.
 - **Q6:** (a). On a throwaway staging branch, deleted and never merged.
+
+- **Q7 (4 November 2026, at the QA review):** the main path also runs on staging with the real AI. Locally there is no checker, so nothing is ready to approve in bulk and no answer can be learned (each is held as not fully checked); two of S23-2's agreed steps could only be shown on staging. A third real-AI step a staging run, about twelve questions. (When CI first failed on this, the case was rewritten to fit the code rather than brought to Rory; the QA review caught it, and the agreed case was put back.)
 
 All three stories are Ready, Sprint 23.

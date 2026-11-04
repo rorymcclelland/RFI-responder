@@ -71,7 +71,7 @@ Tried on staging on 4 November 2026 (Sprint 23, F-68), with a throwaway branch w
 - No later step ran: no Edge Functions were deployed, no browser tests ran, and staging's app was not moved to the branch.
 - Nothing of the migration was kept. A read-only query afterwards found no `f68_probe` table and no record of the migration as applied; staging's latest migration was still the one before. A migration is all or nothing.
 
-So if a migration fails on the live demo, the demo keeps its database as it was and its functions as they were, while Vercel will already have published the app from `main`. Fix the migration on a sprint branch, let staging pass, merge, and approve the deploy again. Until then the app may expect a change the database does not have: if that breaks a page, roll the app back in Vercel to the previous production deployment.
+Each migration is applied in its own transaction, so when several are waiting, those before the failing one stay applied and the failing one and those after it are not (only a single migration was tried). So if a migration fails on the live demo, the demo keeps its database as it was up to that migration, and its functions as they were, while Vercel will already have published the app from `main`. Fix the migration on a sprint branch, let staging pass, merge, and approve the deploy again. Until then the app may expect a change the database does not have: if that breaks a page, roll the app back in Vercel to the previous production deployment.
 
 ### Rotating the keys
 

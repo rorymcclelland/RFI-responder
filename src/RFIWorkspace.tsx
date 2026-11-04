@@ -298,11 +298,12 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   // (once per file; Process now remains if a batch fails).
   const drafted = useRef(new Set<string>());
   useEffect(() => {
-    if (!summary?.trial || !canAssign || archived || step !== 'review' || !sessionId || drafted.current.has(sessionId)) return;
+    // Only for the try's own visitor: an admin opening someone's try never spends their own quota on it (reviews).
+    if (!summary?.trial || summary.ownerId !== currentUser.id || archived || step !== 'review' || !sessionId || drafted.current.has(sessionId)) return;
     if (questions.length === 0 || questions.some((q) => q.processed || q.sessionId !== sessionId)) return;
     drafted.current.add(sessionId);
     processAndReload(sessionId, questions.map((q) => q.id));
-  }, [summary?.trial, canAssign, archived, step, sessionId, questions, processAndReload]);
+  }, [summary?.trial, summary?.ownerId, currentUser.id, archived, step, sessionId, questions, processAndReload]);
 
   // ── Review actions ────────────────────────────────────────────────────────
 
@@ -511,7 +512,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         users={allUsers}
         assignments={assignments[q.id] ?? []}
         canDecide={!archived && (canAssign || (assignments[q.id] ?? []).some((a) => a.assignedTo === currentUser.id))}
-        onAssign={canAssign && !archived ? handleAssign : undefined}
+        onAssign={canAssign && !archived && !summary?.trial ? handleAssign : undefined}
         onUnassign={canAssign && !archived ? handleUnassign : undefined}
       />
     </div>
