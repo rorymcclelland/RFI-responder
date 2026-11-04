@@ -964,6 +964,16 @@ Refinement: `docs/refinement/sprint-22.md`. Q1 to Q4 answered by Rory the same d
 
 **Proposed next.** Sprint 23: U-8, F-66 and F-68.
 
+## Sprint 23: Try it, the main path end to end, and a failing migration on staging (refined 4 November 2026)
+
+Refinement: `docs/refinement/sprint-23.md`. Q1 to Q6 answered by Rory the same day, each as recommended. Q5 changes Sprint 20's one real-AI step a staging run to two: the ask, and drafting a try.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S23-1 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the real AI, never learned from | U-8 | Ready, Sprint 23 |
+| S23-2 | The main path as one browser test | F-66 | Ready, Sprint 23 |
+| S23-3 | A migration that fails, tried on staging | F-68 | Ready, Sprint 23 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
