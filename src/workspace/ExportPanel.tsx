@@ -9,13 +9,15 @@ import { CheckCircle2, Download, FileDown, FileText, Send, Sheet, Upload } from 
 import { exportCSV, exportExcel, exportWord } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
-export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, names, sentAt, changed, preview, saving = false, onMarkSent, onStartNew }: {
+export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, names, sentAt, changed, preview, saving = false, trial = false, onMarkSent, onStartNew }: {
   questions: RFIQuestion[];
   /** Approvers' names for the provenance record (Sprint 7, F-27). */
   names: Map<string, string>;
   fileName: string;
   acceptedCount: number;
   skippedCount: number;
+  /** Sprint 23 (S23-1): a visitor's try, from which nothing is ever learned. */
+  trial?: boolean;
   /** What learning did when the response was last marked as sent (S3-4); empty otherwise. */
   learning: string;
   /** When the response was last marked as sent, or null. */
@@ -84,10 +86,14 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
                 <p className="text-sm font-bold text-ink-800">Marking this response as sent will:</p>
                 <ul className="text-sm text-ink-700 list-disc pl-5 space-y-1">
                   <li>record that it was sent, with your name and the time, in the audit log;</li>
+                  {trial ? (
+                    <li>teach the knowledge base nothing: this is a try, so its answers are never learned and the entries its drafts came from are not confirmed;</li>
+                  ) : (
                   <li>
                     give the knowledge base the approved answers{sentAt ? ' changed since it was last marked as sent' : ''}: {plural(preview.written, 'answer', 'answers')} edited or written by a person, which can become new entries or proposed changes, and {plural(preview.drafts, 'draft', 'drafts')} approved as written, which can confirm the entries they came from{preview.pricing ? `; ${plural(preview.pricing, 'pricing answer', 'pricing answers')}, never learned` : ''}.
                     {' '}What each becomes is decided when you confirm, and shown here afterwards; anything learned from someone other than an admin waits for an admin&apos;s review;
                   </li>
+                  )}
                   <li>{preview.openAssignments ? `close the ${plural(preview.openAssignments, 'open assignment', 'open assignments')} on it.` : 'close any assignment on it (none is open now).'}</li>
                 </ul>
                 <div className="flex gap-2">
@@ -107,10 +113,11 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
             <p className="section-label mb-3">Knowledge base</p>
             <div className="flex items-start gap-2.5 text-sm text-ink-700 font-medium">
               <CheckCircle2 size={17} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-              <span>{learning || 'The knowledge base learned from this response when it was marked as sent.'}</span>
+              <span>{trial ? 'Nothing was learned: this is a try.' : learning || 'The knowledge base learned from this response when it was marked as sent.'}</span>
             </div>
             <p className="text-xs text-ink-400 mt-2 font-medium">
-              Edited and person-written answers become entries, with this response recorded as their source. Pricing answers are never learned.
+              {trial ? 'A try never teaches the knowledge base, so what you write here stays here.'
+                : 'Edited and person-written answers become entries, with this response recorded as their source. Pricing answers are never learned.'}
             </p>
           </div>
         )}

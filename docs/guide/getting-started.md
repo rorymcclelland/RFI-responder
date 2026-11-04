@@ -44,6 +44,15 @@ The tiles at the top count the responses **In progress**, **Ready to send**, **A
 
 Choose a card to open the response.
 
+## Try it with a sample questionnaire
+
+To see the whole job on a questionnaire of your own, choose **Try it with a sample questionnaire** on **Home** or **Responses**. It makes a response that you own, from a short questionnaire from a fictional company, Coral Bay Retail, and drafts its questions from the knowledge base, which takes a minute or so. Then work through it as on any response: the questions that need a person and why, **Ready to approve** and bulk approval, downloading the answers, and **Mark as sent**.
+
+- Nothing in a try is learned. Marking a try as sent records it, but the knowledge base learns nothing from it and confirms none of its entries, and its questions are never counted as gaps.
+- Your tries are yours. Other members do not see them on **Home** or **Responses**; admins see everyone's, marked **Try**.
+- One at a time: **Open your try** goes back to it. **Start a new try** puts your try away (archived as withdrawn) and makes a fresh one.
+- A try is drafted with the AI like any response, so it counts towards your daily limits and the monthly budget.
+
 ## Your profile
 
 Under **Team**, choose **Edit** on your own card to change your display name, job title, department and areas of expertise. Expertise tags help owners find the right person for a question (see [Running a response](running-a-response.md#asking-a-colleague)).

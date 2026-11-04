@@ -11,6 +11,8 @@ export interface OverviewRow {
   created_at: string; updated_at: string; exported_at: string | null; archived_at: string | null;
   outcome: ResponseOutcome | null; stage: ResponseStage; total: number; decided: number; accepted: number;
   skipped: number; pending: number; gated_pending: number; open_assignments: number; overdue: boolean; at_risk: boolean;
+  /** Sprint 23 (S23-1): a visitor's try. */
+  trial?: boolean;
 }
 
 export function toResponse(r: OverviewRow): Opportunity {
@@ -19,7 +21,7 @@ export function toResponse(r: OverviewRow): Opportunity {
     createdAt: r.created_at, updatedAt: r.updated_at, exportedAt: r.exported_at, archivedAt: r.archived_at,
     outcome: r.outcome, stage: r.stage, total: r.total, decided: r.decided, accepted: r.accepted,
     skipped: r.skipped, pending: r.pending, gatedPending: r.gated_pending, openAssignments: r.open_assignments,
-    overdue: r.overdue, atRisk: r.at_risk,
+    overdue: r.overdue, atRisk: r.at_risk, trial: Boolean(r.trial),
   };
 }
 
@@ -80,7 +82,7 @@ export async function deleteResponse(client: SupabaseClient, id: string, reason:
 export interface ExportSummary {
   accepted: number; skipped: number; added?: number; superseded?: number; confirmed?: number;
   not_learned_pricing?: number; not_learned_japanese?: number; not_learned_empty?: number;
-  not_learned_unchecked?: number; proposed?: number; not_confirmed_source?: number;
+  not_learned_unchecked?: number; proposed?: number; not_confirmed_source?: number; not_learned_try?: number;
   /** Sprint 12 (S12-3): learned as translations, waiting for an admin's review. */
   translated?: number;
 }
@@ -105,6 +107,7 @@ export function describeLearning(s: ExportSummary): string {
   add(s.not_learned_japanese, 'not learned (Japanese, before the knowledge base was multilingual)');
   add(s.not_learned_empty, 'not learned (no answer)');
   add(s.not_learned_unchecked, 'not learned (not fully checked)');
+  add(s.not_learned_try, 'not learned (a try)');
   add(s.not_confirmed_source, 'did not confirm their entries (the entries need an admin\'s review)');
   return parts.length ? `Knowledge base: ${parts.join('; ')}.` : 'Knowledge base: nothing new to learn from this response.';
 }

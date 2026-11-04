@@ -7,6 +7,8 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { loadMyAssignments } from './lib/myAssignments';
 import { loadOverview } from './lib/responses';
+import { showInLists } from './lib/tryIt';
+import TryIt from './TryIt';
 import { loadKnowledgeOverview, type KnowledgeOverview } from './lib/knowledgeBrowse';
 import { needsYou, yourResponses, type NeedItem } from './lib/home';
 import { openQuestion } from './lib/openQuestion';
@@ -41,9 +43,11 @@ export default function HomePage({ currentUser, names, onOpenForYou, onOpenRespo
     const n = ++seq.current;
     setError('');
     try {
-      const [mine, all, knowledge] = await Promise.all([
+      const [mine, overview, knowledge] = await Promise.all([
         loadMyAssignments(supabase), loadOverview(supabase), loadKnowledgeOverview(supabase).catch(() => null),
       ]);
+      // Sprint 23 (S23-1, Q2): your own tries, and an admin everyone's; access is unchanged.
+      const all = overview.filter((r) => showInLists(r, currentUser.id, currentUser.isAdmin));
       if (n !== seq.current) return;
       setData({
         items: needsYou({ me: currentUser.id, isAdmin: currentUser.isAdmin, toMe: mine.toMe, fromMe: mine.fromMe, responses: all, knowledge, names }),
@@ -76,6 +80,7 @@ export default function HomePage({ currentUser, names, onOpenForYou, onOpenRespo
         <h1 className="text-3xl font-black text-ink-900 tracking-tight">Hello, {first}</h1>
         <p className="text-ink-500 mt-1.5 text-sm font-medium">What needs you today, your responses, and what the organisation knows.</p>
       </div>
+      <TryIt currentUser={currentUser} />
       {error && <p role="alert" className="text-sm text-coral-600">{error} <button onClick={load} className="btn-ghost text-xs ml-2">Try again</button></p>}
       {!data && !error && <p role="status" className="text-sm text-ink-400">Loading…</p>}
 

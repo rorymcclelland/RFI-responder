@@ -43,6 +43,12 @@ export default function ResponseHeader({ name, response, readFailed = false, own
         )}
       </div>
 
+      {response?.trial && (
+        <p className="text-xs text-sky-800 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2">
+          <span className="font-bold">A try.</span> Work through it as you would a real response: nothing you do here is learned by the knowledge base, and other members do not see it in their lists.
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-ink-500 font-medium">
         {(ownerName ?? response?.ownerName ?? (response ? 'No owner' : null)) && (
           <span className="flex items-center gap-1.5"><User size={12} aria-hidden="true" /> {ownerName ?? response?.ownerName ?? 'No owner'}</span>

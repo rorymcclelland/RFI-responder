@@ -9,3 +9,10 @@ export interface QuestionTarget { responseId: string; sessionId: string; questio
 export function openQuestion(target: QuestionTarget): void {
   window.dispatchEvent(new CustomEvent<QuestionTarget>(OPEN_QUESTION_EVENT, { detail: target }));
 }
+
+/** Sprint 23 (S23-1): open a response at its newest file, from anywhere (Try it). */
+export const OPEN_RESPONSE_EVENT = 'rfi:open-response';
+
+export function openResponse(responseId: string): void {
+  window.dispatchEvent(new CustomEvent<{ responseId: string }>(OPEN_RESPONSE_EVENT, { detail: { responseId } }));
+}

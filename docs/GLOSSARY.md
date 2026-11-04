@@ -15,6 +15,7 @@ The words RFI Respond uses on screen, in the guide and in the introduction, one 
 | **not answered**, **leave unanswered** | A question decided not to answer; exported as "Not answered" | skip, skipped |
 | **owner** | The person responsible for a response | |
 | **colleague**, **asked** | Someone the owner asked to answer or check a question, through an assignment | |
+| **try**, **Try it** | A visitor's own response, made from the sample questionnaire by **Try it**; nothing in it is learned (Sprint 23) | demo copy, sandbox |
 | **needs a person** | A question still to do that bulk approval never takes, with the one reason why (Sprint 22) | held, gated, blocked |
 | **ready to approve** | A question still to do that bulk approval can take as far as the page knows; bulk approval checks its cited entries again when used (Sprint 22) | eligible |
 | **with experts** | The questions of a file asked of colleagues, and where each stands (Sprint 22) | assignments (as a place on the response) |

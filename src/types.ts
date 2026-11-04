@@ -45,6 +45,8 @@ export interface Opportunity {
   openAssignments: number;
   overdue: boolean;
   atRisk: boolean;
+  /** Sprint 23 (S23-1): a visitor's try (Try it), never learned from. */
+  trial?: boolean;
 }
 
 // ─── RFI Workflow ─────────────────────────────────────────────────────────────

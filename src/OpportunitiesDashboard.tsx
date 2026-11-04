@@ -1,5 +1,8 @@
+import TryIt from './TryIt';
+import type { UserProfile } from './types';
+import { showInLists } from './lib/tryIt';
 import { OUTCOME_LABEL, STAGE, formatDate } from './lib/stage';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   AlertTriangle, Archive, ArrowRight, Briefcase, CalendarClock, Check, Clock, Pencil, Plus, RefreshCw, Search, Trash2, User, X,
 } from 'lucide-react';
@@ -254,6 +257,7 @@ function ResponseCard({ opp, canEdit, canDelete, onOpen, onChanged, onArchive, o
             ) : (
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-ink-900 truncate leading-tight">{opp.name}</h3>
+                {opp.trial && <span className="status-pill text-2xs bg-sky-50 text-sky-700 border-sky-200 mt-1">Try</span>}
                 {editable && (
                   <button aria-label="Rename" onClick={(e) => { e.stopPropagation(); setEditing('name'); }}
                     className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center text-ink-400 hover:text-ink-700 transition-all flex-shrink-0">
@@ -331,13 +335,15 @@ function ResponseCard({ opp, canEdit, canDelete, onOpen, onChanged, onArchive, o
 interface Props {
   currentUserId: string;
   isAdmin: boolean;
+  /** For Try it (Sprint 23). */
+  currentUser?: UserProfile;
   onSelectOpportunity: (opp: Opportunity) => void;
 }
 
 type Tab = 'active' | 'archived';
 const ACTIVE_STAGES: ResponseStage[] = ['new', 'in_review', 'ready', 'exported', 'changed'];
 
-export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelectOpportunity }: Props) {
+export default function OpportunitiesDashboard({ currentUserId, isAdmin, currentUser, onSelectOpportunity }: Props) {
   const [responses, setResponses] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -351,17 +357,18 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
   const [archiving, setArchiving] = useState<Opportunity | null>(null);
   const [deleting, setDeleting] = useState<Opportunity | null>(null);
 
-  const reload = async () => {
+  const reload = useCallback(async () => {
     setLoading(true);
     try {
-      setResponses(await loadOverview(supabase));
+      // Sprint 23 (S23-1, Q2): your own tries, and an admin everyone's; access is unchanged.
+      setResponses((await loadOverview(supabase)).filter((r) => showInLists(r, currentUserId, isAdmin)));
       setError('');
     } catch (err) {
       setError((err as Error).message);
     }
     setLoading(false);
-  };
-  useEffect(() => { reload(); }, []);
+  }, [currentUserId, isAdmin]);
+  useEffect(() => { reload(); }, [reload]);
 
   const visible = filterOverview(responses, { tab, stage, flag, mine, search, me: currentUserId });
   const active = responses.filter((r) => r.archivedAt === null);
@@ -395,6 +402,7 @@ export default function OpportunitiesDashboard({ currentUserId, isAdmin, onSelec
             <button onClick={() => setCreating(true)} className="btn-primary text-sm"><Plus size={15} /> New response</button>
           </div>
         </div>
+        {currentUser && <TryIt currentUser={currentUser} compact />}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {tiles.map((t) => (

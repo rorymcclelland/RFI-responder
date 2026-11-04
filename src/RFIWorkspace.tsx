@@ -294,6 +294,16 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     await processAndReload(session.id, ids);
   }, [drafts, fileName, opportunityId, processAndReload]);
 
+  // Sprint 23 (S23-1): a try's questions are drafted when it is first opened, as an upload's are
+  // (once per file; Process now remains if a batch fails).
+  const drafted = useRef(new Set<string>());
+  useEffect(() => {
+    if (!summary?.trial || !canAssign || archived || step !== 'review' || !sessionId || drafted.current.has(sessionId)) return;
+    if (questions.length === 0 || questions.some((q) => q.processed || q.sessionId !== sessionId)) return;
+    drafted.current.add(sessionId);
+    processAndReload(sessionId, questions.map((q) => q.id));
+  }, [summary?.trial, canAssign, archived, step, sessionId, questions, processAndReload]);
+
   // ── Review actions ────────────────────────────────────────────────────────
 
   // Show the change at once; if saving fails, put the question back and say why (F-9).
@@ -656,6 +666,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
             changed={exportState.changedSinceExportAt !== null}
             saving={saving > 0}
             preview={sendPreview(questions, questions.flatMap((q) => assignments[q.id] ?? []), answerSource)}
+            trial={summary?.trial ?? false}
             onMarkSent={archived ? undefined : finishSession}
             onStartNew={archived || step !== 'export' ? undefined : startNew}
           />

@@ -1,5 +1,5 @@
 import { OPEN_ENTRY_EVENT } from './lib/openEntry';
-import { OPEN_QUESTION_EVENT, type QuestionTarget } from './lib/openQuestion';
+import { OPEN_QUESTION_EVENT, OPEN_RESPONSE_EVENT, type QuestionTarget } from './lib/openQuestion';
 import { loadResponse } from './lib/responses';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import {
@@ -228,6 +228,21 @@ export default function App() {
     };
     window.addEventListener(OPEN_QUESTION_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_QUESTION_EVENT, onOpen);
+  }, []);
+
+  // Sprint 23 (S23-1): Try it opens the visitor's try.
+  useEffect(() => {
+    const onOpen = async (e: Event) => {
+      const id = (e as CustomEvent<{ responseId: string }>).detail?.responseId;
+      if (!id) return;
+      const opp = await loadResponse(supabase, id).catch(() => null);
+      if (!opp) { showToast('That response could not be opened.', 'error'); return; }
+      setView('responses');
+      setNavOpen(false);
+      setActiveOpportunity(opp);
+    };
+    window.addEventListener(OPEN_RESPONSE_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_RESPONSE_EVENT, onOpen);
   }, []);
 
   const openGuide = (page: string, anchor: string | null) => {
@@ -538,6 +553,7 @@ export default function App() {
           <OpportunitiesDashboard
             currentUserId={currentUser.id}
             isAdmin={currentUser.isAdmin}
+            currentUser={currentUser}
             onSelectOpportunity={(opp) => { setActiveOpportunity(opp); setView('responses'); }}
           />
         )}
