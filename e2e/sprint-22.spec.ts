@@ -327,7 +327,7 @@ test('A question or file name containing markup shows as text', async ({ browser
   expect(await page.title()).not.toBe('pwned');
 });
 
-test('A response with two files lists both in the header; choosing the other opens it', async ({ browser }) => {
+test('A response with two files lists both in the header; choosing one shows its questions', async ({ browser }) => {
   checks('S22-1 7');
   // Locally only: it adds a response and two files (the providers are off, so no AI is used).
   test.skip(TARGET === 'staging', 'Adds a response and two files: run locally, where no AI is called and the data is thrown away');
@@ -354,6 +354,7 @@ test('A response with two files lists both in the header; choosing the other ope
   await caption(page, 'Choosing a file shows its questions');
   await files.getByRole('button', { name: /first-file-s22\.csv/ }).click();
   await expect(files.getByRole('button', { name: /first-file-s22\.csv/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#stage-questions')).toContainText(/Showing the \d+ in first-file-s22\.csv only\./);
   await expect(files.getByRole('button', { name: /second-file-s22\.csv/ })).toBeVisible();
   await expect(header(page)).toContainText('across 2 files');
 });

@@ -599,6 +599,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         onFilter={(id) => { setFileFilter(id); setSearch(''); setListCollapsed(false); }}
         // Q4: a sent response takes no new file; a later questionnaire is a new response.
         onAddFile={controls.upload && !exportState.exportedAt ? startNew : undefined}
+        addFileNote={controls.upload && exportState.exportedAt ? 'Marked as sent, so no file can be added: a later questionnaire is a new response.' : null}
         stages={stages}
       />
 

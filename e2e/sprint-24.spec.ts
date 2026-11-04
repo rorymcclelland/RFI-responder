@@ -61,8 +61,10 @@ test('One list across a response\'s files, with a filter by file', async ({ brow
   await expect(cards(page)).toHaveCount(total);
   for (const f of FILES) await expect(cards(page).filter({ hasText: `From ${f.name}` })).toHaveCount(f.rows.length);
   await expect(page.locator('#stage-questions')).toContainText(`${total} in this response, across 2 files`);
-  // The header's figures and the groups' counts agree (S24-1 1).
+  // The header's figures and the groups' counts agree (S24-1 1; QA review, L1).
   await expect(header(page)).toContainText(`0 of ${total} decided`);
+  const groupCounts = await page.locator('#stage-questions h3').allInnerTexts();
+  expect(groupCounts.map((t) => Number(t.match(/\((\d+)\)\s*$/)?.[1] ?? 0)).reduce((a, b) => a + b, 0)).toBe(total);
   await expect(files(page).getByRole('button', { name: 'All files' })).toHaveAttribute('aria-pressed', 'true');
 
   await caption(page, 'Choosing a file shows only its questions, and the page says so');
@@ -94,10 +96,11 @@ test('Marked as sent once, for the whole response, when every file is decided; d
     await group.getByRole('button', { name: /^CSV/ }).click();
     const got = await download;
     expect(got.suggestedFilename()).toBe(f.name);
-    // Only this file's questions (the CSV has a header row, then one row each).
+    // Only this file's questions, by their text (the download holds the question, not the customer's reference column).
     const text = readFileSync(await got.path(), 'utf8');
-    for (const row of f.rows) expect(text).toContain(row.split(',')[0]);
-    for (const other of FILES.filter((x) => x !== f)) for (const row of other.rows) expect(text).not.toContain(row.split(',')[0]);
+    const question = (row: string) => row.slice(row.indexOf(',') + 1).replace(/^"|"$/g, '');
+    for (const row of f.rows) expect(text).toContain(question(row));
+    for (const other of FILES.filter((x) => x !== f)) for (const row of other.rows) expect(text).not.toContain(question(row));
   }
   await send(page).getByRole('button', { name: 'Mark as sent' }).click();
   await page.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
@@ -106,6 +109,7 @@ test('Marked as sent once, for the whole response, when every file is decided; d
 
   await caption(page, 'Sent: the response is the record of what was sent, so no file can be added');
   await expect(header(page).getByRole('button', { name: 'Add a file' })).toHaveCount(0);
+  await expect(header(page)).toContainText('Marked as sent, so no file can be added: a later questionnaire is a new response.');
   await nav(page, 'Responses');
   await expect(page.locator('div.group', { has: page.getByText(NAME, { exact: true }) }).first()).toContainText('Sent');
 });
@@ -134,6 +138,9 @@ test('A change after sending reopens the whole response, and it is marked as sen
   await page.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(send(page).getByRole('heading', { name: /^Sent on/ })).toBeVisible();
   await expect(header(page)).not.toContainText('Changed since sent');
+  // Opened again after the second sending, it still says what the knowledge base did (QA review, M3).
+  await openResponse(page, NAME);
+  await expect(send(page)).toContainText(/Knowledge base(, across every time it was marked as sent)?: /);
 });
 
 test('At phone width the files filter and the file on each card fit', async ({ browser }) => {

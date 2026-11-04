@@ -133,7 +133,7 @@ export default function ExportPanel({ files, acceptedCount, skippedCount, learni
               <span>{learning || (trial ? 'Nothing was learned: this is a try.' : 'The knowledge base learned from this response when it was marked as sent.')}</span>
             </div>
             {/* S24-2 4: after a change, the report is the last sending's, until it is marked as sent again. */}
-            {changed && <p className="text-xs text-amber-700 mt-2 font-medium">This is what was learned when it was last marked as sent. The changes since are learned when you mark it as sent again.</p>}
+            {changed && <p className="text-xs text-amber-700 mt-2 font-medium">This is what was learned up to the last time it was marked as sent. The changes since are learned when you mark it as sent again.</p>}
             <p className="text-xs text-ink-400 mt-2 font-medium">
               {trial ? 'A try never teaches the knowledge base, so what you write here stays here.'
                 : 'Edited and person-written answers become entries, with this response recorded as their source. Pricing answers are never learned.'}

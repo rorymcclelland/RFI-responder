@@ -88,11 +88,18 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
     await caption(owner, 'Approves in bulk the drafts nothing holds, across both files');
     const ready = owner.locator('section[aria-labelledby="group-ready"] [id^="question-"]');
     expect(await ready.count()).toBeGreaterThan(0);
-    const readyFiles = new Set(await ready.evaluateAll((els) => els.map((e) => e.textContent?.match(/From (main-path-part-\d)\.csv/)?.[1] ?? '')));
+    // Which questions the page calls ready, and which need a person, before the one bulk approval (S24-1 3).
+    const ids = async (group: string) => owner.locator(`section[aria-labelledby="group-${group}"] [id^="question-"]`).evaluateAll((els) => els.map((e) => e.id));
+    const readyIds = await ids('ready');
+    const needsIds = await ids('needs');
+    const readyFiles = new Set(await ready.evaluateAll((els) => els.map((e) => e.textContent?.match(/From (main-path-part-\d\.csv)/)?.[1]).filter(Boolean)));
+    test.info().annotations.push({ type: 'note', description: `Ready to approve before bulk approval: ${readyIds.length}, from ${[...readyFiles].join(' and ')}` });
     await owner.getByRole('button', { name: 'All eligible' }).click();
-    // Every ready question, from whichever file, was taken by the one bulk approval (S24-1 3).
     await expect(owner.locator('section[aria-labelledby="group-ready"]')).toHaveCount(0);
-    expect(readyFiles.size).toBeGreaterThan(0);
+    // Exactly those: every ready question, from whichever file, is approved; every held one still needs a person.
+    await unfold(owner);
+    expect((await ids('approved')).filter((id) => readyIds.includes(id)).sort()).toEqual([...readyIds].sort());
+    expect((await ids('needs')).sort()).toEqual([...needsIds].sort());
   }
   await caption(owner, 'And the rest one at a time');
   for (let guard = 0; guard < total + 2; guard++) {
@@ -126,9 +133,13 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
     const sheet = book.getWorksheet('RFI Responses')!;
     const head = (sheet.getRow(1).values as unknown[]).map((v) => String(v ?? ''));
     const col = head.indexOf('Answer');
+    const qcol = head.indexOf('Question');
     const these: string[] = [];
-    sheet.eachRow((row, n) => { if (n > 1) these.push(String(row.getCell(col).text ?? '')); });
+    const asked: string[] = [];
+    sheet.eachRow((row, n) => { if (n > 1) { these.push(String(row.getCell(col).text ?? '')); asked.push(String(row.getCell(qcol).text ?? '')); } });
     expect(these).toHaveLength(half.rows.length);
+    // Its own questions only (QA review, M2), by their text.
+    expect(asked.sort()).toEqual(half.rows.map((r) => r.slice(r.indexOf(',') + 1)).sort());
     answers.push(...these);
   }
   const count = async (title: string) => Number((await owner.locator('h3', { hasText: new RegExp(`^\\s*${title} \\(\\d+\\)$`) }).innerText().catch(() => '(0)')).match(/\((\d+)\)/)![1]);
@@ -160,6 +171,7 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   await expect(send).toContainText(report);
   // Sent: no file can be added now (S24-1 8).
   await expect(owner.locator('header[aria-label="Response"]').getByRole('button', { name: 'Add a file' })).toHaveCount(0);
+  await expect(owner.locator('header[aria-label="Response"]')).toContainText('Marked as sent, so no file can be added: a later questionnaire is a new response.');
   await nav(owner, 'Knowledge');
   const learned = owner.getByRole('region', { name: 'Learned recently' });
   // The list has loaded once it shows an answer learned earlier in the run (Sprint 21, Larkspur).

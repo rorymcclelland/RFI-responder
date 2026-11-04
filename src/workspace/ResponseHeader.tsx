@@ -11,7 +11,7 @@ import { OUTCOME_LABEL, STAGE, formatDate } from '../lib/stage';
 
 export interface StageSummary { questions: string; experts: string; send: string }
 
-export default function ResponseHeader({ name, response, readFailed = false, ownerName, files, filter, onFilter, onAddFile, stages }: {
+export default function ResponseHeader({ name, response, readFailed = false, ownerName, files, filter, onFilter, onAddFile, addFileNote = null, stages }: {
   name: string;
   /** The overview's row for this response; null until it is read. */
   response: Opportunity | null;
@@ -24,6 +24,8 @@ export default function ResponseHeader({ name, response, readFailed = false, own
   onFilter: (fileId: string | null) => void;
   /** Only for those who may add a file. */
   onAddFile?: () => void;
+  /** Why no file can be added, said where **Add a file** would be (S24-1 8, Q4). */
+  addFileNote?: string | null;
   stages: StageSummary;
 }) {
   const stage = response ? STAGE[response.stage] : null;
@@ -108,6 +110,7 @@ export default function ResponseHeader({ name, response, readFailed = false, own
             <Upload size={12} aria-hidden="true" /> Add a file
           </button>
         )}
+        {!onAddFile && addFileNote && <span className="text-xs text-ink-500 font-medium">{addFileNote}</span>}
       </div>
 
       <nav aria-label="Stages" className="grid grid-cols-1 sm:grid-cols-3 gap-2">

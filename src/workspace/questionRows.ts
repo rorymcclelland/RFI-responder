@@ -39,6 +39,9 @@ export interface QuestionRow {
 
 export interface ApprovalRow { question_id: string; decided_by: string | null; decided_at: string; kind: 'individual' | 'bulk'; threshold: number | string | null }
 
+/** The API's row cap for one read (Supabase's default); larger reads come in pages of this size. */
+export const PAGE = 1000;
+
 const num = (v: number | string | null | undefined) => (v === null || v === undefined ? null : Number(v));
 
 export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEntry>, approval: ApprovalRow | null = null): RFIQuestion {
@@ -93,9 +96,14 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
 export async function loadQuestions(client: SupabaseClient, sessionId: string | string[]): Promise<RFIQuestion[]> {
   const ids = Array.isArray(sessionId) ? sessionId : [sessionId];
   if (ids.length === 0) return [];
-  const { data, error } = await client.from('rfi_questions').select('*').in('session_id', ids).order('position');
-  if (error) throw new Error(`Could not load the questions: ${error.message}`);
-  const rows = (data ?? []) as QuestionRow[];
+  // Read in pages, so a response with more questions than the API returns at once loses none (QA review, L7).
+  const rows: QuestionRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await client.from('rfi_questions').select('*').in('session_id', ids).order('position').order('id').range(from, from + PAGE - 1);
+    if (error) throw new Error(`Could not load the questions: ${error.message}`);
+    rows.push(...((data ?? []) as QuestionRow[]));
+    if ((data ?? []).length < PAGE) break;
+  }
   const refs = [...new Set(rows.flatMap((r) => (r.sources_json ?? []).map((s) => s.id)))];
   const entriesByRef = new Map<string, KnowledgeEntry>();
   if (refs.length) {

@@ -107,8 +107,10 @@ export async function recordResponseExport(client: SupabaseClient, responseId: s
  * Sprint 24 (S24-2, F-71): what the knowledge base did with a sent response's answers, from what the
  * database stored on each question when it was marked as sent (each outcome is a key of the report).
  */
-export function learnedFrom(questions: { status: string; learnOutcome: string | null }[]): ExportSummary {
-  const s: ExportSummary = { accepted: 0, skipped: 0 };
+export function learnedFrom(questions: { status: string; learnOutcome: string | null; learnedAt?: string | null }[]): ExportSummary & { sendings: number } {
+  // Each sending stamps the questions it learns from with its own time, so distinct times count the
+  // sendings that learned something (a re-sending learns only what changed; QA review, M3).
+  const s: ExportSummary & { sendings: number } = { accepted: 0, skipped: 0, sendings: new Set(questions.map((q) => q.learnedAt).filter(Boolean)).size };
   const counts = s as unknown as Record<string, number>;
   for (const q of questions) {
     if (q.status === 'accepted') s.accepted++;
@@ -118,8 +120,8 @@ export function learnedFrom(questions: { status: string; learnOutcome: string | 
   return s;
 }
 
-/** What learning did, in plain words, for the export panel. */
-export function describeLearning(s: ExportSummary): string {
+/** What learning did, in plain words, for the export panel; over more than one sending, it says so. */
+export function describeLearning(s: ExportSummary & { sendings?: number }): string {
   const parts: string[] = [];
   const add = (n: number | undefined, text: string) => { if (n) parts.push(`${n} ${text}`); };
   add(s.added, 'added as new entries');
@@ -134,7 +136,8 @@ export function describeLearning(s: ExportSummary): string {
   add(s.not_learned_unchecked, 'not learned (not fully checked)');
   add(s.not_learned_try, 'not learned (a try)');
   add(s.not_confirmed_source, 'did not confirm their entries (the entries need an admin\'s review)');
-  return parts.length ? `Knowledge base: ${parts.join('; ')}.` : 'Knowledge base: nothing new to learn from this response.';
+  const head = (s.sendings ?? 0) > 1 ? 'Knowledge base, across every time it was marked as sent' : 'Knowledge base';
+  return parts.length ? `${head}: ${parts.join('; ')}.` : 'Knowledge base: nothing new to learn from this response.';
 }
 
 export interface ExpertSuggestion { userId: string; displayName: string; score: number; reasons: string[] }

@@ -4,6 +4,8 @@ Run 4 November 2026, as agreed at the Sprint 24 refinement (Q5: CI only, no stag
 
 **The break.** On the throwaway branch `f72-broken-step` (commit `e5ad969`, never merged), the colleague's **Approve** in **Questions for you** returned before saving anything (`approveAssigned` in `src/lib/myAssignments.ts`), with no error shown: the quietest way a step can break.
 
+**Which test.** The main path as Sprint 23 left it (one questionnaire file); Sprint 24 then made it two files. The colleague's step, where the break is, did not change.
+
 **The run.** [CI run 41919882875](https://github.com/rorymcclelland/RFI-responder/actions/runs/41919882875), on the branch's local stack. The database tests and the migrations passed; the unit tests and the browser tests failed.
 
 ## S24-3 1: the main path test fails at the colleague's step, naming it

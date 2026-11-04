@@ -1,7 +1,7 @@
 // Sprint 24 (S24-1, U-11): one response, sent as a whole. Test numbers refer to
 // docs/refinement/sprint-24.md.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, refused, type TestUser } from './harness';
+import { as, asServiceRole, asSuperuser, buildDatabase, closePool, createUser, getPool, refused, type TestUser } from './harness';
 import { one, question, response, session } from './fixtures';
 
 let owner: TestUser;
@@ -92,6 +92,19 @@ describe('S24-1 4, 5 and 6: marking the whole response as sent', () => {
     expect(out.audits).toBe(2);
   });
 
+  it('4. by the owner too: one entry learned for each answer, from this response, and none twice (QA review, L2)', async () => {
+    const { r, files } = await twoFiles('Owner sends (S24 4)', [[{}], [{}]]);
+    await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Written by the owner (S24 4) ' || id WHERE session_id = ANY($1)`, [files]);
+    const entries = await as(owner, async (q) => {
+      await q(`SELECT record_response_export($1)`, [r]);
+      // Marking it again with nothing changed is refused, so nothing is learned twice.
+      await q(`SAVEPOINT again`);
+      await q(`SELECT record_response_export($1)`, [r]).catch(() => q(`ROLLBACK TO SAVEPOINT again`));
+      return (await q<{ n: number }>(`SELECT count(*)::int AS n FROM kb_entries WHERE origin_ref LIKE $1`, [`response:${r}/%`])).rows[0].n;
+    });
+    expect(entries).toBe(2);
+  });
+
   it('4. all or nothing: a file the database refuses leaves every file unsent', async () => {
     const { r, files } = await twoFiles('Refused file (S24 4)');
     await decideAll(r);
@@ -139,6 +152,7 @@ describe('S24-1 4, 5 and 6: marking the whole response as sent', () => {
     const { r } = await twoFiles('Unchanged (S24 6)');
     await decideAll(r);
     await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE opportunity_id = $1`, [r]);
+    await asSuperuser(`UPDATE opportunities SET exported_at = now() WHERE id = $1`, [r]);
     expect(await refused(as(owner, (q) => q(`SELECT record_response_export($1)`, [r])))).toMatch(/Nothing has changed since/);
   });
 
@@ -188,5 +202,76 @@ describe('S24-1 10: the role matrix for the two new functions', () => {
   it('adds counts as numbers, and leaves other values alone', async () => {
     const r = await one<{ r: Record<string, unknown> }>(`SELECT private.add_counts('{"a": 1, "b": 2}', '{"a": 3, "c": 4, "re_export": true}') AS r`);
     expect(r.r).toEqual({ a: 4, b: 2, c: 4 });
+  });
+});
+
+describe('Sprint 24 security review', () => {
+  /** Two connections as the owner, each in its own open transaction, for the races. */
+  async function connection(u: TestUser) {
+    const c = await getPool().connect();
+    await c.query('BEGIN');
+    await c.query('SET LOCAL ROLE authenticated');
+    await c.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: u.id, role: 'authenticated', email: u.email })]);
+    return c;
+  }
+
+  it('M1: a file added while the response is being marked as sent is refused once the export commits', async () => {
+    const { r } = await twoFiles('Race (S24 M1)');
+    await decideAll(r);
+    const sending = await connection(owner);
+    const adding = await connection(admin);
+    try {
+      await sending.query(`SELECT record_response_export($1)`, [r]);
+      // The insert waits for the export, then sees it.
+      const late = adding.query(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('late.xlsx', 1, $1)`, [r]);
+      await new Promise((res) => setTimeout(res, 200));
+      await sending.query('COMMIT');
+      expect(await refused(late)).toMatch(/marked as sent, so no file can be added/);
+    } finally {
+      await adding.query('ROLLBACK').catch(() => undefined);
+      adding.release();
+      sending.release();
+    }
+    expect(await stage(r)).toBe('exported');
+    const unsent = await asSuperuser(`SELECT count(*)::int AS n FROM rfi_sessions WHERE opportunity_id = $1 AND exported_at IS NULL`, [r]);
+    expect(unsent.rows[0].n).toBe(0);
+  });
+
+  it('M2 (a): no question is added to a sent file', async () => {
+    const { r, files } = await twoFiles('Sent file (S24 M2)');
+    await decideAll(r);
+    await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE opportunity_id = $1`, [r]);
+    expect(await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 9, 'Late question (S24 M2)?')`, [files[0]]))))
+      .toMatch(/marked as sent, so no question can be added/);
+  });
+
+  it('M2 (b): a file still being added (fewer questions saved than it has) is not sent', async () => {
+    const { r, files } = await twoFiles('Uploading (S24 M2)');
+    await decideAll(r);
+    await asSuperuser(`UPDATE rfi_sessions SET file_name = 'half-saved.xlsx', question_count = 40 WHERE id = $1`, [files[1]]);
+    expect(await refused(as(owner, (q) => q(`SELECT record_response_export($1)`, [r])))).toMatch(/The file half-saved\.xlsx is still being added/);
+  });
+
+  it('every file sent but the response not marked: marking it as sent marks it (not refused for good)', async () => {
+    const { r } = await twoFiles('Stuck (S24 info)');
+    await decideAll(r);
+    await asSuperuser(`ALTER TABLE opportunities DISABLE TRIGGER opportunities_sent_when_every_file_is`);
+    await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE opportunity_id = $1`, [r]);
+    await asSuperuser(`ALTER TABLE opportunities ENABLE TRIGGER opportunities_sent_when_every_file_is`);
+    expect(await sentAt(r)).toBeNull();
+    const res = await as(owner, async (q) => {
+      const x = (await q<{ r: Record<string, number> }>(`SELECT record_response_export($1) AS r`, [r])).rows[0].r;
+      const opp = (await q<{ exported_at: string | null }>(`SELECT exported_at FROM opportunities WHERE id = $1`, [r])).rows[0];
+      return { x, opp };
+    });
+    expect(res.x).toMatchObject({ files: 0 });
+    expect(res.opp.exported_at).toBeTruthy();
+  });
+
+  it('bulk approval checks its threshold and counts zero for a response with no file', async () => {
+    const r = await response(owner.id, { name: 'No files (S24 info)' });
+    expect(await refused(as(owner, (q) => q(`SELECT bulk_accept_response($1, 2)`, [r])))).toMatch(/between 0 and 1/);
+    const res = await as(owner, async (q) => (await q<{ r: Record<string, number> }>(`SELECT bulk_accept_response($1, 0.8) AS r`, [r])).rows[0].r);
+    expect(res).toMatchObject({ accepted: 0, heldGated: 0, belowThreshold: 0 });
   });
 });
