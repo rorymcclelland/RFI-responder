@@ -112,6 +112,8 @@ export const ALREADY_DECIDED = 'The owner has already decided this question sinc
 export async function approveAssigned(client: SupabaseClient, a: MyAssignment, text: string): Promise<void> {
   const problem = answerProblem(a, text);
   if (problem) throw new Error(problem);
+  // F-72 (Sprint 24, S24-3): a deliberate break on a throwaway branch, never merged: Approve saves nothing.
+  if (text) return;
   // Sprint 21 (BUG-45): the answer and the decision in one transaction, only while still to do.
   const { data, error } = await client.rpc('approve_answer', { p_question: a.question.id, p_answer: text, p_only_pending: true });
   if (error) throw new Error(`Your answer was not saved: ${error.message}${/[.!?]$/.test(error.message) ? '' : '.'}`);
