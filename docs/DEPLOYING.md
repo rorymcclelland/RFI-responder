@@ -63,6 +63,16 @@ Setting it up, once (the owner's steps; about 30 minutes):
 
 Since Sprint 21 (S21-3), the hosted projects' sign-in settings are written in [`supabase/hosted-auth.json`](../supabase/hosted-auth.json), one block per environment: new sign-ups off, the site address, and the redirect addresses. At the end of every staging run, and on the live demo after approval but before anything is deployed, the workflow reads the project's settings with its own token (read-only) and fails, naming each difference and where to change it, if they do not match: on staging the run fails after its tests; on the live demo the migrations and functions are held back (the app itself is published by Vercel from `main` regardless, as above). New sign-ups must stay off whatever the file says (decision 0003). The check runs on each deploy, so a setting changed between pushes is found at the next one. Nothing is applied automatically (Rory, Q4): the tokens cannot change sign-in. To change a setting, change it in the Supabase dashboard (Authentication) and in `hosted-auth.json` in the same sprint.
 
+### When a migration fails
+
+Tried on staging on 4 November 2026 (Sprint 23, F-68), with a throwaway branch whose only migration created a table and then failed (`SELECT 1 / 0`); the branch was never merged. What happened:
+
+- The Deploy run stopped at that migration. Its log names the file (`Applying migration 20261110100000_f68_failing_probe.sql...`) and the database's error (`ERROR: division by zero (SQLSTATE 22012)`).
+- No later step ran: no Edge Functions were deployed, no browser tests ran, and staging's app was not moved to the branch.
+- Nothing of the migration was kept. A read-only query afterwards found no `f68_probe` table and no record of the migration as applied; staging's latest migration was still the one before. A migration is all or nothing.
+
+So if a migration fails on the live demo, the demo keeps its database as it was and its functions as they were, while Vercel will already have published the app from `main`. Fix the migration on a sprint branch, let staging pass, merge, and approve the deploy again. Until then the app may expect a change the database does not have: if that breaks a page, roll the app back in Vercel to the previous production deployment.
+
 ### Rotating the keys
 
 Who does what. Rory makes what only a dashboard issues and keeps the credentials; [`scripts/setup-secrets.ts`](../scripts/setup-secrets.ts), which Rory runs on his PC, puts them where the deploy reads them; Claude sets public, non-secret settings through the connectors, with Rory's approval each time, and never sees a value.
