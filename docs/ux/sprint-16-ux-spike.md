@@ -148,6 +148,7 @@ Ordered so each slice is useful on its own. K stories are the knowledge base as 
 | U-8 | **Try it** for demo visitors: their own copy of a sample response, within the budget | 10 | M |
 | U-9 | Plain settings with **Advanced**, and the audit log filterable by person and response | 8, 9 | S |
 | U-10 | The guide, the introduction and the screenshots redone, a slice at a time | all | M |
+| U-11 | U-5's second slice (from the Sprint 22 review): one question list across a response's files, and bulk approval and **Mark as sent** for a whole response | 1, 4 | M |
 
 (U-7, "knowledge in one place", is replaced by K-1 to K-4.)
 

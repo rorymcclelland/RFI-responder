@@ -107,3 +107,17 @@ Order: S22-2 (it stands alone, and S22-3 needs its spend by use), S22-3, then S2
 - **Q4:** (a). The staging test checks the ask is recorded; the cap stays with the database tests.
 
 All three stories are Ready, Sprint 22.
+
+## Close (4 November 2026)
+
+All three stories are done. Rory signed off from the demo page and approved the production deploy, which applied both migrations and passed every deploy check after the live demo's sign-in settings matched. The evidence is in the Sprint 22 review in `docs/BACKLOG.md` and on the demo page (`docs/testing/sprint-22-demo.md`).
+
+**What changed from the refinement while building.**
+- **S22-1's groups.** Approved and Not answered are folded while anything is still to do, and a group opens for the question open in it, so a card just decided stays in view. The three stages are sections of one page, with the header's stage buttons jumping to each, rather than separate views: the Sprint 21 tests kept checking what they checked, and a phone scrolls one page.
+- **S22-1's reason order** is as the code and the guide have it: not processed, the gate, no draft, not calibrated, the checker's verdict.
+- **S22-1 case 3** is also checked against the database: bulk approval takes exactly the questions the page calls **Ready to approve**, over 480 combinations, when no cited entry needs re-checking. The page and the guide say that bulk approval checks the cited entries again.
+- **S22-1 case 4** needed demo data with something to approve in bulk: Bluefin is now approved in bulk at 95%, leaving two drafts at 91% (QA review). The checker's partly-answered hold (Sprint 8) is shown where a visitor meets it, pressing **High ≥80%**. Staging reloads its demo when the plan's version changes; the live demo keeps the earlier data until Rory reloads it.
+- **S22-2** gave the direct embedding function its own name under **Spend by use** (only CI calls it), and each settings part saves only its own fields (security review).
+- **S22-2 case 8** is far inside its second after the security review: a member's call returns at once, and a response or person with few rows reads in milliseconds.
+- **S22-3** also checks that the ask is recorded against the admin who asked, under **Spend by person**.
+- The second slice of U-5 is U-11 in the backlog.

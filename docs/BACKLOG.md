@@ -924,16 +924,45 @@ Refinement: `docs/refinement/sprint-21.md`. Q1 to Q4 answered by Rory the same d
 
 **Proposed next.** Sprint 22: U-5 (its first slice, split at refinement), U-9 and F-69. U-8 follows in Sprint 23, on the rebuilt response page.
 
-## Sprint 22: the response as a journey, plain settings, and the ask's usage on staging (refined 3 November 2026)
+## Sprint 22: the response as a journey, plain settings, and the ask's usage on staging (refined 3 November 2026; closed 4 November 2026)
 
 Refinement: `docs/refinement/sprint-22.md`. Q1 to Q4 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S22-1 | The response as a journey, first slice: a header, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each | U-5, U-10 | Ready, Sprint 22 |
-| S22-2 | Plain settings with **Advanced**, spend by use, and the audit log by person and response | U-9 | Ready, Sprint 22 |
-| S22-3 | The staging run's real-AI step reads the ask's usage | F-69 | Ready, Sprint 22 |
+| S22-1 | The response as a journey, first slice: a header, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each | U-5, U-10 | Done, Sprint 22 (first slice; the second is U-11) |
+| S22-2 | Plain settings with **Advanced**, spend by use, and the audit log by person and response | U-9 | Done, Sprint 22 |
+| S22-3 | The staging run's real-AI step reads the ask's usage | F-69 | Done, Sprint 22 |
 | F-70 | Done, Sprint 22. Staging's builds stopped: Vercel's free plan limits deployments a day, and every push made up to four (the unused sprint-branch preview, staging, and both results branches, which failed to build because their commits had no `vercel.json`). The results commits now carry one turning deployments off, and `vercel.json` turns them off for `sprint-*`, so a push makes one, staging's | Found on 3 November 2026 by the staging runs of c2ae75c and 9e9ff12 (Vercel: "Deployment rate limited"). The account's other project shares the limit |
+
+### Sprint 22 review (4 November 2026)
+
+**Checks, with evidence.**
+- 1141 unit and 409 database tests on the merged build `4a69074`; lint and type check clean; CI green.
+- The browser tests on `726d754` (the last code change): 26 passed in CI's local stack; 24 passed and 2 skipped (they add data or need a third person, locally only) on staging, where the real-AI step asked one question and saw it recorded under **Asking the knowledge base** and against the admin. The demo page showed every agreed case: 17 passed in the browser and 6 checked by a named check in CI, none failed, none by hand. Rory watched it and signed off.
+- Independent QA and security reviews: every finding dealt with (commit "Sprint 22 reviews" and after). The security review found nothing high; its two medium findings (the audit functions read the whole log for every caller) are fixed in `20261109110000` with a database test of the timings. The QA review found tests that passed without proving their case, including bulk approval, which never ran because the demo's Bluefin had nothing left to approve in bulk.
+- The guide's screenshots retaken from the CI screenshot run.
+
+**Found and fixed in the sprint.** A file just added dropping out of the header's list once another was opened (found by the case 7 browser test); the demo's Bluefin approved in bulk at 95% rather than 80%, so the demo shows **Ready to approve** and the bulk bar with something to take (staging reloads its demo when the plan's version changes; the live demo is Rory's to reload); F-70, Vercel's daily deployment limit, which stopped staging's builds.
+
+### Where every Sprint 22 review item now lives
+
+| Item | Now |
+|---|---|
+| U-5 first slice, U-9, F-69 (S22-1 to S22-3) | Done in Sprint 22 |
+| Sprint 22 QA and security review findings | Done (review) |
+| F-70 Vercel's daily deployment limit | Done in Sprint 22 |
+| U-5's second slice: one question list across a response's files, bulk approval and **Mark as sent** for a whole response | U-11, Backlog, from Sprint 22 review |
+| The live demo still holds the earlier Bluefin data (approved in bulk at 80%) | Rory's choice: reload the live demo with `supabase/demo-hosted.sql` (DEPLOYING.md), not a code item |
+
+**Not yet in a sprint, ranked at the Sprint 22 review.**
+1. U-8 **Try it** for demo visitors (M): the visitor's own copy of a sample response, within the budget; the response page it copies has settled, and it does most for demos and interviews.
+2. F-66 the main path as one browser test (M): sign in, add a response, upload, review, assign, approve and send end to end; Try it walks most of the same path.
+3. F-68 a migration that fails, tried on staging (S): the stop on failure has been seen for other steps, not for a migration.
+4. U-11 one list across a response's files, and sending a whole response (M, database functions): little value while responses have one file each.
+5. Then the earlier list: F-14 and F-15 (need people), F-59, F-20, F-34, F-60, F-62, F-8 (Pro plan), F-2, F-4.
+
+**Proposed next.** Sprint 23: U-8, F-66 and F-68.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -1025,7 +1054,7 @@ Refinement: `docs/refinement/sprint-22.md`. Q1 to Q4 answered by Rory the same d
 | F-66 | The main path (sign in, add a response, upload, review, assign, approve, export) as a browser test | Returned from Sprint 20 (S20-1's first content) |
 | F-67 | Done, Sprint 21 (S21-4). One step per staging run asks the knowledge base a question with the real AI model (Sprint 20, Q2) | Returned from Sprint 20; its case 3 (the staging run reads the usage line) is F-69 |
 | F-68 | A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
-| F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Returned from Sprint 21: not built (QA review); the recording and the cap are checked by database tests since Sprint 18 |
+| F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Done, Sprint 22 (S22-3) |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
 
