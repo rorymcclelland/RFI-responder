@@ -183,10 +183,14 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
 
   // The header's figures are the whole response's, from the database's overview: read again once
   // no decision is being saved, so they match its card on Responses (S22-1, case 1).
+  // Only the latest read is shown: an earlier one that answers late (say, from before the questions
+  // were added) would otherwise put old figures back (found on staging, Sprint 23: "0 of 0 decided").
+  const summaryRead = useRef(0);
   const refreshSummary = useCallback(() => {
+    const n = ++summaryRead.current;
     loadResponse(supabase, opportunityId)
-      .then((r) => { setSummary(r); setSummaryFailed(r === null); })
-      .catch((err) => { console.error('response overview read failed', err); setSummaryFailed(true); });
+      .then((r) => { if (n !== summaryRead.current) return; setSummary(r); setSummaryFailed(r === null); })
+      .catch((err) => { if (n !== summaryRead.current) return; console.error('response overview read failed', err); setSummaryFailed(true); });
   }, [opportunityId]);
 
   // ── File parsing ─────────────────────────────────────────────────────────

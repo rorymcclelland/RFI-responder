@@ -39,8 +39,11 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   await owner.getByRole('button', { name: 'Match and draft' }).click();
   await owner.getByRole('heading', { name: 'Questions', level: 2 }).waitFor({ timeout: 240_000 });
   await expect(owner.getByText(/Matching, checking and drafting/)).toHaveCount(0, { timeout: 240_000 });
-  const total = Number((await owner.locator('header[aria-label="Response"]').innerText()).match(/\d+ of (\d+) decided/)![1]);
-  expect(total).toBeGreaterThan(5);
+  // The header's figures are read again once drafting ends: wait for them to count the questions.
+  const header = owner.locator('header[aria-label="Response"]');
+  const totalNow = async () => Number((await header.innerText()).match(/\d+ of (\d+) decided/)?.[1] ?? 0);
+  await expect.poll(totalNow, { timeout: 30_000 }).toBeGreaterThan(5);
+  const total = await totalNow();
 
   // 2. Assign the question the knowledge base cannot answer to a colleague.
   await caption(owner, `Asks ${member.name} to answer the question the knowledge base cannot`);
