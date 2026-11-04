@@ -115,6 +115,12 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   await send.getByRole('button', { name: 'Mark as sent' }).click();
   await owner.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(send.getByRole('heading', { name: /^Sent on/ })).toBeVisible();
+  if (TARGET !== 'staging') {
+    // Locally, with no checker, every answer is held as not fully checked and is not learned; the
+    // page says so as soon as it is sent (the report is not kept once the response is closed).
+    await caption(owner, 'Locally, with no checker, nothing was learned, and the page says so');
+    await expect(send).toContainText(/not learned \(not fully checked\)/);
+  }
   await nav(owner, 'Knowledge');
   const learned = owner.getByRole('region', { name: 'Learned recently' });
   // The list has loaded once it shows an answer learned earlier in the run (Sprint 21, Larkspur).
@@ -125,13 +131,6 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
     await expect(entry).toBeVisible();
     await expect(entry).toContainText(`from ${name}`);
   } else {
-    // Locally, with no checker, every answer is held as not fully checked and is not learned.
-    await caption(owner, 'Locally, with no checker, nothing was learned, and the page said so');
-    await nav(owner, 'Responses');
-    await openResponse(owner, name);
-    await expect(owner.getByRole('region', { name: 'Send the response' })).toContainText(/not learned \(not fully checked\)/);
-    await nav(owner, 'Knowledge');
-    await expect(learned.getByRole('button').first()).toBeVisible();
     await expect(learned.getByText(CHARTER)).toHaveCount(0);
   }
 });
