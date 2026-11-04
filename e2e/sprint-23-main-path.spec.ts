@@ -2,8 +2,8 @@
  * Sprint 23 (S23-2, F-66): the main path as one browser test, in order, on a response the test
  * makes: an owner adds a response, uploads a questionnaire and drafts it; a colleague answers the
  * question they were asked; the owner decides the rest, downloads the Excel file and marks the
- * response as sent; the colleague's answer is then in the knowledge base. Locally only (Q5): the
- * providers are off, and staging's real-AI steps are the ask and the try.
+ * response as sent, and the page says what the knowledge base did. Locally only (Q5): the providers
+ * are off, and staging's real-AI steps are the ask and the try.
  */
 import { readFileSync } from 'node:fs';
 import ExcelJS from 'exceljs';
@@ -14,7 +14,7 @@ const { admin, member } = PEOPLE;
 const NOT_ANSWERED = 'Not answered';
 const CHARTER = 'Do you hold the Coral Bay Retail Supplier Charter accreditation?';
 
-test('The main path, end to end: add, upload, draft, assign, answer, approve, download, mark as sent, learned', async ({ browser }) => {
+test('The main path, end to end: add, upload, draft, assign, answer, approve, download, mark as sent', async ({ browser }) => {
   checks('S23-2 1', 'S23-2 2', 'S23-2 3');
   test.skip(TARGET === 'staging', 'Locally only (Q5): it drafts a whole questionnaire');
   test.setTimeout(420_000);
@@ -96,14 +96,18 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   expect(answers.filter((a) => a && a !== NOT_ANSWERED)).toHaveLength(approved);
   expect(answers).toContain(answer);
 
-  // 6. Mark as sent; the colleague's answer is learned, with the response as its source.
+  // 6. Mark as sent, and see what the knowledge base did with the answers. Locally the providers are
+  // off, so no checker classified the questions: each is held as not fully checked, and learning
+  // refuses such answers (the allow list, Sprint 3). The page must say so, and nothing may reach the
+  // knowledge base. That a checked answer becomes an entry is proven by the database tests
+  // (the workflow tests in supabase/tests/db/workflow.test.ts and the later sprints' tests).
   await caption(owner, 'Marks the response as sent');
   await send.getByRole('button', { name: 'Mark as sent' }).click();
   await owner.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(send.getByRole('heading', { name: /^Sent on/ })).toBeVisible();
-  await caption(owner, `The knowledge base has ${member.name}'s answer, from this response`);
+  await caption(owner, 'The page says what the knowledge base did: here, with no checker, nothing was learned');
+  await expect(send).toContainText(/not learned \(not fully checked\)/);
   await nav(owner, 'Knowledge');
-  const learned = owner.getByRole('region', { name: 'Learned recently' }).getByRole('button').filter({ hasText: CHARTER }).first();
-  await expect(learned).toBeVisible();
-  await expect(learned).toContainText(`from ${name}`);
+  await expect(owner.getByRole('region', { name: 'Learned recently' })).toBeVisible();
+  await expect(owner.getByRole('region', { name: 'Learned recently' }).getByText(CHARTER)).toHaveCount(0);
 });
