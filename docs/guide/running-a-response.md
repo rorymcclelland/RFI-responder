@@ -49,9 +49,9 @@ Processing stops if you reach your daily limit, or the organisation reaches its 
 
 ![A response: its header, the three stages, and the questions grouped by what they need](../screenshots/2-review.png)
 
-A response opens with its header, in the words of its card on **Responses**: the name, the owner, the due date (with **Overdue** or **At risk** when it is), how many of its questions are decided, its stage, and its files, the open one marked; choose another file to open it. Below the header are three stages, each saying what it holds; choose one to go to it:
+A response opens with its header, in the words of its card on **Responses**: the name, the owner, the due date (with **Overdue** or **At risk** when it is), how many of its questions are decided, its stage, and its files. Below the header are three stages, each saying what it holds; choose one to go to it:
 
-- **Questions**: the open file's questions, grouped by what they need.
+- **Questions**: every question in the response, from all its files, grouped by what they need. When a response has more than one file, each card says which file it came from, and the files in the header filter the list: choose a file to see only its questions, or **All files** to see them all again.
 - **With experts**: the questions asked of colleagues ([Asking a colleague](#asking-a-colleague)).
 - **Send**: downloading the answers and marking the response as sent ([Download and mark as sent](#5-download-and-mark-as-sent)).
 
@@ -99,15 +99,15 @@ The question appears under **Questions for you** in their **Assignments** ([Answ
 
 When every question is approved or left unanswered, the response shows **Ready to send**, with the downloads and **Mark as sent**. Until then the line under the bulk buttons says how many are still to do. Only the owner and admins see them.
 
-Download the answers whenever you need them: **Excel (.xlsx)**, **CSV (.csv)** or **Word (.doc)**. Downloading does not mark the response as sent. Each file records how every answer was produced (drafted by a model, edited, or written by a person, with the model and prompt version) and who approved it, when and how: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV. Questions left unanswered are exported as "Not answered", and the customer's own question numbers are kept. The translation label the app adds to a draft is left out of the exported answer wherever it is, and so is the reference list at the end of a draft, exactly as the app wrote it; anything a person wrote stays. Instead, each file records which answers were drafted from entries in another language, under **Translation** in the provenance.
+Download the answers whenever you need them: **Excel (.xlsx)**, **CSV (.csv)** or **Word (.doc)**. A response with more than one file has a download for each file, holding only that file's questions, so the customer gets back each questionnaire they sent. Downloading does not mark the response as sent. Each file records how every answer was produced (drafted by a model, edited, or written by a person, with the model and prompt version) and who approved it, when and how: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV. Questions left unanswered are exported as "Not answered", and the customer's own question numbers are kept. The translation label the app adds to a draft is left out of the exported answer wherever it is, and so is the reference list at the end of a draft, exactly as the app wrote it; anything a person wrote stays. Instead, each file records which answers were drafted from entries in another language, under **Translation** in the provenance.
 
-The app never sends anything to the customer: you send the files. When you have, choose **Mark as sent**. Before anything happens it says what marking as sent will do, with the numbers for this response:
+The app never sends anything to the customer: you send the files. When you have, choose **Mark as sent**. It is one step for the whole response, every file at once, and is offered only when every question in every file is decided. Before anything happens it says what marking as sent will do, with the numbers for this response:
 
 - record that it was sent, with your name and the time, in the audit log;
 - let the knowledge base learn from the answers people edited or wrote (below);
 - close the response's open assignments.
 
-Choose **Confirm: mark as sent** to go ahead, or **Cancel** to change nothing. The response then shows **Sent** on the overview.
+Choose **Confirm: mark as sent** to go ahead, or **Cancel** to change nothing. The response then shows **Sent** on the overview. Opened again later, its **Send** stage still says what the knowledge base did with its answers.
 
 ![A response marked as sent, and what the knowledge base learned](../screenshots/6-export-and-learning.png)
 
@@ -129,7 +129,7 @@ Marking a response as sent turns edited and person-written answers into knowledg
 
 ## 6. Finish
 
-Choose **Add a file** in the header (or **Add another file** after marking as sent) to add another file to the same response; only the owner or an admin can. The header lists the response's files (the ten most recent, and the open one), and choosing one opens it. The response opens on the most recent file.
+Choose **Add a file** in the header to add another file to the same response; only the owner or an admin can. Its questions join the list, and the header lists every file. Once the response is marked as sent, no file can be added: it is the record of what was sent, so a later questionnaire is a new response.
 
 When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the response marked as sent first, and marked again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 

@@ -9,41 +9,58 @@
  * Locally the providers are off: no checker classifies the questions, each is held as not fully
  * checked, nothing is ready to approve in bulk, and learning rightly refuses the answers; there the
  * test checks that the page says so and nothing reaches the knowledge base.
+ *
+ * Since Sprint 24 (S24-1, U-11) the customer's questionnaire arrives as two files, the sample's first
+ * and second halves: the list, bulk approval and Mark as sent are the whole response's, and each file
+ * downloads on its own. The same twelve questions are drafted, so the real-AI cost is unchanged.
  */
 import { readFileSync } from 'node:fs';
 import ExcelJS from 'exceljs';
-import { test, expect, PEOPLE, TARGET, signIn, caption, checks, nav, openResponse, expand } from './support';
+import { test, expect, PEOPLE, TARGET, signIn, caption, checks, nav, openResponse, expand, unfold } from './support';
 
 const { admin, member } = PEOPLE;
 /** The export's wording for a question left unanswered (NOT_ANSWERED in src/exportUtils.ts). */
 const NOT_ANSWERED = 'Not answered';
 const CHARTER = 'Do you hold the Coral Bay Retail Supplier Charter accreditation?';
+/** The sample questionnaire in two halves, as a customer might send it (S24-1). */
+const SAMPLE = readFileSync('sample-data/try-it-questionnaire.csv', 'utf8').trim().split(/\r?\n/);
+const HALVES = [
+  { name: 'main-path-part-1.csv', rows: SAMPLE.slice(1, 7) },
+  { name: 'main-path-part-2.csv', rows: SAMPLE.slice(7) },
+].map((h) => ({ ...h, buffer: Buffer.from([SAMPLE[0], ...h.rows].join('\n') + '\n') }));
 
 test('The main path, end to end: add, upload, draft, assign, answer, approve, download, mark as sent', async ({ browser }) => {
   // Every step, in order, runs only on staging (bulk approval and learning need checked drafts).
-  checks(...(TARGET === 'staging' ? ['S23-2 1', 'S23-2 2', 'S23-2 3'] : ['S23-2 2']));
+  checks(...(TARGET === 'staging' ? ['S23-2 1', 'S23-2 2', 'S23-2 3', 'S24-1 3'] : ['S23-2 2']), 'S24-1 4', 'S24-1 7', 'S24-2 1');
   if (TARGET === 'staging') test.info().annotations.push({ type: 'real-ai', description: 'Drafts a whole questionnaire with the real models' });
   test.setTimeout(480_000);
   const name = `Main path (S23-2) ${Date.now()}`;
   const answer = `No; we would apply for it within 90 days of contract (synthetic answer, ${Date.now()}).`;
 
-  // 1. Add a response and upload its questionnaire.
+  // 1. Add a response and upload its questionnaire, which comes in two files.
   const owner = await signIn(browser, admin);
   await caption(owner, `${admin.name} adds a response`);
   await nav(owner, 'Responses');
   await owner.getByRole('button', { name: 'New response' }).click();
   await owner.getByLabel(/^Name/).fill(name);
   await owner.getByRole('button', { name: /^Create/ }).click();
-  await caption(owner, 'Uploads the customer\'s questionnaire and drafts it (the question column is found by its heading)');
-  await owner.locator('input[type=file]').setInputFiles({ name: 'main-path-questionnaire.csv', mimeType: 'text/csv', buffer: readFileSync('sample-data/try-it-questionnaire.csv') });
-  await owner.getByRole('button', { name: 'Match and draft' }).click();
-  await owner.getByRole('heading', { name: 'Questions', level: 2 }).waitFor({ timeout: 240_000 });
-  await expect(owner.getByText(/Matching, checking and drafting/)).toHaveCount(0, { timeout: 240_000 });
+  await caption(owner, 'Uploads the customer\'s questionnaire, in two files, and drafts them (the question column is found by its heading)');
+  for (const [i, half] of HALVES.entries()) {
+    if (i > 0) await owner.locator('header[aria-label="Response"]').getByRole('button', { name: 'Add a file' }).click();
+    await owner.locator('input[type=file]').setInputFiles({ name: half.name, mimeType: 'text/csv', buffer: half.buffer });
+    await owner.getByRole('button', { name: 'Match and draft' }).click();
+    await owner.getByRole('heading', { name: 'Questions', level: 2 }).waitFor({ timeout: 240_000 });
+    await expect(owner.getByText(/Matching, checking and drafting/)).toHaveCount(0, { timeout: 240_000 });
+  }
   // The header's figures are read again once drafting ends: wait for them to count the questions.
   const header = owner.locator('header[aria-label="Response"]');
   const totalNow = async () => Number((await header.innerText()).match(/\d+ of (\d+) decided/)?.[1] ?? 0);
-  await expect.poll(totalNow, { timeout: 30_000 }).toBeGreaterThan(5);
+  await expect.poll(totalNow, { timeout: 30_000 }).toBe(HALVES[0].rows.length + HALVES[1].rows.length);
   const total = await totalNow();
+  // One list: every question of both files, each card naming its file (S24-1 1).
+  await unfold(owner);
+  await expect(owner.locator('[id^="question-"]')).toHaveCount(total);
+  for (const half of HALVES) await expect(owner.locator('[id^="question-"]', { hasText: `From ${half.name}` })).toHaveCount(half.rows.length);
 
   // 2. Assign the question the knowledge base cannot answer to a colleague.
   await caption(owner, `Asks ${member.name} to answer the question the knowledge base cannot`);
@@ -68,11 +85,14 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   await owner.reload();
   await openResponse(owner, name);
   if (TARGET === 'staging') {
-    await caption(owner, 'Approves in bulk the drafts nothing holds');
+    await caption(owner, 'Approves in bulk the drafts nothing holds, across both files');
     const ready = owner.locator('section[aria-labelledby="group-ready"] [id^="question-"]');
     expect(await ready.count()).toBeGreaterThan(0);
+    const readyFiles = new Set(await ready.evaluateAll((els) => els.map((e) => e.textContent?.match(/From (main-path-part-\d)\.csv/)?.[1] ?? '')));
     await owner.getByRole('button', { name: 'All eligible' }).click();
+    // Every ready question, from whichever file, was taken by the one bulk approval (S24-1 3).
     await expect(owner.locator('section[aria-labelledby="group-ready"]')).toHaveCount(0);
+    expect(readyFiles.size).toBeGreaterThan(0);
   }
   await caption(owner, 'And the rest one at a time');
   for (let guard = 0; guard < total + 2; guard++) {
@@ -89,21 +109,28 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   }
   await expect(owner.locator('header[aria-label="Response"]')).toContainText(`${total} of ${total} decided`);
 
-  // 5. Download the Excel file: it holds every approved answer, the colleague's among them.
-  await caption(owner, 'Downloads the answers: the Excel file holds every approved answer');
+  // 5. Download each file's answers: together they hold every approved answer, the colleague's among them.
+  await caption(owner, 'Downloads the answers, one Excel file for each of the customer\'s files');
   const send = owner.getByRole('region', { name: 'Send the response' });
-  const download = owner.waitForEvent('download');
-  await send.getByRole('button', { name: /^Excel/ }).click();
-  const file = await (await download).path();
-  const book = new ExcelJS.Workbook();
-  await book.xlsx.readFile(file);
-  // The answers sheet: a row per decided question, the answer column holding each approved answer
-  // and the not-answered wording for the rest (exportRows in src/exportUtils.ts).
-  const sheet = book.getWorksheet('RFI Responses')!;
-  const head = (sheet.getRow(1).values as unknown[]).map((v) => String(v ?? ''));
-  const col = head.indexOf('Answer');
   const answers: string[] = [];
-  sheet.eachRow((row, n) => { if (n > 1) answers.push(String(row.getCell(col).text ?? '')); });
+  for (const half of HALVES) {
+    const download = owner.waitForEvent('download');
+    await send.getByRole('group', { name: `Download ${half.name}` }).getByRole('button', { name: /^Excel/ }).click();
+    const got = await download;
+    // Each download is named for its file and holds that file's questions only (S24-1 7).
+    expect(got.suggestedFilename()).toBe(half.name.replace(/\.csv$/, '.xlsx'));
+    const book = new ExcelJS.Workbook();
+    await book.xlsx.readFile(await got.path());
+    // The answers sheet: a row per decided question, the answer column holding each approved answer
+    // and the not-answered wording for the rest (exportRows in src/exportUtils.ts).
+    const sheet = book.getWorksheet('RFI Responses')!;
+    const head = (sheet.getRow(1).values as unknown[]).map((v) => String(v ?? ''));
+    const col = head.indexOf('Answer');
+    const these: string[] = [];
+    sheet.eachRow((row, n) => { if (n > 1) these.push(String(row.getCell(col).text ?? '')); });
+    expect(these).toHaveLength(half.rows.length);
+    answers.push(...these);
+  }
   const count = async (title: string) => Number((await owner.locator('h3', { hasText: new RegExp(`^\\s*${title} \\(\\d+\\)$`) }).innerText().catch(() => '(0)')).match(/\((\d+)\)/)![1]);
   const approved = await count('Approved');
   const unanswered = await count('Not answered');
@@ -113,8 +140,8 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
   expect(answers.filter((a) => a && a !== NOT_ANSWERED)).toHaveLength(approved);
   expect(answers).toContain(answer);
 
-  // 6. Mark as sent, and see what the knowledge base did with the answers.
-  await caption(owner, 'Marks the response as sent');
+  // 6. Mark as sent, once for the whole response, and see what the knowledge base did with the answers.
+  await caption(owner, 'Marks the whole response as sent, both files at once');
   await send.getByRole('button', { name: 'Mark as sent' }).click();
   await owner.getByRole('group', { name: 'Confirm marking as sent' }).getByRole('button', { name: 'Confirm: mark as sent' }).click();
   await expect(send.getByRole('heading', { name: /^Sent on/ })).toBeVisible();
@@ -124,6 +151,15 @@ test('The main path, end to end: add, upload, draft, assign, answer, approve, do
     await caption(owner, 'Locally, with no checker, nothing was learned, and the page says so');
     await expect(send).toContainText(/not learned \(not fully checked\)/);
   }
+  const report = (await send.innerText()).match(/Knowledge base: [^\n]+/)![0];
+  // Opened again later, the response still says what was learned, in the same words (S24-2 1).
+  await caption(owner, 'Opened again later, the response still says what the knowledge base did with it');
+  await nav(owner, 'Responses');
+  await openResponse(owner, name);
+  await expect(send.getByRole('heading', { name: /^Sent on/ })).toBeVisible();
+  await expect(send).toContainText(report);
+  // Sent: no file can be added now (S24-1 8).
+  await expect(owner.locator('header[aria-label="Response"]').getByRole('button', { name: 'Add a file' })).toHaveCount(0);
   await nav(owner, 'Knowledge');
   const learned = owner.getByRole('region', { name: 'Learned recently' });
   // The list has loaded once it shows an answer learned earlier in the run (Sprint 21, Larkspur).

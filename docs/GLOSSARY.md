@@ -5,7 +5,7 @@ The words RFI Respond uses on screen, in the guide and in the introduction, one 
 | Say | Meaning | Not |
 |---|---|---|
 | **response** | One customer questionnaire and everything done to answer it: its questions, files, decisions and export. Shown under **Responses** | opportunity, workspace, RFI (as a name for it) |
-| **file** | A spreadsheet or Word document whose questions were added to a response. A response can have several | session, RFI session, upload (as a noun) |
+| **file** | A spreadsheet or Word document whose questions were added to a response. A response can have several: its page lists every file's questions together, filtered by file with **All files** or a file's name, each file downloads on its own, and the response is marked as sent once, as a whole (Sprint 24) | session, RFI session, upload (as a noun) |
 | **question** | One question from the customer, with its draft and decision | |
 | **knowledge base**, **Knowledge** | The organisation's approved answers that drafts are written from; **Knowledge** in the menu | KB (entry numbers keep their `KB-` prefix) |
 | **entry** | One answer in the knowledge base, with its number (`KB-0042`) | |

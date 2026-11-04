@@ -1,10 +1,11 @@
-/** Expert assignments for a session's questions: load, assign and unassign. */
+/** Expert assignments for a response's questions (every file, since Sprint 24): load, assign and unassign. */
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { QuestionAssignment, RFIQuestion, UserProfile } from '../types';
 
-export function useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError }: {
-  sessionId: string | null;
+export function useAssignments({ sessionIds, opportunityId, questions, currentUser, allUsers, onError }: {
+  /** The files whose assignments are read (S24-1: all the response's). */
+  sessionIds: string[];
   opportunityId: string;
   questions: RFIQuestion[];
   currentUser: UserProfile;
@@ -14,11 +15,12 @@ export function useAssignments({ sessionId, opportunityId, questions, currentUse
 }) {
   const [assignments, setAssignments] = useState<Record<string, QuestionAssignment[]>>({});
 
-  const loadAssignments = useCallback(async (sid: string) => {
+  const loadAssignments = useCallback(async (sids: string[]) => {
+    if (sids.length === 0) { setAssignments({}); return; }
     const { data } = await supabase
       .from('question_assignments')
       .select('*, assignedToProfile:user_profiles!question_assignments_assigned_to_fkey(id, display_name, job_title, expertise_tags, is_admin, created_at)')
-      .eq('session_id', sid);
+      .in('session_id', sids);
     if (data) {
       const map: Record<string, QuestionAssignment[]> = {};
       for (const r of data) {
@@ -43,20 +45,20 @@ export function useAssignments({ sessionId, opportunityId, questions, currentUse
     }
   }, []);
 
+  const key = sessionIds.join(',');
   useEffect(() => {
-    if (sessionId) loadAssignments(sessionId);
-    else setAssignments({});
-  }, [sessionId, loadAssignments]);
+    loadAssignments(key ? key.split(',') : []);
+  }, [key, loadAssignments]);
 
   async function handleAssign(questionId: string, userId: string) {
     const q = questions.find((q) => q.id === questionId);
-    if (!q || !sessionId) return;
+    if (!q) return;
     const existing = assignments[questionId] ?? [];
     if (existing.some((a) => a.assignedTo === userId)) return;
     const { data, error } = await supabase
       .from('question_assignments')
       .insert({
-        question_id: questionId, session_id: sessionId, opportunity_id: opportunityId,
+        question_id: questionId, session_id: q.sessionId, opportunity_id: opportunityId,
         assigned_to: userId, assigned_by: currentUser.id,
         question_text: q.question, answer_text: q.finalAnswer,
       })

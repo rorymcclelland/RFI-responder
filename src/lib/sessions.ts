@@ -26,6 +26,16 @@ export async function bulkAcceptInDb(client: SupabaseClient, sessionId: string, 
   return data as BulkResult;
 }
 
+/**
+ * Sprint 24 (S24-1, U-11): bulk approval across every file of a response, by the same rules, in one
+ * database call (bulk_accept_response); the counts are the whole response's.
+ */
+export async function bulkAcceptResponse(client: SupabaseClient, responseId: string, minConfidence: number): Promise<BulkResult> {
+  const { data, error } = await client.rpc('bulk_accept_response', { p_response: responseId, p_min_confidence: minConfidence });
+  if (error) throw new Error(`Bulk approval was not saved: ${error.message}`);
+  return data as BulkResult;
+}
+
 /** Describe what bulk approval did and what it held back, in plain words. */
 export function describeBulk(r: BulkResult, threshold: number): string {
   const parts = [`${r.accepted} approved`];
@@ -162,6 +172,22 @@ export async function loadExportState(client: SupabaseClient, sessionId: string)
   const { data, error } = await client.from('rfi_sessions').select('exported_at, changed_since_export_at').eq('id', sessionId).maybeSingle();
   if (error || !data) return { exportedAt: null, changedSinceExportAt: null };
   return { exportedAt: (data.exported_at as string | null) ?? null, changedSinceExportAt: (data.changed_since_export_at as string | null) ?? null };
+}
+
+/**
+ * Sprint 24 (S24-1): the whole response's export. It is sent once every file is (Q3), when the last
+ * was; it has changed since when any file has. A response with an unsent file is not sent.
+ */
+export function responseExportState(files: { exportedAt: string | null; changedSinceExportAt: string | null }[]): ExportState {
+  if (files.length === 0 || files.some((f) => !f.exportedAt)) return { exportedAt: null, changedSinceExportAt: null };
+  const latest = (xs: (string | null)[]) => xs.filter((x): x is string => Boolean(x)).sort().at(-1) ?? null;
+  return { exportedAt: latest(files.map((f) => f.exportedAt)), changedSinceExportAt: latest(files.map((f) => f.changedSinceExportAt)) };
+}
+
+export async function loadResponseExportState(client: SupabaseClient, responseId: string): Promise<ExportState> {
+  const { data, error } = await client.from('rfi_sessions').select('exported_at, changed_since_export_at').eq('opportunity_id', responseId);
+  if (error || !data) return { exportedAt: null, changedSinceExportAt: null };
+  return responseExportState(data.map((r) => ({ exportedAt: (r.exported_at as string | null) ?? null, changedSinceExportAt: (r.changed_since_export_at as string | null) ?? null })));
 }
 
 /** What the workspace says about the export, or null when there is nothing to say. */

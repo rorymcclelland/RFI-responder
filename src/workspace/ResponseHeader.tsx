@@ -1,8 +1,9 @@
 /**
  * Sprint 22 (S22-1, U-5): the response's header. Where it stands, in the words of its card on
  * Responses (name, owner, due date, Overdue or At risk, progress and stage, all from the database's
- * overview of the whole response), its files with the open one marked, and the three stages, each
- * with what it holds, to jump to. Text shows as text, never as markup.
+ * overview of the whole response), its files, and the three stages, each with what it holds, to jump
+ * to. Text shows as text, never as markup. Since Sprint 24 (S24-1, Q1) the page lists every file's
+ * questions, and the files here filter the list: all of them, or one.
  */
 import { AlertTriangle, CalendarClock, FileText, Upload, User } from 'lucide-react';
 import type { Opportunity, RFISession } from '../types';
@@ -10,7 +11,7 @@ import { OUTCOME_LABEL, STAGE, formatDate } from '../lib/stage';
 
 export interface StageSummary { questions: string; experts: string; send: string }
 
-export default function ResponseHeader({ name, response, readFailed = false, ownerName, files, openFileId, openFileName, onOpenFile, onAddFile, stages }: {
+export default function ResponseHeader({ name, response, readFailed = false, ownerName, files, filter, onFilter, onAddFile, stages }: {
   name: string;
   /** The overview's row for this response; null until it is read. */
   response: Opportunity | null;
@@ -18,18 +19,15 @@ export default function ResponseHeader({ name, response, readFailed = false, own
   readFailed?: boolean;
   ownerName: string | null;
   files: RFISession[];
-  openFileId: string | null;
-  openFileName: string;
-  onOpenFile: (file: RFISession) => void;
+  /** The one file the list shows, or null for every file. */
+  filter: string | null;
+  onFilter: (fileId: string | null) => void;
   /** Only for those who may add a file. */
   onAddFile?: () => void;
   stages: StageSummary;
 }) {
   const stage = response ? STAGE[response.stage] : null;
   const pct = response && response.total ? Math.round((response.decided / response.total) * 100) : 0;
-  // The open file is always listed, even when it is older than the files read first.
-  const listed = files.some((f) => f.id === openFileId) || !openFileId ? files
-    : [{ id: openFileId, fileName: openFileName } as RFISession, ...files];
   const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   return (
@@ -78,21 +76,33 @@ export default function ResponseHeader({ name, response, readFailed = false, own
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="section-label">Files</span>
-        <ul aria-label="Files" className="contents">
-          {listed.map((f) => (
-            <li key={f.id} className="contents">
-              {f.id === openFileId ? (
-                <span aria-current="true" className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-900 bg-ink-50 border border-ink-200 rounded-lg px-2.5 py-1.5 max-w-full">
-                  <FileText size={12} aria-hidden="true" className="flex-shrink-0" /> <span className="truncate">{f.fileName}</span> <span className="font-medium text-ink-500">(open)</span>
-                </span>
-              ) : (
-                <button onClick={() => onOpenFile(f)} className="btn-ghost text-xs py-1.5 max-w-full">
+        {files.length === 1 ? (
+          <ul aria-label="Files" className="contents">
+            <li className="contents">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-ink-900 bg-ink-50 border border-ink-200 rounded-lg px-2.5 py-1.5 max-w-full">
+                <FileText size={12} aria-hidden="true" className="flex-shrink-0" /> <span className="truncate">{files[0].fileName}</span>
+              </span>
+            </li>
+          </ul>
+        ) : files.length > 1 && (
+          // Every file's questions are listed; choosing a file shows only its questions (S24-1, Q1).
+          <ul aria-label="Files" className="contents">
+            <li className="contents">
+              <button aria-pressed={filter === null} onClick={() => onFilter(null)}
+                className={`text-xs py-1.5 px-2.5 rounded-lg border font-bold ${filter === null ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-700 border-ink-200 hover:bg-ink-50'}`}>
+                All files
+              </button>
+            </li>
+            {files.map((f) => (
+              <li key={f.id} className="contents">
+                <button aria-pressed={filter === f.id} onClick={() => onFilter(filter === f.id ? null : f.id)}
+                  className={`inline-flex items-center gap-1.5 text-xs py-1.5 px-2.5 rounded-lg border font-bold max-w-full ${filter === f.id ? 'bg-ink-900 text-white border-ink-900' : 'bg-white text-ink-700 border-ink-200 hover:bg-ink-50'}`}>
                   <FileText size={12} aria-hidden="true" className="flex-shrink-0" /> <span className="truncate">{f.fileName}</span>
                 </button>
-              )}
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
         {onAddFile && (
           <button onClick={onAddFile} className="btn-ghost text-xs py-1.5">
             <Upload size={12} aria-hidden="true" /> Add a file

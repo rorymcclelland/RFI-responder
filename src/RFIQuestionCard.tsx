@@ -2,7 +2,7 @@ import { ASSIGNMENT_WORD, GATE_LABEL, needReason } from './workspace/journey';
 import { openEntry } from './lib/openEntry';
 import { confidenceBand } from './workspace/confidenceBands';
 import { useState, useEffect } from 'react';
-import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle } from 'lucide-react';
+import { ChevronDown, CheckCircle2, SkipForward, Pencil, RotateCcw, BookOpen, Tag, UserPlus, UserCheck, X, ChevronDown as ChevDown, Info, ExternalLink, AlertTriangle, FileText } from 'lucide-react';
 import { RFIQuestion, UserProfile, QuestionAssignment, KnowledgeEntry } from './types';
 import { approvalLabel, bulkHoldReason, checkerSummary, confidenceRange, formatConfidence, needsWrittenAnswer } from './lib/format';
 import { CALIBRATION_TABLES } from '../supabase/functions/_shared/calibration-tables.ts';
@@ -293,11 +293,13 @@ interface Props {
   onUnassign?: (questionId: string, assignmentId: string) => void;
   /** Owner, admin or assignee (Sprint 3, F-7); others can read but not decide. */
   canDecide?: boolean;
+  /** Sprint 24 (S24-1): the question's file, named when the response has more than one. */
+  fileName?: string;
 }
 
 export default function RFIQuestionCard({
   question, index, isExpanded, onToggleExpand, onAccept, onSkip, onUndoSkip,
-  users = [], assignments = [], onAssign, onUnassign, canDecide = true,
+  users = [], assignments = [], onAssign, onUnassign, canDecide = true, fileName,
 }: Props) {
   const [editing, setEditing]     = useState(false);
   const [editText, setEditText]   = useState(question.finalAnswer);
@@ -350,6 +352,11 @@ export default function RFIQuestionCard({
           <p className={`text-sm font-semibold leading-snug ${question.status === 'skipped' ? 'text-ink-400 line-through' : 'text-ink-800'}`}>
             {question.question}
           </p>
+          {fileName && (
+            <span className="flex items-center gap-1 mt-1 text-2xs font-semibold text-ink-400 min-w-0" title="The file this question came from">
+              <FileText size={10} aria-hidden="true" className="flex-shrink-0" /> <span className="truncate">From {fileName}</span>
+            </span>
+          )}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {/* Sprint 22 (S22-1): the one reason a question still to do needs a person, first. */}
             {reason ? (

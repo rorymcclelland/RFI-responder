@@ -196,7 +196,8 @@ test('The header says where the response stands, as its card on Responses does; 
     await expect(h.getByText(flag, { exact: true })).toHaveCount(cardText.includes(flag) ? 1 : 0);
   }
   await expect(h.getByRole('navigation', { name: 'Stages' }).getByRole('button')).toHaveText([/^Questions/, /^With experts/, /^Send/]);
-  await expect(h.getByRole('list', { name: 'Files' }).locator('[aria-current="true"]')).toContainText('(open)');
+  // Since Sprint 24 (S24-1, Q1) a one-file response simply names its file; there is nothing to switch to.
+  await expect(h.getByRole('list', { name: 'Files' }).getByRole('listitem')).toHaveCount(1);
 
   await caption(page, 'Every question is in one group, and the groups add up to the header\'s count');
   const counts = await Promise.all(['Needs a person', 'Ready to approve', 'Approved', 'Not answered'].map((g) => groupCount(page, g)));
@@ -347,11 +348,12 @@ test('A response with two files lists both in the header; choosing the other ope
   await header(page).getByRole('button', { name: 'Add a file' }).click();
   await upload('second-file-s22.csv');
   const files = header(page).getByRole('list', { name: 'Files' });
-  await expect(files.getByRole('listitem')).toHaveCount(2);
-  await expect(files.locator('[aria-current="true"]')).toContainText('second-file-s22.csv');
-  await caption(page, 'Choosing the other file opens it');
+  // Both files, and since Sprint 24 (S24-1, Q1) All files: choosing a file filters the one list to it.
+  await expect(files.getByRole('listitem')).toHaveCount(3);
+  await expect(files.getByRole('button', { name: 'All files' })).toHaveAttribute('aria-pressed', 'true');
+  await caption(page, 'Choosing a file shows its questions');
   await files.getByRole('button', { name: /first-file-s22\.csv/ }).click();
-  await expect(files.locator('[aria-current="true"]')).toContainText('first-file-s22.csv');
+  await expect(files.getByRole('button', { name: /first-file-s22\.csv/ })).toHaveAttribute('aria-pressed', 'true');
   await expect(files.getByRole('button', { name: /second-file-s22\.csv/ })).toBeVisible();
   await expect(header(page)).toContainText('across 2 files');
 });

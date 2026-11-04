@@ -3,7 +3,7 @@
  * staging the visitor's try is drafted with the real AI (Q5); locally the providers are off.
  */
 import { readFileSync } from 'node:fs';
-import { test, expect, PEOPLE, TARGET, signIn, caption, checks, nav, scrollsSideways } from './support';
+import { test, expect, PEOPLE, TARGET, signIn, caption, checks, nav, openResponse, scrollsSideways } from './support';
 import { requestAllowed } from './target';
 import type { Locator, Page } from '@playwright/test';
 
@@ -94,6 +94,10 @@ test('Try it: your own response from the sample, drafted, worked through and mar
   await caption(page, 'Sent, and nothing was learned');
   await expect(sendPanel(page).getByRole('heading', { name: /^Sent on/ })).toBeVisible();
   // What the database reported: nothing learned, because it is a try (QA review: not the flag alone).
+  await expect(sendPanel(page)).toContainText(/\d+ not learned \(a try\)/);
+  // Sprint 24 (S24-2 2): opened again later, the try still says nothing was learned from it.
+  checks('S24-2 2');
+  await openResponse(page, tryOf(member.name));
   await expect(sendPanel(page)).toContainText(/\d+ not learned \(a try\)/);
 });
 

@@ -18,11 +18,12 @@ export const toSession = (r: Record<string, unknown>): RFISession => ({
 });
 
 /**
- * The response's files (sessions; newest first, at most ten). Throws if the read fails. Since Sprint 17
+ * The response's files (sessions; newest first, at most a hundred, since Sprint 24 lists every file's
+ * questions at once; there were at most ten before). Throws if the read fails. Since Sprint 17
  * (S17-1) files not linked to any response are not read: they were listed in every response.
  */
 export async function loadResponseSessions(client: SupabaseClient, opportunityId: string): Promise<{ linked: RFISession[] }> {
-  const linked = await client.from('rfi_sessions').select('*').eq('opportunity_id', opportunityId).order('created_at', { ascending: false }).limit(10);
+  const linked = await client.from('rfi_sessions').select('*').eq('opportunity_id', opportunityId).order('created_at', { ascending: false }).limit(100);
   if (linked.error) {
     console.error('rfi_sessions read failed', linked.error);
     throw new Error('This response could not be loaded. Check your connection and try again.');

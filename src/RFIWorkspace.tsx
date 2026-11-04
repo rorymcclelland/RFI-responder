@@ -1,6 +1,11 @@
 /**
  * RFIWorkspace: the end-to-end workflow for one response.
  *
+ * Since Sprint 24 (S24-1, U-11) the page holds every file of the response at once: one list of their
+ * questions (filtered by file if wished), bulk approval across them all, and one Mark as sent for the
+ * whole response once every question in every file is decided (Rory, Q1 and Q3). Downloads stay one
+ * per file (Q2), and no file is added once the response is sent (Q4).
+ *
  * Steps: upload, column mapping, processing (server-side from Sprint 2), review, export.
  * Each step is its own component in ./workspace (F-5); this file holds the state that
  * crosses steps and the review list.
@@ -15,9 +20,9 @@ import PreviewStep from './workspace/PreviewStep';
 import { detectQuestionColumn } from './lib/drafting';
 import { firstView, loadResponseSession, loadResponseSessions } from './workspace/openResponse';
 import { exportReason, workspaceControls } from './workspace/controls';
-import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, loadExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
+import { bulkAcceptResponse, describeBulk, exportNotice, insertQuestions, loadResponseExportState, processInBatches, saveQuestionPatch, type ExportState } from './lib/sessions';
 import { indexNewEntries } from './lib/knowledgeBase';
-import { describeLearning, loadResponse, recordExport, sendPreview } from './lib/responses';
+import { describeLearning, learnedFrom, loadResponse, recordResponseExport, sendPreview } from './lib/responses';
 import { answerSource } from './lib/answerLabel';
 import { supabase } from './lib/supabase';
 import type { Opportunity, RFIQuestion, RFISession, UserProfile } from './types';
@@ -78,46 +83,65 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [summaryFailed, setSummaryFailed] = useState(false);
   const [search, setSearch]               = useState('');
   const [expandedId, setExpandedId]       = useState<string | null>(null);
+  // The file being added or drafted, and the newest file once the response is open; the list is every file's.
   const [sessionId, setSessionId]         = useState<string | null>(null);
   const [pastSessions, setPastSessions]   = useState<RFISession[]>([]);
+  // Sprint 24 (S24-1, Q1): the list shows every file's questions, or one file's when chosen.
+  const [fileFilter, setFileFilter]       = useState<string | null>(null);
   const [learning, setLearning]           = useState('');
   const [uploadError, setUploadError]     = useState('');
   const [notice, setNotice]               = useState('');
   const [listCollapsed, setListCollapsed] = useState(false);
-  // Sprint 11 (S11-1): the open session's export, and whether answers changed since.
+  // Sprint 11 (S11-1): the export, and whether answers changed since; since Sprint 24 the whole response's.
   const [exportState, setExportState]     = useState<ExportState>({ exportedAt: null, changedSinceExportAt: null });
   const rawRows                           = useRef<Row[]>([]);
   // Sprint 5 (S5-3): questions found in a Word document, while the person checks them.
   const [drafts, setDrafts]               = useState<Draft[]>([]);
   const [extraction, setExtraction]       = useState<{ summary: string; ruleBased: boolean }>({ summary: '', ruleBased: false });
 
-  const { assignments, handleAssign, handleUnassign, loadAssignments } = useAssignments({ sessionId, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
+  const fileIds = pastSessions.map((f) => f.id);
+  const { assignments, handleAssign, handleUnassign, loadAssignments } = useAssignments({ sessionIds: fileIds, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
-  /** Returns false if the questions could not be read; the caller decides what to show. */
-  const openSession = useCallback(async (session: RFISession, given?: number): Promise<boolean> => {
+  /**
+   * Opens the response: every file's questions and the whole response's export (S24-1). `focusFile`
+   * is the file whose name and id the page keeps as the newest (or the one a link asked for).
+   * Returns false if the questions could not be read; the caller decides what to show.
+   */
+  const openFiles = useCallback(async (files: RFISession[], focusFile: RFISession, given?: number): Promise<boolean> => {
     // Opened by hand (no sequence given), it is the newest load: an earlier one finishing late is ignored (security review, M3).
     const seq = given ?? ++loadSeq.current;
     let loaded: RFIQuestion[];
     try {
-      loaded = await loadQuestions(supabase, session.id);
+      loaded = await loadQuestions(supabase, files.map((f) => f.id));
     } catch (err) {
       // On the automatic path the caller shows its own error (security review, L6).
       if (seq === loadSeq.current && given === undefined) setUploadError((err as Error).message);
       return false;
     }
-    const exported = await loadExportState(supabase, session.id);
+    const exported = await loadResponseExportState(supabase, opportunityId);
     if (seq !== loadSeq.current) return true;
+    const sent = Boolean(exported.exportedAt) && !exported.changedSinceExportAt;
     setUploadError('');
+    setPastSessions(files);
     setQuestions(loaded);
-    setFileName(session.fileName);
-    setSessionId(session.id);
+    setFileName(focusFile.fileName);
+    setSessionId(focusFile.id);
     setExportState(exported);
-    setStep(session.status === 'completed' ? 'export' : 'review');
+    setStep(sent ? 'export' : 'review');
     setLearning('');
-    setListCollapsed(session.status === 'completed');
-    setSearch(''); setExpandedId(null); setNotice(''); setOpenGroups(new Set());
+    setListCollapsed(sent);
+    setSearch(''); setExpandedId(null); setNotice(''); setOpenGroups(new Set()); setFileFilter(null);
     return true;
-  }, []);
+  }, [opportunityId]);
+
+  /** Reads the response's files, questions and export again, keeping what the person is looking at. */
+  const reloadAll = useCallback(async () => {
+    const { linked } = await loadResponseSessions(supabase, opportunityId);
+    setPastSessions(linked);
+    setQuestions(await loadQuestions(supabase, linked.map((f) => f.id)));
+    setExportState(await loadResponseExportState(supabase, opportunityId));
+    return linked;
+  }, [opportunityId]);
 
   const loadPastSessions = useCallback(async (autoResume = false) => {
     const seq = ++loadSeq.current;
@@ -134,7 +158,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       const view = firstView(wanted && !linked.includes(wanted) ? [wanted, ...linked] : linked, focus?.sessionId ?? null);
       if (view === 'upload') { setStep('idle'); return; }
       if (focus) setPendingFocus({ ...focus, missing: view.missing === true });
-      if (!(await openSession(view.open, seq)) && seq === loadSeq.current) {
+      const files = linked.includes(view.open) ? linked : [view.open, ...linked];
+      if (!(await openFiles(files, view.open, seq)) && seq === loadSeq.current) {
         setLoadError('The questions in this response could not be loaded. Check your connection and try again.');
         setStep('load_error');
       }
@@ -143,7 +168,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       if (autoResume) { setLoadError((err as Error).message); setStep('load_error'); }
       else setUploadError((err as Error).message);
     }
-  }, [opportunityId, openSession, focus]);
+  }, [opportunityId, openFiles, focus]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadPastSessions(true); }, [opportunityId]);
@@ -229,25 +254,35 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
 
   // ── Processing (server-side, S2-2a) ──────────────────────────────────────
 
-  /** Ask the server to process these questions, then show the session as saved. */
-  const processAndReload = useCallback(async (sid: string, ids: string[]) => {
+  /**
+   * Ask the server to process these questions (each file's in turn), then show the response as saved:
+   * every file, so a file just added is listed and its questions join the list (S22-1 7, S24-1).
+   */
+  const processAndReload = useCallback(async (work: { sid: string; ids: string[] }[]) => {
+    const all = work.reduce((n, w) => n + w.ids.length, 0);
     setStep('processing');
     setProgress(0);
-    setProcessMsg(`Matching, checking and drafting 0 / ${ids.length}`);
-    const { failed, reasons } = await processInBatches(supabase, sid, ids, (done, total) => {
-      setProcessMsg(`Matching, checking and drafting ${done} / ${total}`);
-      setProgress(Math.round((done / total) * 100));
-    });
-    if (failed.length) setUploadError(`${failed.length} question${failed.length !== 1 ? 's' : ''} could not be processed${reasons.length ? ` (${reasons.join('; ')})` : ''}.`);
-    // The header lists the response's files: read them again, so a file just added stays listed (Sprint 22, S22-1 7).
-    loadPastSessions();
+    setProcessMsg(`Matching, checking and drafting 0 / ${all}`);
+    let before = 0;
+    const failed: string[] = [];
+    const reasons = new Set<string>();
+    for (const w of work) {
+      const r = await processInBatches(supabase, w.sid, w.ids, (done) => {
+        setProcessMsg(`Matching, checking and drafting ${before + done} / ${all}`);
+        setProgress(Math.round(((before + done) / all) * 100));
+      });
+      failed.push(...r.failed);
+      r.reasons.forEach((x) => reasons.add(x));
+      before += w.ids.length;
+    }
+    if (failed.length) setUploadError(`${failed.length} question${failed.length !== 1 ? 's' : ''} could not be processed${reasons.size ? ` (${[...reasons].join('; ')})` : ''}.`);
     try {
-      setQuestions(await loadQuestions(supabase, sid));
+      await reloadAll();
     } catch (err) {
       setUploadError((err as Error).message);
     }
     setStep('review');
-  }, [loadPastSessions]);
+  }, [reloadAll]);
 
   const runProcessing = useCallback(async () => {
     if (!questionCol) return;
@@ -271,7 +306,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       setUploadError((err as Error).message);
       return;
     }
-    await processAndReload(session.id, ids);
+    await processAndReload([{ sid: session.id, ids }]);
   }, [questionCol, fileName, opportunityId, processAndReload]);
 
   /** S5-3: save the checked list from a Word document, then process it like a spreadsheet's. */
@@ -295,7 +330,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       return;
     }
     setDrafts([]);
-    await processAndReload(session.id, ids);
+    await processAndReload([{ sid: session.id, ids }]);
   }, [drafts, fileName, opportunityId, processAndReload]);
 
   // Sprint 23 (S23-1): a try's questions are drafted when it is first opened, as an upload's are
@@ -304,9 +339,10 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   useEffect(() => {
     // Only for the try's own visitor: an admin opening someone's try never spends their own quota on it (reviews).
     if (!summary?.trial || summary.ownerId !== currentUser.id || archived || step !== 'review' || !sessionId || drafted.current.has(sessionId)) return;
-    if (questions.length === 0 || questions.some((q) => q.processed || q.sessionId !== sessionId)) return;
+    const own = questions.filter((q) => q.sessionId === sessionId);
+    if (own.length === 0 || own.some((q) => q.processed)) return;
     drafted.current.add(sessionId);
-    processAndReload(sessionId, questions.map((q) => q.id));
+    processAndReload([{ sid: sessionId, ids: own.map((q) => q.id) }]);
   }, [summary?.trial, summary?.ownerId, currentUser.id, archived, step, sessionId, questions, processAndReload]);
 
   // ── Review actions ────────────────────────────────────────────────────────
@@ -333,23 +369,24 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     }));
     setSaving((n) => n + 1);
     saveQuestionPatch(supabase, id, { status: patch.status, finalAnswer: patch.finalAnswer }).then(async () => {
-      // A change to an exported session reopens its export (S11-1): show the review again, with why.
-      if (!sessionId || !exportState.exportedAt) return;
-      const next = await loadExportState(supabase, sessionId);
+      // A change to a sent response reopens its export (S11-1): show the review again, with why.
+      if (!exportState.exportedAt) return;
+      const next = await loadResponseExportState(supabase, opportunityId);
       setExportState(next);
       if (next.changedSinceExportAt) { setStep('review'); setListCollapsed(false); }
     }).catch((err: Error & { partial?: boolean }) => {
       setUploadError(err.message);
       // Part of the change is in the database (the answer, not the decision): show what was saved.
-      if (err.partial && sessionId) {
-        loadQuestions(supabase, sessionId).then(setQuestions).catch(() => {
+      if (err.partial) {
+        loadQuestions(supabase, fileIds).then(setQuestions).catch(() => {
           if (previous) setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
         });
       } else if (previous) {
         setQuestions((prev) => prev.map((q) => (q.id === id ? previous! : q)));
       }
     }).finally(() => setSaving((n) => n - 1));
-  }, [sessionId, exportState.exportedAt]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opportunityId, exportState.exportedAt, fileIds.join(',')]);
 
   // The database records the approval (S3-2); show the same record at once rather than after a reload.
   const handleAccept   = useCallback((id: string, ans: string) => updateQuestion(id, {
@@ -359,13 +396,12 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const handleSkip     = useCallback((id: string) => updateQuestion(id, { status: 'skipped', approval: null }), [updateQuestion]);
   const handleUndoSkip = useCallback((id: string) => updateQuestion(id, { status: 'pending', approval: null }), [updateQuestion]);
 
-  // The database decides what bulk approval includes; the screen then shows what was saved.
+  // The database decides what bulk approval includes, across every file (S24-1); the screen then shows what was saved.
   const runBulkAccept = async (threshold: number) => {
-    if (!sessionId) return;
     setUploadError(''); setNotice('');
     try {
-      const result = await bulkAcceptInDb(supabase, sessionId, threshold);
-      setQuestions(await loadQuestions(supabase, sessionId));
+      const result = await bulkAcceptResponse(supabase, opportunityId, threshold);
+      setQuestions(await loadQuestions(supabase, fileIds));
       setNotice(describeBulk(result, threshold));
     } catch (err) {
       setUploadError((err as Error).message);
@@ -379,20 +415,19 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const unprocessed = questions.filter((q) => !q.processed && q.status === 'pending');
 
   /**
-   * Record the export (S3-2): refused by the database while anything is pending, and the moment
-   * the knowledge base learns from this response (S3-4). New entries are then embedded.
+   * Record the export (S3-2): refused by the database while anything in any file is to do, and the
+   * moment the knowledge base learns from this response (S3-4). New entries are then embedded. Since
+   * Sprint 24 (S24-1, Q3) it is the whole response, every file in one transaction.
    */
   const finishSession = async () => {
-    if (!sessionId) return;
     setUploadError(''); setNotice('');
     try {
       // Mark as sent (S21-1): the database records it, learns and closes the assignments.
-      const summary = await recordExport(supabase, sessionId);
-      setExportState(await loadExportState(supabase, sessionId));
+      const summary = await recordResponseExport(supabase, opportunityId);
       setLearning(describeLearning(summary));
-      setQuestions(await loadQuestions(supabase, sessionId));
+      const files = await reloadAll();
       // The database closed the open assignments: show it (QA review, Sprint 21).
-      await loadAssignments(sessionId);
+      await loadAssignments(files.map((f) => f.id));
       if (summary.added || summary.superseded) {
         const indexed = await indexNewEntries();
         if (!indexed.ok) setNotice(`The new entries are saved but not yet indexed for meaning-based search (${indexed.reason}); they will be indexed on the next sign-in.`);
@@ -403,21 +438,26 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     }
     setListCollapsed(true);
     setStep('export');
-    loadPastSessions();
   };
 
   const startNew = () => {
     setStep('idle'); setQuestions([]); setFileName(''); setHeaders([]);
     setQuestionCol(''); setProgress(0); setSessionId(null);
     setLearning(''); setListCollapsed(false); setNotice(''); setExportState({ exportedAt: null, changedSinceExportAt: null });
-    setSearch(''); setExpandedId(null); setOpenGroups(new Set());
+    setSearch(''); setExpandedId(null); setOpenGroups(new Set()); setFileFilter(null);
     loadPastSessions();
   };
 
-  // BUG-31 (Sprint 10 accuracy review): a card's number is its place in the upload, not in the
+  // BUG-31 (Sprint 10 accuracy review): a card's number is its place in its file, not in the
   // review order (which is sorted by confidence).
-  const uploadOrder = new Map([...questions].sort((x, y) => x.position - y.position).map((q, i) => [q.id, i]));
+  const uploadOrder = new Map<string, number>();
+  for (const f of new Set(questions.map((q) => q.sessionId))) {
+    questions.filter((q) => q.sessionId === f).sort((x, y) => x.position - y.position).forEach((q, i) => uploadOrder.set(q.id, i));
+  }
+  const fileNames = new Map(pastSessions.map((f) => [f.id, f.fileName]));
+  const manyFiles = new Set(questions.map((q) => q.sessionId)).size > 1 || pastSessions.length > 1;
   const visible = questions.filter((q) => {
+    if (fileFilter && q.sessionId !== fileFilter) return false;
     if (search) {
       const s = search.toLowerCase();
       return q.question.toLowerCase().includes(s) || q.finalAnswer.toLowerCase().includes(s);
@@ -450,7 +490,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       error={uploadError}
       pastSessions={pastSessions}
       onFile={processFile}
-      onLoadSession={openSession}
+      onLoadSession={(f) => { openFiles(pastSessions.some((x) => x.id === f.id) ? pastSessions : [f, ...pastSessions], f); }}
       onRefresh={() => loadPastSessions()}
       uploadNote={controls.upload ? null : controls.uploadNote}
     />
@@ -507,6 +547,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     <div key={q.id} id={`question-${q.id}`} className="scroll-mt-4">
       <RFIQuestionCard
         question={q}
+        fileName={manyFiles ? fileNames.get(q.sessionId) ?? 'another file' : undefined}
         index={uploadOrder.get(q.id) ?? 0}
         isExpanded={expandedId === q.id}
         onToggleExpand={() => setExpandedId(expandedId === q.id ? null : q.id)}
@@ -554,10 +595,10 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         readFailed={summaryFailed}
         ownerName={ownerName}
         files={pastSessions}
-        openFileId={sessionId}
-        openFileName={fileName}
-        onOpenFile={(f) => { openSession(f); }}
-        onAddFile={controls.upload ? startNew : undefined}
+        filter={fileFilter}
+        onFilter={(id) => { setFileFilter(id); setSearch(''); setListCollapsed(false); }}
+        // Q4: a sent response takes no new file; a later questionnaire is a new response.
+        onAddFile={controls.upload && !exportState.exportedAt ? startNew : undefined}
         stages={stages}
       />
 
@@ -585,7 +626,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
             (a batch failed, or the file was added by an earlier version of the app), so {unprocessed.length !== 1 ? 'they are' : 'it is'} not available for bulk approval.
           </span>
           {canAssign && !archived && (
-            <button onClick={() => sessionId && processAndReload(sessionId, unprocessed.map((q) => q.id))} className="btn-ghost text-xs py-1.5">
+            <button onClick={() => processAndReload([...new Set(unprocessed.map((q) => q.sessionId))].map((sid) => ({ sid, ids: unprocessed.filter((q) => q.sessionId === sid).map((q) => q.id) })))} className="btn-ghost text-xs py-1.5">
               <RefreshCw size={12} /> Process now
             </button>
           )}
@@ -603,7 +644,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <h2 id="stage-questions-heading" className="text-lg font-black text-ink-900">Questions</h2>
           <p className="text-xs text-ink-500 flex-1 min-w-[12rem]">
-            {totalCount} in {fileName ? 'this file' : 'this response'}: {pendingCount} to do, {acceptedCount} approved{skippedCount ? `, ${skippedCount} not answered` : ''}.
+            {totalCount} in this response{manyFiles ? `, across ${pastSessions.length} files` : ''}: {pendingCount} to do, {acceptedCount} approved{skippedCount ? `, ${skippedCount} not answered` : ''}.
+            {fileFilter && <> Showing the {visible.length} in {fileNames.get(fileFilter) ?? 'one file'} only.</>}
           </p>
           <div className="relative w-full sm:w-64">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 pointer-events-none" aria-hidden="true" />
@@ -661,11 +703,11 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
         {/* Sprint 21 (S21-1, U-6): download once every question is decided; marking as sent is separate. */}
         {canAssign && totalCount > 0 && allDone ? (
           <ExportPanel
-            questions={questions}
-            fileName={fileName}
+            files={pastSessions.map((f) => ({ id: f.id, fileName: f.fileName, questions: questions.filter((q) => q.sessionId === f.id) })).filter((f) => f.questions.length > 0)}
             acceptedCount={acceptedCount}
             skippedCount={skippedCount}
-            learning={learning}
+            // S24-2 (F-71): what was learned, from what the database stored when it was sent, once the page's own report is gone.
+            learning={learning || (exportState.exportedAt ? describeLearning(learnedFrom(questions)) : '')}
             names={new Map(allUsers.map((u) => [u.id, u.displayName]))}
             sentAt={exportState.exportedAt}
             changed={exportState.changedSinceExportAt !== null}
@@ -673,13 +715,12 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
             preview={sendPreview(questions, questions.flatMap((q) => assignments[q.id] ?? []), answerSource)}
             trial={summary?.trial ?? false}
             onMarkSent={archived ? undefined : finishSession}
-            onStartNew={archived || step !== 'export' ? undefined : startNew}
           />
         ) : (
           <p className="text-sm text-ink-500">
             {!canAssign
               ? `Only the response owner${ownerName ? `, ${ownerName},` : ''} or an admin downloads the answers and marks the response as sent.`
-              : exportReason(pendingCount) ?? 'Nothing to download yet: this file has no questions.'}
+              : exportReason(pendingCount) ?? 'Nothing to download yet: this response has no questions.'}
           </p>
         )}
       </section>

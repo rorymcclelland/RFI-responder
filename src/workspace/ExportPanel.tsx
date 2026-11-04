@@ -3,17 +3,19 @@
  * the answers at any time; marking the response as sent is a separate step, which says beforehand what
  * it will do (record who and when, teach the knowledge base, close the assignments). Downloads hold
  * only decided answers, so every answer in a file has a named person's decision behind it (rule 4, Q1).
+ * Since Sprint 24 (S24-1) marking as sent is the whole response's, and downloads stay one per file
+ * (Rory, Q2): the customer gets back each questionnaire they sent.
  */
 import { useState } from 'react';
-import { CheckCircle2, Download, FileDown, FileText, Send, Sheet, Upload } from 'lucide-react';
+import { CheckCircle2, Download, FileDown, FileText, Send, Sheet } from 'lucide-react';
 import { exportCSV, exportExcel, exportWord } from '../exportUtils';
 import type { RFIQuestion } from '../types';
 
-export default function ExportPanel({ questions, fileName, acceptedCount, skippedCount, learning, names, sentAt, changed, preview, saving = false, trial = false, onMarkSent, onStartNew }: {
-  questions: RFIQuestion[];
+export default function ExportPanel({ files, acceptedCount, skippedCount, learning, names, sentAt, changed, preview, saving = false, trial = false, onMarkSent }: {
+  /** Each file of the response with its own questions: one download each (S24-1, Q2). */
+  files: { id: string; fileName: string; questions: RFIQuestion[] }[];
   /** Approvers' names for the provenance record (Sprint 7, F-27). */
   names: Map<string, string>;
-  fileName: string;
   acceptedCount: number;
   skippedCount: number;
   /** Sprint 23 (S23-1): a visitor's try, from which nothing is ever learned. */
@@ -30,8 +32,6 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
   saving?: boolean;
   /** Absent when the person cannot mark it as sent (not the owner or an admin, or archived). */
   onMarkSent?: () => Promise<void>;
-  /** Absent for an archived response, which takes no new uploads. */
-  onStartNew?: () => void;
 }) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -56,19 +56,35 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
         <div>
           <p className="section-label mb-1">Download</p>
           <p className="text-xs text-ink-500 mb-4">Downloading does not mark the response as sent. Each file records how every answer was produced (drafted by a model, edited or written by a person) and who approved it: on a Provenance sheet in Excel, at the end of the Word file, and in columns in CSV.</p>
-          <div className="flex flex-wrap gap-3">
-            <button disabled={saving} onClick={() => exportExcel(questions, fileName, names)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-emerald-300 text-emerald-700 rounded-2xl hover:bg-emerald-50 transition-colors shadow-card disabled:opacity-40">
-              <Sheet size={18} /> Excel (.xlsx)
-            </button>
-            <button disabled={saving} onClick={() => exportCSV(questions, fileName, names)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-ink-200 text-ink-700 rounded-2xl hover:bg-ink-50 transition-colors shadow-card disabled:opacity-40">
-              <FileText size={18} /> CSV (.csv)
-            </button>
-            <button disabled={saving} onClick={() => exportWord(questions, fileName, names)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-sky-300 text-sky-700 rounded-2xl hover:bg-sky-50 transition-colors shadow-card disabled:opacity-40">
-              <FileDown size={18} /> Word (.doc)
-            </button>
+          <div className="space-y-4">
+            {files.map((f) => {
+              // With several files, each button names its file, for those who hear the page (S24-1 7).
+              const label = (format: string) => (files.length > 1 ? `${format}, ${f.fileName}` : undefined);
+              return (
+                <div key={f.id} role={files.length > 1 ? 'group' : undefined} aria-label={files.length > 1 ? `Download ${f.fileName}` : undefined}>
+                  {files.length > 1 && (
+                    <p className="flex items-center gap-1.5 text-xs font-bold text-ink-700 mb-2 min-w-0">
+                      <FileText size={12} aria-hidden="true" className="flex-shrink-0" /> <span className="truncate">{f.fileName}</span>
+                      <span className="font-medium text-ink-400 flex-shrink-0">({f.questions.length} question{f.questions.length !== 1 ? 's' : ''})</span>
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-3">
+                    <button disabled={saving} aria-label={label('Excel (.xlsx)')} onClick={() => exportExcel(f.questions, f.fileName, names)}
+                      className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-emerald-300 text-emerald-700 rounded-2xl hover:bg-emerald-50 transition-colors shadow-card disabled:opacity-40">
+                      <Sheet size={18} /> Excel (.xlsx)
+                    </button>
+                    <button disabled={saving} aria-label={label('CSV (.csv)')} onClick={() => exportCSV(f.questions, f.fileName, names)}
+                      className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-ink-200 text-ink-700 rounded-2xl hover:bg-ink-50 transition-colors shadow-card disabled:opacity-40">
+                      <FileText size={18} /> CSV (.csv)
+                    </button>
+                    <button disabled={saving} aria-label={label('Word (.doc)')} onClick={() => exportWord(f.questions, f.fileName, names)}
+                      className="flex items-center gap-2 px-5 py-3 text-sm font-bold bg-white border-2 border-sky-300 text-sky-700 rounded-2xl hover:bg-sky-50 transition-colors shadow-card disabled:opacity-40">
+                      <FileDown size={18} /> Word (.doc)
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           {saving && <p className="text-xs text-ink-500 mt-2" role="status">Saving a change; the downloads are ready again once it is saved.</p>}
         </div>
@@ -116,6 +132,8 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
               {/* What the database did when it was marked as sent; for a try, it says nothing was learned (QA review). */}
               <span>{learning || (trial ? 'Nothing was learned: this is a try.' : 'The knowledge base learned from this response when it was marked as sent.')}</span>
             </div>
+            {/* S24-2 4: after a change, the report is the last sending's, until it is marked as sent again. */}
+            {changed && <p className="text-xs text-amber-700 mt-2 font-medium">This is what was learned when it was last marked as sent. The changes since are learned when you mark it as sent again.</p>}
             <p className="text-xs text-ink-400 mt-2 font-medium">
               {trial ? 'A try never teaches the knowledge base, so what you write here stays here.'
                 : 'Edited and person-written answers become entries, with this response recorded as their source. Pricing answers are never learned.'}
@@ -123,13 +141,6 @@ export default function ExportPanel({ questions, fileName, acceptedCount, skippe
           </div>
         )}
 
-        {onStartNew && (
-          <div className="border-t border-ink-100 pt-4">
-            <button onClick={onStartNew} className="btn-ghost text-sm">
-              <Upload size={15} /> Add another file
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );

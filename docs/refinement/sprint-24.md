@@ -92,3 +92,10 @@ Order: S24-3 first (stands alone, one CI run), then S24-1, then S24-2 on the **S
 - **Q5:** (a). The F-72 branch runs in CI only.
 
 All three stories are Ready, Sprint 24.
+
+## While building
+
+- **S22-1 7 changes by Q1.** Its agreed case said choosing the other file opens it; with one list, choosing a file filters the list to it. The case's wording in `e2e/cases.ts` says so, and its test checks the filter.
+- **The main path's questionnaire is two files.** The sample's two halves, uploaded one after the other, so the main path also proves S24-1 on staging with the real AI (bulk approval across both files, one Mark as sent, one download each) for the same twelve questions as before: no extra real-AI cost.
+- **Two older database tests** marked a response as sent without sending its file, which the database now refuses to call sent; they send the file first.
+- **A response marked as sent before Sprint 24 with a file unsent** is no longer called sent: the migration clears that mark on responses not archived (none of the demo's responses has more than one file).

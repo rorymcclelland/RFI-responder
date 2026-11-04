@@ -61,7 +61,9 @@ describe('S3-1 the overview', () => {
     await asSuperuser(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [q1]);
     expect((await overview(opp)).stage).toBe('ready');
     await as(owner, (q) => q(`SELECT record_export($1)`, [s]));
-    // record_export ran in a rolled-back transaction; set the date directly to check the stage.
+    // record_export ran in a rolled-back transaction; set the dates directly to check the stage (the
+    // file first: since Sprint 24 a response is sent only once every file of it is).
+    await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE id = $1`, [s]);
     await asSuperuser(`UPDATE opportunities SET exported_at = now() WHERE id = $1`, [opp]);
     expect((await overview(opp)).stage).toBe('exported');
     await asSuperuser(`UPDATE opportunities SET archived_at = now(), outcome = 'won' WHERE id = $1`, [opp]);
@@ -188,6 +190,8 @@ describe('S3-3 archive, outcome and admin-only delete', () => {
     const opp = await response();
     const s = await session(opp);
     const a = await question(s);
+    // Its file first: since Sprint 24 a response is sent only once every file of it is.
+    await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE id = $1`, [s]);
     await asSuperuser(`UPDATE opportunities SET exported_at = now() WHERE id = $1`, [opp]);
     await as(owner, async (q) => {
       await q(`SELECT archive_response($1, 'won')`, [opp]);

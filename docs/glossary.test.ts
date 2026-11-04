@@ -80,6 +80,15 @@ describe('the glossary (S17-1)', () => {
     expect(glossary).toContain('| **try**, **Try it** |');
   });
 
+  it('Sprint 24 (S24-1 12): a file is one of a response\'s, listed together and sent as a whole', () => {
+    const glossary = readFileSync(join(__dirname, 'GLOSSARY.md'), 'utf8');
+    const row = glossary.split('\n').find((l) => l.startsWith('| **file** |'))!;
+    expect(row).toContain('**All files**');
+    expect(row).toContain('marked as sent once, as a whole');
+    // The label the glossary names is the app's.
+    expect(readFileSync(join(ROOT, 'src/workspace/ResponseHeader.tsx'), 'utf8')).toContain('All files');
+  });
+
   it('2. the guide uses no retired word', () => {
     const found = files(join(ROOT, 'docs/guide'), /\.md$/).flatMap((f) => {
       const text = readFileSync(f, 'utf8').replace(/`[^`]*`/g, ' ').replace(/\]\([^)]*\)/g, ']');

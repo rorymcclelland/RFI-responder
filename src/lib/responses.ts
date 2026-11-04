@@ -93,6 +93,31 @@ export async function recordExport(client: SupabaseClient, sessionId: string): P
   return data as ExportSummary;
 }
 
+/**
+ * Sprint 24 (S24-1, U-11): mark the whole response as sent, every file in one transaction; refused
+ * while any question in any file is to do.
+ */
+export async function recordResponseExport(client: SupabaseClient, responseId: string): Promise<ExportSummary> {
+  const { data, error } = await client.rpc('record_response_export', { p_response: responseId });
+  if (error) throw fail('Not marked as sent', error.message);
+  return data as ExportSummary;
+}
+
+/**
+ * Sprint 24 (S24-2, F-71): what the knowledge base did with a sent response's answers, from what the
+ * database stored on each question when it was marked as sent (each outcome is a key of the report).
+ */
+export function learnedFrom(questions: { status: string; learnOutcome: string | null }[]): ExportSummary {
+  const s: ExportSummary = { accepted: 0, skipped: 0 };
+  const counts = s as unknown as Record<string, number>;
+  for (const q of questions) {
+    if (q.status === 'accepted') s.accepted++;
+    if (q.status === 'skipped') s.skipped++;
+    if (q.learnOutcome) counts[q.learnOutcome] = (counts[q.learnOutcome] ?? 0) + 1;
+  }
+  return s;
+}
+
 /** What learning did, in plain words, for the export panel. */
 export function describeLearning(s: ExportSummary): string {
   const parts: string[] = [];

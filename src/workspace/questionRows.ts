@@ -86,9 +86,14 @@ export function toQuestion(r: QuestionRow, entriesByRef: Map<string, KnowledgeEn
   };
 }
 
-/** A session's questions, least confident first; questions without calibrated confidence come first of all. */
-export async function loadQuestions(client: SupabaseClient, sessionId: string): Promise<RFIQuestion[]> {
-  const { data, error } = await client.from('rfi_questions').select('*').eq('session_id', sessionId).order('position');
+/**
+ * A file's questions, or since Sprint 24 (S24-1) every file's of a response, least confident first;
+ * questions without calibrated confidence come first of all.
+ */
+export async function loadQuestions(client: SupabaseClient, sessionId: string | string[]): Promise<RFIQuestion[]> {
+  const ids = Array.isArray(sessionId) ? sessionId : [sessionId];
+  if (ids.length === 0) return [];
+  const { data, error } = await client.from('rfi_questions').select('*').in('session_id', ids).order('position');
   if (error) throw new Error(`Could not load the questions: ${error.message}`);
   const rows = (data ?? []) as QuestionRow[];
   const refs = [...new Set(rows.flatMap((r) => (r.sources_json ?? []).map((s) => s.id)))];
@@ -101,7 +106,7 @@ export async function loadQuestions(client: SupabaseClient, sessionId: string): 
   }
   // The latest recorded approval of each question (S3-2).
   const { data: approvals } = await client.from('approvals').select('question_id, decided_by, decided_at, kind, threshold')
-    .eq('session_id', sessionId).order('decided_at', { ascending: true });
+    .in('session_id', ids).order('decided_at', { ascending: true });
   const latest = new Map<string, ApprovalRow>();
   for (const a of (approvals ?? []) as ApprovalRow[]) latest.set(a.question_id, a);
   return rows.map((r) => toQuestion(r, entriesByRef, latest.get(r.id) ?? null)).sort((a, b) => (a.confidence ?? -1) - (b.confidence ?? -1));
