@@ -43,7 +43,8 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "e2e-results/**": false
+      "e2e-results/**": false,
+      "sprint-*": false
     }
   }
 }

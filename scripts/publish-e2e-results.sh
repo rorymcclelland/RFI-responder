@@ -26,6 +26,10 @@ for secret in "${E2E_PASSWORD:-}" "${E2E_VERCEL_BYPASS:-}"; do
     echo "::error::A secret appeared in the results; nothing was published."; exit 1
   fi
 done
+# Vercel reads its settings from each commit, and these commits have no vercel.json of their own:
+# without this one, every results branch started a deployment that failed and counted against the
+# account's daily limit (Sprint 22, when the limit stopped staging's builds).
+printf '{\n  "git": { "deploymentEnabled": false }\n}\n' > "$out/vercel.json"
 cd "$out"
 git init -q -b results
 git add -A
