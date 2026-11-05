@@ -71,6 +71,28 @@ export function appVersion(html: string): string | null {
   return html.match(/<meta name="app-version" content="([0-9a-f]{7,40})"/)?.[1] ?? null;
 }
 
+/**
+ * Whether the build the app serves includes the expected commit (found at the Sprint 24 production
+ * deploy): the hosting builds every push to main, so a later commit (a README change, say) can be
+ * live by the time the check runs. GitHub's comparison says whether `served` is the expected commit
+ * or a descendant of it; anything else (behind, diverged, or no answer) does not count.
+ */
+export async function servedIncludes(expected: string, served: string, compare: (base: string, head: string) => Promise<string | null>): Promise<boolean> {
+  if (!expected || !served) return false;
+  if (served === expected) return true;
+  const status = await compare(expected, served);
+  return status === 'identical' || status === 'ahead';
+}
+
+/** GitHub's comparison of two commits in this repository: its status, or null when it cannot be read. */
+async function githubCompare(base: string, head: string): Promise<string | null> {
+  const repo = process.env.GITHUB_REPOSITORY; const token = process.env.GITHUB_TOKEN;
+  if (!repo || !token) return null;
+  const res = await fetch(`https://api.github.com/repos/${repo}/compare/${base}...${head}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } });
+  if (!res.ok) return null;
+  return ((await res.json()) as { status?: string }).status ?? null;
+}
+
 interface Lint { level?: string; name?: string; title?: string; detail?: string }
 
 /** Error-level advisor findings, as lines to print. */
@@ -179,12 +201,12 @@ async function main() {
       const res = await fetch(appUrl, { headers, cache: 'no-store' });
       const body = await res.text();
       last = { status: res.status, version: appVersion(body), page: body.includes('id="root"') };
-      if (!expected || (last.status === 200 && last.version === expected)) break;
+      if (!expected || (last.status === 200 && last.version && await servedIncludes(expected, last.version, githubCompare))) break;
       await new Promise((r) => setTimeout(r, 15_000));
     }
     if (last.status !== 200 || !last.page) problems.push(`The app at ${appUrl} answered ${last.status} without its page.`);
-    else if (expected && last.version !== expected) problems.push(`The app at ${appUrl} serves build ${last.version ?? '(unnamed)'}, not ${expected.slice(0, 7)}, after 15 minutes.`);
-    else console.log(`App: ${appUrl} answers${expected ? `, serving ${expected.slice(0, 7)}` : ' (its build was not checked: EXPECTED_SHA is not set)'}.`);
+    else if (expected && !(last.version && await servedIncludes(expected, last.version, githubCompare))) problems.push(`The app at ${appUrl} serves build ${last.version ?? '(unnamed)'}, which does not include ${expected.slice(0, 7)}, after 15 minutes.`);
+    else console.log(`App: ${appUrl} answers${expected ? `, serving ${last.version!.slice(0, 7)}${last.version === expected ? '' : `, which includes ${expected.slice(0, 7)}`}` : ' (its build was not checked: EXPECTED_SHA is not set)'}.`);
   }
 
   // 4. The security advisor.

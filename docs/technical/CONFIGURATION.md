@@ -77,7 +77,9 @@ Read by the browser acceptance tests ([`e2e/`](../../e2e)) and the deploy script
 | `APP_URL` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | After a deploy, the app to check (also the screenshot script's, above) |
 | `SUPABASE_ACCESS_TOKEN` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | A Supabase personal access token: the CLI uses it to deploy, and the check to read the security advisor |
 | `VERCEL_BYPASS` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | Vercel's protection-bypass secret, to load a protected preview |
-| `EXPECTED_SHA` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | The commit just deployed: the check waits until the app's page names it (the `app-version` tag, from Vercel's `VERCEL_GIT_COMMIT_SHA` at build time) |
+| `EXPECTED_SHA` | None | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | The commit just deployed: the check waits until the app's page names it, or a later commit that includes it (the `app-version` tag, from Vercel's `VERCEL_GIT_COMMIT_SHA` at build time) |
+| `GITHUB_REPOSITORY` | Set by GitHub Actions | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | The repository whose commits the deploy check compares (Sprint 24 close) |
+| `GITHUB_TOKEN` | Set by GitHub Actions | [`scripts/deploy-check.ts`](../../scripts/deploy-check.ts) | Read-only, to ask GitHub whether the build the app serves includes the deployed commit (Sprint 24 close) |
 
 ## Settings in the database
 

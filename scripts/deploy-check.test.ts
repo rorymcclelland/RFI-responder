@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advisorErrors, appVersion, appliedMigrations, functionVerdict, missingMigrations, repoFunctions, repoMigrations } from './deploy-check';
+import { advisorErrors, appVersion, appliedMigrations, functionVerdict, missingMigrations, repoFunctions, repoMigrations, servedIncludes } from './deploy-check';
 import { newPassword, stagingProblem } from './e2e-staging-users';
 
 describe('deploy checks (Sprint 20, S20-3)', () => {
@@ -65,5 +65,16 @@ describe('staging test people (Sprint 20, S20-2)', () => {
     const a = newPassword(), b = newPassword();
     expect(a).toMatch(/^[A-Za-z0-9_-]{32}$/);
     expect(a).not.toBe(b);
+  });
+
+  it('accepts a later build that includes the expected commit, and nothing else (Sprint 24 production deploy)', async () => {
+    const answers: Record<string, string | null> = { later: 'ahead', older: 'behind', other: 'diverged', unknown: null };
+    const compare = async (_base: string, head: string) => answers[head] ?? null;
+    expect(await servedIncludes('abc1234', 'abc1234', compare)).toBe(true);
+    expect(await servedIncludes('abc1234', 'later', compare)).toBe(true);
+    expect(await servedIncludes('abc1234', 'older', compare)).toBe(false);
+    expect(await servedIncludes('abc1234', 'other', compare)).toBe(false);
+    expect(await servedIncludes('abc1234', 'unknown', compare)).toBe(false);
+    expect(await servedIncludes('abc1234', '', compare)).toBe(false);
   });
 });
