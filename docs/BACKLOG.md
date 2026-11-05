@@ -1006,15 +1006,45 @@ Refinement: `docs/refinement/sprint-23.md`. Q1 to Q6 answered by Rory the same d
 
 **Proposed next.** Sprint 24: U-11, F-71 and F-72.
 
-## Sprint 24: one response, one list, sent as a whole (refined 4 November 2026)
+## Sprint 24: one response, one list, sent as a whole (refined 4 November 2026; closed 5 November 2026)
 
 Refinement: `docs/refinement/sprint-24.md`. Q1 to Q5 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S24-1 | One list across a response's files, bulk approval and **Mark as sent** for the whole response; downloads stay one per file; no file added once sent | U-11 | Ready, Sprint 24 |
-| S24-2 | What was learned, kept with a sent response | F-71 | Ready, Sprint 24 |
-| S24-3 | The main path test seen failing on a broken step (CI only) | F-72 | Ready, Sprint 24 |
+| S24-1 | One list across a response's files, bulk approval and **Mark as sent** for the whole response; downloads stay one per file; no file added once sent | U-11 | Done, Sprint 24 |
+| S24-2 | What was learned, kept with a sent response | F-71 | Done, Sprint 24 |
+| S24-3 | The main path test seen failing on a broken step (CI only) | F-72 | Done, Sprint 24 (S24-3 3 waits for Rory to delete `f72-broken-step`) |
+| BUG-47 | Done, Sprint 24 close. Three messages still spoke of one file after S24-1 (With experts, "in this file"; a link to a question whose file is gone, "the newest file is shown") | Found while rebuilding the website walkthrough, 5 November 2026 |
+
+### Sprint 24 review (5 November 2026)
+
+**Checks, with evidence.**
+- 1,173 unit, 438 database and 37 browser tests; CI and staging green on `26d28a4` (staging with the real AI, the main path in two files). The demo page showed every agreed case: 12 passed in the browser, 4 by a named check in CI, 3 by hand (S24-3, from CI run 41919882875). Rory signed off.
+- Independent reviews, every finding dealt with. Security: a file added during Mark as sent, or a question added to a sent file, could leave a response Sent with work outstanding (both refused, reading with a lock, tested with two connections and seen failing without the lock); a half-uploaded file is not sent; bulk approval on a response with no file. QA: the download test compared references the export does not hold; S24-1 8 had been narrowed without asking (the page now says why no file can be added); bulk approval on staging checks exactly the ready questions were taken; a re-sent response's report says it covers every sending.
+- The live demo: Deploy run 42047767693, approved by Rory, applied both Sprint 24 migrations and the functions, the advisor reported no error, and the run **failed** its last check: the app served `95d4887` (a README commit pushed after `9bb0de0`), not `9bb0de0`. The code was the same; the check now accepts a later build that includes the deployed commit (F-76).
+- **Found at the deploy (F-75):** Vercel published the Sprint 24 app to the live demo at 14:43 when `main` moved, and the migrations it needs reached the database only at 17:37, when Rory approved. For those three hours, bulk approval and Mark as sent on the live demo called functions that did not exist yet. R-18's residual said this could happen "briefly"; three hours is not brief.
+
+### Where every Sprint 24 review item now lives
+
+| Item | Now |
+|---|---|
+| U-11, F-71, F-72 (S24-1 to S24-3) | Done in Sprint 24 |
+| Sprint 24 QA and security review findings | Done (review) |
+| BUG-47 messages that still spoke of one file | Done at the Sprint 24 close |
+| The app reaches the live demo before the approved database deploy | F-75, Backlog, from Sprint 24 review (proposed first for Sprint 25) |
+| The deploy check failed when a later docs commit was already live | F-76, Done at the Sprint 24 close |
+| Marking a very large response as sent can pass the database's statement time limit (9 s measured at four files of 500 questions) | F-73, Backlog, from Sprint 24 review |
+| The per-file functions (`record_export`, `bulk_accept`) are still callable through the API, though a response is never called sent until every file is | F-74, Backlog, from Sprint 24 review |
+| The throwaway branches `f72-broken-step`, `response-wording`, `deploy-check-later-build` and the Sprint 23 ones | Rory to delete |
+
+**Not yet in a sprint, ranked at the Sprint 24 review.**
+1. F-75 the live app only after the approved database deploy (S to M): the gap made real at this deploy; needs a Vercel setting changed by Rory (turn off Git deployments for `main`) and a deploy hook the workflow calls after the migrations.
+2. F-74 the per-file functions out of the API (S): one migration and the older tests moved to the whole-response functions.
+3. F-73 sending a large response within the time limit (M): measure on the hosted database first.
+4. Then the earlier list: F-14 and F-15 (need people), F-59, F-20, F-34, F-60, F-62, F-8 (Pro plan), F-2, F-4.
+
+**Proposed next.** Sprint 25: F-75, F-74 and F-73.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -1108,6 +1138,10 @@ Refinement: `docs/refinement/sprint-24.md`. Q1 to Q5 answered by Rory the same d
 | F-68 | Done, Sprint 23 (S23-3). A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
 | F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Done, Sprint 22 (S22-3) |
 | F-71 | What the knowledge base did with a response's answers (added, proposed, confirmed, not learned and why) is shown only at the moment it is marked as sent; opened again later, the **Send** stage says it was sent but not what was learned | From the Sprint 23 review (found by the main path's first CI run). Keep the report with the export record and show it on a sent response |
+| F-73 | Marking a very large response as sent can run past the hosted database's statement time limit: measured locally at 1 s for one file of 500 questions, 9 s for four, 73 s for three files of 2,000; all or nothing, so a timeout records nothing | From the Sprint 24 security review (L1). Measure on the hosted database; then cap, split, or speed up `record_export`'s replace lookup |
+| F-74 | `record_export` and `bulk_accept`, per file, are still callable through the API; the app no longer calls them | From the Sprint 24 security review (info). Revoke them from signed-in users; move the older database tests to the whole-response functions |
+| F-75 | The live demo's app goes live when `main` moves, before Rory approves the database deploy: at Sprint 24 the new screens met the old database for three hours | From the Sprint 24 deploy. Vercel builds `main` itself; the production job should publish the app after the migrations instead (a Vercel deploy hook, Git deployments for `main` turned off by Rory) |
+| F-76 | Done, Sprint 24 close. The deploy check failed when the app served a later commit that includes the deployed one (a docs push after the merge) | `servedIncludes` asks GitHub whether the served build includes the deployed commit |
 | F-72 | S23-2 case 4: see the main path test fail, naming the step, when a step is broken on a branch (not merged) | From the Sprint 23 review; by construction until then (each step waits for its own result) |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |
