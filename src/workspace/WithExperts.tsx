@@ -31,7 +31,7 @@ export default function WithExperts({ questions, assignments, users, onOpen }: {
         <h2 id="stage-experts-heading" className="text-lg font-black text-ink-900">With experts</h2>
         <p className="text-xs text-ink-500">
           {items.length === 0
-            ? 'No question in this file has been asked of a colleague. Open a question to assign it.'
+            ? 'No question in this response has been asked of a colleague. Open a question to assign it.'
             : `${items.length} ${items.length === 1 ? 'question asked' : 'questions asked'} of colleagues${answered ? `; ${answered} answered, for you to look at` : ''}.`}
         </p>
       </div>
