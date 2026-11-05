@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-four sprints (Sprints 0 to 23). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-five sprints (Sprints 0 to 24). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -83,13 +83,14 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 21 | Sending made plain and gaps: download separate from **Mark as sent**, which says beforehand what it will do; Knowledge shows what it could not answer in recent responses and where each stands; approving an answer in one step; the hosted sign-in settings checked on every deploy, a script that stores the keys without copying, and one real-AI question on every staging run |
 | 22 | The response as a journey: a header like its card, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each; plain settings with **Advanced**, spend by use, and the audit log by person and response; the staging real-AI step checks its usage is recorded |
 | 23 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the AI and never learned from; the main path as one browser test, on staging with the real AI; a failing migration tried on staging |
+| 24 | One response, one list: every file's questions together, filtered by file, approved in bulk and marked as sent once, as a whole, with a download per file and no file added once sent; what was learned kept with a sent response; the main path test seen failing on a broken step |
 
 Each sprint followed the same cycle:
 
 1. **Refine** the stories into test cases, risks and questions for the product owner, recorded in [`docs/refinement/`](docs/refinement/) with the answers.
 2. **Build test-first**, one commit per story.
-3. **Review:** a separate AI agent that had not seen the reasoning reviewed every sprint's changes for security and correctness. There was no human security review. Every finding was fixed with a test before the sprint closed (listed at the end of each refinement).
-4. **Check end to end** in a browser on the local PC, against the agreed test cases.
+3. **Review:** a separate AI agent that had not seen the reasoning reviewed every sprint's changes for security and correctness. There was no human security review. Every finding was fixed with a test before the sprint closed, or recorded as a residual with the product owner's agreement (listed at the end of each refinement).
+4. **Check end to end.** Until Sprint 19, by hand in a browser on the local PC, against the agreed test cases. Since Sprint 20 ([decision 0008](docs/decisions/0008-claude-as-qa.md)) Claude is also the QA team: every agreed case is a browser test in [`e2e/`](e2e/), run in CI against the local stack and, on each deploy, against a hosted staging copy with the real AI; a second agent checks the tests prove the cases; and the product owner signs off from a demo page of the recordings (summaries in [`docs/testing/`](docs/testing/)). The live demo is deployed only after his approval.
 5. **Close:** anything undelivered goes back to the [backlog](docs/BACKLOG.md), anything raised at the review and not fixed becomes a backlog row, the [risk register](docs/governance/RISK-REGISTER.md) is updated and the backlog re-ranked.
 
 The product brief is [`docs/PRODUCT.md`](docs/PRODUCT.md), the original requirements are the 65 job stories in [`docs/JOB_STORIES.md`](docs/JOB_STORIES.md), and the reasoning behind the main choices is in [`docs/decisions/`](docs/decisions/). How the parts fit together, and where the trust boundaries are: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
