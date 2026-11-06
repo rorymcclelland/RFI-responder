@@ -60,7 +60,7 @@ describe('F-26 close assignments at export', () => {
   it('1 and 2. export closes open assignments, leaves finished ones, and the overview stops counting them', async () => {
     const { opp, s, open, done } = await exportable();
     await as(owner, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export.assignments_closed).toBe(1);
       const st = await q<{ id: string; status: string; completed_at: string | null }>(`SELECT id, status, completed_at FROM question_assignments WHERE session_id = $1`, [s]);
       const byId = Object.fromEntries(st.rows.map((x) => [x.id, x]));

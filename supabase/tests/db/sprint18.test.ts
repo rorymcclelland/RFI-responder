@@ -224,7 +224,7 @@ describe('S18-3 retire an answer, or decline a proposed change (K-2)', () => {
     // Bulk approval leaves it, whatever the stored gate says.
     await asSuperuser(`UPDATE rfi_questions SET gate = NULL, gate_reason = NULL WHERE id = $1`, [pending]);
     await as(admin, async (q) => {
-      await q(`SELECT bulk_accept($1, 0)`, [s]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0) AS bulk_accept`, [s]);
       expect((await q(`SELECT status FROM rfi_questions WHERE id = $1`, [pending])).rows[0].status).toBe('pending');
     });
   });
@@ -240,7 +240,7 @@ describe('S18-3 retire an answer, or decline a proposed change (K-2)', () => {
     const same = await question(s, { cited: [e.ref], sources: [e.ref], text: 'Which SIEM do you use (S18-3)?' });
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', judge_best_ref = $2 WHERE id = $1`, [same, e.ref]);
     await as(admin, async (q) => {
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       const k = (await q(`SELECT superseded_by, last_reviewed_at FROM kb_entries WHERE id = $1`, [e.id])).rows[0];
       expect(k).toEqual({ superseded_by: null, last_reviewed_at: null });
       const out = (await q(`SELECT learn_outcome FROM rfi_questions WHERE id = $1`, [qid])).rows[0].learn_outcome;
@@ -363,7 +363,7 @@ describe('Sprint 18 security review', () => {
     const only = await question(s, { cited: [gone.ref], sources: [gone.ref], text: 'Cites only the retired one (review M1)?' });
     await asAdminCommit(`SELECT public.retire_entry($1, 'Withdrawn for the review M1 test.')`, [gone.id]);
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', gate = NULL, gate_reason = NULL WHERE id = ANY($1)`, [[both, only]]);
-    await asAdminCommit(`SELECT record_export($1)`, [s]);
+    await asAdminCommit(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
     const out = await asSuperuser<{ id: string; learn_outcome: string }>(`SELECT id, learn_outcome FROM rfi_questions WHERE id = ANY($1)`, [[both, only]]);
     const by = new Map(out.rows.map((r) => [r.id, r.learn_outcome]));
     expect(by.get(both)).toBe('confirmed');

@@ -43,7 +43,7 @@ describe('S4-2 bulk approval and delete markers cannot be forged (F-24)', () => 
     await question(s);
     await question(s);
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      const r = await q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept.accepted).toBe(2);
       const a = await q<{ kind: string; threshold: string }>(`SELECT kind, threshold FROM approvals WHERE session_id = $1`, [s]);
       expect(a.rows).toEqual([{ kind: 'bulk', threshold: '0.8' }, { kind: 'bulk', threshold: '0.8' }]);
@@ -65,7 +65,7 @@ describe('S4-2 bulk approval and delete markers cannot be forged (F-24)', () => 
     await question(s, { confidence: 0.5 });
     await question(s, { confidence: 0.5 });
     await refused(as(owner, async (q) => {
-      await q(`SELECT bulk_accept($1, 0.8)`, [s]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE session_id = $1 AND status = 'pending'`, [s]);
     }));
   });
@@ -221,7 +221,7 @@ describe('S4-3 member-added entries: add, review and hold', () => {
     const held = await question(s, { gate: 'unreviewed_source' });
     const ok = await question(s);
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 1, heldGated: 1 });
       const st = await q<{ id: string; status: string }>(`SELECT id, status FROM rfi_questions WHERE session_id = $1 ORDER BY status`, [s]);
       expect(st.rows).toEqual(expect.arrayContaining([{ id: held, status: 'pending' }, { id: ok, status: 'accepted' }]));
@@ -263,7 +263,7 @@ describe('S4-3 member-added entries: add, review and hold', () => {
                        VALUES ($1, $3, $4, $5, 'individual', 'Edited by the owner.'), ($2, $3, $4, $6, 'individual', 'Edited by the expert.')`,
       [byOwner, byExpert, s, opp, owner.id, expert.id]);
     await as(owner, async (q) => {
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       const r = await q<{ question: string; reviewed: boolean; created_by: string }>(
         `SELECT question, reviewed_at IS NOT NULL AS reviewed, created_by FROM kb_entries WHERE question LIKE '%(S4-3 t4)?' ORDER BY question`);
       expect(r.rows).toEqual([
@@ -325,7 +325,7 @@ describe('S4-4 review dates, the overdue report and F-25', () => {
     const id = await question(s, { sources: [cited.ref, matched.ref], cited: [cited.ref] });
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
     await as(owner, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export.confirmed).toBe(1);
       const d = await q<{ ref: string; recent: boolean }>(
         `SELECT ref, last_reviewed_at > now() - interval '1 minute' AS recent FROM kb_entries WHERE ref = ANY($1) ORDER BY ref`, [[cited.ref, matched.ref]]);
@@ -337,10 +337,10 @@ describe('S4-4 review dates, the overdue report and F-25', () => {
     const s = await session(await response(owner.id));
     const stale = await question(s, { gate: 'stale_source', text: 'Stale-sourced question (S4-4 t3)?', final: 'Updated by a person.' });
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept($1, 0.5)`, [s]);
+      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.5) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldGated: 1 });
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [stale]);
-      const ex = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const ex = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(ex.rows[0].record_export.added).toBe(1);
     });
   });
@@ -409,7 +409,7 @@ describe('Sprint 4 security review findings', () => {
         await cl.query('BEGIN');
         await cl.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: member.id, role: 'authenticated' })]);
         await cl.query('SET LOCAL ROLE authenticated');
-        const r = await cl.query<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+        const r = await cl.query<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
         await cl.query('COMMIT');
         return r.rows[0].record_export;
       } finally { cl.release(); }
@@ -432,7 +432,7 @@ describe('Sprint 4 security review findings', () => {
     await entry({ question: 'Do you rotate keys (R1b)?', answer: 'Yes.' });
     const { s } = await learnAs(admin, 'Do you rotate keys (R1b)?', 'Yes, every 90 days.');
     await as(admin, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export.superseded).toBe(1);
       const cur = await q<{ reviewed: boolean }>(`SELECT reviewed_at IS NOT NULL AS reviewed FROM kb_entries WHERE question = 'Do you rotate keys (R1b)?' AND superseded_by IS NULL`);
       expect(cur.rows).toEqual([{ reviewed: true }]);
@@ -446,14 +446,14 @@ describe('Sprint 4 security review findings', () => {
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
     await asSuperuser(`INSERT INTO approvals (question_id, session_id, decided_by, kind, final_answer) VALUES ($1, $2, $3, 'individual', 'x')`, [id, s, owner.id]);
     await as(owner, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export).toMatchObject({ not_confirmed_source: 1 });
       expect((await q<{ l: string | null }>(`SELECT last_reviewed_at AS l FROM kb_entries WHERE id = $1`, [old.id])).rows[0].l).toBeNull();
     });
     // The same with an admin's approval confirms it, and the confirmation is in the audit log.
     await asSuperuser(`UPDATE approvals SET decided_by = $2 WHERE question_id = $1`, [id, admin.id]);
     await as(admin, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export).toMatchObject({ confirmed: 1 });
       const log = await q<{ details: { refs: string[] } }>(`SELECT details FROM audit_log WHERE action = 'kb.confirmed' AND target_id = $1`, [id]);
       expect(log.rows[0].details.refs).toEqual([old.ref]);

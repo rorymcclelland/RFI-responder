@@ -52,7 +52,7 @@ describe('S6-4 reviewing an entry releases questions held for it (F-28)', () => 
       expect(await gateOf(q, id)).toEqual({ gate: null, gate_reason: null });
       const logged = await q<{ n: string }>(`SELECT count(*) AS n FROM audit_log WHERE action = 'question.released' AND target_id = $1`, [id]);
       expect(logged.rows[0].n).toBe('1');
-      const r = await q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      const r = await q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept.accepted).toBe(1);
     });
   });
@@ -116,7 +116,7 @@ describe('S6-4 reviewing an entry releases questions held for it (F-28)', () => 
     const id = await question(s, { cited: [e.ref], text: 'Processed while current (S6-4 t6)?' });
     await asSuperuser(`UPDATE kb_entries SET last_reviewed_at = $2, reviewed_at = $2, created_at = $2 WHERE id = $1`, [e.id, longAgo]);
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      const r = await q<{ bulk_accept: { accepted: number; heldGated: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldGated: 1 });
       const g = await gateOf(q, id);
       expect(g.gate).toBe('stale_source');
@@ -132,7 +132,7 @@ describe('S6-4 reviewing an entry releases questions held for it (F-28)', () => 
     const ok = await question(s, { cited: [fine.ref], text: 'Cites the current one (S6-4 t6b)?' });
     await asSuperuser(`UPDATE kb_entries SET reviewed_at = NULL WHERE id = $1`, [e.id]);
     await as(owner, async (q) => {
-      expect((await q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept($1, 0.8)`, [s])).rows[0].bulk_accept.accepted).toBe(1);
+      expect((await q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s])).rows[0].bulk_accept.accepted).toBe(1);
       const st = await q<{ id: string; status: string }>(`SELECT id, status FROM rfi_questions WHERE session_id = $1`, [s]);
       expect(st.rows).toEqual(expect.arrayContaining([{ id: held, status: 'pending' }, { id: ok, status: 'accepted' }]));
     });
@@ -160,7 +160,7 @@ describe('Sprint 6 security review', () => {
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [q1]);
     await asSuperuser(`INSERT INTO approvals (question_id, session_id, decided_by, kind, final_answer) VALUES ($1, $2, $3, 'individual', 'We encrypt data at rest.')`, [q1, s1, owner.id]);
     await as(owner, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s1]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s1]);
       expect(r.rows[0].record_export).toMatchObject({ not_confirmed_source: 1 });
       expect((await q<{ l: string | null }>(`SELECT last_reviewed_at AS l FROM kb_entries WHERE id = $1`, [e.id])).rows[0].l).toBeNull();
       expect((await q<{ gate: string }>(`SELECT gate FROM rfi_questions WHERE id = $1`, [q2])).rows[0].gate).toBe('stale_source');
@@ -187,7 +187,7 @@ describe('Sprint 6 security review', () => {
     const dup = await question(s, { cited: [e.ref, e.ref], text: 'Repeated ref (S6 review 10)?' });
     const blank = await question(s, { cited: [''], text: 'Blank ref (S6 review 10)?' });
     await as(owner, async (q) => {
-      await q(`SELECT bulk_accept($1, 0.8)`, [s]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       const g = await q<{ id: string; gate: string; gate_reason: string }>(`SELECT id, gate, gate_reason FROM rfi_questions WHERE id = ANY($1)`, [[dup, blank]]);
       const byId = new Map(g.rows.map((r) => [r.id, r]));
       expect(byId.get(dup)!.gate_reason).toBe(`Cites ${e.ref}, not reviewed by an admin yet, so it is reviewed individually.`);

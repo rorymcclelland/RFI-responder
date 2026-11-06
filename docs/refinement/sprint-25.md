@@ -91,3 +91,11 @@ Order: S25-1 first (it closes the gap Sprint 24 found, and every later deploy de
 - **Q5:** (a). A half-day spike on staging first; the fix, if needed, is refined at its close for Sprint 26.
 
 S25-1 and S25-2 are Ready, Sprint 25. S25-3 is a spike, Ready, Sprint 25; the F-73 fix it informs is Planned, Sprint 26 (refined at the spike's close).
+
+## While building
+
+- **Vercel's production branch cannot be changed with the connector** (Q3): no Vercel tool here sets it, so it falls back to (b), a dashboard step for Rory. The branch `live` was made first at the commit the live demo already served (`b5a41bd`), so the switch changes nothing for visitors. Case 5: the live demo's two variables are on Production with no branch attached (checked with the connector).
+- **The older tests called the per-file functions 76 times in 12 files** (refinement's "about 120 in 14" counted lines). Each now calls the whole-response function for the file's response, found by a lookup the test harness adds to the test database only (`test_only.response_of`, never in a migration); the results are read under the same names, so no assertion changed except as below. No test was deleted.
+- **A file with no response can no longer be bulk-approved or sent by anyone through the API**, an admin included (before, an admin could). The app always makes a file in a response, and the live demo has none without one (read-only check, 6 November). Its questions are still decided one by one. The test that proved the admin could now proves both are refused.
+- **Sending again with nothing changed is refused** (Sprint 24), so the older test "recording the same export twice does not learn twice" now checks that refusal, then marks the file changed without changing an answer and sends it again: nothing is learned twice.
+- **The client's per-file calls are removed** (`bulkAcceptInDb`, `recordExport`); their unit tests now cover the whole-response calls the app uses, with the same wording checks.

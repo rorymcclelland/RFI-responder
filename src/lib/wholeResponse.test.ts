@@ -2,6 +2,7 @@
 // response, read from what the database stored. Test numbers refer to docs/refinement/sprint-24.md.
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { responseExportState } from './sessions';
 import { describeLearning, learnedFrom } from './responses';
 
@@ -72,5 +73,26 @@ describe('S24-2 (F-71): what was learned, from what was stored', () => {
 
   it('nothing stored: nothing new to learn', () => {
     expect(describeLearning(learnedFrom([q('skipped', null)]))).toBe('Knowledge base: nothing new to learn from this response.');
+  });
+});
+
+// Sprint 25 (S25-2 5, F-74): the per-file functions are not callable through the API, and the app
+// calls neither: a response is sent, and bulk-approved, only as a whole.
+describe('the app calls no per-file function (S25-2 5)', () => {
+  const files = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? files(join(dir, e.name)) : /\.(ts|tsx)$/.test(e.name) && !/\.test\.tsx?$/.test(e.name) ? [join(dir, e.name)] : []);
+  const calls = /\.rpc\(\s*['"`](record_export|bulk_accept)['"`]/;
+
+  it('finds such a call when there is one', () => {
+    expect(calls.test(`client.rpc('record_export', { p_session: s })`)).toBe(true);
+    expect(calls.test(`client.rpc("bulk_accept", {})`)).toBe(true);
+    expect(calls.test(`client.rpc('record_response_export', {})`)).toBe(false);
+    expect(calls.test(`client.rpc('bulk_accept_response', {})`)).toBe(false);
+  });
+
+  it('no file in src/ calls record_export or bulk_accept', () => {
+    const all = files('src');
+    expect(all.length).toBeGreaterThan(50);
+    expect(all.filter((f) => calls.test(readFileSync(f, 'utf8')))).toEqual([]);
   });
 });

@@ -39,6 +39,14 @@ async function question(s: string, opts: { confidence?: number | null; gate?: st
      VALUES ($1, 0, 'Q', $2, $3, now(), 'generated', 'yes', 'claude-haiku-5-5') RETURNING id`, [s, conf, opts.gate ?? null])).id;
 }
 
+/** Sprint 25 (S25-2): a file in a response of its own, since bulk approval now takes a whole response. */
+async function freshFile(name: string): Promise<string> {
+  const opp = (await one<{ id: string }>(
+    `INSERT INTO opportunities (name, created_by, owner_id) VALUES ($1, $2, $2) RETURNING id`, [`Fresh ${name}`, owner.id])).id;
+  return (await one<{ id: string }>(
+    `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id) VALUES ($1, 'in_progress', 0, $2) RETURNING id`, [name, opp])).id;
+}
+
 beforeAll(async () => {
   await buildDatabase();
   admin = await createUser({ admin: true });
@@ -106,16 +114,14 @@ describe('1. members cannot write scores, gates or drafts; the service role can'
 
 describe('2. bulk_accept never accepts gated or uncalibrated questions', () => {
   it.each([0, 0.5, 0.8])('at threshold %s', async (threshold) => {
-    const fresh = (await one<{ id: string }>(
-      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
-       SELECT 'b.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    const fresh = await freshFile('b.xlsx');
     const ok = await question(fresh, { confidence: 0.95 });
     const low = await question(fresh, { confidence: 0.4 });
     const gated = await Promise.all(['pricing', 'legal', 'unchecked', 'translation'].map((g) => question(fresh, { confidence: 0.99, gate: g })));
     const uncalibrated = await question(fresh, { confidence: null });
 
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: Record<string, number> }>(`SELECT bulk_accept($1, $2)`, [fresh, threshold]);
+      const r = await q<{ bulk_accept: Record<string, number> }>(`SELECT bulk_accept_response(test_only.response_of($1), $2) AS bulk_accept`, [fresh, threshold]);
       const res = r.rows[0].bulk_accept;
       expect(res.heldGated).toBe(4);
       expect(res.heldUncalibrated).toBe(1);
@@ -129,33 +135,37 @@ describe('2. bulk_accept never accepts gated or uncalibrated questions', () => {
   });
 
   it('refuses a threshold outside 0 to 1', async () => {
-    await refused(as(owner, (q) => q(`SELECT bulk_accept($1, 1.5)`, [session])));
+    await refused(as(owner, (q) => q(`SELECT bulk_accept_response(test_only.response_of($1), 1.5) AS bulk_accept`, [session])));
   });
 });
 
 describe('3. only the response owner or an admin can approve in bulk', () => {
   it('a member who is not the owner is refused', async () => {
     await question(session);
-    await refused(as(member, (q) => q(`SELECT bulk_accept($1, 0.8)`, [session])));
+    await refused(as(member, (q) => q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [session])));
   });
 
   it('the owner and an admin can', async () => {
     await question(session);
     for (const u of [owner, admin]) {
-      const r = await as(u, (q) => q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept($1, 0.8)`, [session]));
+      const r = await as(u, (q) => q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [session]));
       expect(r.rows[0].bulk_accept.accepted).toBeGreaterThanOrEqual(1);
     }
   });
 
-  it('a session with no response can only be bulk-approved by an admin', async () => {
+  // Sprint 25 (S25-2): bulk approval is for a whole response, so a file with no response (none on the
+  // live demo; the app always makes a file in a response) is no longer bulk-approved by anyone,
+  // admin included; before Sprint 25 an admin could. Its questions are still decided one by one.
+  it('a session with no response cannot be bulk-approved, by the owner or an admin', async () => {
     await question(orphanSession);
-    await refused(as(owner, (q) => q(`SELECT bulk_accept($1, 0.8)`, [orphanSession])));
-    const r = await as(admin, (q) => q<{ bulk_accept: { accepted: number } }>(`SELECT bulk_accept($1, 0.8)`, [orphanSession]));
-    expect(r.rows[0].bulk_accept.accepted).toBeGreaterThanOrEqual(1);
+    for (const u of [owner, admin]) {
+      expect(await refused(as(u, (q) => q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [orphanSession])))).toMatch(/No such response/);
+      expect(await refused(as(u, (q) => q(`SELECT bulk_accept($1, 0.8)`, [orphanSession])))).toMatch(/permission denied for function/);
+    }
   });
 
   it('anonymous visitors cannot call it', async () => {
-    await refused(as(null, (q) => q(`SELECT bulk_accept($1, 0.8)`, [session])));
+    await refused(as(null, (q) => q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [session])));
   });
 });
 
@@ -203,13 +213,11 @@ describe('security review findings (Sprint 2)', () => {
   }
 
   it('finding 1: bulk approval never includes questions the server has not processed', async () => {
-    const fresh = (await one<{ id: string }>(
-      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
-       SELECT 'l.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    const fresh = await freshFile('l.xlsx');
     const old = await legacyQuestion(fresh);
     const ok = await question(fresh);
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: { accepted: number; heldUncalibrated: number } }>(`SELECT bulk_accept($1, 0)`, [fresh]);
+      const r = await q<{ bulk_accept: { accepted: number; heldUncalibrated: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0) AS bulk_accept`, [fresh]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 1, heldUncalibrated: 1 });
     });
     await refused(as(owner, (q) => q(`UPDATE rfi_questions SET status = 'accepted' WHERE id IN ($1, $2)`, [old, ok])));
@@ -239,14 +247,12 @@ describe('security review findings (Sprint 2)', () => {
   });
 
   it('finding 3: accepted_count is computed by the database, and members cannot write it', async () => {
-    const fresh = (await one<{ id: string }>(
-      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
-       SELECT 'c.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    const fresh = await freshFile('c.xlsx');
     await question(fresh);
     await question(fresh);
     await refused(as(member, (q) => q(`UPDATE rfi_sessions SET accepted_count = 999 WHERE id = $1`, [fresh])));
     await as(owner, async (q) => {
-      await q(`SELECT bulk_accept($1, 0)`, [fresh]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0) AS bulk_accept`, [fresh]);
       const r = await q<{ accepted_count: number }>(`SELECT accepted_count FROM rfi_sessions WHERE id = $1`, [fresh]);
       expect(r.rows[0].accepted_count).toBe(2);
     });
@@ -277,15 +283,13 @@ describe('security review findings (Sprint 2)', () => {
 
 describe('found in the end-to-end run: bulk approval requires a draft', () => {
   it.each(['insufficient_evidence', 'person_required', null])('a calibrated, ungated question with draft kind %s is held back', async (kind) => {
-    const fresh = (await one<{ id: string }>(
-      `INSERT INTO rfi_sessions (file_name, status, question_count, opportunity_id)
-       SELECT 'd.xlsx', 'in_progress', 0, opportunity_id FROM rfi_sessions WHERE id = $1 RETURNING id`, [session])).id;
+    const fresh = await freshFile('d.xlsx');
     const drafted = await question(fresh, { confidence: 0.95 });
     const empty = await question(fresh, { confidence: 1 });
     await asSuperuser(`UPDATE rfi_questions SET draft_kind = 'generated' WHERE id = $1`, [drafted]);
     await asSuperuser(`UPDATE rfi_questions SET draft_kind = $2 WHERE id = $1`, [empty, kind]);
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: { accepted: number; heldNoDraft: number } }>(`SELECT bulk_accept($1, 0.8)`, [fresh]);
+      const r = await q<{ bulk_accept: { accepted: number; heldNoDraft: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [fresh]);
       expect(r.rows[0].bulk_accept.accepted).toBe(1);
       expect(r.rows[0].bulk_accept.heldNoDraft).toBe(1);
     });

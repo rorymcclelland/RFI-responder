@@ -23,7 +23,7 @@ describe('S7-1 bulk approval needs a "yes" verdict (F-33)', () => {
     const no = await question(s, { verdict: 'no', confidence: 0.9, text: 'No with a draft (S7-1)?' });
     const simOnly = await question(s, { verdict: null, judgeModel: null, confidence: 0.9, text: 'Similarity only (S7-1)?' });
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      const r = await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 1, heldPartly: 2 });
       const st = await statuses(q, s);
       expect([st.get(yes), st.get(partly), st.get(no), st.get(simOnly)]).toEqual(['accepted', 'pending', 'pending', 'pending']);
@@ -43,7 +43,7 @@ describe('S7-1 bulk approval needs a "yes" verdict (F-33)', () => {
     const s = await session(await response(owner.id));
     await question(s, { verdict: 'partly', confidence: 0.5, text: 'Partly, low (S7-1 t6)?' });
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0)`, [s]);
+      const r = await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept_response(test_only.response_of($1), 0) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldPartly: 1 });
     });
   });
@@ -51,7 +51,7 @@ describe('S7-1 bulk approval needs a "yes" verdict (F-33)', () => {
     const s = await session(await response(owner.id));
     const scored = await question(s, { verdict: null, judgeModel: 'rerank-2.5', confidence: 0.9, text: 'Reranker, no verdict (S7 review)?' });
     await as(owner, async (q) => {
-      const r = await q<{ bulk_accept: Bulk & { heldNoVerdict: number } }>(`SELECT bulk_accept($1, 0.8)`, [s]);
+      const r = await q<{ bulk_accept: Bulk & { heldNoVerdict: number } }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       expect(r.rows[0].bulk_accept).toMatchObject({ accepted: 0, heldPartly: 0, heldNoVerdict: 1 });
       expect((await statuses(q, s)).get(scored)).toBe('pending');
     });
@@ -69,7 +69,7 @@ describe('S7-2 a draft citing a replaced entry is held from bulk (F-32)', () => 
     const fresh = await entry({ question: 'Replacement (S7-2 t1)?' });
     await replace(old.id, fresh.id);
     await as(owner, async (q) => {
-      expect((await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0.8)`, [s])).rows[0].bulk_accept.accepted).toBe(0);
+      expect((await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s])).rows[0].bulk_accept.accepted).toBe(0);
       const g = (await q<{ gate: string; gate_reason: string }>(`SELECT gate, gate_reason FROM rfi_questions WHERE id = $1`, [id])).rows[0];
       expect(g.gate).toBe('stale_source');
       expect(g.gate_reason).toBe(`Cites ${old.ref} (replaced by ${fresh.ref}), so it is reviewed individually.`);
@@ -96,7 +96,7 @@ describe('S7-2 a draft citing a replaced entry is held from bulk (F-32)', () => 
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [done]);
     await replace(old.id, (await entry({ question: 'Newer (S7-2 t4)?' })).id);
     await as(owner, async (q) => {
-      expect((await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept($1, 0.8)`, [s])).rows[0].bulk_accept.accepted).toBe(1);
+      expect((await q<{ bulk_accept: Bulk }>(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s])).rows[0].bulk_accept.accepted).toBe(1);
       const g = await q<{ id: string; gate: string | null }>(`SELECT id, gate FROM rfi_questions WHERE id = ANY($1)`, [[ok, done]]);
       expect(g.rows.every((x) => x.gate === null)).toBe(true);
     });

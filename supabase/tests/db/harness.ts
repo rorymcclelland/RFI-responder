@@ -50,6 +50,17 @@ export async function buildDatabase(options: { seed?: boolean } = {}): Promise<v
         throw new Error(`Migration ${file} failed: ${(err as Error).message}`);
       }
     }
+    // Sprint 25 (S25-2): the per-file functions are no longer callable through the API, so the older
+    // tests send and bulk-approve a file through the whole-response functions, finding the file's
+    // response here. Test databases only (never a migration), outside the schemas the hardening
+    // tests list, and it reads only which response a file belongs to.
+    await db.query(`
+      CREATE SCHEMA test_only;
+      CREATE FUNCTION test_only.response_of(p_file uuid) RETURNS uuid
+        LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
+        AS $$ SELECT opportunity_id FROM public.rfi_sessions WHERE id = p_file $$;
+      GRANT USAGE ON SCHEMA test_only TO authenticated, anon, service_role;
+      GRANT EXECUTE ON FUNCTION test_only.response_of(uuid) TO authenticated, anon, service_role;`);
     if (options.seed) await db.query(readFileSync(join(ROOT, 'supabase/seed.sql'), 'utf8'));
   } finally {
     await db.end();

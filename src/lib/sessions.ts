@@ -17,18 +17,10 @@ export interface BulkResult {
 }
 
 /**
- * Approve in bulk through the database function bulk_accept (S2-2a), which checks that the
- * caller owns the response (or is an admin) and never accepts gated or uncalibrated questions.
- */
-export async function bulkAcceptInDb(client: SupabaseClient, sessionId: string, minConfidence: number): Promise<BulkResult> {
-  const { data, error } = await client.rpc('bulk_accept', { p_session: sessionId, p_min_confidence: minConfidence });
-  if (error) throw new Error(`Bulk approval was not saved: ${error.message}`);
-  return data as BulkResult;
-}
-
-/**
  * Sprint 24 (S24-1, U-11): bulk approval across every file of a response, by the same rules, in one
- * database call (bulk_accept_response); the counts are the whole response's.
+ * database call (bulk_accept_response); the counts are the whole response's. The database checks
+ * that the caller owns the response (or is an admin) and never accepts gated or uncalibrated
+ * questions. Since Sprint 25 (S25-2) the per-file bulk_accept is not callable through the API.
  */
 export async function bulkAcceptResponse(client: SupabaseClient, responseId: string, minConfidence: number): Promise<BulkResult> {
   const { data, error } = await client.rpc('bulk_accept_response', { p_response: responseId, p_min_confidence: minConfidence });

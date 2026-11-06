@@ -56,7 +56,7 @@ describe('S12-3 Japanese answers are learned; translated ones wait for review', 
     const { s, id } = await exportedWith({ approver: admin, text: '監査ログを保管していますか（S12-3 t1）？', final: '', draftKind: 'insufficient_evidence', generated: '該当なし。' });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = '監査ログは1年間保管しています。', status = 'accepted' WHERE id = $1`, [id]);
-      const r = (await q(`SELECT record_export($1) AS r`, [s])).rows[0].r as Record<string, number>;
+      const r = (await q(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r as Record<string, number>;
       expect(r.added).toBe(1);
       const e = (await q(`SELECT k.language, k.reviewed_at, k.translated_from FROM kb_entries k JOIN rfi_questions x ON x.learned_entry_id = k.id WHERE x.id = $1`, [id])).rows[0];
       expect(e.language).toBe('ja');
@@ -72,7 +72,7 @@ describe('S12-3 Japanese answers are learned; translated ones wait for review', 
       const { s, id } = await exportedWith({ approver: admin, text: `鍵を更新していますか（S12-3 t2 ${edited}）？`, final: draft, generated: draft, cited: [src.ref], gate: 'translation' });
       await as(admin, async (q) => {
         await q(`UPDATE rfi_questions SET final_answer = $2, status = 'accepted' WHERE id = $1`, [id, edited ? '鍵は90日ごとに自動で更新しています。' : draft]);
-        const r = (await q(`SELECT record_export($1) AS r`, [s])).rows[0].r as Record<string, number>;
+        const r = (await q(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r as Record<string, number>;
         expect(r.translated).toBe(1);
         const e = (await q(`SELECT k.answer, k.language, k.reviewed_at, k.translated_from FROM kb_entries k JOIN rfi_questions x ON x.learned_entry_id = k.id WHERE x.id = $1`, [id])).rows[0];
         expect(e.language).toBe('ja');
@@ -89,14 +89,14 @@ describe('S12-3 Japanese answers are learned; translated ones wait for review', 
     const sameLang = await exportedWith({ approver: admin, text: 'データは暗号化されていますか（S12-3 t3）？', final: 'はい、AES-256で暗号化しています。', draftKind: 'insufficient_evidence', generated: '該当なし。' });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = 'はい、AES-256で暗号化しています。', status = 'accepted' WHERE id = $1`, [sameLang.id]);
-      const r = (await q(`SELECT record_export($1) AS r`, [sameLang.s])).rows[0].r as Record<string, number>;
+      const r = (await q(`SELECT record_response_export(test_only.response_of($1)) AS r`, [sameLang.s])).rows[0].r as Record<string, number>;
       expect(r.superseded).toBe(1);
     });
     const enEntry = await one<{ id: string; ref: string }>(`INSERT INTO kb_entries (question, answer, tags, origin) VALUES ('Is data encrypted (S12-3 t3b)?', 'Yes, with AES-256.', '{}', 'seed') RETURNING id, ref`);
     const cross = await exportedWith({ approver: admin, text: 'Is data encrypted (S12-3 t3b)?', final: 'はい、すべてのデータをAES-256で暗号化しています。', draftKind: 'insufficient_evidence', generated: 'None.' });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = 'はい、すべてのデータをAES-256で暗号化しています。', status = 'accepted' WHERE id = $1`, [cross.id]);
-      await q(`SELECT record_export($1)`, [cross.s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [cross.s]);
       expect((await q(`SELECT superseded_by FROM kb_entries WHERE id = $1`, [enEntry.id])).rows[0].superseded_by).toBeNull();
     });
     expect(en.ref).toBeTruthy();
@@ -106,7 +106,7 @@ describe('S12-3 Japanese answers are learned; translated ones wait for review', 
     const { s, id } = await exportedWith({ approver: admin, text: '価格はいくらですか（S12-3 t4）？', final: '', draftKind: 'person_required', generated: 'Pricing question.', gate: 'pricing' });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = '1席あたり10ポンドです。', status = 'accepted' WHERE id = $1`, [id]);
-      const r = (await q(`SELECT record_export($1) AS r`, [s])).rows[0].r as Record<string, number>;
+      const r = (await q(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r as Record<string, number>;
       expect(r.not_learned_pricing).toBe(1);
     });
   });
@@ -117,7 +117,7 @@ describe('S12-3 Japanese answers are learned; translated ones wait for review', 
     const { s, id } = await exportedWith({ approver: admin, text: '多要素認証を義務付けていますか（S12-3 t5）？', final: draft, cited: [src.ref], gate: 'translation' });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       const e = (await q(`SELECT k.id FROM kb_entries k JOIN rfi_questions x ON x.learned_entry_id = k.id WHERE x.id = $1`, [id])).rows[0];
       await q(`SELECT review_entry($1, NULL, NULL)`, [e.id]);
       const after = (await q(`SELECT reviewed_at, language, translated_from FROM kb_entries WHERE id = $1`, [e.id])).rows[0];
@@ -160,7 +160,7 @@ describe('Sprint 12 security review: learning across languages', () => {
   const exportAs = (u: TestUser, s: string, id: string, final: string | undefined, check: (r: Record<string, number>, q: Q) => Promise<void>) => as(u, async (q) => {
     if (final !== undefined) await q(`UPDATE rfi_questions SET final_answer = $2 WHERE id = $1`, [id, final]);
     await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-    const r = (await q(`SELECT record_export($1) AS r`, [s])).rows[0].r as Record<string, number>;
+    const r = (await q(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r as Record<string, number>;
     await check(r, q as unknown as Q);
   });
 
@@ -252,7 +252,7 @@ describe('Sprint 12 security review: learning across languages', () => {
       expect((await learned(q, id)).language).toBe('ja');
       await q(`UPDATE rfi_questions SET final_answer = '侵入テストは年2回実施しています。' WHERE id = $1`, [id]);
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      const r = (await q(`SELECT record_export($1) AS r`, [s])).rows[0].r as Record<string, number>;
+      const r = (await q(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r as Record<string, number>;
       expect(r.superseded).toBe(1);
       const again = await learned(q, id);
       expect(again.answer).toBe('侵入テストは年2回実施しています。');

@@ -87,12 +87,6 @@ export interface ExportSummary {
   translated?: number;
 }
 
-export async function recordExport(client: SupabaseClient, sessionId: string): Promise<ExportSummary> {
-  const { data, error } = await client.rpc('record_export', { p_session: sessionId });
-  if (error) throw fail('Not marked as sent', error.message);
-  return data as ExportSummary;
-}
-
 /**
  * Sprint 24 (S24-1, U-11): mark the whole response as sent, every file in one transaction; refused
  * while any question in any file is to do.

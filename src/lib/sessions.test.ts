@@ -1,14 +1,15 @@
-// Bulk approval goes through the database function bulk_accept (Sprint 2, S2-2a), which
+// Bulk approval goes through the database function bulk_accept_response (Sprint 2, S2-2a; a whole
+// response since Sprint 24), which
 // enforces who may approve and what is held back; questions are inserted as text only and
 // processed server-side in batches of ten.
 import { describe, expect, it, vi } from 'vitest';
-import { bulkAcceptInDb, describeBulk, exportNotice, insertQuestions, processInBatches } from './sessions';
+import { bulkAcceptResponse, describeBulk, exportNotice, insertQuestions, processInBatches } from './sessions';
 
-describe('bulkAcceptInDb', () => {
-  it('calls bulk_accept with the session and threshold, and returns what it did', async () => {
+describe('bulkAcceptResponse', () => {
+  it('calls bulk_accept_response with the response and threshold, and returns what it did', async () => {
     const rpc = vi.fn().mockResolvedValue({ data: { accepted: 3, heldGated: 2, heldUncalibrated: 1, belowThreshold: 4 }, error: null });
-    const r = await bulkAcceptInDb({ rpc } as never, 'session-1', 0.8);
-    expect(rpc).toHaveBeenCalledWith('bulk_accept', { p_session: 'session-1', p_min_confidence: 0.8 });
+    const r = await bulkAcceptResponse({ rpc } as never, 'response-1', 0.8);
+    expect(rpc).toHaveBeenCalledWith('bulk_accept_response', { p_response: 'response-1', p_min_confidence: 0.8 });
     expect(r.accepted).toBe(3);
     expect(describeBulk(r, 0.8)).toBe(
       '3 approved; 4 below 80%; 2 held back for individual review (pricing, legal, unchecked, translated or Japanese, matched before every entry was indexed, or citing an entry that is unreviewed or overdue for review); 1 without calibrated confidence.',
@@ -17,7 +18,7 @@ describe('bulkAcceptInDb', () => {
 
   it('reports a refusal instead of hiding it', async () => {
     const rpc = vi.fn().mockResolvedValue({ data: null, error: { message: 'Only the response owner or an admin can approve questions in bulk' } });
-    await expect(bulkAcceptInDb({ rpc } as never, 'session-1', 0.8)).rejects.toThrow(/not saved: Only the response owner/);
+    await expect(bulkAcceptResponse({ rpc } as never, 'response-1', 0.8)).rejects.toThrow(/not saved: Only the response owner/);
   });
 });
 

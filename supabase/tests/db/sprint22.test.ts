@@ -178,7 +178,7 @@ describe('S22-1 3 (QA review): Ready to approve is what bulk approval takes', ()
     const expected = combos.filter((c) => bulkEligible(c.q)).map((c) => c.id).sort();
     expect(expected.length).toBeGreaterThan(0);
     const approved = await as(owner, async (q) => {
-      await q(`SELECT bulk_accept($1, 0)`, [s]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0) AS bulk_accept`, [s]);
       return (await q<{ id: string }>(`SELECT id FROM rfi_questions WHERE session_id = $1 AND status = 'accepted' ORDER BY id`, [s])).rows.map((r) => r.id);
     });
     expect(approved).toEqual(expected);

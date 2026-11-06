@@ -60,7 +60,7 @@ describe('S3-1 the overview', () => {
     expect((await overview(opp)).stage).toBe('in_review');
     await asSuperuser(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [q1]);
     expect((await overview(opp)).stage).toBe('ready');
-    await as(owner, (q) => q(`SELECT record_export($1)`, [s]));
+    await as(owner, (q) => q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]));
     // record_export ran in a rolled-back transaction; set the dates directly to check the stage (the
     // file first: since Sprint 24 a response is sent only once every file of it is).
     await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE id = $1`, [s]);
@@ -119,7 +119,7 @@ describe('S3-2 recorded approvals and the readiness gate', () => {
     const c = await question(s, { confidence: 0.85 });
     await as(owner, async (q) => {
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [a]);
-      await q(`SELECT bulk_accept($1, 0.8)`, [s]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
       const r = await q<{ question_id: string; kind: string; threshold: string | null; decided_by: string }>(
         `SELECT question_id, kind, threshold, decided_by FROM approvals WHERE session_id = $1 ORDER BY id`, [s]);
       expect(r.rows.map((x) => [x.question_id, x.kind, x.threshold === null ? null : Number(x.threshold)])).toEqual([
@@ -158,11 +158,11 @@ describe('S3-2 recorded approvals and the readiness gate', () => {
     const s = await session(opp);
     await question(s, { status: 'accepted' });
     const p = await question(s);
-    expect(await refused(as(owner, (q) => q(`SELECT record_export($1)`, [s])))).toMatch(/1 question\(s\) are still pending/);
+    expect(await refused(as(owner, (q) => q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s])))).toMatch(/1 question\(s\) in this response are still to do/);
     await asSuperuser(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [p]);
-    await refused(as(member, (q) => q(`SELECT record_export($1)`, [s])));
+    await refused(as(member, (q) => q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s])));
     await as(owner, async (q) => {
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export).toMatchObject({ accepted: 1, skipped: 1 });
       // 5. The export is in the audit log, and the session is completed.
       const log = await q(`SELECT 1 FROM audit_log WHERE action = 'response.exported' AND target_id = $1`, [s]);
@@ -178,7 +178,7 @@ describe('S3-2 recorded approvals and the readiness gate', () => {
     const s = await session(opp);
     await question(s, { status: 'accepted' });
     await as(admin, async (q) => {
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       const log = await q<{ details: { accepted: number } }>(`SELECT details FROM audit_log WHERE action = 'response.exported' AND target_id = $1`, [s]);
       expect(log.rows[0].details.accepted).toBe(1);
     });
@@ -245,7 +245,7 @@ describe('S3-4 learning at export', () => {
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET final_answer = 'We encrypt data at rest with AES-256 and rotate keys yearly.' WHERE id = $1`, [id]);
       await accept(q, id);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export.superseded).toBe(1);
       const learned = await q<Record<string, unknown>>(
         `SELECT k.origin, k.origin_ref, k.created_by, k.tags, k.answer FROM rfi_questions x JOIN kb_entries k ON k.id = x.learned_entry_id WHERE x.id = $1`, [id]);
@@ -266,7 +266,7 @@ describe('S3-4 learning at export', () => {
     const { s, id } = await exportOne({ text: 'Do you test restores? (S3-4 t2)', final: 'Restores are tested quarterly.', sources: [[old.ref, 0.2]], verdict: 'partly' });
     await as(owner, async (q) => {
       await accept(q, id);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export.added).toBe(1);
       expect((await q<{ superseded_by: string | null }>(`SELECT superseded_by FROM kb_entries WHERE id = $1`, [old.id])).rows[0].superseded_by).toBeNull();
     });
@@ -277,7 +277,7 @@ describe('S3-4 learning at export', () => {
     const { s, id } = await exportOne({ text: 'Which SIEM product do you use? (S3-4 judge)', final: 'We use Splunk.', sources: [[old.ref, 0.9]], verdict: 'no' });
     await as(owner, async (q) => {
       await accept(q, id);
-      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s])).rows[0].record_export.added).toBe(1);
+      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s])).rows[0].record_export.added).toBe(1);
     });
   });
 
@@ -288,7 +288,7 @@ describe('S3-4 learning at export', () => {
     await asSuperuser(`UPDATE rfi_questions SET cited_refs = $2 WHERE id = $1`, [id, [old.ref]]);
     await as(owner, async (q) => {
       await accept(q, id);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export).toMatchObject({ confirmed: 1 });
       expect(r.rows[0].record_export.added).toBeUndefined();
       expect((await q<{ last_reviewed_at: string | null }>(`SELECT last_reviewed_at FROM kb_entries WHERE id = $1`, [old.id])).rows[0].last_reviewed_at).not.toBeNull();
@@ -304,7 +304,7 @@ describe('S3-4 learning at export', () => {
     const legal = await question(s, { text: 'Liability cap? (t4)', gate: 'legal', final: 'Capped at fees paid.' });
     await as(owner, async (q) => {
       for (const id of [pricing, ja, legal]) await accept(q, id);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       // Sprint 12 security review (M3): a draft gated as translated is learned as a translation.
       expect(r.rows[0].record_export).toMatchObject({ not_learned_pricing: 1, added: 1, translated: 1 });
       expect((await q(`SELECT 1 FROM kb_entries WHERE question = 'What is the price? (t4)'`)).rowCount).toBe(0);
@@ -316,8 +316,17 @@ describe('S3-4 learning at export', () => {
     const { s, id } = await exportOne({ text: 'Twice? (t5)', final: 'Once only.' });
     await as(owner, async (q) => {
       await accept(q, id);
-      await q(`SELECT record_export($1)`, [s]);
-      const again = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
+      // Sprint 25 (S25-2): marking it as sent again with nothing changed is refused (Sprint 24). To record
+      // the same answers a second time, the file is marked as changed without any answer changing.
+      await q(`SAVEPOINT again`);
+      expect(await refused(q(`SELECT record_response_export(test_only.response_of($1))`, [s]))).toMatch(/Nothing has changed/);
+      await q(`ROLLBACK TO SAVEPOINT again`);
+      await q(`RESET ROLE`);
+      await q(`UPDATE rfi_sessions SET changed_since_export_at = now() WHERE id = $1`, [s]);
+      await q(`SET LOCAL ROLE authenticated`);
+      const again = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
+      expect(again.rows[0].record_export.files).toBe(1);
       expect(again.rows[0].record_export.added).toBeUndefined();
       expect((await q(`SELECT 1 FROM kb_entries WHERE question = 'Twice? (t5)'`)).rowCount).toBe(1);
     });
@@ -328,12 +337,12 @@ describe('S3-4 learning at export', () => {
     const { s, id } = await exportOne({ text: 'same   QUESTION? (dup key)', final: 'New answer.', sources: [[old.ref, 0.1]], verdict: 'no' });
     await as(admin, async (q) => {
       await accept(q, id);
-      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s])).rows[0].record_export.superseded).toBe(1);
+      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s])).rows[0].record_export.superseded).toBe(1);
     });
     // An owner's approval of the same question is proposed beside it instead (Sprint 4 review).
     await as(owner, async (q) => {
       await accept(q, id);
-      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s])).rows[0].record_export.proposed).toBe(1);
+      expect((await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s])).rows[0].record_export.proposed).toBe(1);
     });
   });
 });
@@ -361,8 +370,8 @@ describe('found while building: bulk-approved drafts are confirmed, not treated 
     const s = await session(opp);
     await question(s, { confidence: 0.95, sources: [[old.ref, 0.8]] });
     await as(owner, async (q) => {
-      await q(`SELECT bulk_accept($1, 0.8)`, [s]);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      await q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS bulk_accept`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export).toMatchObject({ confirmed: 1, accepted: 1 });
     });
   });
@@ -429,7 +438,7 @@ describe('Sprint 3 security review findings', () => {
     const jaText = await question(s, { text: '価格はいくらですか？(r2)', language: 'en', final: '5ポンド' });
     await as(owner, async (q) => {
       for (const id of [unprocessed, unchecked, jaText]) await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export).toMatchObject({ not_learned_unchecked: 2, added: 1 });
       expect(r.rows[0].record_export.not_learned_japanese).toBeUndefined();
     });
@@ -461,7 +470,7 @@ describe('Sprint 3 security review findings', () => {
     const id = await question(s, { text: 'A question (r5)', final: 'Edited.', sources: [[top.ref, 0.9], [other.ref, 0.85]], verdict: 'yes', bestRef: other.ref });
     await as(owner, async (q) => {
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_export($1)`, [s]);
+      const r = await q<{ record_export: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect(r.rows[0].record_export.added).toBe(1);
       expect((await q<{ superseded_by: string | null }>(`SELECT superseded_by FROM kb_entries WHERE id = $1`, [top.id])).rows[0].superseded_by).toBeNull();
     });

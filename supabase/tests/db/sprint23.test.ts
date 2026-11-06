@@ -82,7 +82,7 @@ describe('S23-1 3: marking a try as sent learns nothing', () => {
     const reviewedBefore = (await one<{ at: string }>(`SELECT last_reviewed_at AS at FROM kb_entries WHERE id = $1`, [cited.id])).at;
 
     const result = await as(visitor, async (q) => {
-      const r = (await q<{ r: Record<string, number> }>(`SELECT record_export($1) AS r`, [s])).rows[0].r;
+      const r = (await q<{ r: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r;
       const after = (await q<{ n: string }>(`SELECT count(*) AS n FROM kb_entries`)).rows[0].n;
       expect(Number(after)).toBe(entriesBefore);
       const reviewed = (await q<{ at: string }>(`SELECT last_reviewed_at AS at FROM kb_entries WHERE id = $1`, [cited.id])).rows[0].at;
@@ -103,7 +103,7 @@ describe('S23-1 3: marking a try as sent learns nothing', () => {
     const s = await session(o);
     const id = await question(s, { text: 'Do you run penetration tests (S23 control)?' });
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Yes, yearly, by an outside firm (S23).' WHERE id = $1`, [id]);
-    const r = await as(visitor, async (q) => (await q<{ r: Record<string, number> }>(`SELECT record_export($1) AS r`, [s])).rows[0].r);
+    const r = await as(visitor, async (q) => (await q<{ r: Record<string, number> }>(`SELECT record_response_export(test_only.response_of($1)) AS r`, [s])).rows[0].r);
     expect(r.not_learned_try).toBeUndefined();
     expect(Object.keys(r).some((k) => ['added', 'proposed', 'superseded'].includes(k))).toBe(true);
   });

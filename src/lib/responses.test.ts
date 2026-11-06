@@ -1,6 +1,6 @@
 // Sprint 3: responses through the database functions; the database enforces the rules.
 import { describe, expect, it, vi } from 'vitest';
-import { archiveResponse, deleteResponse, describeLearning, inAppWords, recordExport, sendPreview, suggestExperts, toResponse, updateResponse } from './responses';
+import { archiveResponse, deleteResponse, describeLearning, inAppWords, recordResponseExport, sendPreview, suggestExperts, toResponse, updateResponse } from './responses';
 
 describe('inAppWords (Sprint 21 QA review, finding 10)', () => {
   it('says the database\'s refusals in the app\'s words', () => {
@@ -51,9 +51,10 @@ describe('responses', () => {
     expect(rpc).toHaveBeenLastCalledWith('archive_response', { p_response: 'r1', p_outcome: 'won' });
     await deleteResponse({ rpc } as never, 'r1', 'Created by mistake');
     expect(rpc).toHaveBeenLastCalledWith('delete_response', { p_response: 'r1', p_reason: 'Created by mistake' });
-    expect(await recordExport({ rpc } as never, 's1')).toMatchObject({ accepted: 3, added: 1 });
-    const refused = vi.fn().mockResolvedValue({ data: null, error: { message: '2 question(s) are still pending' } });
-    await expect(recordExport({ rpc: refused } as never, 's1')).rejects.toThrow(/Not marked as sent: 2 question/);
+    expect(await recordResponseExport({ rpc } as never, 'r1')).toMatchObject({ accepted: 3, added: 1 });
+    expect(rpc).toHaveBeenLastCalledWith('record_response_export', { p_response: 'r1' });
+    const refused = vi.fn().mockResolvedValue({ data: null, error: { message: '2 question(s) in this response are still to do' } });
+    await expect(recordResponseExport({ rpc: refused } as never, 'r1')).rejects.toThrow(/Not marked as sent: 2 question/);
   });
 
   it('says plainly when a change applied to nothing (row-level security)', async () => {

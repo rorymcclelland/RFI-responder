@@ -74,7 +74,7 @@ describe('S11-1 a change after an export is recorded, and the export recorded ag
     const id = await question(s, { text: `Re-export question ${Math.random()}?` });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'First answer, edited.' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       let row = (await q(`SELECT changed_since_export_at, exported_at FROM rfi_sessions WHERE id = $1`, [s])).rows[0];
       expect(row.exported_at).not.toBeNull();
       expect(row.changed_since_export_at).toBeNull();
@@ -85,7 +85,7 @@ describe('S11-1 a change after an export is recorded, and the export recorded ag
       await q(`UPDATE rfi_questions SET final_answer = 'Second answer, corrected.' WHERE id = $1`, [id]);
       expect((await q(`SELECT learned_at FROM rfi_questions WHERE id = $1`, [id])).rows[0].learned_at).toBeNull();
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       row = (await q(`SELECT changed_since_export_at, status FROM rfi_sessions WHERE id = $1`, [s])).rows[0];
       expect(row.changed_since_export_at).toBeNull();
       expect(row.status).toBe('completed');
@@ -105,10 +105,10 @@ describe('S11-1 a change after an export is recorded, and the export recorded ag
     const id = await question(s, { text: `Member re-export ${Math.random()}?` });
     await as(owner, async (q) => {
       await q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'First, edited.' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       await q(`UPDATE rfi_questions SET final_answer = 'Second, corrected.' WHERE id = $1`, [id]);
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect((await q(`SELECT learn_outcome FROM rfi_questions WHERE id = $1`, [id])).rows[0].learn_outcome).toBe('proposed');
     });
   });
@@ -244,10 +244,10 @@ describe('S11-2 a question matched against an incomplete index (F-43)', () => {
     const s = await session(await response(owner.id));
     const id = await question(s, { gate: 'unindexed_entries', confidence: 0.95, text: `Incomplete index ${Math.random()}?` });
     await as(owner, async (q) => {
-      const r = (await q(`SELECT bulk_accept($1, 0.8) AS b`, [s])).rows[0].b as { accepted: number; heldGated: number };
+      const r = (await q(`SELECT bulk_accept_response(test_only.response_of($1), 0.8) AS b`, [s])).rows[0].b as { accepted: number; heldGated: number };
       expect(r).toMatchObject({ accepted: 0, heldGated: 1 });
       await q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'Checked by a person.' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       expect((await q(`SELECT learn_outcome FROM rfi_questions WHERE id = $1`, [id])).rows[0].learn_outcome).toBe('added');
     });
   });
@@ -339,11 +339,11 @@ describe('Sprint 11 security review', () => {
     const id = await question(s, { text: `Unchanged relearn ${Math.random()}?` });
     await as(admin, async (q) => {
       await q(`UPDATE rfi_questions SET status = 'accepted', final_answer = 'The answer, edited.' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       const first = (await q(`SELECT learned_entry_id FROM rfi_questions WHERE id = $1`, [id])).rows[0].learned_entry_id;
       await q(`UPDATE rfi_questions SET status = 'skipped' WHERE id = $1`, [id]);
       await q(`UPDATE rfi_questions SET status = 'accepted' WHERE id = $1`, [id]);
-      await q(`SELECT record_export($1)`, [s]);
+      await q(`SELECT record_response_export(test_only.response_of($1)) AS record_export`, [s]);
       const after = (await q(`SELECT learned_entry_id, learn_outcome, learned_at FROM rfi_questions WHERE id = $1`, [id])).rows[0];
       expect(after.learned_entry_id).toBe(first);
       expect(after.learn_outcome).toBe('added');
