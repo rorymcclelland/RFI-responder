@@ -223,7 +223,7 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S25-2 3', story: 'S25-2', title: 'Every older test that called the per-file functions still proves what it proved', how: { kind: 'ci', by: 'the full database suite: 76 calls in 12 files moved to the whole-response functions, none deleted (docs/refinement/sprint-25.md, While building)' } },
       { id: 'S25-2 4', story: 'S25-2', title: 'The demo loaders still build the demo', how: { kind: 'ci', by: 'supabase/tests/db/seed.test.ts and demo-seed.test.ts, and CI\'s local stack' } },
       { id: 'S25-2 5', story: 'S25-2', title: 'The app calls neither function', how: { kind: 'ci', by: 'src/lib/wholeResponse.test.ts' } },
-      { id: 'S25-3 1', story: 'S25-3', title: 'The figures on staging and the cause are written down, with a recommended fix', how: { kind: 'hand', why: 'pending: docs/spikes/f73-sending-large-responses.md' } },
+      { id: 'S25-3 1', story: 'S25-3', title: 'The figures on staging and the cause are written down, with a recommended fix', how: { kind: 'hand', why: 'docs/spikes/f73-sending-large-responses.md: staging Deploy run 42207780200 on the throwaway branch sprint-25-f73 (rolled back, nothing left), and the local profile' } },
     ],
   },
 ];
