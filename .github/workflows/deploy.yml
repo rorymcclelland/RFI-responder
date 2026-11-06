@@ -142,7 +142,8 @@ jobs:
 
   production:
     name: The live demo (after Rory's approval)
-    if: github.ref_name == 'main'
+    # The branch main itself, not a tag of the same name (Sprint 25 security review, L1).
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -173,9 +174,20 @@ jobs:
           if [ "${reviewers:-0}" -lt 1 ]; then
             echo "::error::The production environment does not require a reviewer, so nothing was deployed. Add yourself under Settings, Environments, production."; exit 1
           fi
+          # Sprint 25 security review, M2: the live demo only moves forward. A re-run, or a late approval,
+          # of a run for an older commit would otherwise deploy older functions and move "live" back.
+          # Nothing is deployed unless this commit is "live" or a later commit built on it.
+          order=$(gh api "repos/${GITHUB_REPOSITORY}/compare/live...${GITHUB_SHA}" --jq .status || echo unknown)
+          if [ "$order" != ahead ] && [ "$order" != identical ]; then
+            echo "::error::This commit is not the live demo's commit or a later one built on it (${order}), so nothing was deployed. Deploy the latest main instead; to roll back, see docs/DEPLOYING.md."; exit 1
+          fi
           echo "ok=true" >> "$GITHUB_OUTPUT"
       - if: steps.ready.outputs.ok == 'true'
         uses: actions/checkout@v5
+        with:
+          # The job's token can write (to move "live"), so it is not left in .git/config, where
+          # npm ci's install scripts could read it (Sprint 25 security review, M1).
+          persist-credentials: false
       - if: steps.ready.outputs.ok == 'true'
         uses: actions/setup-node@v4
         with:
@@ -204,13 +216,13 @@ jobs:
       # Sprint 25 (S25-1, F-75): Vercel's production branch is "live", not main, so the app reaches the
       # live demo only here, after Rory's approval and after the migrations and functions it needs.
       # If any earlier step fails, this one does not run and the live demo keeps the previous app.
-      # A push made with the workflow's own token starts no other workflow. To roll back, move "live"
-      # back to the previous commit (docs/DEPLOYING.md).
+      # A push made with the workflow's own token starts no other workflow. It is not forced, so "live"
+      # only moves forward (security review, M2). To roll back, see docs/DEPLOYING.md.
       - name: Move the live branch to this commit
         if: steps.ready.outputs.ok == 'true'
         env:
           TOKEN: ${{ github.token }}
-        run: git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
+        run: git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
       - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:

@@ -54,6 +54,19 @@ describe('S25-2 1: the per-file functions are refused to every caller through th
   });
 });
 
+describe('S25-2 1: whatever their signature (security review, I2)', () => {
+  // Supabase grants EXECUTE on new public functions to signed-in users by default, so a later rewrite
+  // that drops and recreates either function, or adds an overload, would be callable again.
+  it('no function called record_export or bulk_accept, in any schema or signature, is callable by an API role', async () => {
+    const rows = (await asSuperuser<{ fn: string; role: string; ok: boolean }>(
+      `SELECT p.oid::regprocedure::text AS fn, r.role, has_function_privilege(r.role, p.oid, 'EXECUTE') AS ok
+         FROM pg_proc p CROSS JOIN (VALUES ('authenticated'), ('anon'), ('service_role')) r(role)
+        WHERE p.proname IN ('record_export', 'bulk_accept')`)).rows;
+    expect(rows.length).toBeGreaterThanOrEqual(6);
+    expect(rows.filter((r) => r.ok)).toEqual([]);
+  });
+});
+
 describe('S25-2 2: the whole-response functions still work for the owner and an admin', () => {
   it('bulk approval and marking as sent, through the definer functions that call the per-file ones', async () => {
     for (const who of [owner, admin]) {

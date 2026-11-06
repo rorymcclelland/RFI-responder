@@ -36,7 +36,7 @@ Bold: over the 8-second limit, so refused in the app.
 
 ### Locally, and what grows
 
-On the local test database (Postgres 16), with 3,000 reviewed entries in the knowledge base, sending is about 2.5 to 3 times faster than on staging. Statement statistics (`pg_stat_statements`, counting the statements inside the functions) for one file of 3,000 questions, 4.7 seconds in all:
+On the local test database (Postgres 16), 6 November, with 3,000 reviewed entries in the knowledge base (`F73_KB=3000`), sending was about 1.2 to 1.9 times faster than on staging at the same sizes (0.8 against 1.3 seconds at 1 × 500; 3.6 against 4.2 at 4 × 500; 8.7 against 16.3 at 3 × 2,000). Statement statistics (`pg_stat_statements`, counting the statements inside the functions) for one file of 3,000 questions, 4.7 seconds in all:
 
 | Statement | Calls | Time |
 |---|---|---|
@@ -58,11 +58,11 @@ The two candidate fixes, tried on the local test database only (`F73_PATCH=1` in
 | 2 × 2,000 | 5.7 | 3.5 | 1.4 | 1.4 |
 | 3 × 2,000 | 8.7 | 5.5 | 2.3 | 2.3 |
 
-With both, sending grows in a straight line, about 0.9 ms a question locally. Local runs varied by up to a second between runs at the larger sizes.
+With both, sending grows in a straight line, about 0.9 ms a question locally, and the QA review's own run reproduced it (0.42, 1.6, 3.4 and 5.3 seconds). Without the fixes, runs varied more: at 2 × 2,000, 5.7 seconds in the run above, 9.4 in an earlier one and 7.9 in the QA review's.
 
 ## What this does not show
 
-- The fixes were not measured on staging, and were not run against the database tests. If staging is as much slower as it is today, sending with both fixes would take about 2 to 2.5 ms a question there, so a response of about 3,000 to 4,000 questions would still reach 8 seconds. That is an estimate from these figures, not a measurement.
+- The fixes were not measured on staging, and were not run against the database tests. If staging is 1.2 to 1.9 times slower, as above, sending with both fixes would take about 1.1 to 1.7 ms a question there, so a response of roughly 4,500 to 7,000 questions would reach 8 seconds. That is an estimate from these figures, not a measurement, and the fix must be measured on staging before any limit is set.
 - The synthetic questions each cite one entry and learn as new entries. Real answers that replace or propose replacements, or cite several entries, do a little more work each.
 - Staging's knowledge base is small (134 entries). The tag lookup's cost grows with the knowledge base, so a larger one would be slower before the fix and unchanged after it.
 

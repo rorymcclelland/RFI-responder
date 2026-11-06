@@ -82,6 +82,22 @@ describe('the live app only after its database (S25-1)', () => {
     expect(production).toMatch(/permissions:\n\s+contents: write\n/);
   });
 
+  it('live only moves forward: not forced, and nothing deploys unless the commit is live or later (security review, M2)', () => {
+    const step = prodSteps[index(/^Move the live branch to this commit$/)];
+    expect(step.text).toMatch(/git push "https/);
+    expect(step.text).not.toMatch(/push (-f|--force)/);
+    const ready = prodSteps[index(/^Is the deploy set up/)];
+    expect(ready.text).toContain('compare/live...${GITHUB_SHA}');
+    expect(ready.text).toMatch(/!= ahead \] && \[ "\$order" != identical/);
+    expect(index(/^Is the deploy set up/)).toBeLessThan(index(/^Migrations and Edge Functions to the live demo$/));
+  });
+
+  it('the job runs for the branch main only, and its checkout keeps no token (security review, L1 and M1)', () => {
+    expect(production).toContain("if: github.ref == 'refs/heads/main'");
+    const checkout = prodSteps.find((s) => s.name.startsWith('actions/checkout'));
+    expect(checkout?.text).toMatch(/persist-credentials: false/);
+  });
+
   it('live moves only when every step before it succeeded (test case 4)', () => {
     const live = index(/^Move the live branch to this commit$/);
     const step = prodSteps[live];
@@ -90,6 +106,13 @@ describe('the live app only after its database (S25-1)', () => {
     expect(step.text).not.toMatch(/always\(\)|failure\(\)|cancelled\(\)|success\(\) \|\|/);
     for (const earlier of prodSteps.slice(0, live)) {
       expect(earlier.text, earlier.name).not.toMatch(/continue-on-error|always\(\)|failure\(\)/);
+    }
+    // The steps that must succeed first run exactly when live may move (a skipped step would count as
+    // a success), and nothing in them hides a failure (QA review, M1: both mutations passed before).
+    for (const name of [/^Sign-in settings match the repository$/, /^Migrations and Edge Functions to the live demo$/]) {
+      const s = prodSteps[index(name)];
+      expect(s.text, s.name).toMatch(/if: steps\.ready\.outputs\.ok == 'true'\s*$/m);
+      expect(s.text, s.name).not.toMatch(/\|\|\s*(true|:|exit 0)|set \+e|;\s*true\b/);
     }
   });
 
