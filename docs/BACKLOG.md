@@ -1046,6 +1046,16 @@ Refinement: `docs/refinement/sprint-24.md`. Q1 to Q5 answered by Rory the same d
 
 **Proposed next.** Sprint 25: F-75, F-74 and F-73.
 
+## Sprint 25: the live app only after its database, and the Sprint 24 review's follow-ups (refined 6 November 2026)
+
+Refinement: `docs/refinement/sprint-25.md`. Q1 to Q5 answered by Rory the same day, each as recommended.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S25-1 | The live app only after its database: `main` builds nothing; the approved production job moves a `live` branch after the migrations, and Vercel's production branch is `live` | F-75 | Ready, Sprint 25 |
+| S25-2 | The per-file functions (`record_export`, `bulk_accept`) revoked from signed-in users; older tests moved to the whole-response functions | F-74 | Ready, Sprint 25 |
+| S25-3 | Spike, half a day: sending and bulk-approving a large response on staging against the hosted time limit, and why the time grows | F-73 | Ready, Sprint 25 (the fix: Planned, Sprint 26, refined at the spike's close) |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
