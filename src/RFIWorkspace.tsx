@@ -426,6 +426,11 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       const summary = await recordResponseExport(supabase, opportunityId);
       setLearning(describeLearning(summary));
       const files = await reloadAll();
+      // Sprint 25 (found by CI): collapse the list as the page first shows the response as sent, not
+      // after indexing the new entries, which can take seconds and would close a list the person had
+      // opened again in the meantime.
+      setListCollapsed(true);
+      setStep('export');
       // The database closed the open assignments: show it (QA review, Sprint 21).
       await loadAssignments(files.map((f) => f.id));
       if (summary.added || summary.superseded) {
@@ -434,10 +439,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       }
     } catch (err) {
       setUploadError((err as Error).message);
-      return;
     }
-    setListCollapsed(true);
-    setStep('export');
   };
 
   const startNew = () => {

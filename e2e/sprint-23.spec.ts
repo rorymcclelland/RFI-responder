@@ -42,9 +42,11 @@ test('Try it: your own response from the sample, drafted, worked through and mar
   await tryPanel(page).getByRole('button', { name: 'Try it with a sample questionnaire' }).click();
 
   await caption(page, 'A response of their own, named for the sample and for them, drafted as an upload is');
-  await expect(header(page).getByRole('heading', { level: 1, name: tryOf(member.name) })).toBeVisible({ timeout: 30_000 });
-  await expect(header(page)).toContainText('A try.');
+  // The response header appears once drafting ends, which with the real AI on staging can take more
+  // than 30 seconds (Sprint 25: at 10 of 12 after 30), so the name is checked after the drafting wait.
   await drafted(page);
+  await expect(header(page).getByRole('heading', { level: 1, name: tryOf(member.name) })).toBeVisible();
+  await expect(header(page)).toContainText('A try.');
   await expect(header(page)).toContainText(`of ${QUESTIONS} decided`);
   if (TARGET === 'staging') {
     // The real pipeline: drafts from the knowledge base, not the fallback (as S21-4 checks the ask).
