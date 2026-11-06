@@ -50,6 +50,8 @@ Read from the shell, and by the evaluation scripts also from `.env` in `supabase
 | `APP_URL` | `http://127.0.0.1:5173` | [`scripts/screenshots.ts`](../../scripts/screenshots.ts) | The running app to photograph. Must be a local address |
 | `SEED_PASSWORD` | The seed users' local password | [`scripts/screenshots.ts`](../../scripts/screenshots.ts) | The password of the seed users in [`supabase/seed.sql`](../../supabase/seed.sql); for local use only |
 | `DB_TEST_URL` | `postgres://postgres@localhost:5432/postgres` | [`supabase/tests/db/harness.ts`](../../supabase/tests/db/harness.ts) | A Postgres 16 superuser connection for `npm run test:db`. The tests drop and recreate a database called `rfi_test` on that server |
+| `F73_KB` | `300` | [`scripts/spikes/f73-profile.ts`](../../scripts/spikes/f73-profile.ts) | Sprint 25 spike (F-73), local only: how many synthetic knowledge-base entries to load before timing |
+| `F73_PATCH` | Unset | [`scripts/spikes/f73-profile.ts`](../../scripts/spikes/f73-profile.ts) | Sprint 25 spike (F-73), local only: `1` tries the candidate fixes on the throwaway test database before timing (never a migration) |
 
 ## Browser tests, staging and deploys (Sprint 20)
 

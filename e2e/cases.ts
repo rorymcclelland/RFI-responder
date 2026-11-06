@@ -203,4 +203,27 @@ export const SPRINTS: SprintCases[] = [
       { id: 'S24-3 3', story: 'S24-3', title: 'The break never reaches main', how: { kind: 'hand', why: 'pending until Rory deletes f72-broken-step: it is not merged, and main does not contain e5ad969' } },
     ],
   },
+  {
+    sprint: 25,
+    title: 'The live app only after its database, and the Sprint 24 review\'s follow-ups',
+    stories: [
+      { id: 'S25-1', title: 'The live app only after its database', forTheUser: 'What visitors see on the live demo always matches its database: new screens go live only after the deploy is approved and the migrations they need are in.' },
+      { id: 'S25-2', title: 'The per-file functions out of the API', forTheUser: 'A response is sent, and approved in bulk, only as a whole: the older one-file functions cannot be called to get round it.' },
+      { id: 'S25-3', title: 'Spike: sending a large response on the hosted database', forTheUser: 'We know how large a response can be marked as sent within the hosted database\'s time limit, and why it slows down.' },
+    ],
+    cases: [
+      { id: 'S25-1 1', story: 'S25-1', title: 'A push to main builds no deployment on Vercel', how: { kind: 'ci', by: 'scripts/deploy-order.test.ts (vercel.json); Vercel\'s list of deployments after the merge, read with the connector, is added at the close' } },
+      { id: 'S25-1 2', story: 'S25-1', title: 'With the deploy waiting for approval, the live demo still serves the previous commit', how: { kind: 'hand', why: 'pending: read with the connector while the first production run after the merge waits for Rory\'s approval' } },
+      { id: 'S25-1 3', story: 'S25-1', title: 'After approval: migrations and functions, then live moves, then Vercel builds it, and the check finds the commit served', how: { kind: 'hand', why: 'pending: the first production run after the merge, from its log; the order itself is checked in CI by scripts/deploy-order.test.ts' } },
+      { id: 'S25-1 4', story: 'S25-1', title: 'If a migration or function step fails, live does not move and the live demo keeps the previous app', how: { kind: 'ci', by: 'scripts/deploy-order.test.ts (the live step comes after them and runs only if every earlier step succeeded; seen failing with always() and with the steps swapped); Sprint 23 showed a failing migration stops the run' } },
+      { id: 'S25-1 5', story: 'S25-1', title: 'The live demo keeps its production settings and address', how: { kind: 'hand', why: 'checked with the Vercel connector on 6 November: the live demo\'s variables are on Production with no branch attached; the address is checked again after the switch' } },
+      { id: 'S25-1 6', story: 'S25-1', title: 'DEPLOYING.md and the risk register say what happens, and how to roll back', how: { kind: 'ci', by: 'docs/docs.test.ts and docs/governance/governance.test.ts' } },
+      { id: 'S25-2 1', story: 'S25-2', title: 'An owner, an admin, a member, a visitor and the service role are each refused both per-file functions', how: { kind: 'ci', by: 'supabase/tests/db/sprint25.test.ts' } },
+      { id: 'S25-2 2', story: 'S25-2', title: 'The whole-response functions still work, learn, close assignments and write the audit log', how: { kind: 'ci', by: 'supabase/tests/db/sprint25.test.ts and supabase/tests/db/sprint24.test.ts (unchanged)' } },
+      { id: 'S25-2 3', story: 'S25-2', title: 'Every older test that called the per-file functions still proves what it proved', how: { kind: 'ci', by: 'the full database suite: 76 calls in 12 files moved to the whole-response functions, none deleted (docs/refinement/sprint-25.md, While building)' } },
+      { id: 'S25-2 4', story: 'S25-2', title: 'The demo loaders still build the demo', how: { kind: 'ci', by: 'supabase/tests/db/seed.test.ts and demo-seed.test.ts, and CI\'s local stack' } },
+      { id: 'S25-2 5', story: 'S25-2', title: 'The app calls neither function', how: { kind: 'ci', by: 'src/lib/wholeResponse.test.ts' } },
+      { id: 'S25-3 1', story: 'S25-3', title: 'The figures on staging and the cause are written down, with a recommended fix', how: { kind: 'hand', why: 'pending: docs/spikes/f73-sending-large-responses.md' } },
+    ],
+  },
 ];
