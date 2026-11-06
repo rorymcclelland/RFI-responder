@@ -44,6 +44,7 @@
   "git": {
     "deploymentEnabled": {
       "e2e-results/**": false,
+      "main": false,
       "sprint-*": false
     }
   }

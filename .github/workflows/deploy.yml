@@ -6,8 +6,9 @@
 #   there with test people made for the run, and publishes the results for the demo page.
 # - A push to main deploys the migrations and Edge Functions to the live demo, in the GitHub
 #   environment "production", which must require Rory's approval (Q1 of the Sprint 20 refinement): the
-#   job refuses to run if it does not. Vercel publishes the app itself from main as before, without
-#   waiting (docs/DEPLOYING.md says so).
+#   job refuses to run if it does not. After the migrations and functions, it moves the branch "live"
+#   to the commit, and Vercel publishes the live demo from "live" (Sprint 25, S25-1); a push to main
+#   builds nothing on Vercel (vercel.json).
 #
 # Secrets are passed only to the steps that need them, never to `npm ci` (security review, H2), and
 # are environment secrets, so a job outside that environment cannot read them.
@@ -148,8 +149,9 @@ jobs:
     concurrency:
       group: deploy-production
       cancel-in-progress: false
+    # Write access only to move the branch "live", which Vercel publishes as the live demo (S25-1).
     permissions:
-      contents: read
+      contents: write
       actions: read
     env:
       PRODUCTION_REF: ${{ vars.PRODUCTION_PROJECT_REF }}
@@ -199,6 +201,16 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
         run: bash scripts/supabase-deploy.sh "$PRODUCTION_REF" /tmp/migrations.txt
+      # Sprint 25 (S25-1, F-75): Vercel's production branch is "live", not main, so the app reaches the
+      # live demo only here, after Rory's approval and after the migrations and functions it needs.
+      # If any earlier step fails, this one does not run and the live demo keeps the previous app.
+      # A push made with the workflow's own token starts no other workflow. To roll back, move "live"
+      # back to the previous commit (docs/DEPLOYING.md).
+      - name: Move the live branch to this commit
+        if: steps.ready.outputs.ok == 'true'
+        env:
+          TOKEN: ${{ github.token }}
+        run: git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
       - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:
