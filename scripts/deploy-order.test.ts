@@ -85,7 +85,11 @@ describe('the live app only after its database (S25-1)', () => {
   it('live only moves forward: not forced, and nothing deploys unless the commit is live or later (security review, M2)', () => {
     const step = prodSteps[index(/^Move the live branch to this commit$/)];
     expect(step.text).toMatch(/git push "https/);
-    expect(step.text).not.toMatch(/push (-f|--force)/);
+    expect(step.text).not.toMatch(/push (-f|--force)|\+\$\{GITHUB_SHA\}/);
+    // A non-forced push needs the history to see it is a fast-forward: from a one-commit checkout git
+    // refuses every push ("fetch first"), which stopped the first deploy of Sprint 25.
+    const checkout = prodSteps.find((s) => s.name.startsWith('actions/checkout'));
+    expect(checkout?.text).toMatch(/fetch-depth: 0/);
     const ready = prodSteps[index(/^Is the deploy set up/)];
     expect(ready.text).toContain('compare/live...${GITHUB_SHA}');
     expect(ready.text).toMatch(/!= ahead \] && \[ "\$order" != identical/);
