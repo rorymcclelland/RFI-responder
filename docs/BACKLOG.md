@@ -1086,6 +1086,15 @@ Refinement: `docs/refinement/sprint-25.md`. Q1 to Q5 answered by Rory the same d
 
 **Confirmed by Rory (7 November 2026).** Sprint 26 is S26-1 and F-77, both to be refined now. For S26-1: fix both causes, measure again on staging, then refuse at upload a response too large to send in about half the time limit, saying why; one limit covers bulk approval too.
 
+## Sprint 26: a large response sent within the time limit, and the live demo's branch protected (refined 7 November 2026)
+
+Refinement: `docs/refinement/sprint-26.md`. Q1 to Q5 answered by Rory the same day, each as recommended.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S26-1 | Sending and bulk approval grow in a straight line (the two causes the Sprint 25 spike found), measured again on staging, then a limit at upload set from that figure, enforced by the database and explained by the app | F-73 | Ready, Sprint 26 |
+| S26-2 | Only the approved deploy can move `live`: a ruleset with a deploy-key bypass, the key held by the `production` environment, the job's token read-only; `main` protected as Rory chooses | F-77 | Ready, Sprint 26 |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
