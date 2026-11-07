@@ -1084,6 +1084,8 @@ Refinement: `docs/refinement/sprint-25.md`. Q1 to Q5 answered by Rory the same d
 
 **Proposed next.** Sprint 26: S26-1 (the F-73 fix and a limit at upload) and F-77.
 
+**Confirmed by Rory (7 November 2026).** Sprint 26 is S26-1 and F-77, both to be refined now. For S26-1: fix both causes, measure again on staging, then refuse at upload a response too large to send in about half the time limit, saying why; one limit covers bulk approval too.
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
