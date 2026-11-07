@@ -1046,15 +1046,43 @@ Refinement: `docs/refinement/sprint-24.md`. Q1 to Q5 answered by Rory the same d
 
 **Proposed next.** Sprint 25: F-75, F-74 and F-73.
 
-## Sprint 25: the live app only after its database, and the Sprint 24 review's follow-ups (refined 6 November 2026)
+## Sprint 25: the live app only after its database, and the Sprint 24 review's follow-ups (refined 6 November 2026; closed 7 November 2026)
 
 Refinement: `docs/refinement/sprint-25.md`. Q1 to Q5 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S25-1 | The live app only after its database: `main` builds nothing; the approved production job moves a `live` branch after the migrations, and Vercel's production branch is `live` | F-75 | Ready, Sprint 25 |
-| S25-2 | The per-file functions (`record_export`, `bulk_accept`) revoked from signed-in users; older tests moved to the whole-response functions | F-74 | Ready, Sprint 25 |
-| S25-3 | Spike, half a day: sending and bulk-approving a large response on staging against the hosted time limit, and why the time grows | F-73 | Ready, Sprint 25 (the fix: Planned, Sprint 26, refined at the spike's close) |
+| S25-1 | The live app only after its database: `main` builds nothing; the approved production job moves a `live` branch after the migrations, and Vercel's production branch is `live` | F-75 | Done, Sprint 25 |
+| S25-2 | The per-file functions (`record_export`, `bulk_accept`) revoked from signed-in users; older tests moved to the whole-response functions | F-74 | Done, Sprint 25 |
+| S25-3 | Spike, half a day: sending and bulk-approving a large response on staging against the hosted time limit, and why the time grows | F-73 | Done, Sprint 25 (the spike; the fix is S26-1, proposed for Sprint 26) |
+
+### Sprint 25 review (7 November 2026)
+
+**Checks, with evidence.**
+- 1,189 unit, 448 database and 37 browser tests; CI green on `5194d29` and staging on `e6d8b92` (the difference is docs only), and both again on the deploy fix `31dde04`. Sprint 25 has no browser cases: the demo page listed each agreed case with the check in CI that proves it, or why it is by hand. Rory signed off on 6 November.
+- Independent reviews, every finding dealt with or backlogged. Security: `live` only moves forward (unforced push, and nothing deploys unless the commit is `live` or later); the production checkout keeps no token for `npm ci` to read; the job runs for the branch `main` only; no version of either per-file function is callable whatever its signature; the rollback advice corrected (Vercel's instant rollback holds new production builds; functions are not rolled back). Its High finding, that anyone who can push, or a `sprint-*` workflow, could move `live`, is F-77 (Rory, 6 November: Sprint 26). QA: the order test also fails if the migrations step is skipped or hides a failure (both passed before); the Try-it header waits with the drafting allowance; cases and docs claim no more than their checks; the spike's local-to-staging ratio corrected.
+- CI and staging found two problems on the first push, neither from this sprint: after **Mark as sent** the question list collapsed only after indexing, closing a list opened in the meantime (fixed); the Try-it test allowed 30 seconds for a header that appears only when drafting ends (fixed).
+- **The live demo.** Pushing `main` built nothing on Vercel (70c182c and 31dde04; S25-1 1), and while the run waited for approval the live demo kept `b5a41bd` (S25-1 2). The first approved run, 42264207268, applied the Sprint 25 migration and the functions, then **stopped** at moving `live`: an unforced push from a one-commit checkout is always refused ("fetch first"); the order test had checked the step's text, not that it works. The live demo kept the Sprint 24 app with the Sprint 25 database, which is safe (the migration only takes away two functions that app does not call). The fix (`fetch-depth: 0`) was reproduced against a local copy of the repository before it shipped, and run 42385184404 then moved `live` from `b5a41bd` to `31dde04` after the functions, Vercel built the live demo from `live` (`target: production`, ref `live`), and the check found `31dde04` served at rfi-responder.vercel.app (S25-1 3 and 5). The security advisor reports no error, and `record_export` and `bulk_accept` are no longer among the functions signed-in users can call.
+- **The spike (S25-3).** On staging, marking as sent passes the 8-second limit between 2,000 and 4,000 questions (10.4 to 10.8 s at two files of 2,000; 16.0 to 16.6 s at three); bulk approval stays under it (6.2 to 6.4 s at 6,000). The cause is not the suspected duplicate lookup: a trigger recounts the file after every question's update (growing with the square of the file), and a tag lookup scans the knowledge base. Two fixes, tried locally, make sending grow in a straight line (`docs/spikes/f73-sending-large-responses.md`).
+
+### Where every Sprint 25 review item now lives
+
+| Item | Now |
+|---|---|
+| F-75, F-74 (S25-1, S25-2) and the F-73 spike (S25-3) | Done in Sprint 25 |
+| Sprint 25 QA and security review findings | Done (review), except H1 |
+| Anyone who can push, or a `sprint-*` workflow, could move `live` (security review, H1); with it, the production job's own token back to read, and the job checking that the `production` environment deploys from `main` only (security review, M1 and L1, the parts not done) | F-77, Backlog, from Sprint 25 review (Rory: Sprint 26) |
+| The question list closing after **Mark as sent**; the Try-it test's 30-second header wait | Done in Sprint 25 (found by CI and staging) |
+| The production push to `live` refused from a one-commit checkout | Done at the Sprint 25 deploy (`31dde04`) |
+| Sending a large response passes the time limit on the hosted database (the fix, then a limit from measured figures) | F-73 fix, Backlog, from the Sprint 25 spike (S26-1, proposed for Sprint 26) |
+| `sprint-25-f73` and the earlier throwaway branches | Rory to delete |
+
+**Not yet in a sprint, ranked at the Sprint 25 review.**
+1. F-73 fix (M): the two causes the spike found, in one migration with tests, measured again on staging, then a limit at upload from the measured figures; a response of two files of 2,000 questions cannot be marked as sent on the live demo today.
+2. F-77 protecting `live` and `main` (S to M): the last route round the approval; needs Rory's ruleset and a deploy key held in the `production` environment.
+3. Then the earlier list: F-14 and F-15 (need people), F-59, F-20, F-34, F-60, F-62, F-8 (Pro plan), F-2, F-4.
+
+**Proposed next.** Sprint 26: S26-1 (the F-73 fix and a limit at upload) and F-77.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -1148,9 +1176,9 @@ Refinement: `docs/refinement/sprint-25.md`. Q1 to Q5 answered by Rory the same d
 | F-68 | Done, Sprint 23 (S23-3). A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
 | F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Done, Sprint 22 (S22-3) |
 | F-71 | What the knowledge base did with a response's answers (added, proposed, confirmed, not learned and why) is shown only at the moment it is marked as sent; opened again later, the **Send** stage says it was sent but not what was learned | From the Sprint 23 review (found by the main path's first CI run). Keep the report with the export record and show it on a sent response |
-| F-73 | Marking a very large response as sent can run past the hosted database's statement time limit: measured locally at 1 s for one file of 500 questions, 9 s for four, 73 s for three files of 2,000; all or nothing, so a timeout records nothing | From the Sprint 24 security review (L1). Measure on the hosted database; then cap, split, or speed up `record_export`'s replace lookup |
-| F-74 | `record_export` and `bulk_accept`, per file, are still callable through the API; the app no longer calls them | From the Sprint 24 security review (info). Revoke them from signed-in users; move the older database tests to the whole-response functions |
-| F-75 | The live demo's app goes live when `main` moves, before Rory approves the database deploy: at Sprint 24 the new screens met the old database for three hours | From the Sprint 24 deploy. Vercel builds `main` itself; the production job should publish the app after the migrations instead (a Vercel deploy hook, Git deployments for `main` turned off by Rory) |
+| F-73 | Marking a very large response as sent can run past the hosted database's statement time limit; all or nothing, so a timeout records nothing. Spike done, Sprint 25 (S25-3): on staging it passes the 8-second limit between 2,000 and 4,000 questions, because a trigger recounts the file after every question's update and a tag lookup scans the knowledge base | From the Sprint 24 security review (L1). The fix: Backlog, from the Sprint 25 spike, proposed as S26-1: fix both causes, measure again on staging, then refuse at upload a response too large to send (`docs/spikes/f73-sending-large-responses.md`) |
+| F-74 | Done, Sprint 25 (S25-2). `record_export` and `bulk_accept`, per file, were still callable through the API; the app no longer calls them | From the Sprint 24 security review (info). Revoke them from signed-in users; move the older database tests to the whole-response functions |
+| F-75 | Done, Sprint 25 (S25-1): `main` builds nothing; the approved production job moves `live`, Vercel's production branch, after the migrations. The live demo's app went live when `main` moved, before Rory approves the database deploy: at Sprint 24 the new screens met the old database for three hours | From the Sprint 24 deploy. Vercel builds `main` itself; the production job should publish the app after the migrations instead (a Vercel deploy hook, Git deployments for `main` turned off by Rory) |
 | F-76 | Done, Sprint 24 close. The deploy check failed when the app served a later commit that includes the deployed one (a docs push after the merge) | `servedIncludes` asks GitHub whether the served build includes the deployed commit |
 | F-77 | Anyone who can push to the repository, or a workflow on a `sprint-*` branch (whose token can write), could move `live` and publish to the live demo without Rory's approval, as they could push `main` before Sprint 25 | From the Sprint 25 security review (H1). A GitHub ruleset on `live` (and `main`) that only a deploy key may update, its private key a secret of the `production` environment; the production job pushes with it and its own token goes back to read. Rory's settings and secret. Planned, Sprint 26 (Rory, 6 November) |
 | F-72 | S23-2 case 4: see the main path test fail, naming the step, when a step is broken on a branch (not merged) | From the Sprint 23 review; by construction until then (each step waits for its own result) |

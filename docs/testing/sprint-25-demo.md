@@ -11,11 +11,11 @@ What visitors see on the live demo always matches its database: new screens go l
 
 | Case | What was checked | Result |
 |---|---|---|
-| S25-1 1 | A push to main builds no deployment on Vercel (scripts/deploy-order.test.ts (vercel.json); Vercel's list of deployments after the merge, read with the connector, is added at the close) | Checked in CI |
-| S25-1 2 | With the deploy waiting for approval, the live demo still serves the previous commit (pending: read with the connector while the first production run after the merge waits for Rory's approval) | By hand |
-| S25-1 3 | After approval: migrations and functions, then live moves, then Vercel builds it, and the check finds the commit served (pending: the first production run after the merge, from its log; the order itself is checked in CI by scripts/deploy-order.test.ts) | By hand |
+| S25-1 1 | A push to main builds no deployment on Vercel (scripts/deploy-order.test.ts (vercel.json); on 7 November Vercel built nothing for the pushes of main (70c182c, 31dde04), read with the connector) | Checked in CI |
+| S25-1 2 | With the deploy waiting for approval, the live demo still serves the previous commit (read with the connector on 7 November while Deploy run 42264207268 waited: the live demo kept b5a41bd) | By hand |
+| S25-1 3 | After approval: migrations and functions, then live moves, then Vercel builds it, and the check finds the commit served (Deploy run 42385184404 (7 November): functions, then live moved b5a41bd..31dde04, then the check found 31dde04 served; the first run, 42264207268, stopped at moving live and left the previous app; the order is checked in CI by scripts/deploy-order.test.ts) | By hand |
 | S25-1 4 | If a migration or function step fails, live does not move and the live demo keeps the previous app (scripts/deploy-order.test.ts (the live step comes after them and runs only if every earlier step succeeded; seen failing with always() and with the steps swapped); Sprint 23 showed a failing migration stops the run) | Checked in CI |
-| S25-1 5 | The live demo keeps its production settings and address (checked with the Vercel connector on 6 November: the live demo's variables are on Production with no branch attached; the address is checked again after the switch) | By hand |
+| S25-1 5 | The live demo keeps its production settings and address (checked with the Vercel connector: on 6 November the live demo's variables are on Production with no branch attached; on 7 November its production build came from live and is served at rfi-responder.vercel.app) | By hand |
 | S25-1 6 | DEPLOYING.md and the risk register say what happens, and how to roll back (read by the independent QA and security reviews (Sprint 25); CI checks only that the docs' links and paths hold (docs/docs.test.ts, docs/governance/governance.test.ts)) | By hand |
 
 ### S25-2 The per-file functions out of the API

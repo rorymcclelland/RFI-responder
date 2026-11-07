@@ -84,6 +84,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 22 | The response as a journey: a header like its card, the stages **Questions**, **With experts** and **Send**, and the questions grouped by what they need, one reason each; plain settings with **Advanced**, spend by use, and the audit log by person and response; the staging real-AI step checks its usage is recorded |
 | 23 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the AI and never learned from; the main path as one browser test, on staging with the real AI; a failing migration tried on staging |
 | 24 | One response, one list: every file's questions together, filtered by file, approved in bulk and marked as sent once, as a whole, with a download per file and no file added once sent; what was learned kept with a sent response; the main path test seen failing on a broken step |
+| 25 | The live demo's app is published only after its database: pushing `main` builds nothing, and the approved deploy moves a `live` branch after the migrations and functions; the per-file send and bulk-approval functions out of the API; a spike on sending a large response on the hosted database |
 
 Each sprint followed the same cycle:
 
