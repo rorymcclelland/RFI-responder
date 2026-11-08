@@ -42,9 +42,9 @@ jobs:
           done
           [ -n "$db_url" ] || { echo "::error::Could not reach staging's database"; exit 1; }
           echo "::add-mask::$db_url"
-          for size in "1 500" "4 500" "2 2000" "3 2000"; do
+          for size in "3 500" "1 1500" "4 500" "1 2000"; do
             set -- $size
-            for run in 1 2; do
+            for run in 1 2 3; do
               psql "$db_url" -q -v files="$1" -v per="$2" -f scripts/spikes/f73-hosted.sql | grep '^F73' | sed "s/^/run ${run}: /"
             done
           done
