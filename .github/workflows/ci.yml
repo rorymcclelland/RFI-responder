@@ -81,7 +81,7 @@ jobs:
       - name: Type-check the Edge Functions (Deno)
         run: deno check --config supabase/functions/deno.json supabase/functions/*/index.ts
       - name: Start Supabase (database, auth and API only)
-        run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor,realtime,storage-api,postgres-meta
+        run: supabase start -x studio,imgproxy,mailpit,logflare,vector,supavisor,realtime,storage-api,postgres-meta
       - name: Apply every migration and the dev seed from scratch
         run: supabase db reset
       - name: Sign-up is refused (invite-only, decision 0003)
@@ -222,7 +222,7 @@ jobs:
         with:
           version: 2.121.0
       - name: Start Supabase (database, auth, API and functions)
-        run: supabase start -x studio,imgproxy,inbucket,logflare,vector,supavisor,realtime,storage-api,postgres-meta
+        run: supabase start -x studio,imgproxy,mailpit,logflare,vector,supavisor,realtime,storage-api,postgres-meta
       - name: Load every migration and the demo seed
         run: supabase db reset
       - name: Point the app at the local stack, and serve the functions with every AI provider failing

@@ -7,7 +7,7 @@ import { REPO, type Run } from './setup-secrets';
 // Built at run time, so no key-shaped text sits in the repository (GitHub's push protection).
 const PRIVATE = ['-----BEGIN', 'OPENSSH PRIVATE KEY-----\nfake', 'private', 'material\n-----END OPENSSH PRIVATE KEY-----\n'].join(' ');
 const PUBLIC = 'ssh-ed25519 AAAAfakepublic rfi';
-const fakeKey: MakeKey = (_run, use) => use({ privateKey: PRIVATE, publicKey: PUBLIC });
+const fakeKey: MakeKey = (_run, withPair) => withPair({ privateKey: PRIVATE, publicKey: PUBLIC });
 
 function fakeRun(o: { keys?: { id: number; title: string; read_only: boolean }[]; rulesets?: { id: number; name: string }[]; secretFails?: boolean } = {}) {
   const calls: { cmd: string; args: string[]; input?: string }[] = [];

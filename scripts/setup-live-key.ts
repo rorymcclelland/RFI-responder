@@ -69,16 +69,16 @@ export function otherWriteKeys(keys: DeployKey[]): DeployKey[] {
   return keys.filter((k) => !k.read_only && !k.title.startsWith(KEY_TITLE));
 }
 
-/** Makes a key pair in a temporary folder and hands it over; the folder is gone when `use` returns. Replaced in the tests. */
-export type MakeKey = <T>(run: Run, use: (pair: { privateKey: string; publicKey: string }) => T) => T;
+/** Makes a key pair in a temporary folder and hands it over; the folder is gone when `withPair` returns. Replaced in the tests. */
+export type MakeKey = <T>(run: Run, withPair: (pair: { privateKey: string; publicKey: string }) => T) => T;
 
-const realMakeKey: MakeKey = (run, use) => {
+const realMakeKey: MakeKey = (run, withPair) => {
   const dir = mkdtempSync(join(tmpdir(), 'rfi-live-key-'));
   try {
     const file = join(dir, 'key');
     const r = run('ssh-keygen', ['-q', '-t', 'ed25519', '-N', '', '-C', KEY_TITLE, '-f', file]);
     if (r.status !== 0) throw new Error('ssh-keygen failed: is OpenSSH installed? (Windows: Settings, Apps, Optional features, OpenSSH Client)');
-    return use({ privateKey: readFileSync(file, 'utf8'), publicKey: readFileSync(`${file}.pub`, 'utf8').trim() });
+    return withPair({ privateKey: readFileSync(file, 'utf8'), publicKey: readFileSync(`${file}.pub`, 'utf8').trim() });
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
