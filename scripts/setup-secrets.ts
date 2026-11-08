@@ -143,7 +143,8 @@ export type Ask = (question: string) => Promise<string>;
 /** The Supabase command line, from this repository's own node_modules, run by Node (no shell, no npx). */
 const SUPABASE_CLI = join('node_modules', 'supabase', 'dist', 'supabase.js');
 
-const realRun: Run = (cmd, args, input) => {
+/** The real command runner, also used by setup-live-key.ts (Sprint 26). */
+export const realRun: Run = (cmd, args, input) => {
   let file = cmd;
   let argv = args;
   if (cmd === 'supabase') {

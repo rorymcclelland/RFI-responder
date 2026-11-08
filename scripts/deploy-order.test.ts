@@ -74,17 +74,44 @@ describe('the live app only after its database (S25-1)', () => {
     expect(signIn).toBeLessThan(live);
   });
 
-  it('moves live to the deployed commit, with the workflow\'s own token', () => {
+  it('moves live to the deployed commit with the deploy key, over SSH to GitHub\'s pinned host key (S26-2 4)', () => {
     const step = prodSteps[index(/^Move the live branch to this commit$/)];
     expect(step.text).toContain('"${GITHUB_SHA}:refs/heads/live"');
-    expect(step.text).toContain('TOKEN: ${{ github.token }}');
-    expect(step.text).not.toMatch(/secrets\./);
-    expect(production).toMatch(/permissions:\n\s+contents: write\n/);
+    expect(step.text).toContain('LIVE_DEPLOY_KEY: ${{ secrets.LIVE_DEPLOY_KEY }}');
+    expect(step.text).toMatch(/git@github\.com:\$\{GITHUB_REPOSITORY\}\.git/);
+    // GitHub's published Ed25519 host key (SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU), checked, never learned.
+    expect(step.text).toContain('github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl');
+    expect(step.text).toMatch(/StrictHostKeyChecking=yes/);
+    expect(step.text).not.toMatch(/StrictHostKeyChecking=(no|accept-new)|ssh-keyscan|github\.token/);
+  });
+
+  it('the job\'s own token cannot write, and the key reaches only the step that pushes (S26-2 4)', () => {
+    expect(production).toMatch(/permissions:\n\s+contents: read\n/);
+    expect(production).not.toMatch(/contents: write/);
+    // The key's value goes to one step; the ready check only learns whether it is set (true or false).
+    const users = prodSteps.filter((s) => s.text.includes('${{ secrets.LIVE_DEPLOY_KEY }}'));
+    expect(users.map((s) => s.name)).toEqual(['Move the live branch to this commit']);
+    const uses = workflow.match(/secrets\.LIVE_DEPLOY_KEY[^}]*\}\}/g) ?? [];
+    expect(uses.sort()).toEqual(["secrets.LIVE_DEPLOY_KEY != '' }}", 'secrets.LIVE_DEPLOY_KEY }}']);
+  });
+
+  it('nothing deploys unless the ruleset on live is in force (S26-2 7)', () => {
+    const ready = prodSteps[index(/^Is the deploy set up/)];
+    expect(ready.text).toContain('rules/branches/live');
+    expect(ready.text).toContain('!= "deletion,non_fast_forward,update"');
+  });
+
+  it('nothing deploys unless the production environment deploys from main only (S26-2 5)', () => {
+    const ready = prodSteps[index(/^Is the deploy set up/)];
+    expect(ready.text).toContain('deployment_branch_policy');
+    expect(ready.text).toContain('deployment-branch-policies');
+    expect(ready.text).toMatch(/\$branches" != "branch:main"/);
+    expect(ready.text).toMatch(/\$policy" != custom/);
   });
 
   it('live only moves forward: not forced, and nothing deploys unless the commit is live or later (security review, M2)', () => {
     const step = prodSteps[index(/^Move the live branch to this commit$/)];
-    expect(step.text).toMatch(/git push "https/);
+    expect(step.text).toMatch(/git push "git@github/);
     expect(step.text).not.toMatch(/push (-f|--force)|\+\$\{GITHUB_SHA\}/);
     // A non-forced push needs the history to see it is a fast-forward: from a one-commit checkout git
     // refuses every push ("fetch first"), which stopped the first deploy of Sprint 25.

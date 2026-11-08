@@ -150,9 +150,10 @@ jobs:
     concurrency:
       group: deploy-production
       cancel-in-progress: false
-    # Write access only to move the branch "live", which Vercel publishes as the live demo (S25-1).
+    # Read only (Sprint 26, S26-2): "live" is moved with a deploy key that only this environment holds,
+    # and a ruleset refuses every other update to it (scripts/setup-live-key.ts).
     permissions:
-      contents: write
+      contents: read
       actions: read
     env:
       PRODUCTION_REF: ${{ vars.PRODUCTION_PROJECT_REF }}
@@ -163,6 +164,7 @@ jobs:
         env:
           HAS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
           HAS_DB: ${{ secrets.PRODUCTION_DB_PASSWORD != '' }}
+          HAS_KEY: ${{ secrets.LIVE_DEPLOY_KEY != '' }}
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$HAS_TOKEN" != true ] || [ "$HAS_DB" != true ] || [ -z "$PRODUCTION_REF" ] || [ -z "$PRODUCTION_APP_HOST" ]; then
@@ -173,6 +175,22 @@ jobs:
           reviewers=$(gh api "repos/${GITHUB_REPOSITORY}/environments/production" --jq '[.protection_rules[]? | select(.type == "required_reviewers")] | length' || echo 0)
           if [ "${reviewers:-0}" -lt 1 ]; then
             echo "::error::The production environment does not require a reviewer, so nothing was deployed. Add yourself under Settings, Environments, production."; exit 1
+          fi
+          # Sprint 26 (S26-2): without the deploy key "live" cannot move, so nothing is deployed before it is there.
+          if [ "$HAS_KEY" != true ]; then
+            echo "::error::The production environment has no LIVE_DEPLOY_KEY, so nothing was deployed: run scripts/setup-live-key.ts (docs/DEPLOYING.md)."; exit 1
+          fi
+          # Sprint 26 (S26-2): the ruleset that keeps everyone else off "live" must be in force.
+          rules=$(gh api "repos/${GITHUB_REPOSITORY}/rules/branches/live" --jq '[.[].type] | map(select(. == "update" or . == "deletion" or . == "non_fast_forward")) | unique | join(",")' || echo unknown)
+          if [ "$rules" != "deletion,non_fast_forward,update" ]; then
+            echo "::error::The branch live is not protected (rules in force: ${rules:-none}), so nothing was deployed: run scripts/setup-live-key.ts (docs/DEPLOYING.md)."; exit 1
+          fi
+          # Sprint 26 (S26-2, the rest of the Sprint 25 review's L1): the environment, and so its secrets,
+          # must be available to the branch main only.
+          policy=$(gh api "repos/${GITHUB_REPOSITORY}/environments/production" --jq '.deployment_branch_policy | if . == null then "all" elif .custom_branch_policies then "custom" else "protected" end' || echo unknown)
+          branches=$(gh api "repos/${GITHUB_REPOSITORY}/environments/production/deployment-branch-policies" --jq '[.branch_policies[] | .type + ":" + .name] | join(",")' || echo unknown)
+          if [ "$policy" != custom ] || [ "$branches" != "branch:main" ]; then
+            echo "::error::The production environment must deploy from the branch main only (now: ${policy}, ${branches}), so nothing was deployed. Set Settings, Environments, production, Deployment branches and tags to the branch main."; exit 1
           fi
           # Sprint 25 security review, M2: the live demo only moves forward. A re-run, or a late approval,
           # of a run for an older commit would otherwise deploy older functions and move "live" back.
@@ -185,8 +203,8 @@ jobs:
       - if: steps.ready.outputs.ok == 'true'
         uses: actions/checkout@v5
         with:
-          # The job's token can write (to move "live"), so it is not left in .git/config, where
-          # npm ci's install scripts could read it (Sprint 25 security review, M1).
+          # The job's token is not left in .git/config, where npm ci's install scripts could read it
+          # (Sprint 25 security review, M1).
           persist-credentials: false
           # The whole history, so the push to "live" can be checked as a fast-forward (see that step).
           fetch-depth: 0
@@ -218,16 +236,23 @@ jobs:
       # Sprint 25 (S25-1, F-75): Vercel's production branch is "live", not main, so the app reaches the
       # live demo only here, after Rory's approval and after the migrations and functions it needs.
       # If any earlier step fails, this one does not run and the live demo keeps the previous app.
-      # A push made with the workflow's own token starts no other workflow. It is not forced, so "live"
-      # only moves forward (security review, M2): GitHub refuses a push that is not a fast-forward. The
-      # checkout fetches the whole history (fetch-depth: 0) so git can see the move is forward; from a
-      # one-commit checkout it refuses every push ("fetch first", the first deploy of Sprint 25).
+      # Sprint 26 (S26-2, F-77): pushed with the deploy key, the one way past the "live" ruleset besides the
+      # repository's admins, over SSH to GitHub's published Ed25519 host key (checked, never learned:
+      # SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU). Not forced, so "live" only moves forward
+      # (security review, M2), and the checkout fetches the whole history so git can see that it does
+      # ("fetch first", the first deploy of Sprint 25). The key is written to a file only for this push.
       # To roll back, see docs/DEPLOYING.md.
       - name: Move the live branch to this commit
         if: steps.ready.outputs.ok == 'true'
         env:
-          TOKEN: ${{ github.token }}
-        run: git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
+          LIVE_DEPLOY_KEY: ${{ secrets.LIVE_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          dir=$(mktemp -d); trap 'rm -rf "$dir"' EXIT
+          (umask 077; printf '%s\n' "$LIVE_DEPLOY_KEY" > "$dir/key")
+          echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > "$dir/known_hosts"
+          GIT_SSH_COMMAND="ssh -i $dir/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$dir/known_hosts -o StrictHostKeyChecking=yes" \
+            git push "git@github.com:${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
       - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:

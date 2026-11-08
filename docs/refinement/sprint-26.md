@@ -101,3 +101,10 @@ Order: S26-1's first migration and the staging measurement first (the limit wait
 - **Q5:** (a). A script Rory runs on his PC creates the key pair, adds the public half as a deploy key that can write, stores the private half as the `production` environment's secret with `gh`, and deletes the local copy.
 
 S26-1 and S26-2 are Ready, Sprint 26.
+
+## While building
+
+- **S26-1's fix reproduces the spike locally:** 0.4, 1.8, 3.7 and 5.2 seconds to send at 1 × 500, 4 × 500, 2 × 2,000 and 3 × 2,000 (against 0.8, 3.6, 5.7 and 8.7 before). `record_export` was copied from the database and only its tag lookup changed. The test that the tags learned are as before passed before the change too, so it pins the behaviour rather than the fix.
+- **The script makes the rulesets too**, not only the key (Q4 and Q5): Rory still runs it, and the rulesets are then written as code (`scripts/setup-live-key.ts`) rather than as steps to follow in GitHub's settings. It refuses if another deploy key can write, because a ruleset lets every deploy key through.
+- **The deploy checks the protection is there before it deploys anything:** the key set, the rules in force on `live` (read from GitHub's API), and the `production` environment deploying from `main` only. Until Rory runs the script, a production run refuses at its first step, with the reason.
+- **GitHub's SSH host key** is pinned in the workflow from GitHub's published list, and its fingerprint was checked against the published one.
