@@ -12,9 +12,12 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve, sep } from 'node:path';
 import { SPRINTS, type Case, type SprintCases } from '../e2e/cases';
+import { SETUP, reproduce } from './reproduce';
 
 export interface RunTest {
   title: string;
+  /** The spec file, under e2e/. */
+  file?: string;
   /** Where it ran: local (CI's own stack) or staging. */
   target?: string;
   /** The test used the real AI models (Sprint 20, Q2). */
@@ -45,6 +48,7 @@ export function readRun(report: Result, root: string, target?: string): RunTest[
   const out: RunTest[] = [];
   const walk = (suite: Result) => {
     for (const spec of (suite.specs as Result[] | undefined) ?? []) {
+      const file = typeof spec.file === 'string' && /^[\w.-]+\.spec\.ts$/.test(spec.file) ? spec.file : undefined;
       for (const t of (spec.tests as Result[] | undefined) ?? []) {
         const results = (t.results as Result[] | undefined) ?? [];
         // A test that did not run here (skipped on this target) says nothing about the case.
@@ -59,6 +63,7 @@ export function readRun(report: Result, root: string, target?: string): RunTest[
         const err = ((last.errors as Result[]) ?? [])[0] as Result | undefined;
         out.push({
           title: String(spec.title),
+          ...(file ? { file } : {}),
           ...(target ? { target } : {}),
           ...(annotations.some((a) => a.type === 'real-ai') ? { realAi: true } : {}),
           status: failed ? 'failed' : 'passed',
@@ -98,6 +103,16 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '
 const LABEL: Record<Verdict['state'], string> = { passed: 'Passed', failed: 'Failed', ci: 'Checked in CI', hand: 'By hand', unchecked: 'Not checked' };
 const detail = (v: Verdict) => (v.state === 'ci' ? v.by : v.state === 'hand' ? v.why : v.state === 'unchecked' ? 'No test names this case, and no other check is recorded.' : v.tests.map((t) => t.title).join('; '));
 
+/** Rory, 9 November: each case opens to show how to check it again (scripts/reproduce.ts). */
+function againHtml(c: Case, tests: RunTest[]): string {
+  const r = reproduce(c, tests.filter((t) => t.cases.includes(c.id)));
+  return '<div class="again"><p class="again-h">How to check it again</p>'
+    + (r.commands.length ? `<p class="again-l">Run${r.commands.length > 1 ? ' each' : ''}:</p>${r.commands.map((x) => `<pre><code>${esc(x)}</code></pre>`).join('')}` : '')
+    + (r.steps.length ? `<p class="again-l">${r.commands.length ? (c.how.kind === 'browser' ? 'What the test does:' : 'The tests:') : 'Steps:'}</p><ol>${r.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>` : '')
+    + (r.note ? `<p class="again-n">${esc(r.note)}</p>` : '')
+    + '</div>';
+}
+
 /** The page. Videos are referenced as videos/<file>, copied there by `writeDemo`. */
 export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuilds: Build | Build[], video: (path: string) => string): string {
   const builds = Array.isArray(buildOrBuilds) ? buildOrBuilds : [buildOrBuilds];
@@ -109,7 +124,7 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
       const cases = s.cases.filter((c) => c.story === st.id);
       const rows = cases.map((c) => {
         const v = verdict(c, tests);
-        return `<tr><td class="id">${esc(c.id)}</td><td>${esc(c.title)}<div class="how">${esc(detail(v))}</div></td><td><span class="chip ${v.state}">${LABEL[v.state]}</span></td></tr>`;
+        return `<tr><td class="id">${esc(c.id)}</td><td><details class="case"><summary>${esc(c.title)}</summary>${againHtml(c, tests)}</details><div class="how">${esc(detail(v))}</div></td><td><span class="chip ${v.state}">${LABEL[v.state]}</span></td></tr>`;
       }).join('');
       // One set of recordings per test: from the first run given (staging, when it ran there).
       const own = tests.filter((t, i) => !shown.has(t) && t.cases.some((id) => cases.some((c) => c.id === id))
@@ -176,6 +191,18 @@ tr:last-child td { border-bottom:0; }
 video { width:100%; max-width:100%; border-radius:8px; border:1px solid var(--line); background:var(--bg); }
 details summary { cursor:pointer; color:var(--accent); font-size:.9rem; }
 details ol { margin:6px 0 0; padding-left:22px; color:var(--muted); font-size:.9rem; }
+details.case > summary { color:var(--ink); font-size:inherit; list-style-position:outside; }
+details.case > summary::marker { color:var(--accent); }
+details.case[open] > summary { font-weight:600; }
+.again { margin:8px 0 4px; padding:10px 12px; border-left:3px solid var(--accent); background:var(--bg); border-radius:0 8px 8px 0; display:grid; gap:4px; min-width:0; }
+.again-h { margin:0; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600; }
+.again-l { margin:4px 0 0; font-size:.86rem; color:var(--ink); font-weight:600; }
+.again-n { margin:4px 0 0; font-size:.86rem; color:var(--muted); }
+.again pre { margin:2px 0; padding:6px 8px; background:var(--panel); border:1px solid var(--line); border-radius:6px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.again li, details.setup li { overflow-wrap:anywhere; }
+.again code { font-family:var(--mono); font-size:.8rem; color:var(--ink); }
+details.setup { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-top:14px; max-width:70ch; }
+details.setup summary { font-weight:600; }
 a:focus-visible, summary:focus-visible, video:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 </style>
 <main>
@@ -183,6 +210,7 @@ a:focus-visible, summary:focus-visible, video:focus-visible { outline:2px solid 
 <h1>${esc(title)}</h1>
 ${builds.map((b) => `<p class="meta">${esc(b.target === 'staging' ? 'Staging' : 'Local')} run: build <span class="id">${esc(b.sha.slice(0, 7))}</span> on ${esc(b.branch)}, ${esc(b.at.replace('T', ' ').replace(/:\d\dZ$/, ' UTC'))}. <a href="${esc(b.run)}">The CI run</a>.</p>`).join('')}
 <div class="tally">${(['passed', 'failed', 'unchecked', 'ci', 'hand'] as const).filter((st) => count(st)).map((st) => `<span class="chip ${st}">${count(st)} ${LABEL[st].toLowerCase()}</span>`).join('')}</div>
+<details class="setup"><summary>Running the checks yourself</summary>${SETUP.map((s) => `<p class="again-l">${esc(s.title)}</p><ol>${s.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ol>`).join('')}<p class="again-n">Then open any case below for its command and steps. Cases checked by hand list what to do instead.</p></details>
 <p class="note">${esc(ai)} A result of Passed or Failed comes only from browser tests that ran in these builds, and a case passes only if it passed in every run that tested it; Checked in CI and By hand say how else a case is covered.</p>
 </header>
 ${body}
@@ -196,6 +224,7 @@ export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], buildOr
     ...builds.map((b) => `${b.target === 'staging' ? 'Staging' : 'Local'} run: build \`${b.sha.slice(0, 7)}\` on ${b.branch}, ${b.at}. [The CI run](${b.run}).`), ''];
   for (const s of sprints) {
     lines.push(`## Sprint ${s.sprint}: ${s.title}`, '');
+    if (s === sprints[0]) for (const st of SETUP) lines.push(`**Running the checks yourself: ${st.title.toLowerCase()}.** ${st.lines.join(' ')}`, '');
     for (const st of s.stories) {
       lines.push(`### ${st.id} ${st.title}`, '', st.forTheUser, '');
       const cases = s.cases.filter((c) => c.story === st.id);
@@ -206,6 +235,14 @@ export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], buildOr
           lines.push(`| ${c.id} | ${c.title} (${detail(v).replace(/\|/g, '/')}) | ${LABEL[v.state]} |`);
         }
         lines.push('');
+        for (const c of cases) {
+          const r = reproduce(c, tests.filter((t) => t.cases.includes(c.id)));
+          lines.push(`**${c.id}, how to check it again.**`, '');
+          for (const x of r.commands) lines.push('```', x, '```');
+          r.steps.forEach((x, i) => lines.push(`${i + 1}. ${x}`));
+          if (r.note) lines.push(r.note);
+          lines.push('');
+        }
       }
     }
   }
