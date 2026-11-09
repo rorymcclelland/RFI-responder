@@ -1,239 +1,26 @@
-# Sprint 20 (S20-3, S20-4): deploys, checks the deploy, and runs the acceptance tests on staging.
-#
-# - A push to a sprint-* branch deploys its migrations and Edge Functions to the staging project, moves
-#   the branch "staging" to the same commit and waits for Vercel's build of it (served at
-#   STAGING_APP_HOST, talking to staging), checks the deploy, then runs the browser acceptance tests
-#   there with test people made for the run, and publishes the results for the demo page.
-# - A push to main deploys the migrations and Edge Functions to the live demo, in the GitHub
-#   environment "production", which must require Rory's approval (Q1 of the Sprint 20 refinement): the
-#   job refuses to run if it does not. After the migrations and functions, it moves the branch "live"
-#   to the commit, and Vercel publishes the live demo from "live" (Sprint 25, S25-1); a push to main
-#   builds nothing on Vercel (vercel.json).
-#
-# Secrets are passed only to the steps that need them, never to `npm ci` (security review, H2), and
-# are environment secrets, so a job outside that environment cannot read them.
-# Set up once by the repository owner (docs/DEPLOYING.md, "Staging and automated deploys"). Until the
-# settings exist each job says so and passes, so nothing is deployed by accident.
-# Runs only on pushes to this repository: forks and pull requests get no secrets and no environment.
+# THROWAWAY, branch sprint-26-f77 only, never merged (Sprint 26, S26-2 case 1, F-77).
+# Tries to move live with the workflow's own token, which the ruleset on live must refuse. The commit
+# pushed is live's own plus this file, so the app is unchanged even if the push got through.
 name: Deploy
-
 on:
   push:
-    branches: ['sprint-*', 'main']
-    # A push that changes only documentation deploys nothing (and asks for no approval).
-    paths-ignore: ['docs/**', '**/*.md']
-  workflow_dispatch:
-
+    branches: ['sprint-26-f77']
 permissions:
-  contents: read
-
+  contents: write
 jobs:
-  staging:
-    name: Staging, its checks and the acceptance tests
-    if: startsWith(github.ref_name, 'sprint-')
+  try:
+    name: A sprint workflow tries to move live (must be refused)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    environment: staging
-    # One staging project, so one run at a time across all branches (security review, M4).
-    concurrency:
-      group: deploy-staging
-      cancel-in-progress: false
-    # Write access only to move the staging branch and push the results to their own branch.
-    permissions:
-      contents: write
-      deployments: read
-    env:
-      STAGING_REF: ${{ vars.STAGING_PROJECT_REF }}
-      STAGING_APP_HOST: ${{ vars.STAGING_APP_HOST }}
-      PRODUCTION_SUPABASE_REF: ${{ vars.PRODUCTION_PROJECT_REF }}
-      PRODUCTION_APP_HOST: ${{ vars.PRODUCTION_APP_HOST }}
     steps:
-      - name: Is staging set up?
-        id: ready
-        env:
-          HAS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
-          HAS_DB: ${{ secrets.STAGING_DB_PASSWORD != '' }}
-        run: |
-          if [ "$HAS_TOKEN" != true ] || [ "$HAS_DB" != true ] || [ -z "$STAGING_REF" ] || [ -z "$PRODUCTION_SUPABASE_REF" ] || [ -z "$PRODUCTION_APP_HOST" ] || [ -z "$STAGING_APP_HOST" ]; then
-            echo "::notice::Staging is not set up yet (docs/DEPLOYING.md, Staging and automated deploys); nothing deployed."
-            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          if [ "$STAGING_REF" = "$PRODUCTION_SUPABASE_REF" ] || [ "$STAGING_APP_HOST" = "$PRODUCTION_APP_HOST" ]; then
-            echo "::error::A staging setting names the live demo"; exit 1
-          fi
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-      - if: steps.ready.outputs.ok == 'true'
-        uses: actions/checkout@v5
-      - if: steps.ready.outputs.ok == 'true'
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
         with:
-          node-version: 22
-          cache: npm
-      - if: steps.ready.outputs.ok == 'true'
-        run: npm install -g npm@11 && npm ci
-      - if: steps.ready.outputs.ok == 'true'
-        uses: supabase/setup-cli@v1
-        with:
-          version: 2.121.0
-      - name: Migrations and Edge Functions to staging
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
-          LOAD_DEMO_IF_MISSING: '1'
-        run: bash scripts/supabase-deploy.sh "$STAGING_REF" /tmp/migrations.txt
-      # The staging app lives at one address (STAGING_APP_HOST, a Vercel domain tied to the branch
-      # "staging"), so the staging functions' APP_ORIGIN never changes. This job moves that branch to
-      # the sprint's commit; Vercel builds it. A push made with the job's token starts no workflow.
-      - name: Move the staging branch to this commit
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          TOKEN: ${{ github.token }}
-        run: git push -f "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/staging"
-      - name: Check the deploy (waits for Vercel's build of this commit)
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
-          APP_URL: https://${{ vars.STAGING_APP_HOST }}
-          EXPECTED_SHA: ${{ github.sha }}
-          GITHUB_TOKEN: ${{ github.token }}
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
-        run: npx tsx scripts/deploy-check.ts /tmp/migrations.txt
-      - name: Test people for this run, and a demo reset
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          STAGING_SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
-          STAGING_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
-          STAGING_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SERVICE_ROLE_KEY }}
-        run: npx tsx scripts/e2e-staging-users.ts
-      - name: Install the test browser
-        if: steps.ready.outputs.ok == 'true'
-        run: npx playwright install --with-deps chromium
-      - name: Browser acceptance tests on staging
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          E2E_TARGET: staging
-          E2E_BASE_URL: https://${{ vars.STAGING_APP_HOST }}
-          E2E_FORBIDDEN_HOSTS: ${{ vars.PRODUCTION_APP_HOST }},${{ vars.PRODUCTION_PROJECT_REF }}.supabase.co
-          E2E_VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
-        run: npm run test:e2e
-      - name: Sign the test people out everywhere
-        if: always() && steps.ready.outputs.ok == 'true'
-        env:
-          STAGING_SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
-          STAGING_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
-          STAGING_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SERVICE_ROLE_KEY }}
-        run: npx tsx scripts/e2e-staging-users.ts --finish
-      - name: Publish the results for the demo page (searched for secrets first)
-        if: always() && steps.ready.outputs.ok == 'true'
-        env:
-          TOKEN: ${{ github.token }}
-          E2E_VERCEL_BYPASS: ${{ secrets.VERCEL_BYPASS_SECRET }}
-        run: bash scripts/publish-e2e-results.sh staging
-      # Sprint 21 (S21-3, Q4): the hosted sign-in settings, read-only, against supabase/hosted-auth.json.
-      # On staging, last, so a difference fails the run without hiding the test results.
-      - name: Sign-in settings match the repository
-        if: always() && steps.ready.outputs.ok == 'true'
-        env:
-          SUPABASE_URL: https://${{ vars.STAGING_PROJECT_REF }}.supabase.co
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx tsx scripts/deploy-check.ts --auth staging
-
-  production:
-    name: The live demo (after Rory's approval)
-    # The branch main itself, not a tag of the same name (Sprint 25 security review, L1).
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment: production
-    concurrency:
-      group: deploy-production
-      cancel-in-progress: false
-    # Write access only to move the branch "live", which Vercel publishes as the live demo (S25-1).
-    permissions:
-      contents: write
-      actions: read
-    env:
-      PRODUCTION_REF: ${{ vars.PRODUCTION_PROJECT_REF }}
-      PRODUCTION_APP_HOST: ${{ vars.PRODUCTION_APP_HOST }}
-    steps:
-      - name: Is the deploy set up, and does it wait for approval?
-        id: ready
-        env:
-          HAS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
-          HAS_DB: ${{ secrets.PRODUCTION_DB_PASSWORD != '' }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "$HAS_TOKEN" != true ] || [ "$HAS_DB" != true ] || [ -z "$PRODUCTION_REF" ] || [ -z "$PRODUCTION_APP_HOST" ]; then
-            echo "::notice::The production deploy is not set up yet (docs/DEPLOYING.md); deploy by hand as before."
-            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          # Security review, M3: refuse to deploy unless the environment requires a reviewer.
-          reviewers=$(gh api "repos/${GITHUB_REPOSITORY}/environments/production" --jq '[.protection_rules[]? | select(.type == "required_reviewers")] | length' || echo 0)
-          if [ "${reviewers:-0}" -lt 1 ]; then
-            echo "::error::The production environment does not require a reviewer, so nothing was deployed. Add yourself under Settings, Environments, production."; exit 1
-          fi
-          # Sprint 25 security review, M2: the live demo only moves forward. A re-run, or a late approval,
-          # of a run for an older commit would otherwise deploy older functions and move "live" back.
-          # Nothing is deployed unless this commit is "live" or a later commit built on it.
-          order=$(gh api "repos/${GITHUB_REPOSITORY}/compare/live...${GITHUB_SHA}" --jq .status || echo unknown)
-          if [ "$order" != ahead ] && [ "$order" != identical ]; then
-            echo "::error::This commit is not the live demo's commit or a later one built on it (${order}), so nothing was deployed. Deploy the latest main instead; to roll back, see docs/DEPLOYING.md."; exit 1
-          fi
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-      - if: steps.ready.outputs.ok == 'true'
-        uses: actions/checkout@v5
-        with:
-          # The job's token can write (to move "live"), so it is not left in .git/config, where
-          # npm ci's install scripts could read it (Sprint 25 security review, M1).
-          persist-credentials: false
-          # The whole history, so the push to "live" can be checked as a fast-forward (see that step).
           fetch-depth: 0
-      - if: steps.ready.outputs.ok == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - if: steps.ready.outputs.ok == 'true'
-        run: npm install -g npm@11 && npm ci
-      - if: steps.ready.outputs.ok == 'true'
-        uses: supabase/setup-cli@v1
-        with:
-          version: 2.121.0
-      # Sprint 21 (S21-3; security review): on the live demo, before anything is deployed, so a
-      # difference in the sign-in settings holds the database and functions back.
-      - name: Sign-in settings match the repository
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          SUPABASE_URL: https://${{ vars.PRODUCTION_PROJECT_REF }}.supabase.co
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx tsx scripts/deploy-check.ts --auth production
-      - name: Migrations and Edge Functions to the live demo
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
-        run: bash scripts/supabase-deploy.sh "$PRODUCTION_REF" /tmp/migrations.txt
-      # Sprint 25 (S25-1, F-75): Vercel's production branch is "live", not main, so the app reaches the
-      # live demo only here, after Rory's approval and after the migrations and functions it needs.
-      # If any earlier step fails, this one does not run and the live demo keeps the previous app.
-      # A push made with the workflow's own token starts no other workflow. It is not forced, so "live"
-      # only moves forward (security review, M2): GitHub refuses a push that is not a fast-forward. The
-      # checkout fetches the whole history (fetch-depth: 0) so git can see the move is forward; from a
-      # one-commit checkout it refuses every push ("fetch first", the first deploy of Sprint 25).
-      # To roll back, see docs/DEPLOYING.md.
-      - name: Move the live branch to this commit
-        if: steps.ready.outputs.ok == 'true'
+      - name: Push HEAD to live with the workflow's own token
         env:
           TOKEN: ${{ github.token }}
-        run: git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
-      - name: Check the deploy (waits for Vercel's build of this commit)
-        if: steps.ready.outputs.ok == 'true'
-        env:
-          SUPABASE_URL: https://${{ vars.PRODUCTION_PROJECT_REF }}.supabase.co
-          APP_URL: https://${{ vars.PRODUCTION_APP_HOST }}
-          EXPECTED_SHA: ${{ github.sha }}
-          GITHUB_TOKEN: ${{ github.token }}
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx tsx scripts/deploy-check.ts /tmp/migrations.txt
+        run: |
+          before=$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" refs/heads/live | cut -f1)
+          if git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/live" 2>&1 | tee /tmp/push.txt; then :; fi
+          after=$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" refs/heads/live | cut -f1)
+          echo "live before: $before"; echo "live after:  $after"
+          grep -E "GH013|rule violations|refusing|denied" /tmp/push.txt && [ "$before" = "$after" ] && echo "REFUSED, live unchanged" || { echo "::error::live moved or the push was not refused"; exit 1; }
