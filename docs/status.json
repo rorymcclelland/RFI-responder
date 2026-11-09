@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "project": {
+    "id": "rfi-respond",
+    "name": "RFI Respond",
+    "kind": "sprint"
+  },
+  "writtenAt": "2026-11-09T20:39:00Z",
+  "writtenBy": "sprint-close, RFI Respond session",
+  "lastActivity": "2026-11-09",
+  "links": {
+    "repo": "https://github.com/rorymcclelland/RFI-responder",
+    "demo": "https://claude.ai/artifact/WzFoN5mmo89pnYjuDWbtBx",
+    "live": "https://rfi-responder.vercel.app",
+    "backlog": "https://github.com/rorymcclelland/RFI-responder/blob/main/docs/BACKLOG.md"
+  },
+  "sprint": {
+    "number": "26",
+    "title": "Large responses sent in time; only the approved deploy moves live",
+    "stage": "closed",
+    "stageSince": "2026-11-09",
+    "stories": [
+      {
+        "id": "S26-1",
+        "title": "A large response sent within the time limit, and a limit at upload",
+        "size": "L",
+        "status": "Done, Sprint 26"
+      },
+      {
+        "id": "S26-2",
+        "title": "Only the approved deploy can move live",
+        "size": "M",
+        "status": "Done, Sprint 26"
+      }
+    ]
+  },
+  "waiting": [
+    {
+      "id": "S26-close-deploy",
+      "type": "deploy-approval",
+      "text": "The Sprint 26 close commit on main changes the case list (e2e/cases.ts), so its Deploy run waits for approval. It has no migrations or app changes.",
+      "recommendation": "Approve: it keeps live at the same commit as main, and the live demo rebuilds the same app.",
+      "askedOn": "2026-11-09",
+      "source": ".github/workflows/deploy.yml"
+    },
+    {
+      "id": "S26-branches",
+      "type": "account-step",
+      "text": "Delete the throwaway branches sprint-26-f73, sprint-26-f77, sprint-25-f73, f72-broken-step, response-wording, deploy-check-later-build and sprint-23-f68, and old e2e-results branches.",
+      "recommendation": "Delete them: each was a one-off check, and its evidence is recorded in the backlog.",
+      "askedOn": "2026-11-09",
+      "source": "docs/BACKLOG.md"
+    },
+    {
+      "id": "S27-proposal",
+      "type": "question",
+      "text": "Confirm Sprint 27: F-78 (step list beside each recording), F-80 (actions off Node.js 20) and F-62 (import trimming and collisions).",
+      "recommendation": "Confirm as proposed.",
+      "askedOn": "2026-11-09",
+      "source": "docs/BACKLOG.md"
+    }
+  ],
+  "history": [
+    {
+      "sprint": "25",
+      "title": "The live app only after its database",
+      "refined": "2026-11-06",
+      "closed": "2026-11-07",
+      "planned": 3,
+      "done": 3,
+      "returned": 0
+    },
+    {
+      "sprint": "26",
+      "title": "Large responses sent in time; only the approved deploy moves live",
+      "refined": "2026-11-07",
+      "closed": "2026-11-09",
+      "planned": 2,
+      "done": 2,
+      "returned": 0
+    }
+  ],
+  "notes": "Production deployed 9c596f0 on 9 November (run 42674170041), the first deploy to move live with the deploy key."
+}

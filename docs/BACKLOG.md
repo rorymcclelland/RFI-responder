@@ -1086,14 +1086,47 @@ Refinement: `docs/refinement/sprint-25.md`. Q1 to Q5 answered by Rory the same d
 
 **Confirmed by Rory (7 November 2026).** Sprint 26 is S26-1 and F-77, both to be refined now. For S26-1: fix both causes, measure again on staging, then refuse at upload a response too large to send in about half the time limit, saying why; one limit covers bulk approval too.
 
-## Sprint 26: a large response sent within the time limit, and the live demo's branch protected (refined 7 November 2026)
+## Sprint 26: a large response sent within the time limit, and the live demo's branch protected (refined 7 November 2026; closed 9 November 2026)
 
 Refinement: `docs/refinement/sprint-26.md`. Q1 to Q5 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S26-1 | Sending and bulk approval grow in a straight line (the two causes the Sprint 25 spike found), measured again on staging, then a limit at upload set from that figure, enforced by the database and explained by the app | F-73 | Ready, Sprint 26 |
-| S26-2 | Only the approved deploy can move `live`: a ruleset with a deploy-key bypass, the key held by the `production` environment, the job's token read-only; `main` protected as Rory chooses | F-77 | Ready, Sprint 26 |
+| S26-1 | Sending and bulk approval grow in a straight line (the two causes the Sprint 25 spike found), measured again on staging, then a limit at upload set from that figure, enforced by the database and explained by the app | F-73 | Done, Sprint 26 (the limit is 2,000 questions a response, Rory, 9 November) |
+| S26-2 | Only the approved deploy can move `live`: a ruleset with a deploy-key bypass, the key held by the `production` environment, the job's token read-only; `main` protected as Rory chooses | F-77 | Done, Sprint 26 (no admin bypass on `live`, Rory's option (b), 9 November; residual in R-18) |
+
+### Sprint 26 review (9 November 2026)
+
+**Checks, with evidence.**
+- 1,233 unit, 460 database and 38 browser tests; CI and staging green on `41f9bae`, and CI on `9c596f0` (the demo summary on top). Every agreed case is in `e2e/cases.ts` with how it is checked; the demo page (built from `41f9bae`'s results) opens each case to show how to check it again. Rory signed off on 9 November.
+- **S26-1.** After the fix, sending grows in a straight line: on staging 1,500 questions sent in 2.6 to 2.9 seconds and 2,000 in 3.0 to 4.1, about half the 8-second limit (runs 42531540549 and 42532333906, rolled back, nothing left behind). The database refuses a file that would take a response past 2,000 questions, saying its size and the limit, and the page refuses it before uploading. Building the browser test found that the column-mapping step never showed an error from adding a file; it does now.
+- **S26-2.** Rory ran `scripts/setup-live-key.ts` (twice: the first ruleset let admins through, and the Claude session's credentials, counting as Rory, moved `live`; Rory moved it back and chose no admin bypass). A `sprint-*` workflow's push to `live` with its own token was refused (GH013), as was the session's own push. Production run 42674170041 (approved by Rory, 9 November) applied the three Sprint 26 migrations, moved `live` from `31dde04` to `9c596f0` with the deploy key (GitHub reporting the key bypassing the rule), and the deploy check found `9c596f0` served at rfi-responder.vercel.app; the job's token was read-only. `main` fast-forwarded from `1ccee0f` with no force, and GitHub's API lists deletion and non-fast-forward as the rules on `main`, with no bypass. A force push to `main` was not tried (the session's own safety check refuses it), nor its deletion (GitHub refuses deleting the default branch whatever the rules).
+- Independent reviews, every finding dealt with: QA (a deadlock between two files added at once, reproduced and fixed; the ready check and the push run in the tests, not only read) and security (M1, a file holding more questions than it declared, now refused; M2, the deploy key's step hardened, the rest in R-18's residual; L1, L2, L4, L6 fixed; L3 a set-up step) (`docs/refinement/sprint-26.md`, While building).
+- **Recordings Rory can follow** (Rory, 9 November): the review page plays recordings at a quarter of their speed by default, each caption holds for 1.5 seconds (`E2E_CAPTION_HOLD`), and the pointer, clicks and the field being typed into are drawn (`showPointer`). Made part of the sprint-close skill for every project.
+- One staging deploy check timed out waiting for Vercel, which built 85 minutes late; the job, run again, passed (F-79).
+
+### Where every Sprint 26 review item now lives
+
+| Item | Now |
+|---|---|
+| F-73 fix and limit (S26-1), F-77 (S26-2) | Done in Sprint 26 |
+| Sprint 26 QA and security review findings | Done (review); L3 is a set-up step in DEPLOYING.md |
+| The column-mapping step showed no error from adding a file | Done in Sprint 26 (found by the S26-1 browser test) |
+| Recordings too fast to follow; clicks not visible | Done in Sprint 26 (Rory, 9 November) |
+| A step list beside each recording that jumps to that moment | F-78, Backlog, from Sprint 26 review |
+| Vercel built a staging commit 85 minutes late, timing out the deploy check | F-79, Backlog, from Sprint 26 review |
+| GitHub warns that `actions/setup-node@v4`, `actions/upload-artifact@v4` and `supabase/setup-cli@v1` target Node.js 20, now forced onto Node.js 24 | F-80, Backlog, from Sprint 26 review |
+| The Sprint 25 production run left waiting held the production queue | Done: Rory rejected it, 9 November |
+| `sprint-26-f73`, `sprint-26-f77`, `sprint-25-f73`, `f72-broken-step`, `response-wording`, `deploy-check-later-build`, `sprint-23-f68` and old `e2e-results/*` branches | Rory to delete |
+
+**Not yet in a sprint, ranked at the Sprint 26 review.**
+1. F-78 step list beside each recording (S to M): Rory's own ask for following the review; the tests note each caption's time, and the page lists them as links.
+2. F-80 actions off Node.js 20 (S): GitHub is already forcing them onto Node.js 24; moving to versions built for it before the old ones stop.
+3. F-62 import trimming and collisions (S): small, predates Sprint 13, only through a direct database call.
+4. F-79 slow staging builds (S, a look first): a deploy that waits and names the build already fails safe; worth knowing whether it repeats.
+5. Then the earlier list: F-34, F-14 and F-15 (need people), F-59, F-20, F-60, F-8 (Pro plan), F-2, F-4, F-69, F-71, F-72, F-12.
+
+**Proposed next.** Sprint 27: F-78 (makes every later review easier to follow), F-80 (before the Node.js 20 actions stop working) and F-62 (small robustness fix). F-79 stays in the backlog unless a staging build is late again.
 
 ## Candidate stories (not yet placed in a sprint)
 
@@ -1187,12 +1220,14 @@ Refinement: `docs/refinement/sprint-26.md`. Q1 to Q5 answered by Rory the same d
 | F-68 | Done, Sprint 23 (S23-3). A migration that fails on Supabase has not been tried on staging | From the Sprint 20 review; the stop on a failed step has been seen for a refused token and a failed build |
 | F-69 | The staging run's real-AI step also reads the ask on Governance's usage line, under the admin, with the daily cap (S21-4 case 3) | Done, Sprint 22 (S22-3) |
 | F-71 | What the knowledge base did with a response's answers (added, proposed, confirmed, not learned and why) is shown only at the moment it is marked as sent; opened again later, the **Send** stage says it was sent but not what was learned | From the Sprint 23 review (found by the main path's first CI run). Keep the report with the export record and show it on a sent response |
-| F-73 | Marking a very large response as sent can run past the hosted database's statement time limit; all or nothing, so a timeout records nothing. Spike done, Sprint 25 (S25-3): on staging it passes the 8-second limit between 2,000 and 4,000 questions, because a trigger recounts the file after every question's update and a tag lookup scans the knowledge base | From the Sprint 24 security review (L1). The fix: Backlog, from the Sprint 25 spike, proposed as S26-1: fix both causes, measure again on staging, then refuse at upload a response too large to send (`docs/spikes/f73-sending-large-responses.md`) |
+| F-73 | Done, Sprint 26 (S26-1). Marking a very large response as sent could run past the hosted database's statement time limit: a trigger recounted the file after every question's update, and a tag lookup scanned the knowledge base. Both fixed; a response holds at most 2,000 questions, refused at upload | From the Sprint 24 security review (L1); spike Sprint 25 (S25-3); `docs/spikes/f73-sending-large-responses.md` |
 | F-74 | Done, Sprint 25 (S25-2). `record_export` and `bulk_accept`, per file, were still callable through the API; the app no longer calls them | From the Sprint 24 security review (info). Revoke them from signed-in users; move the older database tests to the whole-response functions |
 | F-75 | Done, Sprint 25 (S25-1): `main` builds nothing; the approved production job moves `live`, Vercel's production branch, after the migrations. The live demo's app went live when `main` moved, before Rory approves the database deploy: at Sprint 24 the new screens met the old database for three hours | From the Sprint 24 deploy. Vercel builds `main` itself; the production job should publish the app after the migrations instead (a Vercel deploy hook, Git deployments for `main` turned off by Rory) |
 | F-76 | Done, Sprint 24 close. The deploy check failed when the app served a later commit that includes the deployed one (a docs push after the merge) | `servedIncludes` asks GitHub whether the served build includes the deployed commit |
-| F-77 | Anyone who can push to the repository, or a workflow on a `sprint-*` branch (whose token can write), could move `live` and publish to the live demo without Rory's approval, as they could push `main` before Sprint 25 | From the Sprint 25 security review (H1). A GitHub ruleset on `live` (and `main`) that only a deploy key may update, its private key a secret of the `production` environment; the production job pushes with it and its own token goes back to read. Rory's settings and secret. Planned, Sprint 26 (Rory, 6 November) |
+| F-77 | Done, Sprint 26 (S26-2). Anyone who could push, or a `sprint-*` workflow, could move `live`. A ruleset on `live` that only a deploy key gets past (no admin bypass), the key a `production` environment secret, the job's token read-only; `main` refuses force pushes and deletion | From the Sprint 25 security review (H1). Residual in R-18 |
 | F-78 | A list of each recording's steps beside it on the review page, where choosing a step jumps the video to that moment | Rory, 9 November (Sprint 26 review page). The results do not record when each step happens yet: the browser tests would note each caption's time in the recording, and `scripts/demo-page.ts` would list them as links that set the video's time. Backlog |
+| F-79 | One staging deploy check timed out because Vercel built the commit 85 minutes after the push (9 November); run again, it passed | From the Sprint 26 review. The check already waits and names the missing build rather than testing an old one. Look at Vercel's build queue if it happens again; consider a longer wait for staging only. Backlog |
+| F-80 | `actions/setup-node@v4`, `actions/upload-artifact@v4` and `supabase/setup-cli@v1` target Node.js 20, which GitHub now forces onto Node.js 24 (a warning on every run) | From the Sprint 26 review. Move to versions built for Node.js 24, pinned, and check CI, staging and the deploy still pass. Backlog |
 | F-72 | S23-2 case 4: see the main path test fail, naming the step, when a step is broken on a branch (not merged) | From the Sprint 23 review; by construction until then (each step waits for its own result) |
 | BUG-35 | Done, Sprint 14. **Save limits** on the governance page gives no sign it worked: the button does not change while saving, and the confirmation ("Saved. The change is in the audit log.") appears at the top of the tab, usually out of view | Found by Rory at go-live, 27 October 2026; the save itself works |
 | F-12 | Keyword confidence is generous: 33 of 40 sample questions scored 80% or more, and one draft cited an unrelated entry | Folded into S1-6 |

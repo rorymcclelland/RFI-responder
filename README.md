@@ -2,7 +2,7 @@
 
 An internal tool that helps an organisation answer requests for information (RFIs), requests for quotation (RFQs) and security questionnaires. It drafts each answer from the organisation's own knowledge base, says how confident it is and why, holds pricing and legal questions for a person, routes specialist questions to colleagues, and adds what people wrote to the knowledge base when each response is exported.
 
-Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-five sprints (Sprints 0 to 24). Synthetic data only; runs locally, with an invite-only hosted demo.
+Product owner: Rory McClelland. Code written by Claude, as an AI coding agent, with every change read and questioned by the product owner. Rebuilt from a prototype in twenty-seven sprints (Sprints 0 to 26). Synthetic data only; runs locally, with an invite-only hosted demo.
 
 ![A draft answer with its sources, calibrated confidence and the checker's reason](docs/screenshots/3-draft-and-checker.png)
 
@@ -85,6 +85,7 @@ The starting point was a prototype generated with Bolt.new: the first commit in 
 | 23 | **Try it** with a sample questionnaire: a visitor's own response, drafted with the AI and never learned from; the main path as one browser test, on staging with the real AI; a failing migration tried on staging |
 | 24 | One response, one list: every file's questions together, filtered by file, approved in bulk and marked as sent once, as a whole, with a download per file and no file added once sent; what was learned kept with a sent response; the main path test seen failing on a broken step |
 | 25 | The live demo's app is published only after its database: pushing `main` builds nothing, and the approved deploy moves a `live` branch after the migrations and functions; the per-file send and bulk-approval functions out of the API; a spike on sending a large response on the hosted database |
+| 26 | Large responses sent within the hosted time limit (sending now grows in a straight line, and a response holds at most 2,000 questions, refused at upload with the reason); only the approved deploy can move `live`, by a deploy key the `production` environment holds, with `main` refusing force pushes and deletion; review recordings slowed, with each click shown |
 
 Each sprint followed the same cycle:
 
