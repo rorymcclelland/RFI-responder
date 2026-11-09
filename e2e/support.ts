@@ -81,10 +81,17 @@ export function showPointer(): void {
     if (!t || !t.matches('input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]),textarea,select,[contenteditable=true]')) return;
     const f = box('e2e-typing', 'border:3px solid #dc2626;border-radius:6px;transition:opacity .3s');
     if (!f) return;
-    const r = t.getBoundingClientRect();
-    Object.assign(f.style, { left: `${r.left - 4}px`, top: `${r.top - 4}px`, width: `${r.width + 2}px`, height: `${r.height + 2}px`, opacity: '1' });
+    // Follows the field while shown, and goes at once when the field loses focus or leaves the page (a
+    // screen change), so it never frames where a field used to be.
+    const until = Date.now() + 1500;
     clearTimeout(hide);
-    hide = setTimeout(() => { f.style.opacity = '0'; }, 1500);
+    const follow = () => {
+      if (!t.isConnected || document.activeElement !== t || Date.now() > until) { f.style.opacity = '0'; return; }
+      const r = t.getBoundingClientRect();
+      Object.assign(f.style, { transition: 'none', left: `${r.left - 4}px`, top: `${r.top - 4}px`, width: `${r.width + 2}px`, height: `${r.height + 2}px`, opacity: '1' });
+      hide = setTimeout(follow, 50);
+    };
+    follow();
   }, true);
 }
 
