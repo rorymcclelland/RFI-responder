@@ -505,16 +505,21 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     />
   );
 
+  // Sprint 26 (found by S26-1 9's browser test): an error from adding the file was never shown on this
+  // step, so a refused file (the size limit, or the database's own refusal) looked like nothing happened.
   if (step === 'mapping') return (
-    <MappingStep
-      fileName={fileName}
-      rowCount={rawRows.current.length}
-      headers={headers}
-      questionCol={questionCol}
-      onChange={setQuestionCol}
-      onBack={() => setStep('idle')}
-      onRun={runProcessing}
-    />
+    <>
+      {uploadError && <p role="alert" className="max-w-3xl mx-auto px-6 pt-6 text-sm text-coral-600">{uploadError}</p>}
+      <MappingStep
+        fileName={fileName}
+        rowCount={rawRows.current.length}
+        headers={headers}
+        questionCol={questionCol}
+        onChange={setQuestionCol}
+        onBack={() => { setUploadError(''); setStep('idle'); }}
+        onRun={runProcessing}
+      />
+    </>
   );
 
   if (step === 'preview') return (

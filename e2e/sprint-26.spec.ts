@@ -28,11 +28,11 @@ test('A file that would take a response past 2,000 questions is refused before a
     if (r.method() !== 'GET' && /\/rest\/v1\/(rfi_sessions|rfi_questions)/.test(r.url())) writes.push(`${r.method()} ${r.url()}`);
   });
   await openResponse(page, BLUEFIN);
-  await caption(page, 'A response that already holds 1,999 questions: adding a file of 12');
+  await caption(page, 'A response that already holds 1,999 questions: adding a file of 40');
   await header(page).getByRole('button', { name: 'Add a file' }).click();
   await page.locator('input[type=file]').setInputFiles({ name: 'twelve-more-s26.csv', mimeType: 'text/csv', buffer: readFileSync('sample-data/sample-questions.csv') });
   await page.getByRole('button', { name: 'Match and draft' }).click();
-  await expect(page.getByText(/This response would have 2,0\d\d questions; a response can have at most 2,000, so that it can be marked as sent in one go\. Put the rest in a new response\./)).toBeVisible();
+  await expect(page.getByRole('alert').filter({ hasText: /This response would have [2-9],\d{3} questions; a response can have at most 2,000, so that it can be marked as sent in one go\. Put the rest in a new response\./ })).toBeVisible();
   await caption(page, 'Refused before uploading: nothing was added');
   expect(writes).toEqual([]);
 });
