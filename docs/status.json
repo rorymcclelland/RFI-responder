@@ -5,8 +5,8 @@
     "name": "RFI Respond",
     "kind": "sprint"
   },
-  "writtenAt": "2026-11-09T20:54:00Z",
-  "writtenBy": "sprint-close, RFI Respond session",
+  "writtenAt": "2026-11-09T21:56:00Z",
+  "writtenBy": "sprint-refine, RFI Respond session",
   "lastActivity": "2026-11-09",
   "links": {
     "repo": "https://github.com/rorymcclelland/RFI-responder",
@@ -15,22 +15,28 @@
     "backlog": "https://github.com/rorymcclelland/RFI-responder/blob/main/docs/BACKLOG.md"
   },
   "sprint": {
-    "number": "26",
-    "title": "Large responses sent in time; only the approved deploy moves live",
-    "stage": "closed",
+    "number": "27",
+    "title": "Recordings you can step through; workflows off Node.js 20; import edge cases",
+    "stage": "awaiting-answers",
     "stageSince": "2026-11-09",
     "stories": [
       {
-        "id": "S26-1",
-        "title": "A large response sent within the time limit, and a limit at upload",
-        "size": "L",
-        "status": "Done, Sprint 26"
+        "id": "S27-1",
+        "title": "A list of steps beside each recording that jumps to that moment",
+        "size": "M",
+        "status": "Refined, Sprint 27 (awaiting answers)"
       },
       {
-        "id": "S26-2",
-        "title": "Only the approved deploy can move live",
-        "size": "M",
-        "status": "Done, Sprint 26"
+        "id": "S27-2",
+        "title": "The workflows on current actions, each pinned to a commit",
+        "size": "S",
+        "status": "Refined, Sprint 27 (awaiting answers)"
+      },
+      {
+        "id": "S27-3",
+        "title": "The import cleans every kind of whitespace, and two imports at once both finish",
+        "size": "S",
+        "status": "Refined, Sprint 27 (awaiting answers)"
       }
     ]
   },
@@ -44,12 +50,28 @@
       "source": "docs/BACKLOG.md"
     },
     {
-      "id": "S27-proposal",
+      "id": "S27-Q1",
       "type": "question",
-      "text": "Confirm Sprint 27: F-78 (step list beside each recording), F-80 (actions off Node.js 20) and F-62 (import trimming and collisions).",
-      "recommendation": "Confirm as proposed.",
+      "text": "Which release of each GitHub Action: the current one, or the oldest that runs on Node.js 24? Either way pinned to its commit.",
+      "recommendation": "The current release of each, pinned to its commit.",
       "askedOn": "2026-11-09",
-      "source": "docs/BACKLOG.md"
+      "source": "docs/refinement/sprint-27.md"
+    },
+    {
+      "id": "S27-Q2",
+      "type": "question",
+      "text": "The npm cache in the production job, which holds the deploy key and the database password: off, or kept?",
+      "recommendation": "Off, as setup-node's makers advise; it costs about 20 seconds.",
+      "askedOn": "2026-11-09",
+      "source": "docs/refinement/sprint-27.md"
+    },
+    {
+      "id": "S27-Q3",
+      "type": "question",
+      "text": "If the whitespace fix would change existing knowledge-base entries: should the migration refuse and say how many, or clean them?",
+      "recommendation": "Refuse and say how many; none are expected.",
+      "askedOn": "2026-11-09",
+      "source": "docs/refinement/sprint-27.md"
     }
   ],
   "history": [
@@ -72,5 +94,5 @@
       "returned": 0
     }
   ],
-  "notes": "Production deployed f0bf63a on 9 November (runs 42674170041 and 42695316494); the first deploys to move live with the deploy key."
+  "notes": "Sprint 26 closed and deployed (f0bf63a). Sprint 27 refined, three questions open."
 }

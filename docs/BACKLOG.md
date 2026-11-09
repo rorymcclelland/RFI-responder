@@ -1128,6 +1128,18 @@ Refinement: `docs/refinement/sprint-26.md`. Q1 to Q5 answered by Rory the same d
 
 **Proposed next.** Sprint 27: F-78 (makes every later review easier to follow), F-80 (before the Node.js 20 actions stop working) and F-62 (small robustness fix). F-79 stays in the backlog unless a staging build is late again.
 
+**Rory, 9 November 2026:** refine F-78, F-80 and F-62 as Sprint 27.
+
+## Sprint 27: recordings you can step through, the workflows off Node.js 20, and two import edge cases (refined 9 November 2026)
+
+Refinement: `docs/refinement/sprint-27.md`. Q1 to Q3 open for Rory.
+
+| ID | Story | From | Status |
+|---|---|---|---|
+| S27-1 | A list of steps beside each recording, each with its time, that moves the video to that moment | F-78 | Refined, Sprint 27 (awaiting answers) |
+| S27-2 | The workflows on current actions (none on Node.js 20), each pinned to a commit; no npm cache in the production job | F-80 | Refined, Sprint 27 (awaiting answers) |
+| S27-3 | The import, editing and learning clean every kind of whitespace from a question's ends, and two imports at once both finish | F-62 | Refined, Sprint 27 (awaiting answers) |
+
 ## Candidate stories (not yet placed in a sprint)
 
 | ID | Story | Acceptance criteria (summary) | Notes |
