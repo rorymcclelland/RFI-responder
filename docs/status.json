@@ -5,7 +5,7 @@
     "name": "RFI Respond",
     "kind": "sprint"
   },
-  "writtenAt": "2026-11-09T20:39:00Z",
+  "writtenAt": "2026-11-09T20:54:00Z",
   "writtenBy": "sprint-close, RFI Respond session",
   "lastActivity": "2026-11-09",
   "links": {
@@ -35,14 +35,6 @@
     ]
   },
   "waiting": [
-    {
-      "id": "S26-close-deploy",
-      "type": "deploy-approval",
-      "text": "The Sprint 26 close commit on main changes the case list (e2e/cases.ts), so its Deploy run waits for approval. It has no migrations or app changes.",
-      "recommendation": "Approve: it keeps live at the same commit as main, and the live demo rebuilds the same app.",
-      "askedOn": "2026-11-09",
-      "source": ".github/workflows/deploy.yml"
-    },
     {
       "id": "S26-branches",
       "type": "account-step",
@@ -80,5 +72,5 @@
       "returned": 0
     }
   ],
-  "notes": "Production deployed 9c596f0 on 9 November (run 42674170041), the first deploy to move live with the deploy key."
+  "notes": "Production deployed f0bf63a on 9 November (runs 42674170041 and 42695316494); the first deploys to move live with the deploy key."
 }
