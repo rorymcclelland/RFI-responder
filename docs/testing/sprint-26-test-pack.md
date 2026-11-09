@@ -71,7 +71,7 @@ No line says **not set** or **refused**, and nothing that looks like a key is pr
 **What it checks:** S26-2 cases 6 and 7, by eye (Claude also reads the rules through GitHub's API).
 
 **Flow and expected outcome:**
-1. **Settings**, **Rules**, **Rulesets**: two rulesets, both **Active**: **live: only the approved deploy** (targets `live`; restricts updates, deletions and force pushes; bypass: deploy keys and the Repository admin role) and **main: no force push or deletion** (targets `main`; no bypass).
+1. **Settings**, **Rules**, **Rulesets**: two rulesets, both **Active**: **live: only the approved deploy** (targets `live`; restricts updates, deletions and force pushes; bypass: deploy keys only; since 9 November no admin bypass) and **main: no force push or deletion** (targets `main`; no bypass).
 2. **Settings**, **Deploy keys**: one key, **RFI Respond: the approved deploy moves live** with today's date, with **Read/write**.
 3. **Settings**, **Environments**, **production**: the secrets include **LIVE_DEPLOY_KEY**.
 

@@ -7,9 +7,11 @@
  *   npx tsx scripts/setup-live-key.ts --apply    does it
  *
  * What it does:
- * - two rulesets: on `live`, no update, force push or deletion except by a deploy key or the
- *   repository's admins (Rory, to roll back); on `main`, no force push or deletion, for anyone
- *   (Rory, 7 November: Q4). Made if missing, brought back to this definition if changed.
+ * - two rulesets: on `live`, no update, force push or deletion except by a deploy key; on `main`, no
+ *   force push or deletion, for anyone (Rory, 7 November: Q4). No admin bypass on `live` (Rory,
+ *   9 November): the Claude session's credentials count as Rory, an admin, and moved `live` when that
+ *   was tested. A rollback uses Vercel's instant rollback, or Rory pauses the ruleset for a minute.
+ *   Made if missing, brought back to this definition if changed.
  * - a new deploy key that can write: the key pair is made in a temporary folder, the public half is
  *   added to the repository, the private half is stored as the `production` environment's secret
  *   LIVE_DEPLOY_KEY through standard input, and the folder is deleted. Earlier keys of this script
@@ -26,7 +28,6 @@ import { REPO, realRun, type Run } from './setup-secrets';
 
 export const SECRET = 'LIVE_DEPLOY_KEY';
 export const KEY_TITLE = 'RFI Respond: the approved deploy moves live';
-const ADMIN_ROLE = 5; // GitHub's id for the repository's admin role, in ruleset bypass lists
 
 export interface Ruleset {
   name: string;
@@ -46,10 +47,7 @@ export function rulesets(): Ruleset[] {
       enforcement: 'active',
       conditions: { ref_name: { include: ['refs/heads/live'], exclude: [] } },
       rules: [{ type: 'update', parameters: { update_allows_fetch_and_merge: false } }, { type: 'deletion' }, { type: 'non_fast_forward' }],
-      bypass_actors: [
-        { actor_type: 'DeployKey', actor_id: null, bypass_mode: 'always' },
-        { actor_type: 'RepositoryRole', actor_id: ADMIN_ROLE, bypass_mode: 'always' },
-      ],
+      bypass_actors: [{ actor_type: 'DeployKey', actor_id: null, bypass_mode: 'always' }],
     },
     {
       name: 'main: no force push or deletion',

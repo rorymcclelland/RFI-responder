@@ -28,18 +28,16 @@ const collect = () => { const lines: string[] = []; return { lines, log: (s: str
 const writes = (calls: ReturnType<typeof fakeRun>['calls']) => calls.filter((c) => c.args[0] === 'secret' || (c.args.includes('-X')));
 
 describe('setup-live-key (S26-2)', () => {
-  it('the live ruleset refuses updates, force pushes and deletion, except a deploy key and the admins', () => {
-    // The whole definition (QA review, L4): the admin role is GitHub's id 5, and updates are not allowed by merging.
+  it('the live ruleset refuses updates, force pushes and deletion to everyone but a deploy key (Rory, 9 November: no admin bypass)', () => {
+    // The whole definition (QA review, L4). No admin bypass: the Claude session pushes with credentials that
+    // count as Rory, an admin, and moved live in case S26-2 2. A rollback is Vercel's, or the ruleset paused.
     expect(rulesets().find((r) => r.conditions.ref_name.include.includes('refs/heads/live'))).toEqual({
       name: 'live: only the approved deploy',
       target: 'branch',
       enforcement: 'active',
       conditions: { ref_name: { include: ['refs/heads/live'], exclude: [] } },
       rules: [{ type: 'update', parameters: { update_allows_fetch_and_merge: false } }, { type: 'deletion' }, { type: 'non_fast_forward' }],
-      bypass_actors: [
-        { actor_type: 'DeployKey', actor_id: null, bypass_mode: 'always' },
-        { actor_type: 'RepositoryRole', actor_id: 5, bypass_mode: 'always' },
-      ],
+      bypass_actors: [{ actor_type: 'DeployKey', actor_id: null, bypass_mode: 'always' }],
     });
   });
 
