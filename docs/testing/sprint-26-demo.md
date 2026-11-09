@@ -1,7 +1,7 @@
 # Sprint 26 review
 
-Local run: build `bb70f63` on sprint-26, 2026-11-09T09:04:40Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42589789337).
-Staging run: build `bb70f63` on sprint-26, 2026-11-09T09:06:13Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42589789354).
+Local run: build `a0e65cf` on sprint-26, 2026-11-09T15:36:22Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42645097987).
+Staging run: build `a0e65cf` on sprint-26, 2026-11-09T15:36:49Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42645097875).
 
 ## Sprint 26: A large response sent within the time limit, and the live demo's branch protected
 
@@ -106,13 +106,13 @@ The live demo changes only through a deploy Rory has approved: no other workflow
 
 | Case | What was checked | Result |
 |---|---|---|
-| S26-2 1 | A workflow on a throwaway sprint-* branch cannot move live with its own token (pending: after Rory runs scripts/setup-live-key.ts, from the throwaway branch's run log and live read through the API) | By hand |
-| S26-2 2 | A push to live with ordinary repository credentials is refused (pending: after Rory's set-up, the push's output) | By hand |
+| S26-2 1 | A workflow on a throwaway sprint-* branch cannot move live with its own token (Deploy run 42628747644 on the throwaway branch sprint-26-f77 (9 November): GH013, repository rule violations; live stayed at 31dde04) | By hand |
+| S26-2 2 | A push to live with the Claude session's own credentials is refused (9 November, after the admin bypass was removed: the push was declined for repository rule violations and live stayed at 31dde04 (GitHub: current_user_can_bypass never). The first try, with the bypass, went through: the session's credentials count as Rory, an admin; Rory put live back) | By hand |
 | S26-2 3 | The approved production run moves live with the key, and the deploy completes (pending: the first production run after the merge) | By hand |
 | S26-2 4 | The job's token cannot write, the key reaches only the push, and GitHub's host key is checked (scripts/deploy-order.test.ts (seen failing with a writable token and an unpinned host key) and scripts/deploy-steps.test.ts (the push run against a local stand-in: forward only, no key left, nothing planted runs)) | Checked in CI |
 | S26-2 5 | Nothing deploys unless the production environment deploys from main only (scripts/deploy-steps.test.ts runs the ready check in each case and sees it refuse; the first production run passes it) | Checked in CI |
 | S26-2 6 | main refuses force pushes and deletion; the merge still fast-forwards (pending: after Rory's set-up, at the merge) | By hand |
-| S26-2 7 | The rulesets are as written, and the deploy refuses without them (scripts/setup-live-key.test.ts (the whole definitions) and scripts/deploy-steps.test.ts (no deploy without the rules in force); read through GitHub's API after Rory's set-up) | Checked in CI |
+| S26-2 7 | The rulesets are as written, and the deploy refuses without them (scripts/setup-live-key.test.ts (the whole definitions) and scripts/deploy-steps.test.ts (no deploy without the rules in force); read through GitHub's API on 9 November: both rulesets active, live bypassed by deploy keys only, main by nobody) | Checked in CI |
 | S26-2 8 | DEPLOYING.md and the risk register say what protects live, and what to do if the key is lost (read in review) | By hand |
 
 **S26-2 1, how to check it again.**
@@ -124,9 +124,9 @@ The live demo changes only through a deploy Rory has approved: no other workflow
 
 **S26-2 2, how to check it again.**
 
-1. As anyone with push rights who is not an admin of the repository: git push origin <any commit>:refs/heads/live
-2. GitHub refuses it (GH013, repository rule violations), and live is unchanged.
-3. An admin is let through on purpose, to roll back (docs/DEPLOYING.md).
+1. From the Claude session (or as any admin): git push origin <a commit on top of live>:refs/heads/live
+2. GitHub refuses it (GH013, repository rule violations), and live is unchanged: git ls-remote origin refs/heads/live.
+3. Only the approved deploy's key can move live; a rollback is Vercel's instant rollback, or Rory pausing the ruleset (docs/DEPLOYING.md).
 
 **S26-2 3, how to check it again.**
 
