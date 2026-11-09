@@ -120,6 +120,8 @@ describe('S5-2 extraction inside the caps', () => {
 describe('S5-3 the customer\'s own numbering is kept', () => {
   it('the owner saves a question with its number; a long number is refused; nobody changes it afterwards', async () => {
     const s = await session(await response(owner.id));
+    // Sprint 26 (S26-1, security review M1): through the API a file holds no more questions than it states.
+    await asSuperuser(`UPDATE rfi_sessions SET question_count = 10 WHERE id = $1`, [s]);
     await as(owner, async (q) => {
       const r = await q<{ customer_ref: string }>(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '3(a)') RETURNING customer_ref`, [s]);
       expect(r.rows[0].customer_ref).toBe('3(a)');
@@ -133,6 +135,8 @@ describe('S5-3 the customer\'s own numbering is kept', () => {
 describe('Sprint 5 security review findings', () => {
   it('1. a customer number can hold only letters, digits, spaces and . ( ) -', async () => {
     const s = await session(await response(owner.id));
+    // Sprint 26 (S26-1, security review M1): through the API a file holds no more questions than it states.
+    await asSuperuser(`UPDATE rfi_sessions SET question_count = 10 WHERE id = $1`, [s]);
     await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '<img src=x>')`, [s])));
     await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '\\\\host\\a')`, [s])));
     const ok = await as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question, customer_ref) VALUES ($1, 0, 'Q?', '4.2 (b)')`, [s]));

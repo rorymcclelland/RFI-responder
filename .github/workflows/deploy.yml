@@ -173,7 +173,8 @@ jobs:
           fi
           # Security review, M3: refuse to deploy unless the environment requires a reviewer.
           reviewers=$(gh api "repos/${GITHUB_REPOSITORY}/environments/production" --jq '[.protection_rules[]? | select(.type == "required_reviewers")] | length' || echo 0)
-          if [ "${reviewers:-0}" -lt 1 ]; then
+          # A number of at least one, or no deploy: an API error must not read as a pass (Sprint 26 review, L1).
+          if ! [[ "$reviewers" =~ ^[0-9]+$ ]] || [ "$reviewers" -lt 1 ]; then
             echo "::error::The production environment does not require a reviewer, so nothing was deployed. Add yourself under Settings, Environments, production."; exit 1
           fi
           # Sprint 26 (S26-2): without the deploy key "live" cannot move, so nothing is deployed before it is there.
@@ -213,8 +214,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # No install scripts (Sprint 26 security review, M2): this job holds the database password, the
+      # access token and the deploy key, so no dependency gets to run code while installing.
       - if: steps.ready.outputs.ok == 'true'
-        run: npm install -g npm@11 && npm ci
+        run: npm install -g npm@11 && npm ci --ignore-scripts
       - if: steps.ready.outputs.ok == 'true'
         uses: supabase/setup-cli@v1
         with:
@@ -250,9 +253,18 @@ jobs:
           set -euo pipefail
           dir=$(mktemp -d); trap 'rm -rf "$dir"' EXIT
           (umask 077; printf '%s\n' "$LIVE_DEPLOY_KEY" > "$dir/key")
+          unset LIVE_DEPLOY_KEY
           echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > "$dir/known_hosts"
-          GIT_SSH_COMMAND="ssh -i $dir/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$dir/known_hosts -o StrictHostKeyChecking=yes" \
-            git push "git@github.com:${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
+          # Sprint 26 security review, M2: pushed from a fresh repository, by git and ssh's full paths, with
+          # an emptied environment (env -i: nothing an earlier step set through $GITHUB_ENV, such as
+          # GIT_CONFIG_COUNT or GIT_SSH_COMMAND, reaches git) and no hooks, global, system or SSH configuration.
+          # An earlier step on the same runner could still interfere in other ways; the install scripts
+          # are off for that reason, and the rest is R-18's residual.
+          clean=(env -i PATH=/usr/bin:/bin HOME="$dir" GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_TERMINAL_PROMPT=0)
+          "${clean[@]}" /usr/bin/git init -q --bare "$dir/push.git"
+          "${clean[@]}" /usr/bin/git -C "$dir/push.git" -c core.hooksPath=/dev/null fetch -q --no-tags "$GITHUB_WORKSPACE" "$GITHUB_SHA"
+          "${clean[@]}" GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $dir/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$dir/known_hosts -o GlobalKnownHostsFile=/dev/null -o StrictHostKeyChecking=yes" \
+            /usr/bin/git -C "$dir/push.git" -c core.hooksPath=/dev/null push "git@github.com:${GITHUB_REPOSITORY}.git" "${GITHUB_SHA}:refs/heads/live"
       - name: Check the deploy (waits for Vercel's build of this commit)
         if: steps.ready.outputs.ok == 'true'
         env:

@@ -19,7 +19,7 @@ INSERT INTO public.opportunities (name, created_by, owner_id)
 VALUES ('F-73 spike ' || :files || 'x' || :per || ' (rolled back)', :'owner', :'owner') RETURNING id AS sent_r \gset
 INSERT INTO public.opportunities (name, created_by, owner_id)
 VALUES ('F-73 spike bulk ' || :files || 'x' || :per || ' (rolled back)', :'owner', :'owner') RETURNING id AS bulk_r \gset
--- One file at a time, then its questions: the database refuses a file's questions beyond its count.
+-- One file at a time, then its questions, as the database owner (since Sprint 26 the API refuses questions beyond a file's count).
 DO $$
 DECLARE r record; f int; s uuid; refs text[];
 BEGIN

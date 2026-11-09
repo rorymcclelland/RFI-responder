@@ -74,13 +74,23 @@ export type MakeKey = <T>(run: Run, withPair: (pair: { privateKey: string; publi
 
 const realMakeKey: MakeKey = (run, withPair) => {
   const dir = mkdtempSync(join(tmpdir(), 'rfi-live-key-'));
+  // Security review, L4: Ctrl+C or a closed window skips finally, so the folder (and the private key in
+  // it) is removed on those too.
+  const cleanUp = () => rmSync(dir, { recursive: true, force: true });
+  const onSignal = () => { cleanUp(); process.exit(130); };
+  process.once('SIGINT', onSignal);
+  process.once('SIGTERM', onSignal);
+  process.once('SIGHUP', onSignal);
   try {
     const file = join(dir, 'key');
     const r = run('ssh-keygen', ['-q', '-t', 'ed25519', '-N', '', '-C', KEY_TITLE, '-f', file]);
     if (r.status !== 0) throw new Error('ssh-keygen failed: is OpenSSH installed? (Windows: Settings, Apps, Optional features, OpenSSH Client)');
     return withPair({ privateKey: readFileSync(file, 'utf8'), publicKey: readFileSync(`${file}.pub`, 'utf8').trim() });
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    cleanUp();
+    process.off('SIGINT', onSignal);
+    process.off('SIGTERM', onSignal);
+    process.off('SIGHUP', onSignal);
   }
 };
 
@@ -127,8 +137,10 @@ export async function setup(apply: boolean, run: Run = realRun, makeKey: MakeKey
     if (!added) { log('  deploy key: GitHub refused the new key; nothing was changed'); return false; }
     const stored = run('gh', ['secret', 'set', SECRET, '--env', 'production', '--repo', REPO], privateKey);
     if (stored.status !== 0) {
-      run('gh', ['api', '-X', 'DELETE', `repos/${REPO}/keys/${added.id}`]);
-      log(`  deploy key: ${SECRET} could not be stored, so the new key was removed again; nothing was changed`);
+      const undone = run('gh', ['api', '-X', 'DELETE', `repos/${REPO}/keys/${added.id}`]);
+      log(undone.status === 0
+        ? `  deploy key: ${SECRET} could not be stored, so the new key was removed again; nothing was changed`
+        : `  deploy key: ${SECRET} could not be stored, and the new key "${title}" could not be removed: remove it in Settings, Deploy keys`);
       return false;
     }
     log(`  deploy key: made, and its private half stored as ${SECRET} in the production environment`);

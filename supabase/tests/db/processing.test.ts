@@ -76,6 +76,8 @@ describe('1. members cannot write scores, gates or drafts; the service role can'
 
   it('the owner can insert a question, but not with a score or gate', async () => {
     // Sprint 3 review: only the response owner or an admin adds questions.
+    // Sprint 26 (S26-1, security review M1): through the API a file holds no more questions than it states.
+    await asSuperuser(`UPDATE rfi_sessions SET question_count = question_count + 10 WHERE id = $1`, [session]);
     await refused(as(member, (q) => q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 1, 'New?')`, [session])));
     await as(owner, async (q) => {
       const r = await q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 1, 'New?') RETURNING id`, [session]);

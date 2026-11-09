@@ -173,4 +173,47 @@ describe('S26-1 8: two files added at once cannot together pass the limit', () =
     const total = await one<{ n: number }>(`SELECT sum(question_count)::int AS n FROM rfi_sessions WHERE opportunity_id = $1`, [r]);
     expect(total.n).toBe(1500);
   });
+
+  it('(QA review) two files added while another statement reads the response do not deadlock', async () => {
+    // Sprint 24's trigger reads the response FOR SHARE; if the limit's FOR UPDATE came after it, two
+    // inserts that each held the share lock would wait for each other ("deadlock detected").
+    const r = await response(owner.id, { name: 'No deadlock (S26 QA)' });
+    const a = await connection(owner);
+    const b = await connection(admin);
+    try {
+      await a.query(`SELECT 1 FROM opportunities WHERE id = $1 FOR SHARE`, [r]);
+      const second = b.query(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('b.xlsx', 10, $1)`, [r]);
+      await new Promise((res) => setTimeout(res, 200));
+      await a.query(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('a.xlsx', 10, $1)`, [r]);
+      await a.query('COMMIT');
+      await second;
+      await b.query('COMMIT');
+    } finally {
+      await a.query('ROLLBACK').catch(() => undefined);
+      await b.query('ROLLBACK').catch(() => undefined);
+      a.release();
+      b.release();
+    }
+    const total = await one<{ n: number }>(`SELECT count(*)::int AS n FROM rfi_sessions WHERE opportunity_id = $1`, [r]);
+    expect(total.n).toBe(2);
+  });
+});
+
+describe('S26-1 7 (security review, M1): a file cannot hold more questions than it said it would', () => {
+  it('through the API, a question beyond the file\'s count is refused, for the owner and an admin', async () => {
+    for (const u of [owner, admin]) {
+      const r = await response(owner.id, { name: `Declared one (S26 M1, ${u === owner ? 'owner' : 'admin'})` });
+      const out = await as(u, async (q) => {
+        const f = (await q<{ id: string }>(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('one.xlsx', 2, $1) RETURNING id`, [r])).rows[0].id;
+        await q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 0, 'First (S26 M1)?'), ($1, 1, 'Second (S26 M1)?')`, [f]);
+        await q('SAVEPOINT more');
+        const third = await q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 2, 'Third (S26 M1)?')`, [f]).then(() => 'added', (e: Error) => e.message);
+        await q('ROLLBACK TO SAVEPOINT more');
+        const many = await q(`INSERT INTO rfi_questions (session_id, position, question) SELECT $1, g, 'Many ' || g || '?' FROM generate_series(10, 3009) g`, [f]).then(() => 'added', (e: Error) => e.message);
+        return { third, many };
+      });
+      expect(out.third).toMatch(/This file said it had 2 questions, and holds them all, so no more can be added/);
+      expect(out.many).toMatch(/so no more can be added/);
+    }
+  });
 });

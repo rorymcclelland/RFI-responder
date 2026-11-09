@@ -29,16 +29,40 @@ const writes = (calls: ReturnType<typeof fakeRun>['calls']) => calls.filter((c) 
 
 describe('setup-live-key (S26-2)', () => {
   it('the live ruleset refuses updates, force pushes and deletion, except a deploy key and the admins', () => {
-    const live = rulesets().find((r) => r.conditions.ref_name.include.includes('refs/heads/live'))!;
-    expect(live.rules.map((r) => r.type).sort()).toEqual(['deletion', 'non_fast_forward', 'update']);
-    expect(live.bypass_actors.map((b) => b.actor_type).sort()).toEqual(['DeployKey', 'RepositoryRole']);
-    expect(live.enforcement).toBe('active');
+    // The whole definition (QA review, L4): the admin role is GitHub's id 5, and updates are not allowed by merging.
+    expect(rulesets().find((r) => r.conditions.ref_name.include.includes('refs/heads/live'))).toEqual({
+      name: 'live: only the approved deploy',
+      target: 'branch',
+      enforcement: 'active',
+      conditions: { ref_name: { include: ['refs/heads/live'], exclude: [] } },
+      rules: [{ type: 'update', parameters: { update_allows_fetch_and_merge: false } }, { type: 'deletion' }, { type: 'non_fast_forward' }],
+      bypass_actors: [
+        { actor_type: 'DeployKey', actor_id: null, bypass_mode: 'always' },
+        { actor_type: 'RepositoryRole', actor_id: 5, bypass_mode: 'always' },
+      ],
+    });
   });
 
   it('the main ruleset refuses force pushes and deletion, for everyone, and leaves fast-forwards alone (Q4)', () => {
-    const main = rulesets().find((r) => r.conditions.ref_name.include.includes('refs/heads/main'))!;
-    expect(main.rules.map((r) => r.type).sort()).toEqual(['deletion', 'non_fast_forward']);
-    expect(main.bypass_actors).toEqual([]);
+    expect(rulesets().find((r) => r.conditions.ref_name.include.includes('refs/heads/main'))).toEqual({
+      name: 'main: no force push or deletion',
+      target: 'branch',
+      enforcement: 'active',
+      conditions: { ref_name: { include: ['refs/heads/main'], exclude: [] } },
+      rules: [{ type: 'deletion' }, { type: 'non_fast_forward' }],
+      bypass_actors: [],
+    });
+    expect(rulesets()).toHaveLength(2);
+  });
+
+  it('if a ruleset is refused, the key is not changed (QA review, L4)', async () => {
+    const base = fakeRun();
+    const run: Run = (cmd, args, input) => (args.includes('POST') && args.some((a) => a.endsWith('/rulesets'))
+      ? { status: 1, stdout: '', stderr: 'refused' } : base.run(cmd, args, input));
+    const { lines, log } = collect();
+    expect(await setup(true, run, fakeKey, log)).toBe(1);
+    expect(base.calls.some((c) => c.args[0] === 'secret' || c.args.some((a) => a.endsWith('/keys') && c.args.includes('POST')))).toBe(false);
+    expect(lines.join('\n')).toMatch(/The deploy key was not changed, because a ruleset was not set/);
   });
 
   it('a dry run says what it would do and changes nothing', async () => {
@@ -88,5 +112,13 @@ describe('setup-live-key (S26-2)', () => {
     expect(calls.some((c) => c.args.includes('DELETE') && c.args.includes(`repos/${REPO}/keys/77`))).toBe(true);
     expect(calls.some((c) => c.args.includes('DELETE') && c.args.includes(`repos/${REPO}/keys/9`))).toBe(false);
     expect(lines.join('\n')).toMatch(/nothing was changed/);
+  });
+
+  it('says so if the new key cannot be removed again (security review, L4)', async () => {
+    const base = fakeRun({ secretFails: true });
+    const run: Run = (cmd, args, input) => (args.includes('DELETE') ? { status: 1, stdout: '', stderr: 'no' } : base.run(cmd, args, input));
+    const { lines, log } = collect();
+    expect(await setup(true, run, fakeKey, log)).toBe(1);
+    expect(lines.join('\n')).toMatch(/could not be removed: remove it in Settings, Deploy keys/);
   });
 });

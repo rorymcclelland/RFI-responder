@@ -82,6 +82,15 @@ describe('the live app only after its database (S25-1)', () => {
     // GitHub's published Ed25519 host key (SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU), checked, never learned.
     expect(step.text).toContain('github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl');
     expect(step.text).toMatch(/StrictHostKeyChecking=yes/);
+    // Only the pinned key counts: the runner's own lists are not read (QA review, L5).
+    expect(step.text).toContain('-o UserKnownHostsFile=$dir/known_hosts');
+    expect(step.text).toContain('-o GlobalKnownHostsFile=/dev/null');
+    expect(step.text).toMatch(/-F \/dev\/null/);
+    // Security review, M2: an emptied environment and full paths, and no install scripts in this job.
+    expect(step.text).toMatch(/clean=\(env -i PATH=\/usr\/bin:\/bin /);
+    expect(step.text).toContain('unset LIVE_DEPLOY_KEY');
+    expect(production).toContain('npm ci --ignore-scripts');
+    expect(production).not.toMatch(/npm ci\s*$/m);
     expect(step.text).not.toMatch(/StrictHostKeyChecking=(no|accept-new)|ssh-keyscan|github\.token/);
   });
 
@@ -91,7 +100,8 @@ describe('the live app only after its database (S25-1)', () => {
     // The key's value goes to one step; the ready check only learns whether it is set (true or false).
     const users = prodSteps.filter((s) => s.text.includes('${{ secrets.LIVE_DEPLOY_KEY }}'));
     expect(users.map((s) => s.name)).toEqual(['Move the live branch to this commit']);
-    const uses = workflow.match(/secrets\.LIVE_DEPLOY_KEY[^}]*\}\}/g) ?? [];
+    // Any way of naming it, secrets.X or secrets['X'] (QA review, L5).
+    const uses = workflow.match(/secrets(?:\.LIVE_DEPLOY_KEY|\[\s*['"]LIVE_DEPLOY_KEY['"]\s*\])[^}]*\}\}/g) ?? [];
     expect(uses.sort()).toEqual(["secrets.LIVE_DEPLOY_KEY != '' }}", 'secrets.LIVE_DEPLOY_KEY }}']);
   });
 
@@ -111,7 +121,7 @@ describe('the live app only after its database (S25-1)', () => {
 
   it('live only moves forward: not forced, and nothing deploys unless the commit is live or later (security review, M2)', () => {
     const step = prodSteps[index(/^Move the live branch to this commit$/)];
-    expect(step.text).toMatch(/git push "git@github/);
+    expect(step.text).toMatch(/\/usr\/bin\/git -C "\$dir\/push\.git" -c core\.hooksPath=\/dev\/null push "git@github/);
     expect(step.text).not.toMatch(/push (-f|--force)|\+\$\{GITHUB_SHA\}/);
     // A non-forced push needs the history to see it is a fast-forward: from a one-commit checkout git
     // refuses every push ("fetch first"), which stopped the first deploy of Sprint 25.

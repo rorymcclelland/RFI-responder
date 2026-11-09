@@ -6,7 +6,7 @@ About 15 minutes.
 
 Already checked by Claude:
 - The script's tests (rulesets as agreed, the key's private half only ever passed through standard input, refusal if another deploy key can write, a failed store undoing itself).
-- The deploy workflow's tests: its token can only read, it pushes `live` with the key to GitHub's pinned host key, and it deploys nothing unless the key is set, the rules on `live` are in force, and `production` deploys from `main` only. The push step itself was run with a stand-in for `git`.
+- The deploy workflow's tests: its token can only read, it pushes `live` with the key to GitHub's pinned host key, and it deploys nothing unless the key is set, the rules on `live` are in force, and `production` deploys from `main` only. The push step and the ready check are run in the tests themselves (`scripts/deploy-steps.test.ts`): the push against a local stand-in for GitHub, the check in every case where it must refuse.
 - What cannot be checked before your set-up: the push with the real key (at the first production deploy after the merge) and GitHub refusing everyone else (cases 1 and 2 of the refinement, which Claude runs after you).
 
 ## Before you start

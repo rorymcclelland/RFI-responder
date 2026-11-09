@@ -240,7 +240,8 @@ describe('Sprint 24 security review', () => {
   it('M2 (a): no question is added to a sent file', async () => {
     const { r, files } = await twoFiles('Sent file (S24 M2)');
     await decideAll(r);
-    await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now() WHERE opportunity_id = $1`, [r]);
+    // Sprint 26: the file states room for more, so the refusal is the one for a sent file.
+    await asSuperuser(`UPDATE rfi_sessions SET status = 'completed', exported_at = now(), question_count = question_count + 5 WHERE opportunity_id = $1`, [r]);
     expect(await refused(as(owner, (q) => q(`INSERT INTO rfi_questions (session_id, position, question) VALUES ($1, 9, 'Late question (S24 M2)?')`, [files[0]]))))
       .toMatch(/marked as sent, so no question can be added/);
   });
