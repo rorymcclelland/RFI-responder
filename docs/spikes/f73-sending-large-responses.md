@@ -77,3 +77,19 @@ To refine at the spike's close with Rory: the limit's size and where it is check
 
 - Locally: `DB_TEST_URL=postgres://... npx tsx scripts/spikes/f73-profile.ts 1x500,4x500,2x2000,3x2000` (add `F73_PATCH=1` for the fixes, `F73_KB=3000` for the knowledge base's size); [`scripts/spikes/f73-statements.ts`](../../scripts/spikes/f73-statements.ts) lists the statements by time, with `pg_stat_statements` preloaded and `pg_stat_statements.track = 'all'`.
 - On staging: [`scripts/spikes/f73-hosted.sql`](../../scripts/spikes/f73-hosted.sql), run by the Deploy workflow of a throwaway branch named `sprint-*` (the staging environment's secrets are available only there). It loads, times and rolls back, and prints `left_behind=0`.
+
+## After the fix (Sprint 26)
+
+The two fixes went in as migration `20261113100000_large_response_speed.sql` (S26-1), and staging was measured again with the same script, 9 November (Deploy runs 42531540549 and 42532333906 on the throwaway branch `sprint-26-f73`; every run rolled back, `left_behind=0`; 134 to 135 current entries in the knowledge base).
+
+| Files × questions | Questions | Mark as sent (s) | Bulk approval (s) |
+|---|---|---|---|
+| 1 × 500 | 500 | 1.1, 1.1 | 0.8, 0.7 |
+| 3 × 500 | 1,500 | 2.6, 2.7, 2.9 | 1.8, 1.8, 1.8 |
+| 1 × 1,500 | 1,500 | 2.9, 2.8, 2.7 | 1.7, 1.7, 1.9 |
+| 4 × 500 | 2,000 | 4.0, 3.7, 3.8, 4.1, 3.0 | 2.3, 2.2, 2.3, 2.3, 1.9 |
+| 1 × 2,000 | 2,000 | 3.1, 3.2, 3.3 | 1.9, 1.9, 2.1 |
+| 2 × 2,000 | 4,000 | **7.4**, **7.1** | 4.2, 4.4 |
+| 3 × 2,000 | 6,000 | **9.9**, **11.6** | 6.1, 6.0 |
+
+Bold: within 1 second of the 8-second limit, or over it. Sending now grows about in a straight line, at about 1.8 ms a question on staging, twice the local figure; the spike's estimate of 1.1 to 1.7 ms was a little low. So the fix alone does not let a response of 4,000 questions be sent safely, and the limit is set at **2,000 questions a response** (Rory, 9 November), sending in about half the time limit.

@@ -4,14 +4,16 @@
 // every update of a question, whatever changed, and the cited entries' tags found by scanning the
 // knowledge base. These tests pin what both do, so the faster versions change only how long they take.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { as, asSuperuser, buildDatabase, closePool, createUser, type TestUser } from './harness';
+import { as, asSuperuser, buildDatabase, closePool, createUser, getPool, refused, type TestUser } from './harness';
 import { entry, one, question, response, session } from './fixtures';
 
 let owner: TestUser;
+let admin: TestUser;
 
 beforeAll(async () => {
   await buildDatabase();
   owner = await createUser({ name: 'Owner (S26)' });
+  admin = await createUser({ admin: true, name: 'Admin (S26)' });
 });
 afterAll(closePool);
 
@@ -91,5 +93,84 @@ describe('S26-1 4: the tags learned from a sent answer are the cited entries\' t
     expect([...(of(several).tags ?? [])].sort()).toEqual(['hosting', 'iso', 'security']);
     expect(of(untagged).tags).toEqual([]);
     expect(of(none).tags).toEqual([]);
+  });
+});
+
+// S26-1, the limit (Rory, 9 November): at most 2,000 questions a response, which staging sends in about
+// half the 8-second limit after the fix; enforced by the database when a file is added or its count changed.
+const addFile = (u: TestUser, r: string | null, n: number, name = 'more.xlsx') =>
+  as(u, (q) => q(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ($1, $2, $3) RETURNING id`, [name, n, r]));
+
+describe('S26-1 6: a file that would take a response past 2,000 questions is refused, with the reason', () => {
+  it('for the owner and an admin: past the limit refused, saying the size and the limit; exactly to it accepted', async () => {
+    for (const u of [owner, admin]) {
+      const r = await response(owner.id, { name: `Limit (S26 6, ${u === owner ? 'owner' : 'admin'})` });
+      await asSuperuser(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('first.xlsx', 1500, $1)`, [r]);
+      const msg = await refused(addFile(u, r, 501));
+      expect(msg).toMatch(/This response would have 2,001 questions; a response can have at most 2,000/);
+      expect(msg).toMatch(/new response/);
+      await expect(addFile(u, r, 500)).resolves.toBeTruthy();
+    }
+  });
+
+  it('raising a file\'s count past the limit is refused too, whoever does it', async () => {
+    const r = await response(owner.id, { name: 'Raise (S26 6)' });
+    const s = (await one<{ id: string }>(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('a.xlsx', 1000, $1) RETURNING id`, [r])).id;
+    await one(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('b.xlsx', 1000, $1) RETURNING id`, [r]);
+    expect(await refused(asSuperuser(`UPDATE rfi_sessions SET question_count = 1001 WHERE id = $1`, [s]))).toMatch(/at most 2,000/);
+    await expect(asSuperuser(`UPDATE rfi_sessions SET question_count = 999 WHERE id = $1`, [s])).resolves.toBeTruthy();
+  });
+
+  it('moving a file into a response is checked against that response', async () => {
+    const full = await response(owner.id, { name: 'Full (S26 6)' });
+    await one(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('big.xlsx', 2000, $1) RETURNING id`, [full]);
+    const other = await response(owner.id, { name: 'Other (S26 6)' });
+    const s = (await one<{ id: string }>(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('one.xlsx', 1, $1) RETURNING id`, [other])).id;
+    expect(await refused(asSuperuser(`UPDATE rfi_sessions SET opportunity_id = $2 WHERE id = $1`, [s, full]))).toMatch(/2,001 questions/);
+  });
+});
+
+describe('S26-1 7: a file of more than 2,000 questions is refused, whatever the app sends', () => {
+  it('in a response or with none, for the owner and an admin', async () => {
+    for (const u of [owner, admin]) {
+      const r = await response(owner.id, { name: `Huge (S26 7, ${u === owner ? 'owner' : 'admin'})` });
+      expect(await refused(addFile(u, r, 100000))).toMatch(/100,000 questions; a response can have at most 2,000/);
+    }
+    expect(await refused(addFile(admin, null, 2001))).toMatch(/A file can have at most 2,000 questions/);
+    await expect(addFile(admin, null, 2000)).resolves.toBeTruthy();
+  });
+
+  it('a negative count is refused', async () => {
+    const r = await response(owner.id, { name: 'Negative (S26 7)' });
+    expect(await refused(addFile(owner, r, -5))).toBeTruthy();
+  });
+});
+
+describe('S26-1 8: two files added at once cannot together pass the limit', () => {
+  async function connection(u: TestUser) {
+    const c = await getPool().connect();
+    await c.query('BEGIN');
+    await c.query('SET LOCAL ROLE authenticated');
+    await c.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: u.id, role: 'authenticated', email: u.email })]);
+    return c;
+  }
+  it('the second waits for the first, then sees it and is refused', async () => {
+    const r = await response(owner.id, { name: 'Race (S26 8)' });
+    await one(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('base.xlsx', 500, $1) RETURNING id`, [r]);
+    const a = await connection(owner);
+    const b = await connection(admin);
+    try {
+      await a.query(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('a.xlsx', 1000, $1)`, [r]);
+      const late = b.query(`INSERT INTO rfi_sessions (file_name, question_count, opportunity_id) VALUES ('b.xlsx', 1000, $1)`, [r]);
+      await new Promise((res) => setTimeout(res, 200));
+      await a.query('COMMIT');
+      expect(await refused(late)).toMatch(/2,500 questions/);
+    } finally {
+      await b.query('ROLLBACK').catch(() => undefined);
+      a.release();
+      b.release();
+    }
+    const total = await one<{ n: number }>(`SELECT sum(question_count)::int AS n FROM rfi_sessions WHERE opportunity_id = $1`, [r]);
+    expect(total.n).toBe(1500);
   });
 });

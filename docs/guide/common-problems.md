@@ -20,7 +20,8 @@ The app says what is wrong with a file it will not open. The usual reasons:
 | This is the older Word format (.doc) | Open it in Word and save it as .docx. |
 | Documents with macros cannot be used | Save a copy as .docx without macros. |
 | The file is too large | The limit is 5 MB. Split the file, or remove images. |
-| The file has more than 2000 rows | Split it into smaller files. |
+| The file has more than 2000 rows | Split it into smaller files, in separate responses: a response holds at most 2,000 questions. |
+| This response would have | The file would take the response past 2,000 questions, the most a response can hold so that it can be marked as sent in one go. Put its questions in a new response. |
 | The CSV file is not valid UTF-8 text | Save it again as "CSV UTF-8" from Excel. |
 | The Excel file could not be read | It may be damaged or protected by a password. Remove the password and save it again. |
 | The document has more than 200,000 characters of text | Split it into smaller files. |

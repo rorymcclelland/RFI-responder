@@ -129,7 +129,7 @@ Marking a response as sent turns edited and person-written answers into knowledg
 
 ## 6. Finish
 
-Choose **Add a file** in the header to add another file to the same response; only the owner or an admin can. Its questions join the list, and the header lists every file. Once the response is marked as sent, no file can be added: it is the record of what was sent, so a later questionnaire is a new response.
+Choose **Add a file** in the header to add another file to the same response; only the owner or an admin can. Its questions join the list, and the header lists every file. Once the response is marked as sent, no file can be added: it is the record of what was sent, so a later questionnaire is a new response. A response holds at most 2,000 questions across its files, so that it can be marked as sent in one go; a file that would take it past that is refused before anything is uploaded, with the response's size, and its questions belong in a new response.
 
 When the outcome is known, archive the response from its card on the overview: choose the archive icon (**Archive with outcome**), then **Won**, **Lost** or **Withdrawn**, and **Archive**. Won and lost need the response marked as sent first, and marked again after any change; a response never sent can only be withdrawn. An archived response is kept as a record and can no longer be changed.
 

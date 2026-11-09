@@ -37,6 +37,7 @@ import { expertItems, groupQuestions } from './workspace/journey';
 import UploadStep from './workspace/UploadStep';
 import { loadQuestions } from './workspace/questionRows';
 import { useAssignments } from './workspace/useAssignments';
+import { responseTooLarge } from './lib/responseLimit';
 
 interface Props {
   opportunityId: string;
@@ -100,6 +101,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
   const [extraction, setExtraction]       = useState<{ summary: string; ruleBased: boolean }>({ summary: '', ruleBased: false });
 
   const fileIds = pastSessions.map((f) => f.id);
+  // Sprint 26 (S26-1): the questions the response already holds, for the limit checked before an upload.
+  const questionsInResponse = pastSessions.reduce((sum, f) => sum + (f.questionCount ?? 0), 0);
   const { assignments, handleAssign, handleUnassign, loadAssignments } = useAssignments({ sessionIds: fileIds, opportunityId, questions, currentUser, allUsers, onError: setUploadError });
 
   /**
@@ -290,6 +293,8 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     const asked = rawRows.current
       .map((r, position) => ({ question: String(r[questionCol] ?? '').trim(), position }))
       .filter((x) => x.question);
+    const tooLarge = responseTooLarge(questionsInResponse, asked.length);
+    if (tooLarge) { setUploadError(tooLarge); return; }
     const { data: session, error } = await supabase
       .from('rfi_sessions')
       .insert({ file_name: fileName, question_count: asked.length, opportunity_id: opportunityId })
@@ -307,12 +312,14 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
       return;
     }
     await processAndReload([{ sid: session.id, ids }]);
-  }, [questionCol, fileName, opportunityId, processAndReload]);
+  }, [questionCol, fileName, opportunityId, processAndReload, questionsInResponse]);
 
   /** S5-3: save the checked list from a Word document, then process it like a spreadsheet's. */
   const saveDrafts = useCallback(async () => {
     setUploadError(''); setNotice('');
     const rows = toInsertRows(drafts);
+    const tooLarge = responseTooLarge(questionsInResponse, rows.length);
+    if (tooLarge) { setUploadError(tooLarge); return; }
     const { data: session, error } = await supabase
       .from('rfi_sessions')
       .insert({ file_name: fileName, question_count: rows.length, opportunity_id: opportunityId })
@@ -331,7 +338,7 @@ export default function RFIWorkspace({ opportunityId, archived, opportunityName,
     }
     setDrafts([]);
     await processAndReload([{ sid: session.id, ids }]);
-  }, [drafts, fileName, opportunityId, processAndReload]);
+  }, [drafts, fileName, opportunityId, processAndReload, questionsInResponse]);
 
   // Sprint 23 (S23-1): a try's questions are drafted when it is first opened, as an upload's are
   // (once per file; Process now remains if a batch fails).
