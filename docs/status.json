@@ -5,7 +5,7 @@
     "name": "RFI Respond",
     "kind": "sprint"
   },
-  "writtenAt": "2026-11-09T21:56:00Z",
+  "writtenAt": "2026-11-09T22:01:00Z",
   "writtenBy": "sprint-refine, RFI Respond session",
   "lastActivity": "2026-11-09",
   "links": {
@@ -17,26 +17,26 @@
   "sprint": {
     "number": "27",
     "title": "Recordings you can step through; workflows off Node.js 20; import edge cases",
-    "stage": "awaiting-answers",
+    "stage": "ready",
     "stageSince": "2026-11-09",
     "stories": [
       {
         "id": "S27-1",
         "title": "A list of steps beside each recording that jumps to that moment",
         "size": "M",
-        "status": "Refined, Sprint 27 (awaiting answers)"
+        "status": "Ready, Sprint 27"
       },
       {
         "id": "S27-2",
         "title": "The workflows on current actions, each pinned to a commit",
         "size": "S",
-        "status": "Refined, Sprint 27 (awaiting answers)"
+        "status": "Ready, Sprint 27"
       },
       {
         "id": "S27-3",
         "title": "The import cleans every kind of whitespace, and two imports at once both finish",
         "size": "S",
-        "status": "Refined, Sprint 27 (awaiting answers)"
+        "status": "Ready, Sprint 27"
       }
     ]
   },
@@ -50,26 +50,10 @@
       "source": "docs/BACKLOG.md"
     },
     {
-      "id": "S27-Q1",
+      "id": "S27-go",
       "type": "question",
-      "text": "Which release of each GitHub Action: the current one, or the oldest that runs on Node.js 24? Either way pinned to its commit.",
-      "recommendation": "The current release of each, pinned to its commit.",
-      "askedOn": "2026-11-09",
-      "source": "docs/refinement/sprint-27.md"
-    },
-    {
-      "id": "S27-Q2",
-      "type": "question",
-      "text": "The npm cache in the production job, which holds the deploy key and the database password: off, or kept?",
-      "recommendation": "Off, as setup-node's makers advise; it costs about 20 seconds.",
-      "askedOn": "2026-11-09",
-      "source": "docs/refinement/sprint-27.md"
-    },
-    {
-      "id": "S27-Q3",
-      "type": "question",
-      "text": "If the whitespace fix would change existing knowledge-base entries: should the migration refuse and say how many, or clean them?",
-      "recommendation": "Refuse and say how many; none are expected.",
+      "text": "Sprint 27 is ready to build: S27-2 first, then S27-3, then S27-1.",
+      "recommendation": "Say go.",
       "askedOn": "2026-11-09",
       "source": "docs/refinement/sprint-27.md"
     }
@@ -94,5 +78,5 @@
       "returned": 0
     }
   ],
-  "notes": "Sprint 26 closed and deployed (f0bf63a). Sprint 27 refined, three questions open."
+  "notes": "Sprint 26 closed and deployed (f0bf63a). Sprint 27 refined and ready, waiting for Rory's go."
 }

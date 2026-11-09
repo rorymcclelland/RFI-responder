@@ -126,3 +126,11 @@ Order: S27-2 first (small, and every later push runs on it), then S27-3, then S2
 - **Q1 Which releases.** (a) The current release of each action, pinned to its commit, as in the table (recommended: all support Node.js 24, and pinning means a later change to the tag cannot reach us); (b) the oldest release of each that runs on Node.js 24, to change as little as possible.
 - **Q2 The npm cache in the production job.** (a) Off: the job that holds the deploy key and the database password builds from the lockfile alone, as `setup-node`'s makers advise, at a cost of about 20 seconds (recommended); (b) kept, as now.
 - **Q3 Existing entries the cleaning would change.** (a) The migration refuses, saying how many, and nothing changes until we decide (recommended: none are expected, and if any exist the fix is to look at them, not to guess); (b) the migration cleans them, skipping any that would then clash with another entry.
+
+## Rory's answers (9 November 2026)
+
+- **Q1:** (a). The current release of each action, pinned to its commit.
+- **Q2:** (a). No npm cache in the production job.
+- **Q3:** (a). The migration refuses, saying how many entries the cleaning would change.
+
+S27-1, S27-2 and S27-3 are Ready, Sprint 27.

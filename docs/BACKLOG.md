@@ -1132,13 +1132,13 @@ Refinement: `docs/refinement/sprint-26.md`. Q1 to Q5 answered by Rory the same d
 
 ## Sprint 27: recordings you can step through, the workflows off Node.js 20, and two import edge cases (refined 9 November 2026)
 
-Refinement: `docs/refinement/sprint-27.md`. Q1 to Q3 open for Rory.
+Refinement: `docs/refinement/sprint-27.md`. Q1 to Q3 answered by Rory the same day, each as recommended.
 
 | ID | Story | From | Status |
 |---|---|---|---|
-| S27-1 | A list of steps beside each recording, each with its time, that moves the video to that moment | F-78 | Refined, Sprint 27 (awaiting answers) |
-| S27-2 | The workflows on current actions (none on Node.js 20), each pinned to a commit; no npm cache in the production job | F-80 | Refined, Sprint 27 (awaiting answers) |
-| S27-3 | The import, editing and learning clean every kind of whitespace from a question's ends, and two imports at once both finish | F-62 | Refined, Sprint 27 (awaiting answers) |
+| S27-1 | A list of steps beside each recording, each with its time, that moves the video to that moment | F-78 | Ready, Sprint 27 |
+| S27-2 | The workflows on current actions (none on Node.js 20), each pinned to a commit; no npm cache in the production job | F-80 | Ready, Sprint 27 |
+| S27-3 | The import, editing and learning clean every kind of whitespace from a question's ends, and two imports at once both finish | F-62 | Ready, Sprint 27 |
 
 ## Candidate stories (not yet placed in a sprint)
 
