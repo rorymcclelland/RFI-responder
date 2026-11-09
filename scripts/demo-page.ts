@@ -147,6 +147,7 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
   };
   const ai = builds.map((b) => aiNote[b.target] ?? '').filter(Boolean).join(' ');
   const title = `Sprint ${sprints.map((s) => s.sprint).join(' and ')} review`;
+  const hasVideo = body.includes('<video ');
   return `<title>${esc(title)}</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -203,7 +204,10 @@ details.case[open] > summary { font-weight:600; }
 .again code { font-family:var(--mono); font-size:.8rem; color:var(--ink); }
 details.setup { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px; margin-top:14px; max-width:70ch; }
 details.setup summary { font-weight:600; }
-a:focus-visible, summary:focus-visible, video:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+a:focus-visible, summary:focus-visible, video:focus-visible, .speed button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.speed { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:14px; padding:8px 10px; background:var(--panel); border:1px solid var(--line); border-radius:8px; font-size:.86rem; color:var(--muted); width:fit-content; max-width:100%; }
+.speed button { font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; min-height:32px; }
+.speed button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
 </style>
 <main>
 <header>
@@ -211,11 +215,46 @@ a:focus-visible, summary:focus-visible, video:focus-visible { outline:2px solid 
 ${builds.map((b) => `<p class="meta">${esc(b.target === 'staging' ? 'Staging' : 'Local')} run: build <span class="id">${esc(b.sha.slice(0, 7))}</span> on ${esc(b.branch)}, ${esc(b.at.replace('T', ' ').replace(/:\d\dZ$/, ' UTC'))}. <a href="${esc(b.run)}">The CI run</a>.</p>`).join('')}
 <div class="tally">${(['passed', 'failed', 'unchecked', 'ci', 'hand'] as const).filter((st) => count(st)).map((st) => `<span class="chip ${st}">${count(st)} ${LABEL[st].toLowerCase()}</span>`).join('')}</div>
 <details class="setup"><summary>Running the checks yourself</summary>${SETUP.map((s) => `<p class="again-l">${esc(s.title)}</p><ol>${s.lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ol>`).join('')}<p class="again-n">Then open any case below for its command and steps. Cases checked by hand list what to do instead.</p></details>
+${hasVideo ? SPEED : ''}
 <p class="note">${esc(ai)} A result of Passed or Failed comes only from browser tests that ran in these builds, and a case passes only if it passed in every run that tested it; Checked in CI and By hand say how else a case is covered.</p>
 </header>
 ${body}
-</main>`;
+</main>${hasVideo ? SPEED_SCRIPT : ''}`;
 }
+
+/**
+ * Rory, 9 November 2026: the tests move faster than a person can follow, so the recordings play at a
+ * quarter of their speed unless the viewer chooses otherwise. The choice applies to every video on the
+ * page and is remembered in this browser only (a convenience; the page works without it).
+ */
+export const SPEED_RATES = [0.25, 0.5, 1, 2];
+const SPEED = `<div class="speed" role="group" aria-label="Playback speed for every recording">
+<span>Recordings play at</span>${SPEED_RATES.map((r) => `<button type="button" data-rate="${r}" aria-pressed="${r === 0.25}" aria-label="${r} times speed">${r === 0.25 ? '&frac14;' : r === 0.5 ? '&frac12;' : r}&times;</button>`).join('')}
+</div>`;
+const SPEED_SCRIPT = `
+<script>
+(() => {
+  const rates = ${JSON.stringify(SPEED_RATES)};
+  let rate = 0.25;
+  try { const saved = Number(localStorage.getItem('demo-playback-rate')); if (rates.includes(saved)) rate = saved; } catch (e) {}
+  const apply = () => {
+    document.querySelectorAll('video').forEach((v) => { v.defaultPlaybackRate = rate; v.playbackRate = rate; });
+    document.querySelectorAll('[data-rate]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.rate) === rate)));
+  };
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-rate]');
+    if (!b) return;
+    rate = Number(b.dataset.rate);
+    try { localStorage.setItem('demo-playback-rate', String(rate)); } catch (e) {}
+    apply();
+  });
+  document.querySelectorAll('video').forEach((v) => {
+    v.addEventListener('loadedmetadata', apply);
+    v.addEventListener('play', () => { v.playbackRate = rate; });
+  });
+  apply();
+})();
+</script>`;
 
 /** The same, as Markdown, without the recordings. */
 export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], buildOrBuilds: Build | Build[]): string {

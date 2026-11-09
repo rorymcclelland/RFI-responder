@@ -86,8 +86,14 @@ export async function caption(page: Page, text: string): Promise<void> {
   await test.step(text, async () => {
     await page.addInitScript(draw, text).catch(() => undefined);
     await page.evaluate(draw, text).catch(() => undefined);
+    // Rory, 9 November 2026: hold each captioned moment on screen, so a person watching the recording
+    // can read the caption and see the page before the test moves on (E2E_CAPTION_HOLD, milliseconds).
+    await page.waitForTimeout(CAPTION_HOLD_MS);
   });
 }
+
+/** How long each caption stays on screen before the test carries on (Rory, 9 November 2026). */
+export const CAPTION_HOLD_MS = Math.max(0, Number(process.env.E2E_CAPTION_HOLD ?? 1500) || 0);
 
 /** Goes to a page in the main menu. */
 export async function nav(page: Page, name: string) {

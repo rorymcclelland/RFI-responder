@@ -74,3 +74,23 @@ describe('the demo page (Sprint 20, S20-4)', () => {
     expect(insideRoot('/res/local', 'artifacts/t/a.zip')).toBeNull();
   });
 });
+
+// Rory, 9 November 2026: the tests move faster than a person can follow.
+describe('the recordings play slowly by default', () => {
+  const tests = readRun(report, '/res/local');
+  it('every video starts at a quarter of its speed, with ¼× ½× 1× 2× to choose from', () => {
+    const html = renderHtml([sprint], tests, [build], (p) => `videos/${p.split('/').pop()}`);
+    expect(html).toContain('<video ');
+    expect(html).toMatch(/role="group" aria-label="Playback speed for every recording"/);
+    expect([...html.matchAll(/data-rate="([\d.]+)" aria-pressed="(true|false)" aria-label="[\d.]+ times speed"/g)].map((m) => [m[1], m[2]]))
+      .toEqual([['0.25', 'true'], ['0.5', 'false'], ['1', 'false'], ['2', 'false']]);
+    expect(html).toContain('let rate = 0.25;');
+    expect(html).toMatch(/v\.defaultPlaybackRate = rate; v\.playbackRate = rate;/);
+    expect(html).toMatch(/try \{ localStorage\.setItem/);
+  });
+  it('a page with no recordings has no speed control', () => {
+    const html = renderHtml([sprint], [], [build], (p) => p);
+    expect(html).not.toContain('data-rate=');
+    expect(html).not.toContain('<script>');
+  });
+});

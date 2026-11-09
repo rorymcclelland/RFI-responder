@@ -69,6 +69,7 @@ Read by the browser acceptance tests ([`e2e/`](../../e2e)) and the deploy script
 | `E2E_PASSWORD` | The seed users' local password | [`e2e/target.ts`](../../e2e/target.ts) | On staging, the password made for the run, masked in the log |
 | `E2E_VERCEL_BYPASS` | None | [`e2e/support.ts`](../../e2e/support.ts) | Vercel's protection-bypass secret for previews, sent only to the app's own host |
 | `E2E_SLOW_MO` | `150` | [`playwright.config.ts`](../../playwright.config.ts) | Milliseconds between browser actions, so the recordings can be followed |
+| `E2E_CAPTION_HOLD` | `1500` | [`e2e/support.ts`](../../e2e/support.ts) | Milliseconds each caption stays on screen before the browser test carries on, so a person can read it in the recording (Rory, 9 November 2026); `0` turns it off |
 | `E2E_NO_SERVER` | None | [`playwright.config.ts`](../../playwright.config.ts) | Set when the app is already running, so the tests do not start it |
 | `STAGING_SUPABASE_URL` | None | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | The staging project's address |
 | `STAGING_SUPABASE_ANON_KEY` | None | [`scripts/e2e-staging-users.ts`](../../scripts/e2e-staging-users.ts) | The staging project's public key, to sign in as the test admin and reset the demo |
