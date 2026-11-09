@@ -88,6 +88,8 @@ export function showPointer(): void {
     const follow = () => {
       if (!t.isConnected || document.activeElement !== t || Date.now() > until) { f.style.opacity = '0'; return; }
       const r = t.getBoundingClientRect();
+      // A field can stay focused while its screen is hidden (the sign-in form behind "Loading").
+      if (!r.width || !r.height || t.checkVisibility?.({ visibilityProperty: true, opacityProperty: true }) === false) { f.style.opacity = '0'; return; }
       Object.assign(f.style, { transition: 'none', left: `${r.left - 4}px`, top: `${r.top - 4}px`, width: `${r.width + 2}px`, height: `${r.height + 2}px`, opacity: '1' });
       hide = setTimeout(follow, 50);
     };

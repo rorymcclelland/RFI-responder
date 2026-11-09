@@ -1,7 +1,7 @@
 # Sprint 26 review
 
-Local run: build `b90897f` on sprint-26, 2026-11-09T17:15:17Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42660413206).
-Staging run: build `b90897f` on sprint-26, 2026-11-09T17:11:18Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42660413183).
+Local run: build `778472e` on sprint-26, 2026-11-09T17:29:24Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42663171360).
+Staging run: build `778472e` on sprint-26, 2026-11-09T17:28:29Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42663171339).
 
 ## Sprint 26: A large response sent within the time limit, and the live demo's branch protected
 
