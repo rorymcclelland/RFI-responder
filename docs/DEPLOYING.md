@@ -103,4 +103,4 @@ Every action the workflows run is pinned to a full commit, with its release in a
 3. Change every `uses:` line for that action, commit and release comment together.
 4. Let CI and staging run on the sprint branch, and the production job run after the merge, before calling it done.
 
-The Supabase CLI's own version is set separately (`version:` under each `supabase/setup-cli`; the test keeps them the same). The production job installs with no npm cache and no install scripts.
+The Supabase CLI's own version is set separately (`version:` under each Supabase CLI setup step; the test keeps them the same). The production job installs with no npm cache and no install scripts.
