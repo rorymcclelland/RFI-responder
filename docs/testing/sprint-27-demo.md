@@ -1,7 +1,7 @@
 # Sprint 26 and 27 review
 
-Local run: build `41e0749` on sprint-27, 2026-11-10T15:11:47Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42839659333).
-Staging run: build `41e0749` on sprint-27, 2026-11-10T15:20:14Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42839788632).
+Staging run: build `4351a4b` on sprint-27, 2026-11-10T16:32:53Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42853753073).
+Local run: build `4351a4b` on sprint-27, 2026-11-10T16:33:45Z. [The CI run](https://github.com/rorymcclelland/RFI-responder/actions/runs/42853753427).
 
 ## Sprint 26: A large response sent within the time limit, and the live demo's branch protected
 
@@ -100,7 +100,7 @@ the Sprint 23 browser tests, unchanged
 3. docs/GLOSSARY.md, the entry for response.
 4. Check each says 2,000, the figure in supabase/migrations/20261113110000_response_size_limit.sql (max_questions).
 
-**Recording: A file that would take a response past 2,000 questions is refused before anything is uploaded, Sarah Chen.** 0:00 Sarah Chen signs in; 0:05 A response that already holds 1,999 questions: adding a file of 40; 0:07 Refused before uploading: nothing was added.
+**Recording: A file that would take a response past 2,000 questions is refused before anything is uploaded, Ellis Admin \(test\).** 0:00 Ellis Admin \(test\) signs in; 0:07 A response that already holds 1,999 questions: adding a file of 40; 0:09 Refused before uploading: nothing was added.
 
 ### S26-2 Only the approved deploy can move live
 
@@ -185,14 +185,14 @@ On the review page, each recording lists its steps with their times; choosing on
 
 | Case | What was checked | Result |
 |---|---|---|
-| S27-1 1 | Each recording's steps are its captions, in order, with times that rise (pending: the sprint's browser test results read at the demo (scripts/demo-page.test.ts checks only the reading of steps)) | By hand |
-| S27-1 2 | Choosing a step moves its video to that moment and plays it, at the chosen speed (pending: the built page checked in a browser at the demo (scripts/demo-page.test.ts checks only the buttons and the script's text)) | By hand |
-| S27-1 3 | A step's time matches the recording: the frame at that time shows its caption (pending: checked from the sprint's recordings at the demo) | By hand |
-| S27-1 4 | In a test with two sessions, each recording lists only its own captions (pending: a two-person browser test's results read at the demo (scripts/demo-page.test.ts checks the reading)) | By hand |
+| S27-1 1 | Each recording's steps are its captions, in order, with times that rise (10 November, results of 4351a4b: 37 recordings on staging and 45 locally each listed exactly their own captions, in order, none missing and none extra (scripts/demo-page.test.ts checks the reading)) | By hand |
+| S27-1 2 | Choosing a step moves its video to that moment and plays it, at the chosen speed (10 November: the built page in Chromium, served with seeking: at ½×, a step at 7.1 s moved its video to 4.7 s and played at ½×; by keyboard at 390 px, a step at 4.9 s moved it to 2.5 s at ¼× (each 2.5 s early, Rory's choice for S27-1 3)) | By hand |
+| S27-1 3 | A step's time matches the recording: the frame at that time shows its caption (Not met as agreed, 10 November: frames from two staging runs (41e0749, 33ff25f) showed recordings starting or ending up to about 2 seconds away from the test's clock. Rory chose times shown as approximate (within about 2 seconds) and each step playing from 2.5 seconds before it. On 4351a4b, eight steps from three recordings: each step's caption appears between 2.5 s before and 0.5 s after its time, so the jump always lands before it) | By hand |
+| S27-1 4 | In a test with two sessions, each recording lists only its own captions (10 November, results of 4351a4b: seven tests record two sessions; each recording lists only the captions drawn in its own session, and together they hold every caption once) | By hand |
 | S27-1 5 | Results without step times keep the plain list, and say the times are missing (scripts/demo-page.test.ts) | Checked in CI |
 | S27-1 6 | A hostile step file is shown as plain text, clamped or dropped, and the page still builds (scripts/demo-page.test.ts) | Checked in CI |
-| S27-1 7 | At phone width the lists do not scroll sideways, and each step can be chosen with the keyboard (pending: the built page checked in a browser at 390 px at the demo) | By hand |
-| S27-1 8 | The tests take no longer than before, apart from one small file per recording (pending: the browser test job's time compared with Sprint 26's at the demo) | By hand |
+| S27-1 7 | At phone width the lists do not scroll sideways, and each step can be chosen with the keyboard (10 November: the built page at 390 px does not scroll sideways; Tab reaches a step (outlined) and Enter plays it) | By hand |
+| S27-1 8 | The tests take no longer than before, apart from one small file per recording (10 November: the browser tests took 463 s on 4351a4b, against 432 to 469 s on main and the refinement (440, 469, 432); an earlier run's 502 s did not repeat) | By hand |
 
 **S27-1 1, how to check it again.**
 
@@ -247,7 +247,7 @@ CI and the deploy run on supported actions, fixed to the exact code that was che
 | Case | What was checked | Result |
 |---|---|---|
 | S27-2 1 | Every action in every workflow is pinned to a full commit, with its release in a comment (scripts/workflows.test.ts (seen failing on the old workflows)) | Checked in CI |
-| S27-2 2 | No action runs on Node.js 20, and CI runs green with no Node.js 20 warning (pending: the sprint's CI run's annotations read at the demo (scripts/workflows.test.ts checks the releases)) | By hand |
+| S27-2 2 | No action runs on Node.js 20, and CI runs green with no Node.js 20 warning (10 November, CI and staging runs on 4351a4b (42853753427, 42853753073): no annotation names Node.js 20; the only notices are GitHub's about the Ubuntu image (scripts/workflows.test.ts checks the releases)) | By hand |
 | S27-2 3 | Staging deploys and its browser tests pass on the new actions (the staging run on the sprint branch) | Checked in CI |
 | S27-2 4 | The production job runs with the new actions, no npm cache, and a read-only token (pending: the first production run after the merge (scripts/workflows.test.ts and scripts/deploy-order.test.ts check the job as written)) | By hand |
 | S27-2 5 | The Supabase CLI is still 2.121.0 in every job (scripts/workflows.test.ts; the run logs) | Checked in CI |
