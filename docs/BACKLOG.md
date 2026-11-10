@@ -1138,7 +1138,7 @@ Refinement: `docs/refinement/sprint-27.md`. Q1 to Q3 answered by Rory the same d
 |---|---|---|---|
 | S27-1 | A list of steps beside each recording, each with its time, that moves the video to that moment | F-78 | Ready, Sprint 27 |
 | S27-2 | The workflows on current actions (none on Node.js 20), each pinned to a commit; no npm cache in the production job | F-80 | Ready, Sprint 27 |
-| S27-3 | The import, editing and learning clean every kind of whitespace from a question's ends, and two imports at once both finish | F-62 | Ready, Sprint 27 |
+| S27-3 | The import, editing and learning clean tabs and line breaks from a question's ends, and two imports at once both finish | F-62 | Ready, Sprint 27 |
 
 ## Candidate stories (not yet placed in a sprint)
 

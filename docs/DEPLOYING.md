@@ -103,4 +103,4 @@ Every action the workflows run is pinned to a full commit, with its release in a
 3. Change every `uses:` line for that action, commit and release comment together.
 4. Let CI and staging run on the sprint branch, and the production job run after the merge, before calling it done.
 
-The Supabase CLI's own version is set separately (`version:` under each Supabase CLI setup step; the test keeps them the same). The production job installs with no npm cache and no install scripts.
+The Supabase CLI's own version is set separately. CI installs it with `supabase/setup-cli` (`version:` under each step). The two deploy jobs take it from the lockfile instead (`supabase` 2.121.0 and its prebuilt `@supabase/cli-*` package, checked by npm against their hashes), and check its version: `setup-cli` restores Bun from the Actions cache unchecked and runs it, which the job that holds the deploy key must not do (Sprint 27 security review). The production job installs with no npm cache and no install scripts. To move the CLI, change `package.json` and the lockfile, the `version:` lines and the deploy jobs' version check together; `scripts/workflows.test.ts` keeps them in step.

@@ -47,10 +47,13 @@ export function readSteps(body: unknown): Step[] | undefined {
     const at = (x as Record<string, unknown>)?.at;
     const text = (x as Record<string, unknown>)?.text;
     if (typeof at !== 'number' || !Number.isFinite(at) || at < 0 || at > 3600 || typeof text !== 'string' || !text.trim()) return [];
-    return [{ at: Math.round(at * 10) / 10, text: text.slice(0, 300) }];
+    return [{ at: Math.round(at * 10) / 10, text: text.replace(/\s+/g, ' ').trim().slice(0, 300) }];
   }).sort((a, b) => a.at - b.at);
   return steps.length ? steps : undefined;
 }
+
+/** Text from the results as plain Markdown: one line, its markup characters escaped (security review, Low). */
+export const md = (t: string) => t.replace(/\s+/g, ' ').replace(/([\\`*_[\]{}()<>#|!~-])/g, '\\$1');
 
 /** A time in a recording, as minutes and seconds. */
 export const clock = (at: number) => `${Math.floor(at / 60)}:${String(Math.floor(at % 60)).padStart(2, '0')}`;
@@ -168,7 +171,7 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
           + (r.steps ? `<ol class="jumps" aria-label="Steps in ${esc(r.label)}'s recording">${r.steps.map((x) => `<li><button type="button" class="jump" data-at="${x.at}"><span class="t">${clock(x.at)}</span> ${esc(x.text)}</button></li>`).join('')}</ol>` : '')
           + '</div>').join('')}</div>`
         // Sprint 27 (S27-1): results from before the times were recorded keep the plain list, and say so.
-        + (t.steps.length && t.recordings.some((r) => !r.steps)
+        + (t.steps.length && !t.recordings.some((r) => r.steps)
           ? `<details><summary>Steps (${t.steps.length})</summary>${t.recordings.length ? '<p class="dur">Times were not recorded for these recordings, so the steps cannot move the video.</p>' : ''}<ol>${t.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : '')
         + '</figure>').join('');
       return `<section class="story"><h3><span class="sid">${esc(st.id)}</span> ${esc(st.title)}</h3><p class="for">${esc(st.forTheUser)}</p>`
@@ -335,9 +338,10 @@ export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], buildOr
           lines.push('');
         }
         // Sprint 27 (S27-1): each recording's steps with their times, for reading beside the page.
-        for (const t of tests.filter((x) => x.cases.some((id) => cases.some((c) => c.id === id)))) {
+        const seen = new Set<string>();
+        for (const t of tests.filter((x) => x.cases.some((id) => cases.some((c) => c.id === id)) && !seen.has(x.title) && seen.add(x.title))) {
           for (const r of t.recordings.filter((x) => x.steps)) {
-            lines.push(`**Recording: ${t.title}, ${r.label}.** ${r.steps!.map((x) => `${clock(x.at)} ${x.text}`).join('; ')}.`, '');
+            lines.push(`**Recording: ${md(t.title)}, ${md(r.label)}.** ${r.steps!.map((x) => `${clock(x.at)} ${md(x.text)}`).join('; ')}.`, '');
           }
         }
       }

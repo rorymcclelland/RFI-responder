@@ -79,10 +79,11 @@ describe('S27-3 2: editing and learning clean the same way', () => {
   });
 
   it('a sent answer to a question with a tab at the start is learned against the entry already held', async () => {
-    const held = await entry({ question: 'Where is data hosted (S27 2)?', answer: 'In the UK.' });
+    await entry({ question: 'Where is data hosted (S27 2)?', answer: 'In the UK.' });
     const r = await response(owner.id, { name: 'Learn (S27 2)' });
     const s = await session(r);
-    const qid = await question(s, { text: '\tWhere is data hosted (S27 2)?\n', sources: [held.ref], cited: [held.ref], final: 'In the UK and Ireland.' });
+    // No judge verdict and no sources, so only the question's key can match it to the entry held (QA review).
+    const qid = await question(s, { text: '\tWhere is data hosted (S27 2)?\n', sources: [], cited: [], verdict: null, final: 'In the UK and Ireland.' });
     await asSuperuser(`UPDATE rfi_questions SET status = 'accepted' WHERE session_id = $1`, [s]);
     await asSuperuser(`UPDATE rfi_sessions SET question_count = 1 WHERE id = $1`, [s]);
     const learned = await as(owner, async (q) => {
@@ -92,7 +93,7 @@ describe('S27-3 2: editing and learning clean the same way', () => {
                 (SELECT count(*)::int FROM kb_entries x WHERE x.question ILIKE '%Where is data hosted (S27 2)%') AS copies
            FROM rfi_questions q LEFT JOIN kb_entries k ON k.id = q.learned_entry_id WHERE q.id = $1`, [qid])).rows[0];
     });
-    expect(learned.outcome).not.toBe('added');
+    expect(learned.outcome).toBe('proposed');
     expect(learned.question).toBe('Where is data hosted (S27 2)?');
     // The entry held, plus at most the proposed change to it: never a second current copy with a tab.
     expect(learned.copies).toBeLessThanOrEqual(2);
@@ -118,7 +119,12 @@ describe('S27-3 3: two imports at once that share a new question both finish', (
     try {
       expect(await run(a, [shared, { question: 'Only in the first file (S27 3)?', answer: 'A.' }])).toEqual({ inserted: 2, duplicates: 0, invalid: 0 });
       second = run(b, [{ ...shared, answer: 'From the second file.' }, { question: 'Only in the second file (S27 3)?', answer: 'B.' }]);
-      await new Promise((res) => setTimeout(res, 200));
+      // Wait until the second import is held on the first's new row (QA review: not a fixed sleep).
+      for (let i = 0; i < 100; i++) {
+        const w = await asSuperuser<{ n: number }>(`SELECT count(*)::int AS n FROM pg_stat_activity WHERE wait_event_type = 'Lock' AND query LIKE '%race.csv%'`);
+        if (w.rows[0].n > 0) break;
+        await new Promise((res) => setTimeout(res, 20));
+      }
       await a.query('COMMIT');
       expect(await second).toEqual({ inserted: 1, duplicates: 1, invalid: 0 });
       await b.query('COMMIT');

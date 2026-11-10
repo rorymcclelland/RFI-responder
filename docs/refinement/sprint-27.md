@@ -35,7 +35,7 @@ Refined 9 November 2026, as proposed at the Sprint 26 review: F-78 (a list of st
 
 **What changes.**
 - `e2e/support.ts`: `newSession` notes when each page in the session is created; `caption()` notes the caption's time in that page's recording (seconds from the page's creation), and the `recordings` fixture attaches each recording's steps beside its video, as a small JSON file (`steps: <label>`).
-- `scripts/demo-page.ts`: reads each recording's steps, checks them (numbers within the video's length, at most 200, text at most 300 characters, anything else dropped), and lists them under the video as buttons; a small script moves the video and plays it. The Markdown summary lists the same steps with their times.
+- `scripts/demo-page.ts`: reads each recording's steps, checks them (times from 0 to an hour, at most 200 steps, text on one line and at most 300 characters, anything else dropped), and lists them under the video as buttons; a small script moves the video and plays it. The Markdown summary lists the same steps with their times.
 - `scripts/demo-page.test.ts`: the new list, the fallback, and hostile step files.
 - The sprint-close skill already says not to show such a list until the times are recorded; it will need no change.
 
@@ -86,7 +86,7 @@ Refined 9 November 2026, as proposed at the Sprint 26 review: F-78 (a list of st
 
 **Size.** S (half a day).
 
-### S27-3 The import cleans every kind of whitespace, and two imports at once both finish. S (F-62)
+### S27-3 The import cleans tabs and line breaks from a question's ends, and two imports at once both finish. S (F-62)
 
 **The job.** A question imported with a tab or a line break at either end is matched to the same question without it, and two imports at the same moment that share a new question both finish, the second counting it as a duplicate, instead of one failing with a database error.
 
@@ -134,3 +134,15 @@ Order: S27-2 first (small, and every later push runs on it), then S27-3, then S2
 - **Q3:** (a). The migration refuses, saying how many entries the cleaning would change.
 
 S27-1, S27-2 and S27-3 are Ready, Sprint 27.
+
+## While building
+
+**S27-2: the CLI comes from the lockfile in the deploy jobs (security review, Medium).** `supabase/setup-cli` v3 installs Bun through `oven-sh/setup-bun`, which restores it from the Actions cache with no hash check and then runs it, in the production job too, against Rory's Q2 (no cache there). Refinement's premise was out of date: `supabase` 2.121.0 has no install script and gets its program from a prebuilt `@supabase/cli-*` package pinned in the lockfile with its hash, so `npm ci --ignore-scripts` installs it. Both deploy jobs now put only that command on `PATH` and check its version; CI keeps `setup-cli`. `scripts/workflows.test.ts` fails if the production job uses `setup-cli`, `setup-bun` or a cache.
+
+**Other review findings, all dealt with.**
+- Security, Low: step text went into the Markdown summary raw, so it could forge a line or a link. It is now one line with Markdown's characters escaped (tested).
+- Security, Low: setup-cli v3 resolves some of its own dependencies at run time; acceptable in CI, and gone from the deploy jobs with the change above. Every pinned commit was checked against its release tag, and setup-cli's own nested pins too.
+- QA, Medium: the learning test passed even with the old cleaning, because the judge's match found the entry; it now has no judge match and no sources, expects `proposed`, and fails on the old code. The race test waited a fixed 200 ms; it now waits until the second import is held on the first's row. Both were seen failing without their fixes.
+- QA, Medium: the case list called five cases CI checks whose essential part is read by hand at the demo or after the merge (S27-1 1, 2 and 4; S27-2 2 and 4). They are now marked by hand, pending, with their steps.
+- QA, Medium: a second recording with no captions (a page with none) made the page say times were missing beside a working list. The note now shows only when no recording has times (tested).
+- QA, Low: the story's title said "every kind of whitespace"; the cleaning removes ASCII whitespace only (a no-break space stays, as a full-width space does), so it now says tabs and line breaks. Step times are bounded to an hour, not the video's length (the page does not know it); the refinement says so. The Markdown summary lists a test's recordings once.

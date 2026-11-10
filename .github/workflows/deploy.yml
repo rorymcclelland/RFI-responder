@@ -71,10 +71,17 @@ jobs:
           cache: npm
       - if: steps.ready.outputs.ok == 'true'
         run: npm install -g npm@11 && npm ci
+      # Sprint 27 security review (Medium): the Supabase CLI comes from the lockfile (supabase 2.121.0 and
+      # its prebuilt @supabase/cli-* package, checked by npm against their hashes, no install scripts), not
+      # from supabase/setup-cli, whose Bun comes from the Actions cache unchecked and runs here. Only the
+      # CLI's own command is put on PATH.
       - if: steps.ready.outputs.ok == 'true'
-        uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
-        with:
-          version: 2.121.0
+        name: The Supabase CLI from the lockfile
+        run: |
+          mkdir -p "$RUNNER_TEMP/cli"
+          ln -s "$GITHUB_WORKSPACE/node_modules/.bin/supabase" "$RUNNER_TEMP/cli/supabase"
+          echo "$RUNNER_TEMP/cli" >> "$GITHUB_PATH"
+          test "$("$RUNNER_TEMP/cli/supabase" --version)" = 2.121.0
       - name: Migrations and Edge Functions to staging
         if: steps.ready.outputs.ok == 'true'
         env:
@@ -220,10 +227,17 @@ jobs:
       # access token and the deploy key, so no dependency gets to run code while installing.
       - if: steps.ready.outputs.ok == 'true'
         run: npm install -g npm@11 && npm ci --ignore-scripts
+      # Sprint 27 security review (Medium): the Supabase CLI comes from the lockfile (supabase 2.121.0 and
+      # its prebuilt @supabase/cli-* package, checked by npm against their hashes, no install scripts), not
+      # from supabase/setup-cli, whose Bun comes from the Actions cache unchecked and runs here. Only the
+      # CLI's own command is put on PATH.
       - if: steps.ready.outputs.ok == 'true'
-        uses: supabase/setup-cli@689adcfb80d947100a1eab127289b97d1fb07b13 # v3.2.0
-        with:
-          version: 2.121.0
+        name: The Supabase CLI from the lockfile
+        run: |
+          mkdir -p "$RUNNER_TEMP/cli"
+          ln -s "$GITHUB_WORKSPACE/node_modules/.bin/supabase" "$RUNNER_TEMP/cli/supabase"
+          echo "$RUNNER_TEMP/cli" >> "$GITHUB_PATH"
+          test "$("$RUNNER_TEMP/cli/supabase" --version)" = 2.121.0
       # Sprint 21 (S21-3; security review): on the live demo, before anything is deployed, so a
       # difference in the sign-in settings holds the database and functions back.
       - name: Sign-in settings match the repository

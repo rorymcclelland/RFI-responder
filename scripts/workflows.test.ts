@@ -25,7 +25,7 @@ describe('the actions the workflows run (S27-2)', () => {
   const uses = usesLines();
 
   it('finds the actions', () => {
-    expect(uses.length).toBeGreaterThanOrEqual(17);
+    expect(uses.length).toBeGreaterThanOrEqual(15);
   });
 
   it.each(uses)('S27-2 1: $where is pinned to a full commit, with its release in a comment', ({ value }) => {
@@ -53,6 +53,13 @@ describe('the actions the workflows run (S27-2)', () => {
     const versions = workflows.flatMap(({ text }) => [...text.matchAll(/supabase\/setup-cli@[^\n]+\n\s+with:\n\s+version:\s*(\S+)/g)].map((m) => m[1]));
     expect(versions).toHaveLength(cli);
     expect(new Set(versions)).toEqual(new Set(['2.121.0']));
+    // The deploy jobs take it from the lockfile and check its version (security review, Medium).
+    const deploy = workflows.find((w) => w.file === 'deploy.yml')!.text;
+    expect(deploy.match(/test "\$\("\$RUNNER_TEMP\/cli\/supabase" --version\)" = 2\.121\.0/g)).toHaveLength(2);
+    const lock = JSON.parse(readFileSync('package-lock.json', 'utf8')) as { packages: Record<string, { version?: string; hasInstallScript?: boolean }> };
+    expect(lock.packages['node_modules/supabase'].version).toBe('2.121.0');
+    expect(lock.packages['node_modules/@supabase/cli-linux-x64'].version).toBe('2.121.0');
+    expect(lock.packages['node_modules/supabase'].hasInstallScript ?? false).toBe(false);
   });
 });
 
@@ -71,6 +78,8 @@ describe('the production job builds without a cache (Rory, Q2)', () => {
 
   it('S27-2 4: turns setup-node\'s cache off and asks for none', () => {
     expect(job).not.toMatch(/^\s+cache:/m);
+    // Security review (Medium): setup-cli restores Bun from the Actions cache, unchecked, and runs it.
+    expect(job).not.toMatch(/uses:\s*\S*(setup-cli|setup-bun|actions\/cache)/);
     const step = job.slice(job.indexOf('actions/setup-node@')).split(/\n\s+- /)[0];
     expect(step).toMatch(/^\s+package-manager-cache:\s*false\s*$/m);
   });

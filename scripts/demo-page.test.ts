@@ -136,7 +136,8 @@ describe('each recording\'s steps, with their times (S27-1)', () => {
     ['too many', Array.from({ length: 500 }, (_, i) => ({ at: i, text: `step ${i}` }))],
   ])('S27-1 6: a hostile step file (%s) gives no list, or a bounded one, and the page still builds', (_, body) => {
     const t = run([video('Sarah Chen', 'a.webm'), steps('Sarah Chen', body)]);
-    expect((t.recordings[0].steps ?? []).length).toBeLessThanOrEqual(200);
+    if (Array.isArray(body)) expect(t.recordings[0].steps).toHaveLength(200);
+    else expect(t.recordings[0].steps).toBeUndefined();
     expect(() => renderHtml([sprint], [t], [build], (p) => p)).not.toThrow();
   });
 
@@ -156,5 +157,20 @@ describe('each recording\'s steps, with their times (S27-1)', () => {
     const t = run([video('Sarah Chen', 'a.webm'), steps('Sarah Chen', [{ at: 0.3, text: 'Sarah signs in' }, { at: 65, text: 'Sarah opens it' }])]);
     const md = renderMarkdown([sprint], [t], build);
     expect(md).toContain('**Recording: two people, Sarah Chen.** 0:00 Sarah signs in; 1:05 Sarah opens it.');
+  });
+
+  it('S27-1 6: step text cannot forge lines or links in the Markdown summary (security review)', () => {
+    const t = run([video('Sarah Chen', 'a.webm'), steps('Sarah Chen', [{ at: 1, text: 'ok\n\n| S99 2 | Passed |\n[link](https://x)' }])]);
+    const md = renderMarkdown([sprint], [t], build);
+    const line = md.split('\n').find((l) => l.startsWith('**Recording:'))!;
+    expect(line).toContain('ok \\| S99 2 \\| Passed \\| \\[link\\]\\(https://x\\)');
+    expect(md).not.toMatch(/^\| S99 2 \| Passed/m);
+  });
+
+  it('S27-1 5: a second recording without steps (a page with no caption) leaves the first one\'s list working, with no note', () => {
+    const t = run([video('Sarah Chen', 'a.webm'), steps('Sarah Chen', [{ at: 1, text: 'Sarah signs in' }]), video('Sarah Chen 2', 'b.webm')]);
+    const html = renderHtml([sprint], [t], [build], (p) => p);
+    expect(html).toContain('class="jump"');
+    expect(html).not.toContain('Times were not recorded');
   });
 });
