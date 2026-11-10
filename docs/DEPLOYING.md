@@ -93,3 +93,14 @@ Who does what. Rory makes what only a dashboard issues and keeps the credentials
 | Public settings (Vercel's preview variables, the repository variables) | Claude, with Rory's approval each time | The Vercel connector, or by hand from the table above |
 | Check | The workflow | The next push to a sprint branch runs the deploy checks, the browser tests and the sign-in check on staging |
 
+
+### Moving an action to a newer release
+
+Every action the workflows run is pinned to a full commit, with its release in a comment (`actions/setup-node@949feb2… # v7.1.0`; Sprint 27, S27-2), so moving a tag cannot change what runs, least of all in the production job that holds the deploy key and the database password. `scripts/workflows.test.ts` fails on any action named by a tag or branch, on one still running on Node.js 20, and on the same action pinned to two commits. To move one:
+
+1. Read the release's notes, above all its breaking changes, and check that its `action.yml` runs on a supported Node.js.
+2. Take the release's commit: `git ls-remote https://github.com/<owner>/<action> refs/tags/<tag> refs/tags/<tag>^{}` (the last line is the commit).
+3. Change every `uses:` line for that action, commit and release comment together.
+4. Let CI and staging run on the sprint branch, and the production job run after the merge, before calling it done.
+
+The Supabase CLI's own version is set separately (`version:` under each `supabase/setup-cli`; the test keeps them the same). The production job installs with no npm cache and no install scripts.
