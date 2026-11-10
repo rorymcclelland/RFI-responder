@@ -24,6 +24,9 @@ export async function newSession(browser: Browser, viewport = { width: 1280, hei
     recordVideo: { dir: test.info().outputPath('videos'), size: viewport },
   });
   opened.push({ context, label });
+  // Sprint 27 (S27-1): a page's recording starts when the page is made, so each caption's time in the
+  // recording is counted from here.
+  context.on('page', (p) => pageStarts.set(p, Date.now()));
   // Rory, 9 November: show the pointer and each click in the recordings, so a person can follow them.
   await context.addInitScript(showPointer);
   const appHost = new URL(BASE_URL).host;
@@ -147,6 +150,13 @@ export async function caption(page: Page, text: string): Promise<void> {
   await test.step(text, async () => {
     await page.addInitScript(draw, text).catch(() => undefined);
     await page.evaluate(draw, text).catch(() => undefined);
+    // Sprint 27 (S27-1): when the caption appeared in this page's recording, for the review page's step list.
+    const start = pageStarts.get(page);
+    if (start !== undefined) {
+      const list = stepTimes.get(page) ?? [];
+      list.push({ at: Math.round((Date.now() - start) / 100) / 10, text });
+      stepTimes.set(page, list);
+    }
     // Rory, 9 November 2026: hold each captioned moment on screen, so a person watching the recording
     // can read the caption and see the page before the test moves on (E2E_CAPTION_HOLD, milliseconds).
     await page.waitForTimeout(CAPTION_HOLD_MS);
@@ -210,6 +220,11 @@ export function checks(...cases: string[]) {
 /** The browser sessions a test opened, closed at its end so each recording is saved and attached. */
 const opened: { context: BrowserContext; label: string }[] = [];
 
+/** When each page was made, so its recording's clock (Sprint 27, S27-1). */
+const pageStarts = new WeakMap<Page, number>();
+/** Each page's captions, with the second of its recording at which each appeared (Sprint 27, S27-1). */
+const stepTimes = new WeakMap<Page, { at: number; text: string }[]>();
+
 export const test = base.extend<{ recordings: void }>({
   // Playwright reads a fixture's needs from its first argument, so it must be a pattern.
   // eslint-disable-next-line no-empty-pattern
@@ -221,7 +236,12 @@ export const test = base.extend<{ recordings: void }>({
       await context.close();
       for (const [i, p] of pages.entries()) {
         const path = await p.video()?.path().catch(() => null);
-        if (path) await testInfo.attach(`recording: ${label}${pages.length > 1 ? ` ${i + 1}` : ''}`, { path, contentType: 'video/webm' });
+        if (!path) continue;
+        const name = `${label}${pages.length > 1 ? ` ${i + 1}` : ''}`;
+        await testInfo.attach(`recording: ${name}`, { path, contentType: 'video/webm' });
+        // Sprint 27 (S27-1): the recording's own steps, each with its time, beside it.
+        const steps = stepTimes.get(p);
+        if (steps?.length) await testInfo.attach(`steps: ${name}`, { body: JSON.stringify(steps), contentType: 'application/json' });
       }
     }
   }, { auto: true }],

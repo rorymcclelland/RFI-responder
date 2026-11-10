@@ -26,9 +26,35 @@ export interface RunTest {
   durationMs: number;
   cases: string[];
   steps: string[];
-  recordings: { label: string; path: string }[];
+  recordings: Recording[];
   error?: string;
 }
+/** A recording, and (Sprint 27, S27-1) its own steps with the second at which each appears in it. */
+export interface Recording { label: string; path: string; steps?: Step[] }
+export interface Step { at: number; text: string }
+
+/**
+ * A recording's steps, from the test's attachment (base64 JSON), checked as untrusted input: at most
+ * 200 steps, each with a time from 0 to an hour (to a tenth of a second) and text cut to 300
+ * characters; anything else is dropped. Undefined when there is nothing usable.
+ */
+export function readSteps(body: unknown): Step[] | undefined {
+  if (typeof body !== 'string' || body.length > 200_000) return undefined;
+  let data: unknown;
+  try { data = JSON.parse(Buffer.from(body, 'base64').toString('utf8')); } catch { return undefined; }
+  if (!Array.isArray(data)) return undefined;
+  const steps = data.slice(0, 200).flatMap((x): Step[] => {
+    const at = (x as Record<string, unknown>)?.at;
+    const text = (x as Record<string, unknown>)?.text;
+    if (typeof at !== 'number' || !Number.isFinite(at) || at < 0 || at > 3600 || typeof text !== 'string' || !text.trim()) return [];
+    return [{ at: Math.round(at * 10) / 10, text: text.slice(0, 300) }];
+  }).sort((a, b) => a.at - b.at);
+  return steps.length ? steps : undefined;
+}
+
+/** A time in a recording, as minutes and seconds. */
+export const clock = (at: number) => `${Math.floor(at / 60)}:${String(Math.floor(at % 60)).padStart(2, '0')}`;
+
 export interface Build { sha: string; run: string; target: string; branch: string; at: string }
 
 type Result = Record<string, unknown>;
@@ -56,10 +82,16 @@ export function readRun(report: Result, root: string, target?: string): RunTest[
         const annotations = [...((t.annotations as Result[]) ?? []), ...results.flatMap((r) => (r.annotations as Result[]) ?? [])];
         const last = results[results.length - 1];
         const failed = results.some((r) => r.status !== 'passed' && r.status !== 'skipped');
-        const recordings = ((last.attachments as Result[]) ?? [])
+        const attachments = (last.attachments as Result[]) ?? [];
+        const recordings = attachments
           .filter((a) => a.contentType === 'video/webm' && typeof a.path === 'string')
           .map((a) => ({ label: String(a.name).replace(/^recording: /, ''), path: insideRoot(root, String(a.path).replace(/^.*?e2e-results\//, '')) }))
-          .filter((r): r is { label: string; path: string } => r.path !== null);
+          .filter((r): r is { label: string; path: string } => r.path !== null)
+          .map((r): Recording => {
+            const file = attachments.find((a) => a.name === `steps: ${r.label}` && a.contentType === 'application/json');
+            const steps = file ? readSteps(file.body) : undefined;
+            return steps ? { ...r, steps } : r;
+          });
         const err = ((last.errors as Result[]) ?? [])[0] as Result | undefined;
         out.push({
           title: String(spec.title),
@@ -132,8 +164,12 @@ export function renderHtml(sprints: SprintCases[], tests: RunTest[], buildOrBuil
       own.forEach((t) => shown.add(t));
       const clips = own.map((t) => `<figure class="clip"><figcaption><strong>${esc(t.title)}</strong>${t.target ? ` <span class="dur">(${esc(t.target)})</span>` : ''}${t.realAi ? ' <span class="chip hand">Real AI model</span>' : ''} <span class="chip ${t.status}">${t.status === 'passed' ? 'Passed' : 'Failed'}</span> <span class="dur">${(t.durationMs / 1000).toFixed(1)} s</span></figcaption>`
         + (t.error ? `<p class="err">${esc(t.error)}</p>` : '')
-        + `<div class="vids">${t.recordings.map((r) => `<div class="vid"><video src="${esc(video(r.path))}" controls preload="metadata" muted playsinline></video><span>${esc(r.label)}</span></div>`).join('')}</div>`
-        + (t.steps.length ? `<details><summary>Steps (${t.steps.length})</summary><ol>${t.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : '')
+        + `<div class="vids">${t.recordings.map((r) => `<div class="vid"><video src="${esc(video(r.path))}" controls preload="metadata" muted playsinline></video><span>${esc(r.label)}</span>`
+          + (r.steps ? `<ol class="jumps" aria-label="Steps in ${esc(r.label)}'s recording">${r.steps.map((x) => `<li><button type="button" class="jump" data-at="${x.at}"><span class="t">${clock(x.at)}</span> ${esc(x.text)}</button></li>`).join('')}</ol>` : '')
+          + '</div>').join('')}</div>`
+        // Sprint 27 (S27-1): results from before the times were recorded keep the plain list, and say so.
+        + (t.steps.length && t.recordings.some((r) => !r.steps)
+          ? `<details><summary>Steps (${t.steps.length})</summary>${t.recordings.length ? '<p class="dur">Times were not recorded for these recordings, so the steps cannot move the video.</p>' : ''}<ol>${t.steps.map((x) => `<li>${esc(x)}</li>`).join('')}</ol></details>` : '')
         + '</figure>').join('');
       return `<section class="story"><h3><span class="sid">${esc(st.id)}</span> ${esc(st.title)}</h3><p class="for">${esc(st.forTheUser)}</p>`
         + (rows ? `<div class="tbl"><table><thead><tr><th>Case</th><th>What was checked</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table></div>` : '')
@@ -189,6 +225,12 @@ tr:last-child td { border-bottom:0; }
 .err { margin:0; color:var(--bad); font-family:var(--mono); font-size:.8rem; overflow-wrap:anywhere; }
 .vids { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }
 .vid { display:grid; gap:4px; min-width:0; } .vid span { font-size:.82rem; color:var(--muted); }
+/* Sprint 27 (S27-1): a recording's steps, each a button that moves the video to it. */
+.jumps { list-style:none; margin:4px 0 0; padding:0; display:grid; gap:2px; max-height:16rem; overflow-y:auto; }
+.jump { all:unset; box-sizing:border-box; display:flex; gap:8px; width:100%; padding:4px 6px; border-radius:6px; cursor:pointer;
+  font:inherit; font-size:.85rem; line-height:1.35; color:var(--ink); overflow-wrap:anywhere; }
+.jump:hover { background:var(--info-bg); } .jump:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.jump .t { font-family:var(--mono); font-size:.78rem; color:var(--accent); flex:none; padding-top:1px; }
 video { width:100%; max-width:100%; border-radius:8px; border:1px solid var(--line); background:var(--bg); }
 details summary { cursor:pointer; color:var(--accent); font-size:.9rem; }
 details ol { margin:6px 0 0; padding-left:22px; color:var(--muted); font-size:.9rem; }
@@ -248,6 +290,16 @@ const SPEED_SCRIPT = `
     try { localStorage.setItem('demo-playback-rate', String(rate)); } catch (e) {}
     apply();
   });
+  // Sprint 27 (S27-1): a step moves its own recording to half a second before the step, and plays it.
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('.jump');
+    const v = b && b.closest('.vid') && b.closest('.vid').querySelector('video');
+    if (!v) return;
+    const at = Number(b.dataset.at);
+    v.currentTime = Math.max(0, at - 0.5);
+    v.playbackRate = rate;
+    v.play().catch(() => {});
+  });
   document.querySelectorAll('video').forEach((v) => {
     v.addEventListener('loadedmetadata', apply);
     v.addEventListener('play', () => { v.playbackRate = rate; });
@@ -281,6 +333,12 @@ export function renderMarkdown(sprints: SprintCases[], tests: RunTest[], buildOr
           r.steps.forEach((x, i) => lines.push(`${i + 1}. ${x}`));
           if (r.note) lines.push(r.note);
           lines.push('');
+        }
+        // Sprint 27 (S27-1): each recording's steps with their times, for reading beside the page.
+        for (const t of tests.filter((x) => x.cases.some((id) => cases.some((c) => c.id === id)))) {
+          for (const r of t.recordings.filter((x) => x.steps)) {
+            lines.push(`**Recording: ${t.title}, ${r.label}.** ${r.steps!.map((x) => `${clock(x.at)} ${x.text}`).join('; ')}.`, '');
+          }
         }
       }
     }

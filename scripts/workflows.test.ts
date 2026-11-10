@@ -28,18 +28,18 @@ describe('the actions the workflows run (S27-2)', () => {
     expect(uses.length).toBeGreaterThanOrEqual(17);
   });
 
-  it.each(uses)('$where is pinned to a full commit, with its release in a comment', ({ value }) => {
+  it.each(uses)('S27-2 1: $where is pinned to a full commit, with its release in a comment', ({ value }) => {
     expect(value).toMatch(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(\/[^@\s]+)?@[0-9a-f]{40}\s+#\s+v\d+(\.\d+){0,2}$/);
   });
 
-  it.each(uses)('$where is on a release that runs on Node.js 24', ({ value }) => {
+  it.each(uses)('S27-2 2: $where is on a release that runs on Node.js 24', ({ value }) => {
     const [name] = value.split('@');
     const release = /#\s+v(\d+)/.exec(value);
     expect(NODE24_FROM[name], `${name} is not in the list of checked actions`).toBeDefined();
     expect(Number(release?.[1])).toBeGreaterThanOrEqual(NODE24_FROM[name]);
   });
 
-  it('pins each action to the same commit everywhere', () => {
+  it('S27-2 1: pins each action to the same commit everywhere', () => {
     const byName = new Map<string, Set<string>>();
     for (const { value } of uses) {
       const [name, rest] = value.split('@');
@@ -48,7 +48,7 @@ describe('the actions the workflows run (S27-2)', () => {
     for (const [name, pins] of byName) expect([...pins], name).toHaveLength(1);
   });
 
-  it('installs the Supabase CLI at the version the project tests with, in every job', () => {
+  it('S27-2 5: installs the Supabase CLI at the version the project tests with, in every job', () => {
     const cli = uses.filter((u) => u.value.startsWith('supabase/setup-cli@')).length;
     const versions = workflows.flatMap(({ text }) => [...text.matchAll(/supabase\/setup-cli@[^\n]+\n\s+with:\n\s+version:\s*(\S+)/g)].map((m) => m[1]));
     expect(versions).toHaveLength(cli);
@@ -69,7 +69,7 @@ describe('the production job builds without a cache (Rory, Q2)', () => {
     expect(job).toMatch(/actions\/setup-node@/);
   });
 
-  it('turns setup-node\'s cache off and asks for none', () => {
+  it('S27-2 4: turns setup-node\'s cache off and asks for none', () => {
     expect(job).not.toMatch(/^\s+cache:/m);
     const step = job.slice(job.indexOf('actions/setup-node@')).split(/\n\s+- /)[0];
     expect(step).toMatch(/^\s+package-manager-cache:\s*false\s*$/m);

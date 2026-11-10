@@ -173,7 +173,7 @@ describe('S27-3 6: the cleaning function is not callable through the API', () =>
   });
 });
 
-describe('S27-3 (Rory, Q3): the migration refuses if the cleaning would change an entry already held', () => {
+describe('S27-3 6 (Rory, Q3): the migration refuses if the cleaning would change an entry already held', () => {
   const migration = readFileSync('supabase/migrations/20261114100000_clean_whitespace.sql', 'utf8');
   const check = migration.slice(migration.indexOf('DO $$'), migration.indexOf('END $$;') + 'END $$;'.length);
 
