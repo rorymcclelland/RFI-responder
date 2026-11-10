@@ -9,7 +9,7 @@
  * Rule 1: a case takes "passed" or "failed" only from a browser test that ran and named it; anything
  * else is shown as checked another way (with how), by hand (with why), or not checked, in red.
  */
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve, sep } from 'node:path';
 import { SPRINTS, type Case, type SprintCases } from '../e2e/cases';
 import { SETUP, reproduce } from './reproduce';
@@ -38,18 +38,47 @@ export interface Step { at: number; text: string }
  * 200 steps, each with a time from 0 to an hour (to a tenth of a second) and text cut to 300
  * characters; anything else is dropped. Undefined when there is nothing usable.
  */
-export function readSteps(body: unknown): Step[] | undefined {
+export function readSteps(body: unknown, duration?: number): Step[] | undefined {
   if (typeof body !== 'string' || body.length > 200_000) return undefined;
   let data: unknown;
   try { data = JSON.parse(Buffer.from(body, 'base64').toString('utf8')); } catch { return undefined; }
   if (!Array.isArray(data)) return undefined;
   const steps = data.slice(0, 200).flatMap((x): Step[] => {
-    const at = (x as Record<string, unknown>)?.at;
+    const toEnd = (x as Record<string, unknown>)?.toEnd;
+    // Counted back from the recording's end when its length is known (a recording can start late).
+    const at = duration !== undefined && typeof toEnd === 'number' && Number.isFinite(toEnd) && toEnd >= 0
+      ? Math.max(0, duration - toEnd) : (x as Record<string, unknown>)?.at;
     const text = (x as Record<string, unknown>)?.text;
     if (typeof at !== 'number' || !Number.isFinite(at) || at < 0 || at > 3600 || typeof text !== 'string' || !text.trim()) return [];
     return [{ at: Math.round(at * 10) / 10, text: text.replace(/\s+/g, ' ').trim().slice(0, 300) }];
   }).sort((a, b) => a.at - b.at);
   return steps.length ? steps : undefined;
+}
+
+/**
+ * A WebM recording's length in seconds, from its Segment Info (Duration, scaled by TimecodeScale), or
+ * undefined if the file cannot be read or gives none (Sprint 27, S27-1). Reads only the file's start.
+ */
+export function webmDuration(path: string): number | undefined {
+  let b: Buffer;
+  try {
+    const fd = openSync(path, 'r');
+    try { b = Buffer.alloc(4096); b = b.subarray(0, readSync(fd, b, 0, 4096, 0)); } finally { closeSync(fd); }
+  } catch { return undefined; }
+  return webmDurationOf(b);
+}
+export function webmDurationOf(b: Buffer): number | undefined {
+  const i = b.indexOf(Buffer.from([0x44, 0x89]));
+  if (i < 0 || i + 11 > b.length) return undefined;
+  const raw = b[i + 2] === 0x88 ? b.readDoubleBE(i + 3) : b[i + 2] === 0x84 ? b.readFloatBE(i + 3) : NaN;
+  let scale = 1_000_000;
+  const j = b.indexOf(Buffer.from([0x2a, 0xd7, 0xb1]));
+  if (j >= 0 && (b[j + 3] & 0xf8) === 0x80) {
+    const n = b[j + 3] & 0x07;
+    if (n >= 1 && n <= 6 && j + 4 + n <= b.length) scale = b.readUIntBE(j + 4, n);
+  }
+  const seconds = (raw * scale) / 1e9;
+  return Number.isFinite(seconds) && seconds > 0 && seconds <= 3600 ? seconds : undefined;
 }
 
 /** Text from the results as plain Markdown: one line, its markup characters escaped (security review, Low). */
@@ -92,7 +121,7 @@ export function readRun(report: Result, root: string, target?: string): RunTest[
           .filter((r): r is { label: string; path: string } => r.path !== null)
           .map((r): Recording => {
             const file = attachments.find((a) => a.name === `steps: ${r.label}` && a.contentType === 'application/json');
-            const steps = file ? readSteps(file.body) : undefined;
+            const steps = file ? readSteps(file.body, webmDuration(r.path)) : undefined;
             return steps ? { ...r, steps } : r;
           });
         const err = ((last.errors as Result[]) ?? [])[0] as Result | undefined;

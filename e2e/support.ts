@@ -233,6 +233,9 @@ export const test = base.extend<{ recordings: void }>({
     await use();
     for (const { context, label } of opened.splice(0)) {
       const pages = context.pages();
+      // Sprint 27 (S27-1): a recording can start a second or two after its page is made (slow runners),
+      // but it ends when the session closes, so each step's time is also kept as seconds before the end.
+      const closedAt = Date.now();
       await context.close();
       for (const [i, p] of pages.entries()) {
         const path = await p.video()?.path().catch(() => null);
@@ -240,7 +243,8 @@ export const test = base.extend<{ recordings: void }>({
         const name = `${label}${pages.length > 1 ? ` ${i + 1}` : ''}`;
         await testInfo.attach(`recording: ${name}`, { path, contentType: 'video/webm' });
         // Sprint 27 (S27-1): the recording's own steps, each with its time, beside it.
-        const steps = stepTimes.get(p);
+        const start = pageStarts.get(p);
+        const steps = stepTimes.get(p)?.map((s) => ({ ...s, toEnd: start === undefined ? undefined : Math.round(((closedAt - start) / 1000 - s.at) * 10) / 10 }));
         if (steps?.length) await testInfo.attach(`steps: ${name}`, { body: JSON.stringify(steps), contentType: 'application/json' });
       }
     }

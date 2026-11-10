@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { insideRoot, readRun, renderHtml, renderMarkdown, verdict, type Build, type RunTest } from './demo-page';
+import { insideRoot, readRun, readSteps, renderHtml, renderMarkdown, verdict, webmDurationOf, type Build, type RunTest } from './demo-page';
 import { SPRINTS, type SprintCases } from '../e2e/cases';
 
 const build: Build = { sha: 'abcdef1234567', run: 'https://github.com/x/y/actions/runs/1', target: 'local', branch: 'sprint-20', at: '2026-11-02T15:00:00Z' };
@@ -172,5 +172,23 @@ describe('each recording\'s steps, with their times (S27-1)', () => {
     const html = renderHtml([sprint], [t], [build], (p) => p);
     expect(html).toContain('class="jump"');
     expect(html).not.toContain('Times were not recorded');
+  });
+
+  it('S27-1 3: reads a recording\'s length from its WebM header, with or without its time scale', () => {
+    const dur = Buffer.alloc(8); dur.writeDoubleBE(7640);
+    const head = Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0x2a, 0xd7, 0xb1, 0x83, 0x0f, 0x42, 0x40, 0x44, 0x89, 0x88]);
+    expect(webmDurationOf(Buffer.concat([head, dur, Buffer.alloc(8)]))).toBeCloseTo(7.64);
+    expect(webmDurationOf(Buffer.concat([Buffer.from([0x44, 0x89, 0x88]), dur, Buffer.alloc(8)]))).toBeCloseTo(7.64);
+    expect(webmDurationOf(Buffer.from('not a recording'))).toBeUndefined();
+    const huge = Buffer.alloc(8); huge.writeDoubleBE(1e12);
+    expect(webmDurationOf(Buffer.concat([Buffer.from([0x44, 0x89, 0x88]), huge, Buffer.alloc(8)]))).toBeUndefined();
+  });
+
+  it('S27-1 3: times are counted back from the recording\'s end when its length is known, as a recording can start late', () => {
+    const body = Buffer.from(JSON.stringify([{ at: 4.8, toEnd: 4.9, text: 'Home' }, { at: 8.1, toEnd: 1.6, text: 'Knowledge' }])).toString('base64');
+    expect(readSteps(body, 7.64)).toEqual([{ at: 2.7, text: 'Home' }, { at: 6, text: 'Knowledge' }]);
+    expect(readSteps(body)).toEqual([{ at: 4.8, text: 'Home' }, { at: 8.1, text: 'Knowledge' }]);
+    const early = Buffer.from(JSON.stringify([{ at: 0, toEnd: 9, text: 'Before the first frame' }])).toString('base64');
+    expect(readSteps(early, 7.64)).toEqual([{ at: 0, text: 'Before the first frame' }]);
   });
 });
