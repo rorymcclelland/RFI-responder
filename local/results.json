@@ -1,0 +1,3541 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/22.23.4/x64/bin/node",
+      "/home/runner/work/RFI-responder/RFI-responder/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/home/runner/work/RFI-responder/RFI-responder/playwright.config.ts",
+    "rootDir": "/home/runner/work/RFI-responder/RFI-responder/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/home/runner/work/RFI-responder/RFI-responder/e2e/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/rorymcclelland/RFI-responder/commit/5994464735190d04ecdb37ce159186ebd343842e",
+        "commitHash": "5994464735190d04ecdb37ce159186ebd343842e",
+        "buildHref": "https://github.com/rorymcclelland/RFI-responder/actions/runs/42856414660"
+      },
+      "gitCommit": {
+        "shortHash": "5994464",
+        "hash": "5994464735190d04ecdb37ce159186ebd343842e",
+        "subject": "Sprint 27 demo: evidence in the case list, summary and status record",
+        "body": "Sprint 27 demo: evidence in the case list, summary and status record\n\nThe hand cases checked at the demo, from 4351a4b's results (CI and staging green on that commit): steps match captions in every recording (S27-1 1, 4), the built page jumps 2.5 s early at the chosen speed and works by keyboard at 390 px (2, 7), eight steps' captions land within the lead (3, not met as agreed: Rory chose approximate times), the browser tests' time within main's range (8), no Node.js 20 annotation (S27-2 2). S27-2 4 waits for the production run. Demo summary in docs/testing/sprint-27-demo.md; status record awaiting sign-off.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01WPpy6XYfi9BKBXrsw4t5HH\n",
+        "author": {
+          "name": "Rory McClelland",
+          "email": "email@mcclelland.info",
+          "time": 1794328654000
+        },
+        "committer": {
+          "name": "Rory McClelland",
+          "email": "email@mcclelland.info",
+          "time": 1794328654000
+        },
+        "branch": "sprint-27"
+      },
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/rorymcclelland/RFI-responder/commit/5994464735190d04ecdb37ce159186ebd343842e",
+            "commitHash": "5994464735190d04ecdb37ce159186ebd343842e",
+            "buildHref": "https://github.com/rorymcclelland/RFI-responder/actions/runs/42856414660"
+          },
+          "gitCommit": {
+            "shortHash": "5994464",
+            "hash": "5994464735190d04ecdb37ce159186ebd343842e",
+            "subject": "Sprint 27 demo: evidence in the case list, summary and status record",
+            "body": "Sprint 27 demo: evidence in the case list, summary and status record\n\nThe hand cases checked at the demo, from 4351a4b's results (CI and staging green on that commit): steps match captions in every recording (S27-1 1, 4), the built page jumps 2.5 s early at the chosen speed and works by keyboard at 390 px (2, 7), eight steps' captions land within the lead (3, not met as agreed: Rory chose approximate times), the browser tests' time within main's range (8), no Node.js 20 annotation (S27-2 2). S27-2 4 waits for the production run. Demo summary in docs/testing/sprint-27-demo.md; status record awaiting sign-off.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01WPpy6XYfi9BKBXrsw4t5HH\n",
+            "author": {
+              "name": "Rory McClelland",
+              "email": "email@mcclelland.info",
+              "time": 1794328654000
+            },
+            "committer": {
+              "name": "Rory McClelland",
+              "email": "email@mcclelland.info",
+              "time": 1794328654000
+            },
+            "branch": "sprint-27"
+          },
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/runner/work/RFI-responder/RFI-responder/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "e2e-results/results.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "e2e-results/report",
+          "open": "never"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "sprint-19.spec.ts",
+      "file": "sprint-19.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Home, as an admin",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8463,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1531
+                    },
+                    {
+                      "title": "Everyone lands on Home: what needs you, your responses, what we know",
+                      "duration": 1514
+                    },
+                    {
+                      "title": "For admins: the answers waiting for review, as one line",
+                      "duration": 1510
+                    },
+                    {
+                      "title": "It opens Knowledge, All answers, with those answers filtered",
+                      "duration": 1538
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:41:01.461Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Home-as-an-admin/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Home-as-an-admin/attachments/recording-Sarah-Chen-c1b9e67b87315421ed9ec7c25c1e60efc80d79ce.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6MywidGV4dCI6IkV2ZXJ5b25lIGxhbmRzIG9uIEhvbWU6IHdoYXQgbmVlZHMgeW91LCB5b3VyIHJlc3BvbnNlcywgd2hhdCB3ZSBrbm93In0seyJhdCI6NC42LCJ0ZXh0IjoiRm9yIGFkbWluczogdGhlIGFuc3dlcnMgd2FpdGluZyBmb3IgcmV2aWV3LCBhcyBvbmUgbGluZSJ9LHsiYXQiOjYuNCwidGV4dCI6Ikl0IG9wZW5zIEtub3dsZWRnZSwgQWxsIGFuc3dlcnMsIHdpdGggdGhvc2UgYW5zd2VycyBmaWx0ZXJlZCJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-ba4b4bbb00ef1520530e",
+          "file": "sprint-19.spec.ts",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "A question for the member, sent to the owner, and the owner uses their answer",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 2"
+                },
+                {
+                  "type": "case",
+                  "description": "S19 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21657,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1515
+                    },
+                    {
+                      "title": "Sarah Chen assigns \"Do you give staff paid volunteering days each year?\" to Tom Richardson",
+                      "duration": 1524
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1543
+                    },
+                    {
+                      "title": "Tom Richardson lands on Home: the question is waiting for them",
+                      "duration": 1534
+                    },
+                    {
+                      "title": "Assignments opens on that question, with everything needed to answer it",
+                      "duration": 1524
+                    },
+                    {
+                      "title": "Notes for the owner",
+                      "duration": 1511
+                    },
+                    {
+                      "title": "The answer, sent to the owner to decide",
+                      "duration": 1511
+                    },
+                    {
+                      "title": "Sarah Chen sees it on Home, under Answered by colleagues",
+                      "duration": 1530
+                    },
+                    {
+                      "title": "It opens the response at that question, still to do, with their answer and Use their answer",
+                      "duration": 1534
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:41:10.014Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 2"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S19 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/attachments/recording-Sarah-Chen-3f9fbf7dbb34b5f6db3b907681a368a006ce3714.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My4xLCJ0ZXh0IjoiU2FyYWggQ2hlbiBhc3NpZ25zIFwiRG8geW91IGdpdmUgc3RhZmYgcGFpZCB2b2x1bnRlZXJpbmcgZGF5cyBlYWNoIHllYXI/XCIgdG8gVG9tIFJpY2hhcmRzb24ifSx7ImF0IjoxNi42LCJ0ZXh0IjoiU2FyYWggQ2hlbiBzZWVzIGl0IG9uIEhvbWUsIHVuZGVyIEFuc3dlcmVkIGJ5IGNvbGxlYWd1ZXMifSx7ImF0IjoxOC42LCJ0ZXh0IjoiSXQgb3BlbnMgdGhlIHJlc3BvbnNlIGF0IHRoYXQgcXVlc3Rpb24sIHN0aWxsIHRvIGRvLCB3aXRoIHRoZWlyIGFuc3dlciBhbmQgVXNlIHRoZWlyIGFuc3dlciJ9XQ=="
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-question-for-t-9b0da-the-owner-uses-their-answer/attachments/recording-Tom-Richardson-caed75df0c36b5224f57e3548204f2713235e424.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuMSwidGV4dCI6IlRvbSBSaWNoYXJkc29uIGxhbmRzIG9uIEhvbWU6IHRoZSBxdWVzdGlvbiBpcyB3YWl0aW5nIGZvciB0aGVtIn0seyJhdCI6NC44LCJ0ZXh0IjoiQXNzaWdubWVudHMgb3BlbnMgb24gdGhhdCBxdWVzdGlvbiwgd2l0aCBldmVyeXRoaW5nIG5lZWRlZCB0byBhbnN3ZXIgaXQifSx7ImF0Ijo2LjQsInRleHQiOiJOb3RlcyBmb3IgdGhlIG93bmVyIn0seyJhdCI6OC41LCJ0ZXh0IjoiVGhlIGFuc3dlciwgc2VudCB0byB0aGUgb3duZXIgdG8gZGVjaWRlIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-157be60f201fac8629fa",
+          "file": "sprint-19.spec.ts",
+          "line": 80,
+          "column": 1
+        },
+        {
+          "title": "Hand back, with a note",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19358,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "Sarah Chen assigns \"What compliance certifications does your organization hold?\" to Tom Richardson",
+                      "duration": 1520
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1549
+                    },
+                    {
+                      "title": "The question has a draft, its confidence and checker, and the answers it was drawn from",
+                      "duration": 1539
+                    },
+                    {
+                      "title": "Tom Richardson is not the right person: Hand back, with a reason of at least 5 characters",
+                      "duration": 1533
+                    },
+                    {
+                      "title": "Sarah Chen sees it handed back, on Home and on the question",
+                      "duration": 1533
+                    },
+                    {
+                      "title": "The answers it was drawn from open on their own page under Knowledge",
+                      "duration": 1535
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:41:31.679Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/attachments/recording-Sarah-Chen-50eb62217831cd138a4498ec1bfabe9176a6d8e8.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My4xLCJ0ZXh0IjoiU2FyYWggQ2hlbiBhc3NpZ25zIFwiV2hhdCBjb21wbGlhbmNlIGNlcnRpZmljYXRpb25zIGRvZXMgeW91ciBvcmdhbml6YXRpb24gaG9sZD9cIiB0byBUb20gUmljaGFyZHNvbiJ9LHsiYXQiOjE0LjQsInRleHQiOiJTYXJhaCBDaGVuIHNlZXMgaXQgaGFuZGVkIGJhY2ssIG9uIEhvbWUgYW5kIG9uIHRoZSBxdWVzdGlvbiJ9XQ=="
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Hand-back-with-a-note/attachments/recording-Tom-Richardson-4277631befaf713b80cb64aae38afc15d359c51e.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuNiwidGV4dCI6IlRoZSBxdWVzdGlvbiBoYXMgYSBkcmFmdCwgaXRzIGNvbmZpZGVuY2UgYW5kIGNoZWNrZXIsIGFuZCB0aGUgYW5zd2VycyBpdCB3YXMgZHJhd24gZnJvbSJ9LHsiYXQiOjUuMiwidGV4dCI6IlRvbSBSaWNoYXJkc29uIGlzIG5vdCB0aGUgcmlnaHQgcGVyc29uOiBIYW5kIGJhY2ssIHdpdGggYSByZWFzb24gb2YgYXQgbGVhc3QgNSBjaGFyYWN0ZXJzIn0seyJhdCI6MTAuMiwidGV4dCI6IlRoZSBhbnN3ZXJzIGl0IHdhcyBkcmF3biBmcm9tIG9wZW4gb24gdGhlaXIgb3duIHBhZ2UgdW5kZXIgS25vd2xlZGdlIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-f957f3d549e0d71c0741",
+          "file": "sprint-19.spec.ts",
+          "line": 136,
+          "column": 1
+        },
+        {
+          "title": "Approve, and when the owner was quicker",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 29370,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1512
+                    },
+                    {
+                      "title": "Sarah Chen assigns \"What endpoint protection solutions are deployed?\" to Tom Richardson",
+                      "duration": 1570
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1534
+                    },
+                    {
+                      "title": "Meanwhile Sarah Chen approves the same question",
+                      "duration": 1548
+                    },
+                    {
+                      "title": "Tom Richardson, on the screen opened before, presses Approve: nothing is overwritten",
+                      "duration": 1526
+                    },
+                    {
+                      "title": "A question nobody else is deciding: Tom Richardson writes the answer and approves it",
+                      "duration": 1534
+                    },
+                    {
+                      "title": "Sarah Chen assigns \"フィッシング攻撃をどのように検知し、対応していますか？\" to Tom Richardson",
+                      "duration": 1518
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:41:51.043Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/test-finished-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/attachments/recording-Sarah-Chen-6fdda7b262d1d8a3aa4535dcf1faecd4501ae12e.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My4zLCJ0ZXh0IjoiU2FyYWggQ2hlbiBhc3NpZ25zIFwiV2hhdCBlbmRwb2ludCBwcm90ZWN0aW9uIHNvbHV0aW9ucyBhcmUgZGVwbG95ZWQ/XCIgdG8gVG9tIFJpY2hhcmRzb24ifSx7ImF0IjoxMC4yLCJ0ZXh0IjoiTWVhbndoaWxlIFNhcmFoIENoZW4gYXBwcm92ZXMgdGhlIHNhbWUgcXVlc3Rpb24ifSx7ImF0IjoxOSwidGV4dCI6IkEgcXVlc3Rpb24gbm9ib2R5IGVsc2UgaXMgZGVjaWRpbmc6IFRvbSBSaWNoYXJkc29uIHdyaXRlcyB0aGUgYW5zd2VyIGFuZCBhcHByb3ZlcyBpdCJ9LHsiYXQiOjIwLjUsInRleHQiOiJTYXJhaCBDaGVuIGFzc2lnbnMgXCLjg5XjgqPjg4Pjgrfjg7PjgrDmlLvmkoPjgpLjganjga7jgojjgYbjgavmpJznn6XjgZfjgIHlr77lv5zjgZfjgabjgYTjgb7jgZnjgYvvvJ9cIiB0byBUb20gUmljaGFyZHNvbiJ9XQ=="
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-Approve-and-when-the-owner-was-quicker/attachments/recording-Tom-Richardson-38c2cbb10153bd8b7afabbf41a1ac26715655c6e.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjcuOSwidGV4dCI6IlRvbSBSaWNoYXJkc29uLCBvbiB0aGUgc2NyZWVuIG9wZW5lZCBiZWZvcmUsIHByZXNzZXMgQXBwcm92ZTogbm90aGluZyBpcyBvdmVyd3JpdHRlbiJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-7bb42455a188d237da03",
+          "file": "sprint-19.spec.ts",
+          "line": 177,
+          "column": 1
+        },
+        {
+          "title": "On a phone, and the Sent list",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 6"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16364,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1523
+                    },
+                    {
+                      "title": "Sarah Chen assigns \"What is the annual subscription price for 250 users?\" to Tom Richardson",
+                      "duration": 1524
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1556
+                    },
+                    {
+                      "title": "At phone width Home stacks and nothing scrolls sideways",
+                      "duration": 1515
+                    },
+                    {
+                      "title": "Assignments stacks too: the list, then the question",
+                      "duration": 1513
+                    },
+                    {
+                      "title": "Sent lists the questions you assigned, with their stages, and no buttons to move them on by hand",
+                      "duration": 1536
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:42:20.421Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 6"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/attachments/recording-Sarah-Chen-044708e536c78a431631ddf5ea71d75d2b0f3efe.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My4zLCJ0ZXh0IjoiU2FyYWggQ2hlbiBhc3NpZ25zIFwiV2hhdCBpcyB0aGUgYW5udWFsIHN1YnNjcmlwdGlvbiBwcmljZSBmb3IgMjUwIHVzZXJzP1wiIHRvIFRvbSBSaWNoYXJkc29uIn0seyJhdCI6MTMuNiwidGV4dCI6IlNlbnQgbGlzdHMgdGhlIHF1ZXN0aW9ucyB5b3UgYXNzaWduZWQsIHdpdGggdGhlaXIgc3RhZ2VzLCBhbmQgbm8gYnV0dG9ucyB0byBtb3ZlIHRoZW0gb24gYnkgaGFuZCJ9XQ=="
+                    },
+                    {
+                      "name": "recording: Tom Richardson, phone",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-On-a-phone-and-the-Sent-list/attachments/recording-Tom-Richardson-phone-5887becd7c68c7daab3b9e3ca18524c8589a0cb2.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson, phone",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAuMSwidGV4dCI6IlRvbSBSaWNoYXJkc29uIHNpZ25zIGluIn0seyJhdCI6My4yLCJ0ZXh0IjoiQXQgcGhvbmUgd2lkdGggSG9tZSBzdGFja3MgYW5kIG5vdGhpbmcgc2Nyb2xscyBzaWRld2F5cyJ9LHsiYXQiOjUuMiwidGV4dCI6IkFzc2lnbm1lbnRzIHN0YWNrcyB0b286IHRoZSBsaXN0LCB0aGVuIHRoZSBxdWVzdGlvbiJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-f3e9db14cad287bdaad6",
+          "file": "sprint-19.spec.ts",
+          "line": 226,
+          "column": 1
+        },
+        {
+          "title": "A member who was not assigned cannot see or decide the question",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S19 8"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5950,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Maya Patel signs in",
+                      "duration": 1514
+                    },
+                    {
+                      "title": "Maya was assigned nothing on Bluefin: Home does not list it, and the card has no decision buttons",
+                      "duration": 1534
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:42:36.792Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S19 8"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-member-who-was-7b195--see-or-decide-the-question/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Maya Patel",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-19-A-member-who-was-7b195--see-or-decide-the-question/attachments/recording-Maya-Patel-25abf870b53454cd8acf529030fb8f738bfa0241.webm"
+                    },
+                    {
+                      "name": "steps: Maya Patel",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJNYXlhIFBhdGVsIHNpZ25zIGluIn0seyJhdCI6My4zLCJ0ZXh0IjoiTWF5YSB3YXMgYXNzaWduZWQgbm90aGluZyBvbiBCbHVlZmluOiBIb21lIGRvZXMgbm90IGxpc3QgaXQsIGFuZCB0aGUgY2FyZCBoYXMgbm8gZGVjaXNpb24gYnV0dG9ucyJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c47c5b93a0706e587733-4b694c536e1e4164af7b",
+          "file": "sprint-19.spec.ts",
+          "line": 261,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-21.spec.ts",
+      "file": "sprint-21.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Ask it a question: the real pipeline on staging, the fallback locally",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-4 2"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-3 2"
+                },
+                {
+                  "type": "note",
+                  "description": "Locally the providers are off: calls 0 before, 0 after, not compared"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9463,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "Before asking: the calls recorded as Asking the knowledge base this month",
+                      "duration": 1526
+                    },
+                    {
+                      "title": "The same question with every AI provider switched off: the fallback answer",
+                      "duration": 1521
+                    },
+                    {
+                      "title": "After asking: the ask is recorded under Spend by use",
+                      "duration": 1512
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:42:42.763Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-4 2"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-3 2"
+                    },
+                    {
+                      "type": "note",
+                      "description": "Locally the providers are off: calls 0 before, 0 after, not compared"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Ask-it-a-questio-db637-taging-the-fallback-locally/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Ask-it-a-questio-db637-taging-the-fallback-locally/attachments/recording-Sarah-Chen-63fcf465e7380e5d4d2880d016796c11e91c5499.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My40LCJ0ZXh0IjoiQmVmb3JlIGFza2luZzogdGhlIGNhbGxzIHJlY29yZGVkIGFzIEFza2luZyB0aGUga25vd2xlZGdlIGJhc2UgdGhpcyBtb250aCJ9LHsiYXQiOjUuNCwidGV4dCI6IlRoZSBzYW1lIHF1ZXN0aW9uIHdpdGggZXZlcnkgQUkgcHJvdmlkZXIgc3dpdGNoZWQgb2ZmOiB0aGUgZmFsbGJhY2sgYW5zd2VyIn0seyJhdCI6Ny40LCJ0ZXh0IjoiQWZ0ZXIgYXNraW5nOiB0aGUgYXNrIGlzIHJlY29yZGVkIHVuZGVyIFNwZW5kIGJ5IHVzZSJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-3ac9142945255c4cdd1a",
+          "file": "sprint-21.spec.ts",
+          "line": 30,
+          "column": 1
+        },
+        {
+          "title": "Nothing to download or mark as sent while questions are still to do",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-1 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5620,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "Bluefin still has questions to do: no download, no Mark as sent, and the reason",
+                      "duration": 1522
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:42:52.235Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-1 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Nothing-to-downl-49abe-e-questions-are-still-to-do/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Nothing-to-downl-49abe-e-questions-are-still-to-do/attachments/recording-Sarah-Chen-e2e650bbe6c552686fb5d57caced0d8057eb452a.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My4yLCJ0ZXh0IjoiQmx1ZWZpbiBzdGlsbCBoYXMgcXVlc3Rpb25zIHRvIGRvOiBubyBkb3dubG9hZCwgbm8gTWFyayBhcyBzZW50LCBhbmQgdGhlIHJlYXNvbiJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-ceea179d9b7a85e1b4bf",
+          "file": "sprint-21.spec.ts",
+          "line": 85,
+          "column": 1
+        },
+        {
+          "title": "A member who does not own the response sees neither Download nor Mark as sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-1 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10780,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1550
+                    },
+                    {
+                      "title": "Tom Richardson opens Larkspur, which they do not own",
+                      "duration": 1546
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:42:57.870Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-1 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/attachments/recording-Sarah-Chen-821d0d3abcf5a8edca3e4a232f614e9687f65dd3.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn1d"
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-A-member-who-doe-20c6f-r-Download-nor-Mark-as-sent/attachments/recording-Tom-Richardson-88bf3c62f7934fbd27624a80c2abe69e004464de.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuNCwidGV4dCI6IlRvbSBSaWNoYXJkc29uIG9wZW5zIExhcmtzcHVyLCB3aGljaCB0aGV5IGRvIG5vdCBvd24ifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-b79f6c148ae344826da3",
+          "file": "sprint-21.spec.ts",
+          "line": 96,
+          "column": 1
+        },
+        {
+          "title": "Changed since sent, download, the confirmation, and marking as sent again",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-1 5"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-1 2"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-1 3"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-1 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 26168,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1516
+                    },
+                    {
+                      "title": "Larkspur was sent: the stage reads Sent, with the date",
+                      "duration": 1539
+                    },
+                    {
+                      "title": "Sarah Chen assigns a question to Tom Richardson, then edits two answers",
+                      "duration": 1531
+                    },
+                    {
+                      "title": "The pricing question, left unanswered before, now gets an answer written by a person",
+                      "duration": 1535
+                    },
+                    {
+                      "title": "A change after sending: the stage reads Changed since sent",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "Downloading does not mark it as sent",
+                      "duration": 1521
+                    },
+                    {
+                      "title": "Mark as sent says first what it will do; Cancel changes nothing",
+                      "duration": 1536
+                    },
+                    {
+                      "title": "Confirmed: Sent again, the assignment closed, and what the knowledge base learned",
+                      "duration": 1521
+                    },
+                    {
+                      "title": "The audit log records who marked it as sent, and when",
+                      "duration": 1538
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:43:08.657Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-1 5"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-1 2"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-1 3"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-1 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Changed-since-se-0bd30-n-and-marking-as-sent-again/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Changed-since-se-0bd30-n-and-marking-as-sent-again/attachments/recording-Sarah-Chen-ce887ded2f749f85067f9fd28834556e67493a58.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My44LCJ0ZXh0IjoiTGFya3NwdXIgd2FzIHNlbnQ6IHRoZSBzdGFnZSByZWFkcyBTZW50LCB3aXRoIHRoZSBkYXRlIn0seyJhdCI6NS42LCJ0ZXh0IjoiU2FyYWggQ2hlbiBhc3NpZ25zIGEgcXVlc3Rpb24gdG8gVG9tIFJpY2hhcmRzb24sIHRoZW4gZWRpdHMgdHdvIGFuc3dlcnMifSx7ImF0IjoxMC4zLCJ0ZXh0IjoiVGhlIHByaWNpbmcgcXVlc3Rpb24sIGxlZnQgdW5hbnN3ZXJlZCBiZWZvcmUsIG5vdyBnZXRzIGFuIGFuc3dlciB3cml0dGVuIGJ5IGEgcGVyc29uIn0seyJhdCI6MTMuMiwidGV4dCI6IkEgY2hhbmdlIGFmdGVyIHNlbmRpbmc6IHRoZSBzdGFnZSByZWFkcyBDaGFuZ2VkIHNpbmNlIHNlbnQifSx7ImF0IjoxNC44LCJ0ZXh0IjoiRG93bmxvYWRpbmcgZG9lcyBub3QgbWFyayBpdCBhcyBzZW50In0seyJhdCI6MTguOSwidGV4dCI6Ik1hcmsgYXMgc2VudCBzYXlzIGZpcnN0IHdoYXQgaXQgd2lsbCBkbzsgQ2FuY2VsIGNoYW5nZXMgbm90aGluZyJ9LHsiYXQiOjIxLjEsInRleHQiOiJDb25maXJtZWQ6IFNlbnQgYWdhaW4sIHRoZSBhc3NpZ25tZW50IGNsb3NlZCwgYW5kIHdoYXQgdGhlIGtub3dsZWRnZSBiYXNlIGxlYXJuZWQifSx7ImF0IjoyMy43LCJ0ZXh0IjoiVGhlIGF1ZGl0IGxvZyByZWNvcmRzIHdobyBtYXJrZWQgaXQgYXMgc2VudCwgYW5kIHdoZW4ifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-6ff537a565d7c3b91d82",
+          "file": "sprint-21.spec.ts",
+          "line": 115,
+          "column": 1
+        },
+        {
+          "title": "Gaps: what the knowledge base could not answer, where each stands, and one step to act",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-2 4"
+                },
+                {
+                  "type": "case",
+                  "description": "S21-2 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15752,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1516
+                    },
+                    {
+                      "title": "First, one question the knowledge base could not answer is left unanswered",
+                      "duration": 1524
+                    },
+                    {
+                      "title": "Knowledge counts the gaps not answered yet, beside the other states",
+                      "duration": 1538
+                    },
+                    {
+                      "title": "Every state, with how many responses asked each question",
+                      "duration": 1532
+                    },
+                    {
+                      "title": "A learned gap opens the answer it became",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "One not answered yet opens in its response, at that question",
+                      "duration": 1553
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:43:34.834Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-2 4"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S21-2 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-what-the-kn-40769--stands-and-one-step-to-act/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-what-the-kn-40769--stands-and-one-step-to-act/attachments/recording-Sarah-Chen-bac3ebdc7a2957315447e9aa348527a9a8e3710f.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My40LCJ0ZXh0IjoiRmlyc3QsIG9uZSBxdWVzdGlvbiB0aGUga25vd2xlZGdlIGJhc2UgY291bGQgbm90IGFuc3dlciBpcyBsZWZ0IHVuYW5zd2VyZWQifSx7ImF0Ijo2LjYsInRleHQiOiJLbm93bGVkZ2UgY291bnRzIHRoZSBnYXBzIG5vdCBhbnN3ZXJlZCB5ZXQsIGJlc2lkZSB0aGUgb3RoZXIgc3RhdGVzIn0seyJhdCI6OC40LCJ0ZXh0IjoiRXZlcnkgc3RhdGUsIHdpdGggaG93IG1hbnkgcmVzcG9uc2VzIGFza2VkIGVhY2ggcXVlc3Rpb24ifSx7ImF0IjoxMS4yLCJ0ZXh0IjoiQSBsZWFybmVkIGdhcCBvcGVucyB0aGUgYW5zd2VyIGl0IGJlY2FtZSJ9LHsiYXQiOjEzLCJ0ZXh0IjoiT25lIG5vdCBhbnN3ZXJlZCB5ZXQgb3BlbnMgaW4gaXRzIHJlc3BvbnNlLCBhdCB0aGF0IHF1ZXN0aW9uIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-30907c8e54a70809a22f",
+          "file": "sprint-21.spec.ts",
+          "line": 207,
+          "column": 1
+        },
+        {
+          "title": "Gaps show a question's markup as text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S21-2 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5590,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1516
+                    },
+                    {
+                      "title": "A question containing markup shows as the text it is",
+                      "duration": 1529
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:43:50.595Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S21-2 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-show-a-question-s-markup-as-text/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-21-Gaps-show-a-question-s-markup-as-text/attachments/recording-Tom-Richardson-fbd97ca0a531eabf9edea1c34b9cb5943551c647.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuNSwidGV4dCI6IkEgcXVlc3Rpb24gY29udGFpbmluZyBtYXJrdXAgc2hvd3MgYXMgdGhlIHRleHQgaXQgaXMifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df105cab4122d888413b-31f2015e1298a9e36aca",
+          "file": "sprint-21.spec.ts",
+          "line": 257,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-22.spec.ts",
+      "file": "sprint-22.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Plain settings first, the tuning under Advanced, and spend by use",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11868,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "What an admin changes most often is in view: the budget, the warning point and the daily limits",
+                      "duration": 1525
+                    },
+                    {
+                      "title": "Advanced holds the reserves, the exchange rate, the prices and the spend by model",
+                      "duration": 1512
+                    },
+                    {
+                      "title": "Saving from either part works, and each save is in the audit log",
+                      "duration": 1522
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:43:56.203Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Plain-settings-f-c71dc-r-Advanced-and-spend-by-use/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Plain-settings-f-c71dc-r-Advanced-and-spend-by-use/attachments/recording-Sarah-Chen-5c026b45faefd48dd5fd5d35fb0875cd46ce4d83.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My45LCJ0ZXh0IjoiV2hhdCBhbiBhZG1pbiBjaGFuZ2VzIG1vc3Qgb2Z0ZW4gaXMgaW4gdmlldzogdGhlIGJ1ZGdldCwgdGhlIHdhcm5pbmcgcG9pbnQgYW5kIHRoZSBkYWlseSBsaW1pdHMifSx7ImF0Ijo1LjUsInRleHQiOiJBZHZhbmNlZCBob2xkcyB0aGUgcmVzZXJ2ZXMsIHRoZSBleGNoYW5nZSByYXRlLCB0aGUgcHJpY2VzIGFuZCB0aGUgc3BlbmQgYnkgbW9kZWwifSx7ImF0Ijo3LjIsInRleHQiOiJTYXZpbmcgZnJvbSBlaXRoZXIgcGFydCB3b3JrcywgYW5kIGVhY2ggc2F2ZSBpcyBpbiB0aGUgYXVkaXQgbG9nIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-5f69af2bcfaf8cb73827",
+          "file": "sprint-22.spec.ts",
+          "line": 18,
+          "column": 1
+        },
+        {
+          "title": "The audit log by person and by response, with the kind, together",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 3"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-2 4"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-2 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9842,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1524
+                    },
+                    {
+                      "title": "One person: only what they did",
+                      "duration": 1529
+                    },
+                    {
+                      "title": "One response: what happened to it, its files and its questions",
+                      "duration": 1513
+                    },
+                    {
+                      "title": "All three together: marked as sent, by this admin, on this response",
+                      "duration": 1511
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:08.077Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 3"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-2 4"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-2 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-by-aed24-onse-with-the-kind-together/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-by-aed24-onse-with-the-kind-together/attachments/recording-Sarah-Chen-13ce61480b1bc56495fed08749cd1e59d5eb9e3f.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My45LCJ0ZXh0IjoiT25lIHBlcnNvbjogb25seSB3aGF0IHRoZXkgZGlkIn0seyJhdCI6NS42LCJ0ZXh0IjoiT25lIHJlc3BvbnNlOiB3aGF0IGhhcHBlbmVkIHRvIGl0LCBpdHMgZmlsZXMgYW5kIGl0cyBxdWVzdGlvbnMifSx7ImF0Ijo3LjUsInRleHQiOiJBbGwgdGhyZWUgdG9nZXRoZXI6IG1hcmtlZCBhcyBzZW50LCBieSB0aGlzIGFkbWluLCBvbiB0aGlzIHJlc3BvbnNlIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-ab9ed7959f50b3b21ee1",
+          "file": "sprint-22.spec.ts",
+          "line": 62,
+          "column": 1
+        },
+        {
+          "title": "The audit log says when more entries match than it shows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5753,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1521
+                    },
+                    {
+                      "title": "When more than 200 match, the log says so, and how to see older ones",
+                      "duration": 1524
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:17.938Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-sa-d3d8f-entries-match-than-it-shows/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-audit-log-sa-d3d8f-entries-match-than-it-shows/attachments/recording-Sarah-Chen-b590bc96db926394fcb9bc39279c340b6e8eab14.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My44LCJ0ZXh0IjoiV2hlbiBtb3JlIHRoYW4gMjAwIG1hdGNoLCB0aGUgbG9nIHNheXMgc28sIGFuZCBob3cgdG8gc2VlIG9sZGVyIG9uZXMifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-77d5d6a0d1eaed3945cd",
+          "file": "sprint-22.spec.ts",
+          "line": 97,
+          "column": 1
+        },
+        {
+          "title": "Someone whose account was deleted is a former user in the person filter and the rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5874,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "A person whose account was deleted shows as a former user",
+                      "duration": 1522
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:23.704Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Someone-whose-ac-9543f--person-filter-and-the-rows/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Someone-whose-ac-9543f--person-filter-and-the-rows/attachments/recording-Sarah-Chen-904315dfc2e71ce9d767a117d7875c1894dc8e38.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My45LCJ0ZXh0IjoiQSBwZXJzb24gd2hvc2UgYWNjb3VudCB3YXMgZGVsZXRlZCBzaG93cyBhcyBhIGZvcm1lciB1c2VyIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-fa751906d2265b3daa8c",
+          "file": "sprint-22.spec.ts",
+          "line": 113,
+          "column": 1
+        },
+        {
+          "title": "Names with markup show as text in the audit log's filters and rows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-2 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5768,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1522
+                    },
+                    {
+                      "title": "A name containing markup shows as the text it is, in the filters and in the log",
+                      "duration": 1525
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:29.587Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-2 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Names-with-marku-46c50-udit-log-s-filters-and-rows/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Names-with-marku-46c50-udit-log-s-filters-and-rows/attachments/recording-Sarah-Chen-673eda0190decc661e7ecc3c55801f4f293208b7.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My44LCJ0ZXh0IjoiQSBuYW1lIGNvbnRhaW5pbmcgbWFya3VwIHNob3dzIGFzIHRoZSB0ZXh0IGl0IGlzLCBpbiB0aGUgZmlsdGVycyBhbmQgaW4gdGhlIGxvZyJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-c3c5d7c301c4291d39cb",
+          "file": "sprint-22.spec.ts",
+          "line": 135,
+          "column": 1
+        },
+        {
+          "title": "The header says where the response stands, as its card on Responses does; every question in one group",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 1"
+                },
+                {
+                  "type": "case",
+                  "description": "S22-1 2"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9223,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1516
+                    },
+                    {
+                      "title": "Bluefin on Responses: its stage, due date and progress",
+                      "duration": 1548
+                    },
+                    {
+                      "title": "The response opens with its header: owner, due date, progress, stage, files and the three stages",
+                      "duration": 1542
+                    },
+                    {
+                      "title": "Every question is in one group, and the groups add up to the header's count",
+                      "duration": 1511
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:35.364Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 1"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S22-1 2"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-header-says--0df04-every-question-in-one-group/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-The-header-says--0df04-every-question-in-one-group/attachments/recording-Sarah-Chen-fcd29a3ab523ce3a8bcbf04f10bdf8646e5f6d56.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My41LCJ0ZXh0IjoiQmx1ZWZpbiBvbiBSZXNwb25zZXM6IGl0cyBzdGFnZSwgZHVlIGRhdGUgYW5kIHByb2dyZXNzIn0seyJhdCI6NS42LCJ0ZXh0IjoiVGhlIHJlc3BvbnNlIG9wZW5zIHdpdGggaXRzIGhlYWRlcjogb3duZXIsIGR1ZSBkYXRlLCBwcm9ncmVzcywgc3RhZ2UsIGZpbGVzIGFuZCB0aGUgdGhyZWUgc3RhZ2VzIn0seyJhdCI6Ny4yLCJ0ZXh0IjoiRXZlcnkgcXVlc3Rpb24gaXMgaW4gb25lIGdyb3VwLCBhbmQgdGhlIGdyb3VwcyBhZGQgdXAgdG8gdGhlIGhlYWRlcidzIGNvdW50In1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-328a8f0a001d7ad928a0",
+          "file": "sprint-22.spec.ts",
+          "line": 176,
+          "column": 1
+        },
+        {
+          "title": "A question that needs a person says why, first; Ready to approve holds the rest",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7438,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1520
+                    },
+                    {
+                      "title": "Needs a person: one reason on each, first",
+                      "duration": 1543
+                    },
+                    {
+                      "title": "Ready to approve: nothing holds these, so they carry no reason",
+                      "duration": 1513
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:44.592Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-that--4f510-y-to-approve-holds-the-rest/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-that--4f510-y-to-approve-holds-the-rest/attachments/recording-Sarah-Chen-5096e38a689035bc7ff3f54c9757cc74b75d2c40.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My45LCJ0ZXh0IjoiTmVlZHMgYSBwZXJzb246IG9uZSByZWFzb24gb24gZWFjaCwgZmlyc3QifSx7ImF0Ijo1LjQsInRleHQiOiJSZWFkeSB0byBhcHByb3ZlOiBub3RoaW5nIGhvbGRzIHRoZXNlLCBzbyB0aGV5IGNhcnJ5IG5vIHJlYXNvbiJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-73d05c5308f80af166f2",
+          "file": "sprint-22.spec.ts",
+          "line": 208,
+          "column": 1
+        },
+        {
+          "title": "With experts: every question asked of a colleague, an answer first; choosing one opens it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7765,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1514
+                    },
+                    {
+                      "title": "With experts: who was asked, where each stands, and their note",
+                      "duration": 1540
+                    },
+                    {
+                      "title": "Choosing one opens it at its question",
+                      "duration": 1513
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:52.036Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-With-experts-eve-67587-first-choosing-one-opens-it/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-With-experts-eve-67587-first-choosing-one-opens-it/attachments/recording-Sarah-Chen-ad17aeaaaa2a7087072422a5a94510722543e1b9.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My44LCJ0ZXh0IjoiV2l0aCBleHBlcnRzOiB3aG8gd2FzIGFza2VkLCB3aGVyZSBlYWNoIHN0YW5kcywgYW5kIHRoZWlyIG5vdGUifSx7ImF0Ijo1LjQsInRleHQiOiJDaG9vc2luZyBvbmUgb3BlbnMgaXQgYXQgaXRzIHF1ZXN0aW9uIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-d98d0de93772126a6cfd",
+          "file": "sprint-22.spec.ts",
+          "line": 225,
+          "column": 1
+        },
+        {
+          "title": "A member who does not own the response sees where it stands, and no approval, assignment or send control",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 8"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6425,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "Tom Richardson sees the header, the groups and the reasons",
+                      "duration": 1537
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:44:59.808Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 8"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-member-who-doe-f530b--assignment-or-send-control/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-member-who-doe-f530b--assignment-or-send-control/attachments/recording-Tom-Richardson-bbe52b6fbf4205f931b68db0f92f225abf67332c.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjQsInRleHQiOiJUb20gUmljaGFyZHNvbiBzZWVzIHRoZSBoZWFkZXIsIHRoZSBncm91cHMgYW5kIHRoZSByZWFzb25zIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-71c86f5f849e4e2fc14f",
+          "file": "sprint-22.spec.ts",
+          "line": 251,
+          "column": 1
+        },
+        {
+          "title": "An archived response shows the same page, read-only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 10"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6434,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "An archived response: the same header and groups, with nothing to change",
+                      "duration": 1533
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:45:06.247Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 10"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-An-archived-response-shows-the-same-page-read-only/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-An-archived-response-shows-the-same-page-read-only/attachments/recording-Sarah-Chen-82154a1f1e0fd16b91c6bab58858181b443a5ef1.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NC4xLCJ0ZXh0IjoiQW4gYXJjaGl2ZWQgcmVzcG9uc2U6IHRoZSBzYW1lIGhlYWRlciBhbmQgZ3JvdXBzLCB3aXRoIG5vdGhpbmcgdG8gY2hhbmdlIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-05dcc57f33f2a7d66098",
+          "file": "sprint-22.spec.ts",
+          "line": 269,
+          "column": 1
+        },
+        {
+          "title": "At phone width the header, the stages and the groups fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 9"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5935,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1515
+                    },
+                    {
+                      "title": "At phone width: the header, the stages and the groups, with no sideways scrolling",
+                      "duration": 1511
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:45:12.693Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 9"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-At-phone-width-t-7470e-e-stages-and-the-groups-fit/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen, phone",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-At-phone-width-t-7470e-e-stages-and-the-groups-fit/attachments/recording-Sarah-Chen-phone-e789cacd045cbcd53aab740708b46919179c3156.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen, phone",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NC4xLCJ0ZXh0IjoiQXQgcGhvbmUgd2lkdGg6IHRoZSBoZWFkZXIsIHRoZSBzdGFnZXMgYW5kIHRoZSBncm91cHMsIHdpdGggbm8gc2lkZXdheXMgc2Nyb2xsaW5nIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-02a52ad50b1c521dfe45",
+          "file": "sprint-22.spec.ts",
+          "line": 289,
+          "column": 1
+        },
+        {
+          "title": "A question or file name containing markup shows as text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 11"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6052,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1525
+                    },
+                    {
+                      "title": "A question and a file name containing markup show as the text they are",
+                      "duration": 1550
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:45:18.637Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 11"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-or-fi-767bd-aining-markup-shows-as-text/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-question-or-fi-767bd-aining-markup-shows-as-text/attachments/recording-Sarah-Chen-2923f9869e524b3bd0c31d60049d79f6aad57951.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NCwidGV4dCI6IkEgcXVlc3Rpb24gYW5kIGEgZmlsZSBuYW1lIGNvbnRhaW5pbmcgbWFya3VwIHNob3cgYXMgdGhlIHRleHQgdGhleSBhcmUifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-00ca017ea67712f414ce",
+          "file": "sprint-22.spec.ts",
+          "line": 301,
+          "column": 1
+        },
+        {
+          "title": "A response with two files lists both in the header; choosing one shows its questions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 7"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10824,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1521
+                    },
+                    {
+                      "title": "A second file for the same response",
+                      "duration": 1559
+                    },
+                    {
+                      "title": "Choosing a file shows its questions",
+                      "duration": 1527
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:45:24.698Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 7"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-response-with--da8dd-ing-one-shows-its-questions/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-A-response-with--da8dd-ing-one-shows-its-questions/attachments/recording-Sarah-Chen-0ea689125b41c903cb50be300808b84f6aa99470.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NS43LCJ0ZXh0IjoiQSBzZWNvbmQgZmlsZSBmb3IgdGhlIHNhbWUgcmVzcG9uc2UifSx7ImF0Ijo4LjcsInRleHQiOiJDaG9vc2luZyBhIGZpbGUgc2hvd3MgaXRzIHF1ZXN0aW9ucyJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-74a82cce36b9cf28d87e",
+          "file": "sprint-22.spec.ts",
+          "line": 330,
+          "column": 1
+        },
+        {
+          "title": "Bulk approval takes only Ready to approve, and the groups update",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S22-1 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7753,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1531
+                    },
+                    {
+                      "title": "Approve in bulk at 80% or more: 2 ready to approve, 3 needing a person",
+                      "duration": 1527
+                    },
+                    {
+                      "title": "Only Ready to approve was taken: Needs a person is unchanged",
+                      "duration": 1542
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:45:35.531Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S22-1 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Bulk-approval-ta-3eb6a-prove-and-the-groups-update/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-22-Bulk-approval-ta-3eb6a-prove-and-the-groups-update/attachments/recording-Sarah-Chen-499afeb123f062e63774585258009b41b49fb978.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NCwidGV4dCI6IkFwcHJvdmUgaW4gYnVsayBhdCA4MCUgb3IgbW9yZTogMiByZWFkeSB0byBhcHByb3ZlLCAzIG5lZWRpbmcgYSBwZXJzb24ifSx7ImF0Ijo1LjgsInRleHQiOiJPbmx5IFJlYWR5IHRvIGFwcHJvdmUgd2FzIHRha2VuOiBOZWVkcyBhIHBlcnNvbiBpcyB1bmNoYW5nZWQifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9946a12308ec58fe05fc-a243b3c02a4027a48ee2",
+          "file": "sprint-22.spec.ts",
+          "line": 362,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-23-main-path.spec.ts",
+      "file": "sprint-23-main-path.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "The main path, end to end: add, upload, draft, assign, answer, approve, download, mark as sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 480000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S23-2 2"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 4"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 7"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-2 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 41009,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1515
+                    },
+                    {
+                      "title": "Sarah Chen adds a response",
+                      "duration": 1518
+                    },
+                    {
+                      "title": "Uploads the customer's questionnaire, in two files, and drafts them (the question column is found by its heading)",
+                      "duration": 1516
+                    },
+                    {
+                      "title": "Asks Tom Richardson to answer the question the knowledge base cannot",
+                      "duration": 1525
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1543
+                    },
+                    {
+                      "title": "Tom Richardson answers it from Assignments",
+                      "duration": 1514
+                    },
+                    {
+                      "title": "Sarah Chen decides the rest: approves the drafts, leaves the others unanswered",
+                      "duration": 1537
+                    },
+                    {
+                      "title": "And the rest one at a time",
+                      "duration": 1534
+                    },
+                    {
+                      "title": "Downloads the answers, one Excel file for each of the customer's files",
+                      "duration": 1534
+                    },
+                    {
+                      "title": "Marks the whole response as sent, both files at once",
+                      "duration": 1530
+                    },
+                    {
+                      "title": "Locally, with no checker, nothing was learned, and the page says so",
+                      "duration": 1536
+                    },
+                    {
+                      "title": "Opened again later, the response still says what the knowledge base did with it",
+                      "duration": 1512
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:45:43.429Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S23-2 2"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 4"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 7"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-2 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-main-path-The-ma-27f15-prove-download-mark-as-sent/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-main-path-The-ma-27f15-prove-download-mark-as-sent/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-main-path-The-ma-27f15-prove-download-mark-as-sent/attachments/recording-Sarah-Chen-fc6a1e5fa1e2ca30c266feb734b13324f421d076.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My44LCJ0ZXh0IjoiU2FyYWggQ2hlbiBhZGRzIGEgcmVzcG9uc2UifSx7ImF0Ijo2LjMsInRleHQiOiJVcGxvYWRzIHRoZSBjdXN0b21lcidzIHF1ZXN0aW9ubmFpcmUsIGluIHR3byBmaWxlcywgYW5kIGRyYWZ0cyB0aGVtICh0aGUgcXVlc3Rpb24gY29sdW1uIGlzIGZvdW5kIGJ5IGl0cyBoZWFkaW5nKSJ9LHsiYXQiOjkuMywidGV4dCI6IkFza3MgVG9tIFJpY2hhcmRzb24gdG8gYW5zd2VyIHRoZSBxdWVzdGlvbiB0aGUga25vd2xlZGdlIGJhc2UgY2Fubm90In0seyJhdCI6MTguMywidGV4dCI6IlNhcmFoIENoZW4gZGVjaWRlcyB0aGUgcmVzdDogYXBwcm92ZXMgdGhlIGRyYWZ0cywgbGVhdmVzIHRoZSBvdGhlcnMgdW5hbnN3ZXJlZCJ9LHsiYXQiOjIxLjcsInRleHQiOiJBbmQgdGhlIHJlc3Qgb25lIGF0IGEgdGltZSJ9LHsiYXQiOjMwLjIsInRleHQiOiJEb3dubG9hZHMgdGhlIGFuc3dlcnMsIG9uZSBFeGNlbCBmaWxlIGZvciBlYWNoIG9mIHRoZSBjdXN0b21lcidzIGZpbGVzIn0seyJhdCI6MzIuNCwidGV4dCI6Ik1hcmtzIHRoZSB3aG9sZSByZXNwb25zZSBhcyBzZW50LCBib3RoIGZpbGVzIGF0IG9uY2UifSx7ImF0IjozNC41LCJ0ZXh0IjoiTG9jYWxseSwgd2l0aCBubyBjaGVja2VyLCBub3RoaW5nIHdhcyBsZWFybmVkLCBhbmQgdGhlIHBhZ2Ugc2F5cyBzbyJ9LHsiYXQiOjM2LCJ0ZXh0IjoiT3BlbmVkIGFnYWluIGxhdGVyLCB0aGUgcmVzcG9uc2Ugc3RpbGwgc2F5cyB3aGF0IHRoZSBrbm93bGVkZ2UgYmFzZSBkaWQgd2l0aCBpdCJ9XQ=="
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-main-path-The-ma-27f15-prove-download-mark-as-sent/attachments/recording-Tom-Richardson-b1856b2c613e543b05445281171458e0885ac07f.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuOSwidGV4dCI6IlRvbSBSaWNoYXJkc29uIGFuc3dlcnMgaXQgZnJvbSBBc3NpZ25tZW50cyJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5de52999dd51354f815d-e42047a19dfd9eb377d6",
+          "file": "sprint-23-main-path.spec.ts",
+          "line": 32,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-23.spec.ts",
+      "file": "sprint-23.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Try it: your own response from the sample, drafted, worked through and marked as sent, learning nothing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 420000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 1"
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 3"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-2 2"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 22117,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "Tom Richardson chooses Try it on Home",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "A response of their own, named for the sample and for them, drafted as an upload is",
+                      "duration": 1556
+                    },
+                    {
+                      "title": "The holds a visitor should see: pricing and legal need a person, each saying why",
+                      "duration": 1513
+                    },
+                    {
+                      "title": "The rest one at a time: approve one, leave the others unanswered",
+                      "duration": 1513
+                    },
+                    {
+                      "title": "Download, then mark as sent: the confirmation says a try teaches the knowledge base nothing",
+                      "duration": 1534
+                    },
+                    {
+                      "title": "Sent, and nothing was learned",
+                      "duration": 1534
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:46:24.462Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 1"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 3"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-2 2"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-Try-it-your-own--d60eb-ed-as-sent-learning-nothing/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-Try-it-your-own--d60eb-ed-as-sent-learning-nothing/attachments/recording-Tom-Richardson-3cef1e2515e40e040e11c2dff8615ec939b2dc80.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuOCwidGV4dCI6IlRvbSBSaWNoYXJkc29uIGNob29zZXMgVHJ5IGl0IG9uIEhvbWUifSx7ImF0Ijo1LjUsInRleHQiOiJBIHJlc3BvbnNlIG9mIHRoZWlyIG93biwgbmFtZWQgZm9yIHRoZSBzYW1wbGUgYW5kIGZvciB0aGVtLCBkcmFmdGVkIGFzIGFuIHVwbG9hZCBpcyJ9LHsiYXQiOjcuMSwidGV4dCI6IlRoZSBob2xkcyBhIHZpc2l0b3Igc2hvdWxkIHNlZTogcHJpY2luZyBhbmQgbGVnYWwgbmVlZCBhIHBlcnNvbiwgZWFjaCBzYXlpbmcgd2h5In0seyJhdCI6OC42LCJ0ZXh0IjoiVGhlIHJlc3Qgb25lIGF0IGEgdGltZTogYXBwcm92ZSBvbmUsIGxlYXZlIHRoZSBvdGhlcnMgdW5hbnN3ZXJlZCJ9LHsiYXQiOjE3LjIsInRleHQiOiJEb3dubG9hZCwgdGhlbiBtYXJrIGFzIHNlbnQ6IHRoZSBjb25maXJtYXRpb24gc2F5cyBhIHRyeSB0ZWFjaGVzIHRoZSBrbm93bGVkZ2UgYmFzZSBub3RoaW5nIn0seyJhdCI6MTkuNiwidGV4dCI6IlNlbnQsIGFuZCBub3RoaW5nIHdhcyBsZWFybmVkIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5e82fcdd06254692d3b8-48c65498df034779320e",
+          "file": "sprint-23.spec.ts",
+          "line": 34,
+          "column": 1
+        },
+        {
+          "title": "A try is in its owner's lists and every admin's, marked Try; not in other members'",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12560,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1518
+                    },
+                    {
+                      "title": "Sarah Chen, an admin, sees Tom Richardson's try on Responses, marked Try",
+                      "duration": 1587
+                    },
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1513
+                    },
+                    {
+                      "title": "Tom Richardson sees their own try",
+                      "duration": 1564
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:46:46.586Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-A-try-is-in-its--bcb1a-d-Try-not-in-other-members-/test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-A-try-is-in-its--bcb1a-d-Try-not-in-other-members-/test-finished-2.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-A-try-is-in-its--bcb1a-d-Try-not-in-other-members-/attachments/recording-Sarah-Chen-98478853f3bc10b3043d58890bf6df81001d7a0d.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NC4yLCJ0ZXh0IjoiU2FyYWggQ2hlbiwgYW4gYWRtaW4sIHNlZXMgVG9tIFJpY2hhcmRzb24ncyB0cnkgb24gUmVzcG9uc2VzLCBtYXJrZWQgVHJ5In1d"
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-A-try-is-in-its--bcb1a-d-Try-not-in-other-members-/attachments/recording-Tom-Richardson-1991756e9bea7e2ba05bd2ed04a9c10f2040028d.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjQuMSwidGV4dCI6IlRvbSBSaWNoYXJkc29uIHNlZXMgdGhlaXIgb3duIHRyeSJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5e82fcdd06254692d3b8-3e3391cb7b17bd5f9001",
+          "file": "sprint-23.spec.ts",
+          "line": 106,
+          "column": 1
+        },
+        {
+          "title": "Another member does not see someone else's try in their lists",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 5"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6296,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Maya Patel signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "Another member does not see it, on Responses or on Home",
+                      "duration": 1526
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:46:59.155Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 5"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-Another-member-d-e9c65-e-else-s-try-in-their-lists/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Maya Patel",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-Another-member-d-e9c65-e-else-s-try-in-their-lists/attachments/recording-Maya-Patel-ebb443087d68bc35fb0690f4294181466054f6fb.webm"
+                    },
+                    {
+                      "name": "steps: Maya Patel",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJNYXlhIFBhdGVsIHNpZ25zIGluIn0seyJhdCI6My45LCJ0ZXh0IjoiQW5vdGhlciBtZW1iZXIgZG9lcyBub3Qgc2VlIGl0LCBvbiBSZXNwb25zZXMgb3Igb24gSG9tZSJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5e82fcdd06254692d3b8-81c7b37bca6096f6dfa7",
+          "file": "sprint-23.spec.ts",
+          "line": 122,
+          "column": 1
+        },
+        {
+          "title": "Open your try goes back to it; Start a new try puts it away and makes a fresh one",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 6"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9706,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "Open your try: back to the one already made, sent and decided",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "Start a new try: the old one is archived, and a fresh one is drafted",
+                      "duration": 1527
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:47:05.459Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 6"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-Open-your-try-go-74986--away-and-makes-a-fresh-one/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Tom Richardson",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-Open-your-try-go-74986--away-and-makes-a-fresh-one/attachments/recording-Tom-Richardson-b95f0c2472d230244b4e965d5d7b64e346e03f5a.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjQsInRleHQiOiJPcGVuIHlvdXIgdHJ5OiBiYWNrIHRvIHRoZSBvbmUgYWxyZWFkeSBtYWRlLCBzZW50IGFuZCBkZWNpZGVkIn0seyJhdCI6Ni4yLCJ0ZXh0IjoiU3RhcnQgYSBuZXcgdHJ5OiB0aGUgb2xkIG9uZSBpcyBhcmNoaXZlZCwgYW5kIGEgZnJlc2ggb25lIGlzIGRyYWZ0ZWQifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5e82fcdd06254692d3b8-fa707a42ccc013d12e07",
+          "file": "sprint-23.spec.ts",
+          "line": 137,
+          "column": 1
+        },
+        {
+          "title": "When a limit stops a try's drafting, the page says which",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 8"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5896,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "Sarah Chen tries it on a day the limit has been reached",
+                      "duration": 1542
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:47:15.172Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 8"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-When-a-limit-sto-e30e2-rafting-the-page-says-which/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-When-a-limit-sto-e30e2-rafting-the-page-says-which/attachments/recording-Sarah-Chen-3f41cc9f86b8aff5ba9f01a5bbc1229ed7937118.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6My40LCJ0ZXh0IjoiU2FyYWggQ2hlbiB0cmllcyBpdCBvbiBhIGRheSB0aGUgbGltaXQgaGFzIGJlZW4gcmVhY2hlZCJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5e82fcdd06254692d3b8-48999c0b8fda2e476d4b",
+          "file": "sprint-23.spec.ts",
+          "line": 158,
+          "column": 1
+        },
+        {
+          "title": "At phone width Try it and the try fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S23-1 9"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5823,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Tom Richardson signs in",
+                      "duration": 1519
+                    },
+                    {
+                      "title": "At phone width: Try it on Home, and the try itself, with no sideways scrolling",
+                      "duration": 1518
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:47:21.075Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-23.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S23-1 9"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-At-phone-width-Try-it-and-the-try-fit/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Tom Richardson, phone",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-23-At-phone-width-Try-it-and-the-try-fit/attachments/recording-Tom-Richardson-phone-f83c72901ad2ee0a823c12b0a1eae6f97f1c1db9.webm"
+                    },
+                    {
+                      "name": "steps: Tom Richardson, phone",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJUb20gUmljaGFyZHNvbiBzaWducyBpbiJ9LHsiYXQiOjMuOSwidGV4dCI6IkF0IHBob25lIHdpZHRoOiBUcnkgaXQgb24gSG9tZSwgYW5kIHRoZSB0cnkgaXRzZWxmLCB3aXRoIG5vIHNpZGV3YXlzIHNjcm9sbGluZyJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5e82fcdd06254692d3b8-aa1b44685b47c236ec49",
+          "file": "sprint-23.spec.ts",
+          "line": 172,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-24.spec.ts",
+      "file": "sprint-24.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "One list across a response's files, with a filter by file",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 1"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 2"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12112,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1512
+                    },
+                    {
+                      "title": "A response whose customer sent two questionnaires",
+                      "duration": 1560
+                    },
+                    {
+                      "title": "Every question of both files in one list, each saying which file it came from",
+                      "duration": 1522
+                    },
+                    {
+                      "title": "Choosing a file shows only its questions, and the page says so",
+                      "duration": 1513
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:47:26.911Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 1"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 2"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-One-list-across--4587d-files-with-a-filter-by-file/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-One-list-across--4587d-files-with-a-filter-by-file/attachments/recording-Sarah-Chen-e0566485f1a7d8f6d59927c3245caf9ed5d61126.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NS4yLCJ0ZXh0IjoiQSByZXNwb25zZSB3aG9zZSBjdXN0b21lciBzZW50IHR3byBxdWVzdGlvbm5haXJlcyJ9LHsiYXQiOjguMSwidGV4dCI6IkV2ZXJ5IHF1ZXN0aW9uIG9mIGJvdGggZmlsZXMgaW4gb25lIGxpc3QsIGVhY2ggc2F5aW5nIHdoaWNoIGZpbGUgaXQgY2FtZSBmcm9tIn0seyJhdCI6OS43LCJ0ZXh0IjoiQ2hvb3NpbmcgYSBmaWxlIHNob3dzIG9ubHkgaXRzIHF1ZXN0aW9ucywgYW5kIHRoZSBwYWdlIHNheXMgc28ifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5a9e5de986300c0b4a5a-fe45316e52e15af6f9ed",
+          "file": "sprint-24.spec.ts",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "Marked as sent once, for the whole response, when every file is decided; downloads one per file; no file added after",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 4"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 7"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 8"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14979,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1517
+                    },
+                    {
+                      "title": "One file decided, the other not: the response cannot be marked as sent yet",
+                      "duration": 1549
+                    },
+                    {
+                      "title": "Both decided: one download for each file, and one Mark as sent",
+                      "duration": 1526
+                    },
+                    {
+                      "title": "Sent: the response is the record of what was sent, so no file can be added",
+                      "duration": 1535
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:47:39.030Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 4"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 7"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 8"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-Marked-as-sent-o-cb0a9-er-file-no-file-added-after/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-Marked-as-sent-o-cb0a9-er-file-no-file-added-after/attachments/recording-Sarah-Chen-3fe5c4c8e1aa7fa2fd27f34651d724781c125e6a.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NC41LCJ0ZXh0IjoiT25lIGZpbGUgZGVjaWRlZCwgdGhlIG90aGVyIG5vdDogdGhlIHJlc3BvbnNlIGNhbm5vdCBiZSBtYXJrZWQgYXMgc2VudCB5ZXQifSx7ImF0Ijo4LCJ0ZXh0IjoiQm90aCBkZWNpZGVkOiBvbmUgZG93bmxvYWQgZm9yIGVhY2ggZmlsZSwgYW5kIG9uZSBNYXJrIGFzIHNlbnQifSx7ImF0IjoxMi43LCJ0ZXh0IjoiU2VudDogdGhlIHJlc3BvbnNlIGlzIHRoZSByZWNvcmQgb2Ygd2hhdCB3YXMgc2VudCwgc28gbm8gZmlsZSBjYW4gYmUgYWRkZWQifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5a9e5de986300c0b4a5a-3042907872e4f6ef8721",
+          "file": "sprint-24.spec.ts",
+          "line": 81,
+          "column": 1
+        },
+        {
+          "title": "A change after sending reopens the whole response, and it is marked as sent again",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 6"
+                },
+                {
+                  "type": "case",
+                  "description": "S24-2 4"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10390,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1516
+                    },
+                    {
+                      "title": "A decision in the second file changes after sending",
+                      "duration": 1564
+                    },
+                    {
+                      "title": "Left unanswered again, it is a change since the response was sent",
+                      "duration": 1535
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:47:54.017Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 6"
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-2 4"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-A-change-after-s-c67ae--it-is-marked-as-sent-again/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-A-change-after-s-c67ae--it-is-marked-as-sent-again/attachments/recording-Sarah-Chen-34fb8287e40125a8b5cdec2a9a2cff1ae27ca913.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NC43LCJ0ZXh0IjoiQSBkZWNpc2lvbiBpbiB0aGUgc2Vjb25kIGZpbGUgY2hhbmdlcyBhZnRlciBzZW5kaW5nIn0seyJhdCI6Ny4xLCJ0ZXh0IjoiTGVmdCB1bmFuc3dlcmVkIGFnYWluLCBpdCBpcyBhIGNoYW5nZSBzaW5jZSB0aGUgcmVzcG9uc2Ugd2FzIHNlbnQifV0="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5a9e5de986300c0b4a5a-ccf97c434c7193e20ce7",
+          "file": "sprint-24.spec.ts",
+          "line": 117,
+          "column": 1
+        },
+        {
+          "title": "At phone width the files filter and the file on each card fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "serial",
+                  "location": {
+                    "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                    "line": 0,
+                    "column": 0
+                  }
+                },
+                {
+                  "type": "case",
+                  "description": "S24-1 11"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5071,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1513
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:48:04.415Z",
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/runner/work/RFI-responder/RFI-responder/e2e/sprint-24.spec.ts",
+                        "line": 0,
+                        "column": 0
+                      }
+                    },
+                    {
+                      "type": "case",
+                      "description": "S24-1 11"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-At-phone-width-t-1223d-d-the-file-on-each-card-fit/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen, phone",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-24-At-phone-width-t-1223d-d-the-file-on-each-card-fit/attachments/recording-Sarah-Chen-phone-4cbebd6703f6d1184c2b7e6230103f90e38f2478.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen, phone",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn1d"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5a9e5de986300c0b4a5a-e3626b8adae7467a5ad5",
+          "file": "sprint-24.spec.ts",
+          "line": 146,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sprint-26.spec.ts",
+      "file": "sprint-26.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "A file that would take a response past 2,000 questions is refused before anything is uploaded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "case",
+                  "description": "S26-1 9"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8584,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Sarah Chen signs in",
+                      "duration": 1524
+                    },
+                    {
+                      "title": "A response that already holds 1,999 questions: adding a file of 40",
+                      "duration": 1537
+                    },
+                    {
+                      "title": "Refused before uploading: nothing was added",
+                      "duration": 1517
+                    }
+                  ],
+                  "startTime": "2026-11-10T16:48:09.499Z",
+                  "annotations": [
+                    {
+                      "type": "case",
+                      "description": "S26-1 9"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-26-A-file-that-woul-16102-before-anything-is-uploaded/test-finished-1.png"
+                    },
+                    {
+                      "name": "recording: Sarah Chen",
+                      "contentType": "video/webm",
+                      "path": "/home/runner/work/RFI-responder/RFI-responder/e2e-results/artifacts/sprint-26-A-file-that-woul-16102-before-anything-is-uploaded/attachments/recording-Sarah-Chen-94ab90e6f60940cfa789e0d159b6605c21081346.webm"
+                    },
+                    {
+                      "name": "steps: Sarah Chen",
+                      "contentType": "application/json",
+                      "body": "W3siYXQiOjAsInRleHQiOiJTYXJhaCBDaGVuIHNpZ25zIGluIn0seyJhdCI6NC43LCJ0ZXh0IjoiQSByZXNwb25zZSB0aGF0IGFscmVhZHkgaG9sZHMgMSw5OTkgcXVlc3Rpb25zOiBhZGRpbmcgYSBmaWxlIG9mIDQwIn0seyJhdCI6Ni44LCJ0ZXh0IjoiUmVmdXNlZCBiZWZvcmUgdXBsb2FkaW5nOiBub3RoaW5nIHdhcyBhZGRlZCJ9XQ=="
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "283ca379fb764ffe9820-bed907e40a66d621dbd9",
+          "file": "sprint-26.spec.ts",
+          "line": 14,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-10T16:41:00.725Z",
+    "duration": 437958.194,
+    "expected": 38,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
